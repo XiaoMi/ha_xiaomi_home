@@ -23,7 +23,8 @@
         "paho-mqtt<=2.0.0",
         "numpy",
         "cryptography",
-        "psutil"
+        "psutil",
+        "aiohttp[speedups]"
     ],
     "version": "v0.1.2",
     "zeroconf": [
