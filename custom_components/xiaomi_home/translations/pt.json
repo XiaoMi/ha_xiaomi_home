@@ -24,15 +24,23 @@
             },
             "devices_filter": {
                 "title": "Selecione a Casa e os Dispositivos",
-                "description": "## Instruções de Utilização\r\n### Modo de Controlo\r\n- Automático: Quando existir um gateway central Xiaomi disponível na rede local, o Home Assistant dará prioridade ao envio de comandos de controlo através do gateway central, permitindo um controlo local. Caso não exista um gateway central na rede local, tentará enviar comandos através da funcionalidade de controlo LAN. Apenas se estas condições não forem cumpridas, os comandos serão enviados pela nuvem.\r\n- Nuvem: Todos os comandos de controlo são enviados através da nuvem.\r\n### Importar dispositivos da casa\r\nA integração adicionará dispositivos das casas selecionadas.\n### Modo de sincronização do nome da divisão\r\nAo importar dispositivos da aplicação Xiaomi Home para o Home Assistant, a nomeação da área onde o dispositivo é adicionado segue as regras abaixo. Note que o processo de sincronização dos dispositivos não altera as definições de casa ou divisão na aplicação Xiaomi Home.\r\n- Não sincronizar: O dispositivo não será atribuído a qualquer área.\r\n- Outras opções: O dispositivo será adicionado a uma área cujo nome corresponde ao da casa e/ou divisão definida na aplicação Xiaomi Home.\r\n### Modo de depuração de ação\r\nPara as ações definidas no MIoT-Spec-V2 do dispositivo, será criada uma entidade do tipo texto juntamente com uma entidade de notificação, nas quais poderá enviar comandos de controlo ao dispositivo para fins de depuração.\r\n### Ocultar entidades não padrão\r\nOculta as entidades geradas a partir de instâncias não padrão do MIoT-Spec-V2, cujos nomes começam por \"*\".\r\n\r\n&emsp;\r\n### Olá {nick_name}, selecione o modo de controlo da integração e a casa na qual deseja importar os dispositivos.",
+                "description": "## Instruções de Utilização\r\n### Modo de Controlo\r\n- Automático: Quando existir um gateway central Xiaomi disponível na rede local, o Home Assistant dará prioridade ao envio de comandos de controlo através do gateway central, permitindo um controlo local. Caso não exista um gateway central na rede local, tentará enviar comandos através da funcionalidade de controlo LAN. Apenas se estas condições não forem cumpridas, os comandos serão enviados pela nuvem.\r\n- Nuvem: Todos os comandos de controlo são enviados através da nuvem.\r\n### Importar dispositivos da casa\r\nA integração adicionará dispositivos das casas selecionadas.\r\n### Modo de sincronização do nome da divisão\r\nAo importar dispositivos da aplicação Xiaomi Home para o Home Assistant, a nomeação da área onde o dispositivo é adicionado segue as regras abaixo. Note que o processo de sincronização dos dispositivos não altera as definições de casa ou divisão na aplicação Xiaomi Home.\r\n- Não sincronizar: O dispositivo não será atribuído a qualquer área.\r\n- Outras opções: O dispositivo será adicionado a uma área cujo nome corresponde ao da casa e/ou divisão definida na aplicação Xiaomi Home.\r\n### Mostrar Opções Avançadas\r\nExibe opções avançadas para configuração profissional da integração.\r\n\r\n&emsp;\r\n### Olá {nick_name}, selecione o modo de controlo da integração e a casa na qual deseja importar os dispositivos.",
                 "data": {
                     "ctrl_mode": "Modo de Controlo",
                     "home_infos": "Importar dispositivos da casa",
                     "area_name_rule": "Modo de sincronização do nome da divisão",
-                    "action_debug": "Modo de depuração de ação",
-                    "hide_non_standard_entities": "Ocultar entidades não padrão"
+                    "show_advanced_options": "Mostrar Opções Avançadas"
+                }
+            },
+            "advanced_options": {
+                "title": "Opções Avançadas",
+                "description": "### Mantenha os valores predefinidos a menos que saiba exatamente o significado destas opções.\r\n### Modo de Depuração de Ação\r\nPara as ações definidas no MIoT-Spec-V2 do dispositivo, será criada uma entidade do tipo texto juntamente com uma entidade de notificação, nas quais poderá enviar comandos de controlo ao dispositivo para fins de depuração.\r\n### Ocultar Entidades Não Padrão\r\nOculta as entidades geradas a partir de instâncias não padrão do MIoT-Spec-V2, cujos nomes começam por \"*\".",
+                "data": {
+                    "action_debug": "Modo de Depuração de Ação",
+                    "hide_non_standard_entities": "Ocultar Entidades Não Padrão"
                 }
             }
+
         },
         "progress": {
             "oauth": "### {link_left}Clique aqui para iniciar sessão{link_right}\r\n(Será automaticamente redirecionado após um login bem-sucedido)"
