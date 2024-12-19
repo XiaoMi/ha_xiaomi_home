@@ -119,7 +119,7 @@ class Notify(MIoTActionEntity, NotifyEntity):
         in_value: list[dict] = []
         for index, prop in enumerate(self.spec.in_):
             if type(in_list[index]).__name__ != prop.format_:
-                logging.error(
+                _LOGGER.error(
                     'action exec failed, %s(%s), invalid params item, '
                     'which item(%s) in the list must be %s, %s',
                     self.name, self.entity_id, prop.description_trans,
