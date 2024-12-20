@@ -67,24 +67,16 @@ SPEC_STD_LIB_EFFECTIVE_TIME = 3600*24*14
 MANUFACTURER_EFFECTIVE_TIME = 3600*24*14
 
 SUPPORTED_PLATFORMS: list = [
-    # 'alarm_control_panel',
     'binary_sensor',
     'button',
     'climate',
-    # 'camera',
-    # 'conversation',
     'cover',
-    # 'device_tracker',
     'event',
     'fan',
     'humidifier',
     'light',
-    # 'lock',
-    # 'media_player',
     'notify',
     'number',
-    # 'remote',
-    # 'scene',
     'select',
     'sensor',
     'switch',
@@ -107,17 +99,17 @@ SUPPORT_CENTRAL_GATEWAY_CTRL: list = ['cn']
 
 DEFAULT_INTEGRATION_LANGUAGE: str = 'en'
 INTEGRATION_LANGUAGES = {
-    'zh-Hans': '简体中文',
-    'zh-Hant': '繁體中文',
-    'en': 'English',
     'de': 'Deutsch',
+    'en': 'English',
     'es': 'Español',
     'fr': 'Français',
     'ja': '日本語',
+    'nl': 'Nederlands',
     'pt': 'Português',
     'pt-BR': 'Português (Brasil)',
     'ru': 'Русский',
-    'nl': 'Nederlands'
+    'zh-Hans': '简体中文',
+    'zh-Hant': '繁體中文'
 }
 
 DEFAULT_CTRL_MODE: str = 'auto'
