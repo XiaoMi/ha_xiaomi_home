@@ -207,6 +207,18 @@ def oauth_redirect_page(lang: str, status: str) -> str:
                         button: "Close Page"
                     }
                 },
+                "it": {
+                    "success": {
+                        "title": "Autenticazione Completata",
+                        "content": "Si prega di chiudere questa pagina e tornare alla pagina di autenticazione dell'account per cliccare AVANTI",
+                        "button": "Chiudi Pagina"
+                    },
+                    "fail": {
+                        "title": "Autenticazione Fallita",
+                        "content": "Si prega di chiudere questa pagina e tornare alla pagina di autenticazione dell'account per cliccare nuovamente sul link di autenticazione.",
+                        "button": "Chiudi Pagina"
+                    }
+                },
                 fr: {
                     success: {
                         title: "Authentification Terminée",
