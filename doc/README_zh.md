@@ -1,6 +1,6 @@
 # Home Assistant 米家集成
 
-[English](../README.md) | [简体中文](./README_zh.md)
+[English](../README.md) | [简体中文](./README_zh.md) | [日本語](./README_ja.md)
 
 米家集成是一个由小米官方提供支持的 Home Assistant 的集成组件，它可以让您在 Home Assistant 中使用小米 IoT 智能设备。
 
