@@ -1089,7 +1089,7 @@ class MIoTClient:
                 handler=self.__on_lan_device_state_changed)
             for did, info in (
                     await self._miot_lan.get_dev_list_async()).items():
-                self.__on_lan_device_state_changed(
+                await self.__on_lan_device_state_changed(
                     did=did, state=info, ctx=None)
             _LOGGER.info('lan device list, %s', self._device_list_lan)
             self._miot_lan.update_devices(devices={

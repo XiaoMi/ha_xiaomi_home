@@ -52,7 +52,7 @@ import socket
 from dataclasses import dataclass
 from enum import Enum, auto
 import subprocess
-from typing import Callable, Optional
+from typing import Callable, Coroutine, Optional
 import psutil
 import ipaddress
 
@@ -97,7 +97,7 @@ class MIoTNetwork:
 
     _sub_list_network_status: dict[str, Callable[[bool], asyncio.Future]]
     _sub_list_network_info: dict[str, Callable[[
-        InterfaceStatus, NetworkInfo], asyncio.Future]]
+        InterfaceStatus, NetworkInfo], Coroutine]]
 
     _ping_address_priority: int
 
@@ -155,7 +155,7 @@ class MIoTNetwork:
 
     def sub_network_info(
         self, key: str,
-        handler: Callable[[InterfaceStatus, NetworkInfo], asyncio.Future]
+        handler: Callable[[InterfaceStatus, NetworkInfo], Coroutine]
     ) -> None:
         self._sub_list_network_info[key] = handler
 
