@@ -560,7 +560,10 @@ class MIoTDevice:
                             # Irregular property will not be transformed.
                             pass
                     elif prop.readable or prop.notifiable:
-                        prop.platform = 'sensor'
+                        if prop.format_ == 'bool':
+                            prop.platform = 'binary_sensor'
+                        else:
+                            prop.platform = 'sensor'
                 if prop.platform:
                     self.append_prop(prop=prop)
             # STEP 3.2: event conversion
