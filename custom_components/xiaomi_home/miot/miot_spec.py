@@ -61,6 +61,7 @@ from .miot_storage import (
     MIoTStorage,
     SpecBoolTranslation,
     SpecFilter,
+    SpecCustomService,
     SpecMultiLang)
 
 _LOGGER = logging.getLogger(__name__)
@@ -466,6 +467,7 @@ class MIoTSpecParser:
     _bool_trans: SpecBoolTranslation
     _multi_lang: SpecMultiLang
     _spec_filter: SpecFilter
+    _custom_service: SpecCustomService
 
     def __init__(
         self, lang: str = DEFAULT_INTEGRATION_LANGUAGE,
@@ -484,6 +486,7 @@ class MIoTSpecParser:
             lang=self._lang, loop=self._main_loop)
         self._multi_lang = SpecMultiLang(lang=self._lang, loop=self._main_loop)
         self._spec_filter = SpecFilter(loop=self._main_loop)
+        self._custom_service = SpecCustomService(loop=self._main_loop)
 
     async def init_async(self) -> None:
         if self._init_done is True:
@@ -491,6 +494,7 @@ class MIoTSpecParser:
         await self._bool_trans.init_async()
         await self._multi_lang.init_async()
         await self._spec_filter.init_async()
+        await self._custom_service.init_async()
         std_lib_cache: dict = None
         if self._storage:
             std_lib_cache: dict = await self._storage.load_async(
@@ -536,6 +540,7 @@ class MIoTSpecParser:
         await self._bool_trans.deinit_async()
         await self._multi_lang.deinit_async()
         await self._spec_filter.deinit_async()
+        await self._custom_service.deinit_async()
         self._ram_cache.clear()
 
     async def parse(
@@ -779,6 +784,8 @@ class MIoTSpecParser:
         _LOGGER.debug('parse urn, %s', urn)
         # Load spec instance
         instance: dict = await self.__get_instance(urn=urn)
+        # Modify the spec instance by custom spec
+        instance = self._custom_service.modify_spec(urn=urn, spec=instance)
         if (
             not isinstance(instance, dict)
             or 'type' not in instance

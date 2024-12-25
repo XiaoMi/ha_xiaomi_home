@@ -1,0 +1,59 @@
+{
+    "urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1": {
+        "3": {
+            "iid": 3,
+            "type": "urn:miot-spec-v2:service:light:00007802:hyd-lyjpro:1",
+            "description": "Light",
+            "properties": [
+                {
+                    "iid": 1,
+                    "type": "urn:miot-spec-v2:property:on:00000006:hyd-lyjpro:1",
+                    "description": "Sunlight",
+                    "format": "bool",
+                    "access": [
+                        "read",
+                        "write",
+                        "notify"
+                    ]
+                },
+                {
+                    "iid": 3,
+                    "type": "urn:miot-spec-v2:property:flex-switch:000000EC:hyd-lyjpro:1",
+                    "description": "Flex Switch",
+                    "format": "uint8",
+                    "access": [
+                        "read",
+                        "write",
+                        "notify"
+                    ],
+                    "value-list": [
+                        {
+                            "value": 1,
+                            "description": "Overturn"
+                        }
+                    ]
+                }
+            ]
+        },
+        "new": [
+            {
+                "iid": 3,
+                "type": "urn:miot-spec-v2:service:light:00007802:hyd-lyjpro:1",
+                "description": "Moonlight",
+                "properties": [
+                    {
+                        "iid": 2,
+                        "type": "urn:miot-spec-v2:property:on:00000006:hyd-lyjpro:1",
+                        "description": "Switch Status",
+                        "format": "bool",
+                        "access": [
+                            "read",
+                            "write",
+                            "notify"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

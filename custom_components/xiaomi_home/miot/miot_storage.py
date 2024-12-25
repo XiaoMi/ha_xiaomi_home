@@ -1033,3 +1033,63 @@ class DeviceManufacturer:
         except Exception as err:  # pylint: disable=broad-exception-caught
             _LOGGER.error('get manufacturer info failed, %s', err)
         return None
+
+
+class SpecCustomService:
+    """Custom MIoT-Spec-V2 service defined by the user."""
+    CUSTOM_SPEC_FILE = 'specs/custom_service.json'
+    _main_loop: asyncio.AbstractEventLoop
+    _data: dict[str, dict[str, any]]
+
+    def __init__(self, loop: Optional[asyncio.AbstractEventLoop]) -> None:
+        self._main_loop = loop or asyncio.get_event_loop()
+        self._data = None
+
+    async def init_async(self) -> None:
+        if isinstance(self._data, dict):
+            return
+        custom_data = None
+        self._data = {}
+        try:
+            custom_data = await self._main_loop.run_in_executor(
+                None, load_json_file,
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    self.CUSTOM_SPEC_FILE))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('custom service, load file error, %s', err)
+            return
+        if not isinstance(custom_data, dict):
+            _LOGGER.error('custom service, invalid spec content')
+            return
+        for values in list(custom_data.values()):
+            if not isinstance(values, dict):
+                _LOGGER.error('custom service, invalid spec data')
+                return
+        self._data = custom_data
+
+    async def deinit_async(self) -> None:
+        self._data = None
+
+    def modify_spec(self, urn: str, spec: dict) -> dict | None:
+        """MUST call init_async() first."""
+        if not self._data:
+            _LOGGER.error('self._data is None')
+            return spec
+        if urn not in self._data:
+            return spec
+        if 'services' not in spec:
+            return spec
+        spec_services = spec['services']
+        custom_spec = self._data.get(urn, None)
+        # Replace services by custom defined spec
+        for i, service in enumerate(spec_services):
+            siid = str(service['iid'])
+            if siid in custom_spec:
+                spec_services[i] = custom_spec[siid]
+        # Add new services
+        if 'new' in custom_spec:
+            for service in custom_spec['new']:
+                spec_services.append(service)
+
+        return spec

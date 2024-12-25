@@ -298,10 +298,11 @@ class MIoTDevice:
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
             f'{self._model_strs[-1][:20]}')
 
-    def gen_service_entity_id(self, ha_domain: str, siid: int) -> str:
+    def gen_service_entity_id(self, ha_domain: str, siid: int,
+                              description: str) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_s_{siid}')
+            f'{self._model_strs[-1][:20]}_s_{siid}_{description}')
 
     def gen_prop_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, piid: int
@@ -731,7 +732,8 @@ class MIoTServiceEntity(Entity):
             self._attr_name = f' {self.entity_data.spec.description_trans}'
         elif isinstance(entity_data.spec, MIoTSpecService):
             self.entity_id = miot_device.gen_service_entity_id(
-                DOMAIN, siid=entity_data.spec.iid)
+                DOMAIN, siid=entity_data.spec.iid,
+                description=entity_data.spec.description)
             self._attr_name = (
                 f'{"* "if self.entity_data.spec.proprietary else " "}'
                 f'{self.entity_data.spec.description_trans}')
