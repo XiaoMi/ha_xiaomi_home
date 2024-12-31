@@ -46,7 +46,6 @@ off Xiaomi or its affiliates' products.
 Text entities for Xiaomi Home.
 """
 from __future__ import annotations
-import json
 import logging
 from typing import Optional
 
@@ -54,6 +53,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.text import TextEntity
+from homeassistant.util import yaml
+from homeassistant.exceptions import HomeAssistantError
 
 from .miot.const import DOMAIN
 from .miot.miot_spec import MIoTSpecAction, MIoTSpecProperty
@@ -121,14 +122,18 @@ class ActionText(MIoTActionEntity, TextEntity):
             return
         in_list: list = None
         try:
-            in_list = json.loads(value)
-        except json.JSONDecodeError as e:
+            in_list = yaml.parse_yaml(value)
+        except HomeAssistantError as e:
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid action params format, %s',
                 self.name, self.entity_id, value)
             raise ValueError(
                 f'action exec failed, {self.name}({self.entity_id}), '
                 f'invalid action params format, {value}') from e
+
+        if not isinstance(in_list, list):
+            in_list = [in_list]
+
         if not isinstance(in_list, list) or len(in_list) != len(self.spec.in_):
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid action params, %s',

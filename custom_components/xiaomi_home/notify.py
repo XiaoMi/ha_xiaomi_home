@@ -111,7 +111,7 @@ class Notify(MIoTActionEntity, NotifyEntity):
                 self.name, self.entity_id, message)
             return
 
-        if isinstance(in_list, str):
+        if not isinstance(in_list, list):
             in_list = [in_list]
 
         if not isinstance(in_list, list) or len(in_list) != len(self.spec.in_):
