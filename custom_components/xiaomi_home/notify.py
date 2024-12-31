@@ -122,36 +122,28 @@ class Notify(MIoTActionEntity, NotifyEntity):
             return
         in_value: list[dict] = []
         for index, prop in enumerate(self.spec.in_):
-            if (
-                prop.format_ == 'str'
-                and isinstance(in_list[index], (bool, int, float, str))
-            ):
-                in_value.append(
-                    {'piid': prop.iid, 'value': str(in_list[index])})
-                continue
-            if (
-                prop.format_ == 'bool'
-                and isinstance(in_list[index], (bool, int))
-            ):
-                # yes, no, on, off, true, false and other bool types will also
-                # be parsed as 0 and 1 of int.
-                in_value.append(
-                    {'piid': prop.iid, 'value': bool(in_list[index])})
-                continue
-            if (
-                prop.format_ == 'float'
-                and isinstance(in_list[index], (int, float))
-            ):
-                in_value.append(
-                    {'piid': prop.iid, 'value': in_list[index]})
-                continue
-            if (
-                prop.format_ == 'int'
-                and isinstance(in_list[index], int)
-            ):
-                in_value.append(
-                    {'piid': prop.iid, 'value': in_list[index]})
-                continue
+            if prop.format_ == 'str':
+                if isinstance(in_list[index], (bool, int, float, str)):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': str(in_list[index])})
+                    continue
+            elif prop.format_ == 'bool':
+                if isinstance(in_list[index], (bool, int)):
+                    # yes, no, on, off, true, false and other bool types
+                    # will also be parsed as 0 and 1 of int.
+                    in_value.append(
+                        {'piid': prop.iid, 'value': bool(in_list[index])})
+                    continue
+            elif prop.format_ == 'float':
+                if isinstance(in_list[index], (int, float)):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': in_list[index]})
+                    continue
+            elif prop.format_ == 'int':
+                if isinstance(in_list[index], int):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': in_list[index]})
+                    continue
             # Invalid params type, raise error.
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid params item, '
