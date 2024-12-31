@@ -52,7 +52,7 @@ import json
 import secrets
 import traceback
 from typing import Optional, Set, Tuple
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 from aiohttp import web
 from aiohttp.hdrs import METH_GET
 import voluptuous as vol
@@ -286,6 +286,10 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     default=OAUTH_REDIRECT_URL  # type: ignore
                 ): vol.In([OAUTH_REDIRECT_URL]),
                 vol.Required(
+                    'use_manual_oauth_redirect_url_after_redirect',
+                    default=False
+                ): bool,
+                vol.Required(
                     'network_detect_config',
                     default=False  # type: ignore
                 ): bool,
@@ -421,9 +425,15 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
                 self._cc_oauth_auth_url = miot_oauth.gen_auth_url(
                     redirect_url=self._oauth_redirect_url_full, state=state)
+                self._miot_oauth = miot_oauth
                 _LOGGER.info(
                     'async_step_oauth, oauth_url: %s',
                     self._cc_oauth_auth_url)
+
+                # 1.5 If we use manual oauth redirect url, it's no need to register webhook.
+                if user_input and user_input['use_manual_oauth_redirect_url_after_redirect']:
+                    return await self.async_step_oauth_manual()
+
                 webhook_async_unregister(
                     self.hass, webhook_id=self._virtual_did)
                 webhook_async_register(
@@ -443,7 +453,6 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.info(
                     'async_step_oauth, webhook.async_register: %s',
                     self._virtual_did)
-                self._miot_oauth = miot_oauth
         except Exception as err:  # pylint: disable=broad-exception-caught
             _LOGGER.error(
                 'async_step_oauth, %s, %s', err, traceback.format_exc())
@@ -473,13 +482,45 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             progress_task=self._cc_task_oauth,
         )
 
-    async def __check_oauth_async(self) -> None:
+    async def async_step_oauth_manual(self, user_input: Optional[dict] = None):
+        key_oauth_redirect_url = 'oauth_redirect_url'
+        step_id = 'oauth_manual'
+        errors = None
+
+        if user_input and user_input[key_oauth_redirect_url]:
+            oauth_redirect_url = user_input[key_oauth_redirect_url]
+            oauth_redirect_parsed_url = urlparse(oauth_redirect_url)
+            oauth_redirect_parsed_query = parse_qs(oauth_redirect_parsed_url.query)
+            code_arr = oauth_redirect_parsed_query.get('code', [])
+            code = None
+            if len(code_arr):
+                code = code_arr[0]
+            try:
+                return await self.__check_oauth_async(oauth_code=code)
+            except MIoTConfigError as err:
+                errors = {'base': err.message}
+
+        return self.async_show_form(
+            step_id=step_id,
+            data_schema=vol.Schema({
+                vol.Required(key_oauth_redirect_url): str
+            }),
+            description_placeholders={
+                'link': self._cc_oauth_auth_url
+            },
+            errors=errors,
+            last_step=False
+        )
+
+    async def __check_oauth_async(self, oauth_code: str | None = None) -> None:
         # TASK 1: Get oauth code
-        if not self._cc_fut_oauth_code:
-            raise MIoTConfigError('oauth_code_fut_error')
-        oauth_code: Optional[str] = await self._cc_fut_oauth_code
+        if oauth_code is None:
+            if not self._cc_fut_oauth_code:
+                raise MIoTConfigError('oauth_code_fut_error')
+            oauth_code: Optional[str] = await self._cc_fut_oauth_code
         if not oauth_code:
             raise MIoTConfigError('oauth_code_error')
+
         # TASK 2: Get access_token and user_info from miot_oauth
         if not self._auth_info:
             try:

@@ -16,6 +16,7 @@
                     "cloud_server": "登录地区",
                     "integration_language": "语言",
                     "oauth_redirect_url": "认证跳转地址",
+                    "use_manual_oauth_redirect_url_after_redirect": "认证后手动输入跳转地址",
                     "network_detect_config": "集成网络配置"
                 }
             },
@@ -25,6 +26,13 @@
                 "data": {
                     "network_detect_addr": "网络检测地址",
                     "check_network_deps": "检测网络依赖项"
+                }
+            },
+            "oauth_manual": {
+                "title": "输入跳转地址",
+                "description": "### [请点击此处进行登录]({link})，然后将重定向的链接复制到下面",
+                "data": {
+                    "oauth_redirect_url": "认证跳转地址"
                 }
             },
             "oauth_error": {
