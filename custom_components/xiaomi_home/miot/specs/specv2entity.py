@@ -211,6 +211,7 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
         'entity': 'air-conditioner'
     },
     'air-condition-outlet': 'air-conditioner',
+    'thermostat': 'air-conditioner',
     'heater': {
         'required': {
             'heater': {
@@ -233,6 +234,30 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
             },
         },
         'entity': 'heater'
+    },
+    'bath-heater': {
+        'required': {
+            'ptc-bath-heater': {
+                'required': {},
+                'optional': {
+                    'properties': {
+                        'target-temperature', 'heat-level',
+                        'temperature', 'mode'
+                    }
+                },
+            }
+        },
+        'optional': {
+            'fan-control': {
+                'required': {},
+                'optional': {
+                    'properties': {
+                        'on', 'fan-level', 'horizontal-swing', 'vertical-swing'
+                    }
+                },
+            }
+        },
+        'entity': 'bath-heater',
     }
 }
 
