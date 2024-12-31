@@ -165,41 +165,45 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                     continue
                 self._hvac_mode_map = {}
                 for item in prop.value_list:
-                    if item['name'].lower() in {'off', 'idle'}:
-                        self._hvac_mode_map[item['value']] = HVACMode.OFF
-                    elif item['name'].lower() in {'auto'}:
-                        self._hvac_mode_map[item['value']] = HVACMode.AUTO
-                    elif item['name'].lower() in {'cool'}:
-                        self._hvac_mode_map[item['value']] = HVACMode.COOL
-                    elif item['name'].lower() in {'heat'}:
-                        self._hvac_mode_map[item['value']] = HVACMode.HEAT
-                    elif item['name'].lower() in {'dry'}:
-                        self._hvac_mode_map[item['value']] = HVACMode.DRY
-                    elif item['name'].lower() in {'fan'}:
-                        self._hvac_mode_map[item['value']] = HVACMode.FAN_ONLY
+                    if item.name.lower() in {'off', 'idle'}:
+                        self._hvac_mode_map[item.value] = HVACMode.OFF
+                    elif item.name.lower() in {'auto'}:
+                        self._hvac_mode_map[item.value] = HVACMode.AUTO
+                    elif item.name.lower() in {'cool'}:
+                        self._hvac_mode_map[item.value] = HVACMode.COOL
+                    elif item.name.lower() in {'heat'}:
+                        self._hvac_mode_map[item.value] = HVACMode.HEAT
+                    elif item.name.lower() in {'dry'}:
+                        self._hvac_mode_map[item.value] = HVACMode.DRY
+                    elif item.name.lower() in {'fan'}:
+                        self._hvac_mode_map[item.value] = HVACMode.FAN_ONLY
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
                 self._prop_mode = prop
             elif prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
                     _LOGGER.error(
                         'invalid target-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
+                self._attr_min_temp = prop.value_range.min
+                self._attr_max_temp = prop.value_range.max
+                self._attr_target_temperature_step = prop.value_range.step
                 self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_TEMPERATURE)
                 self._prop_target_temp = prop
             elif prop.name == 'target-humidity':
-                if not isinstance(prop.value_range, dict):
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
                     _LOGGER.error(
                         'invalid target-humidity value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_humidity = prop.value_range['min']
-                self._attr_max_humidity = prop.value_range['max']
+                self._attr_min_humidity = prop.value_range.min
+                self._attr_max_humidity = prop.value_range.max
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_HUMIDITY)
                 self._prop_target_humi = prop
@@ -212,7 +216,7 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                         'invalid fan-level value_list, %s', self.entity_id)
                     continue
                 self._fan_mode_map = {
-                    item['value']: item['description']
+                    item.value: item.description
                     for item in prop.value_list}
                 self._attr_fan_modes = list(self._fan_mode_map.values())
                 self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
@@ -517,14 +521,16 @@ class Heater(MIoTServiceEntity, ClimateEntity):
                     ClimateEntityFeature.TURN_OFF)
                 self._prop_on = prop
             elif prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
                     _LOGGER.error(
                         'invalid target-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
+                self._attr_min_temp = prop.value_range.min
+                self._attr_max_temp = prop.value_range.max
+                self._attr_target_temperature_step = prop.value_range.step
                 self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_TEMPERATURE)
@@ -538,7 +544,7 @@ class Heater(MIoTServiceEntity, ClimateEntity):
                         'invalid heat-level value_list, %s', self.entity_id)
                     continue
                 self._heat_level_map = {
-                    item['value']: item['description']
+                    item.value: item.description
                     for item in prop.value_list}
                 self._attr_preset_modes = list(self._heat_level_map.values())
                 self._attr_supported_features |= (

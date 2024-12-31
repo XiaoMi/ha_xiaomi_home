@@ -115,22 +115,31 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                 self._prop_on = prop
             # temperature
             if prop.name == 'temperature':
-                if isinstance(prop.value_range, dict):
-                    if (
-                        self._attr_temperature_unit is None
-                        and prop.external_unit
-                    ):
-                        self._attr_temperature_unit = prop.external_unit
-                    self._prop_temp = prop
-                else:
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
                     _LOGGER.error(
                         'invalid temperature value_range format, %s',
                         self.entity_id)
+                    continue
+                if (
+                    self._attr_temperature_unit is None
+                    and prop.external_unit
+                ):
+                    self._attr_temperature_unit = prop.external_unit
+                self._prop_temp = prop
             # target-temperature
             if prop.name == 'target-temperature':
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_precision = prop.value_range['step']
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
+                    _LOGGER.error(
+                        'invalid target-temperature value_range format, %s',
+                        self.entity_id)
+                    continue
+                self._attr_min_temp = prop.value_range.min
+                self._attr_max_temp = prop.value_range.max
+                self._attr_precision = prop.value_range.step
                 if self._attr_temperature_unit is None and prop.external_unit:
                     self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
@@ -146,7 +155,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                         'mode value_list is None, %s', self.entity_id)
                     continue
                 self._mode_list = {
-                    item['value']: item['description']
+                    item.value: item.description
                     for item in prop.value_list}
                 self._attr_operation_list = list(self._mode_list.values())
                 self._attr_supported_features |= (

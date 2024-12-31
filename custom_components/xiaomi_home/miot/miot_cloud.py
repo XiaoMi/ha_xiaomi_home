@@ -147,7 +147,7 @@ class MIoTOauthClient:
             url=f'https://{self._oauth_host}/app/v2/ha/oauth/get_token',
             params={'data': json.dumps(data)},
             headers={'content-type': 'application/x-www-form-urlencoded'},
-            timeout=MIHOME_HTTP_API_TIMEOUT
+            timeout=aiohttp.ClientTimeout(MIHOME_HTTP_API_TIMEOUT)
         )
         if http_res.status == 401:
             raise MIoTOauthError(
@@ -298,7 +298,7 @@ class MIoTHttpClient:
             url=f'{self._base_url}{url_path}',
             params=params,
             headers=self.__api_request_headers,
-            timeout=timeout)
+            timeout=aiohttp.ClientTimeout(timeout))
         if http_res.status == 401:
             raise MIoTHttpError(
                 'mihome api get failed, unauthorized(401)',
@@ -326,7 +326,7 @@ class MIoTHttpClient:
             url=f'{self._base_url}{url_path}',
             json=data,
             headers=self.__api_request_headers,
-            timeout=timeout)
+            timeout=aiohttp.ClientTimeout(timeout))
         if http_res.status == 401:
             raise MIoTHttpError(
                 'mihome api get failed, unauthorized(401)',
@@ -352,7 +352,7 @@ class MIoTHttpClient:
             params={
                 'clientId': self._client_id, 'token': self._access_token},
             headers={'content-type': 'application/x-www-form-urlencoded'},
-            timeout=MIHOME_HTTP_API_TIMEOUT
+            timeout=aiohttp.ClientTimeout(MIHOME_HTTP_API_TIMEOUT)
         )
 
         res_str = await http_res.text()
@@ -720,7 +720,8 @@ class MIoTHttpClient:
             prop_obj['fut'].set_result(None)
         if props_req:
             _LOGGER.info(
-                'get prop from cloud failed, %s, %s', len(key), props_req)
+                'get prop from cloud failed, %s, %s',
+                len(props_req), props_req)
 
         if self._get_prop_list:
             self._get_prop_timer = self._main_loop.call_later(

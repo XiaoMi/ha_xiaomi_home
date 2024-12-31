@@ -46,13 +46,11 @@ off Xiaomi or its affiliates' products.
 MIoT-Spec-V2 parser.
 """
 import asyncio
-import json
 import platform
 import time
 from typing import Any, Optional
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 import logging
+import aiohttp
 
 # pylint: disable=relative-beyond-top-level
 from .const import DEFAULT_INTEGRATION_LANGUAGE, SPEC_STD_LIB_EFFECTIVE_TIME
@@ -77,12 +75,12 @@ class MIoTSpecBase:
     name: Optional[str]
 
     # External params
-    platform: str
+    platform: str | None
     device_class: Any
-    icon: str
+    icon: str | None
     external_unit: Any
 
-    spec_id: str
+    spec_id: int
 
     def __init__(self, spec: dict) -> None:
         self.iid = spec['iid']
@@ -105,17 +103,67 @@ class MIoTSpecBase:
         return self.spec_id
 
     def __eq__(self, value: object) -> bool:
+        if not isinstance(value, MIoTSpecBase):
+            return False
         return self.spec_id == value.spec_id
 
 
 class MIoTSpecProperty(MIoTSpecBase):
     """MIoT SPEC property class."""
+    class ValueRange:
+        def __init__(self, raw: Any):
+            if (not isinstance(raw, dict) or
+                not isinstance(raw.get('min', None), (int, float)) or
+                not isinstance(raw.get('max', None), (int, float)) or
+                not isinstance(raw.get('step', None), (int, float))):
+                raise MIoTSpecError('invalid value range')
+            self.min = raw['min']
+            self.max = raw['max']
+            self.step = raw['step']
+        def dump(self) -> dict:
+            return {
+                'min': self.min,
+                'max': self.max,
+                'step': self.step
+            }
+        min: float
+        max: float
+        step: float
+    class ValueListItem:
+        def __init__(self, raw: Any):
+            if (not isinstance(raw, dict) or
+                not isinstance(raw.get('value', None), (int, bool)) or
+                not isinstance(raw.get('description', None), str) or
+                not isinstance(raw.get('description', None), str)):
+                raise MIoTSpecError('invalid value list item')
+            self.value = raw['value']
+            self.name = raw.get('name', None)
+            self.description = raw['description']
+        def dump(self) -> dict:
+            return {
+                'value': self.value,
+                'name': self.name,
+                'description': self.description
+            }
+        value: int | bool
+        name: str
+        description: str
+    class ValueList(list[ValueListItem]):
+        def __init__(self, raw: Any):
+            if not isinstance(raw, list):
+                raise MIoTSpecError('invalid value list')
+            super().__init__(
+                [MIoTSpecProperty.ValueListItem(item)
+                for item in raw])
+        def dump(self) -> list[dict]:
+            return [item.dump() for item in self]
+
     format_: str
     precision: int
     unit: str
 
-    value_range: list
-    value_list: list[dict]
+    value_range: ValueRange | None
+    value_list: ValueList | None
 
     _access: list
     _writable: bool
@@ -125,10 +173,11 @@ class MIoTSpecProperty(MIoTSpecBase):
     service: MIoTSpecBase
 
     def __init__(
-            self, spec: dict, service: MIoTSpecBase = None,
-            format_: str = None, access: list = None,
-            unit: str = None, value_range: list = None,
-            value_list: list[dict] = None, precision: int = 0
+            self, spec: dict, service: MIoTSpecBase,
+            format_: str, access: list,
+            unit:  str, value_range: Optional[ValueRange] = None,
+            value_list: Optional[ValueList] = None,
+            precision: int = 0
     ) -> None:
         super().__init__(spec=spec)
         self.service = service
@@ -189,8 +238,10 @@ class MIoTSpecProperty(MIoTSpecBase):
             'format': self.format_,
             'access': self._access,
             'unit': self.unit,
-            'value_range': self.value_range,
-            'value_list': self.value_list,
+            'value_range': self.value_range.dump() 
+                if self.value_range else None,
+            'value_list': self.value_list.dump()
+                if self.value_list else None,
             'precision': self.precision
         }
 
@@ -201,8 +252,8 @@ class MIoTSpecEvent(MIoTSpecBase):
     service: MIoTSpecBase
 
     def __init__(
-        self, spec: dict, service: MIoTSpecBase = None,
-        argument: list[MIoTSpecProperty] = None
+        self, spec: dict, service: MIoTSpecBase,
+        argument: list[MIoTSpecProperty]
     ) -> None:
         super().__init__(spec=spec)
         self.argument = argument
@@ -226,14 +277,14 @@ class MIoTSpecEvent(MIoTSpecBase):
 
 class MIoTSpecAction(MIoTSpecBase):
     """MIoT SPEC action class."""
-    in_: list[MIoTSpecProperty]
-    out: list[MIoTSpecProperty]
+    in_: list[MIoTSpecProperty] | None
+    out: list[MIoTSpecProperty] | None
     service: MIoTSpecBase
 
     def __init__(
-            self, spec: dict, service: MIoTSpecBase = None,
-            in_: list[MIoTSpecProperty] = None,
-            out: list[MIoTSpecProperty] = None
+            self, spec: dict, service: MIoTSpecBase,
+            in_: Optional[list[MIoTSpecProperty]] = None,
+            out: Optional[list[MIoTSpecProperty]] = None
     ) -> None:
         super().__init__(spec=spec)
         self.in_ = in_
@@ -252,8 +303,8 @@ class MIoTSpecAction(MIoTSpecBase):
             'description_trans': self.description_trans,
             'proprietary': self.proprietary,
             'need_filter': self.need_filter,
-            'in': [prop.iid for prop in self.in_],
-            'out': [prop.iid for prop in self.out]
+            'in': [prop.iid for prop in (self.in_ or [])],
+            'out': [prop.iid for prop in (self.out or [])]
         }
 
 
@@ -300,8 +351,8 @@ class MIoTSpecInstance:
     icon: str
 
     def __init__(
-        self, urn: str = None, name: str = None,
-        description: str = None, description_trans: str = None
+        self, urn: str, name: str,
+        description: str, description_trans: str
     ) -> None:
         self.urn = urn
         self.name = name
@@ -309,12 +360,18 @@ class MIoTSpecInstance:
         self.description_trans = description_trans
         self.services = []
 
-    def load(self, specs: dict) -> 'MIoTSpecInstance':
-        self.urn = specs['urn']
-        self.name = specs['name']
-        self.description = specs['description']
-        self.description_trans = specs['description_trans']
-        self.services = []
+    @staticmethod
+    def load(specs: dict) -> 'MIoTSpecInstance':
+        urn = specs['urn']
+        name = specs['name']
+        description = specs['description']
+        description_trans = specs['description_trans']
+        miotSpecInstance = MIoTSpecInstance(
+            urn, 
+            name, 
+            description, 
+            description_trans)
+        miotSpecInstance.services = []
         for service in specs['services']:
             spec_service = MIoTSpecService(spec=service)
             for prop in service['properties']:
@@ -324,20 +381,27 @@ class MIoTSpecInstance:
                     format_=prop['format'],
                     access=prop['access'],
                     unit=prop['unit'],
-                    value_range=prop['value_range'],
-                    value_list=prop['value_list'],
+                    value_range=MIoTSpecProperty.ValueRange(
+                        prop['value_range'])
+                        if prop.get('value_range', None) is not None
+                        else None,
+                    value_list=MIoTSpecProperty.ValueList(
+                        prop['value_list'])
+                        if prop.get('value_list', None) is not None
+                        else None,
                     precision=prop.get('precision', 0))
                 spec_service.properties.append(spec_prop)
             for event in service['events']:
-                spec_event = MIoTSpecEvent(
-                    spec=event, service=spec_service)
                 arg_list: list[MIoTSpecProperty] = []
                 for piid in event['argument']:
                     for prop in spec_service.properties:
                         if prop.iid == piid:
                             arg_list.append(prop)
                             break
-                spec_event.argument = arg_list
+                spec_event = MIoTSpecEvent(
+                    spec=event,
+                    service=spec_service,
+                    argument=arg_list)
                 spec_service.events.append(spec_event)
             for action in service['actions']:
                 spec_action = MIoTSpecAction(
@@ -357,8 +421,8 @@ class MIoTSpecInstance:
                             break
                 spec_action.out = out_list
                 spec_service.actions.append(spec_action)
-            self.services.append(spec_service)
-        return self
+            miotSpecInstance.services.append(spec_service)
+        return miotSpecInstance
 
     def dump(self) -> dict:
         return {
@@ -373,13 +437,15 @@ class MIoTSpecInstance:
 class SpecStdLib:
     """MIoT-Spec-V2 standard library."""
     _lang: str
-    _spec_std_lib: Optional[dict[str, dict[str, dict[str, str]]]]
+    _spec_std_lib: dict[str, dict]
 
-    def __init__(self, lang: str) -> None:
-        self._lang = lang
-        self._spec_std_lib = None
-
-    def init(self, std_lib: dict[str, dict[str, str]]) -> None:
+    def __init__(
+        self, 
+        lang: str, 
+        std_lib: dict[str, dict]
+    ) -> None:
+        # FIXME: This is not the correct method to parse JSON schema.
+        # Should consider generate the runtime classes from the schema.
         if (
             not isinstance(std_lib, dict)
             or 'devices' not in std_lib
@@ -389,11 +455,9 @@ class SpecStdLib:
             or 'actions' not in std_lib
             or 'values' not in std_lib
         ):
-            return
+            raise MIoTSpecError('invalid spec std lib')
+        self._lang = lang
         self._spec_std_lib = std_lib
-
-    def deinit(self) -> None:
-        self._spec_std_lib = None
 
     def device_translate(self, key: str) -> Optional[str]:
         if not self._spec_std_lib or key not in self._spec_std_lib['devices']:
@@ -462,14 +526,17 @@ class MIoTSpecParser:
     _init_done: bool
     _ram_cache: dict
 
-    _std_lib: SpecStdLib
+    _std_lib: SpecStdLib | None = None
     _bool_trans: SpecBoolTranslation
     _multi_lang: SpecMultiLang
     _spec_filter: SpecFilter
 
+    _session: aiohttp.ClientSession
+
     def __init__(
-        self, lang: str = DEFAULT_INTEGRATION_LANGUAGE,
-        storage: MIoTStorage = None,
+        self,
+        storage: MIoTStorage,
+        lang: str = DEFAULT_INTEGRATION_LANGUAGE,
         loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._lang = lang
@@ -479,11 +546,11 @@ class MIoTSpecParser:
         self._init_done = False
         self._ram_cache = {}
 
-        self._std_lib = SpecStdLib(lang=self._lang)
         self._bool_trans = SpecBoolTranslation(
             lang=self._lang, loop=self._main_loop)
         self._multi_lang = SpecMultiLang(lang=self._lang, loop=self._main_loop)
         self._spec_filter = SpecFilter(loop=self._main_loop)
+        self._session = aiohttp.ClientSession()
 
     async def init_async(self) -> None:
         if self._init_done is True:
@@ -491,9 +558,9 @@ class MIoTSpecParser:
         await self._bool_trans.init_async()
         await self._multi_lang.init_async()
         await self._spec_filter.init_async()
-        std_lib_cache: dict = None
+        std_lib_cache: dict | None = None
         if self._storage:
-            std_lib_cache: dict = await self._storage.load_async(
+            std_lib_cache = await self._storage.load_async(
                 domain=self.DOMAIN, name='spec_std_lib', type_=dict)
             if (
                 isinstance(std_lib_cache, dict)
@@ -506,13 +573,13 @@ class MIoTSpecParser:
                 # Use the cache if the update time is less than 14 day
                 _LOGGER.debug(
                     'use local spec std cache, ts->%s', std_lib_cache['ts'])
-                self._std_lib.init(std_lib_cache['data'])
+                self._std_lib = SpecStdLib(self._lang, std_lib_cache['data'])
                 self._init_done = True
                 return
         # Update spec std lib
         spec_lib_new = await self.__request_spec_std_lib_async()
         if spec_lib_new:
-            self._std_lib.init(spec_lib_new)
+            self._std_lib = spec_lib_new
             if self._storage:
                 if not await self._storage.save_async(
                         domain=self.DOMAIN, name='spec_std_lib',
@@ -524,7 +591,7 @@ class MIoTSpecParser:
                     _LOGGER.error('save spec std lib failed')
         else:
             if std_lib_cache:
-                self._std_lib.init(std_lib_cache['data'])
+                self._std_lib = SpecStdLib(self._lang, std_lib_cache['data'])
                 _LOGGER.error('get spec std lib failed, use local cache')
             else:
                 _LOGGER.error('get spec std lib failed')
@@ -532,7 +599,7 @@ class MIoTSpecParser:
 
     async def deinit_async(self) -> None:
         self._init_done = False
-        self._std_lib.deinit()
+        self._std_lib = None
         await self._bool_trans.deinit_async()
         await self._multi_lang.deinit_async()
         await self._spec_filter.deinit_async()
@@ -540,13 +607,13 @@ class MIoTSpecParser:
 
     async def parse(
         self, urn: str, skip_cache: bool = False,
-    ) -> MIoTSpecInstance:
+    ) -> MIoTSpecInstance | None:
         """MUST await init first !!!"""
         if not skip_cache:
             cache_result = await self.__cache_get(urn=urn)
             if isinstance(cache_result, dict):
                 _LOGGER.debug('get from cache, %s', urn)
-                return MIoTSpecInstance().load(specs=cache_result)
+                return MIoTSpecInstance.load(specs=cache_result)
         # Retry three times
         for index in range(3):
             try:
@@ -560,9 +627,9 @@ class MIoTSpecParser:
         """MUST await init first !!!"""
         if not urn_list:
             return False
-        spec_std_new: dict = await self.__request_spec_std_lib_async()
+        spec_std_new = await self.__request_spec_std_lib_async()
         if spec_std_new:
-            self._std_lib.init(spec_std_new)
+            self._std_lib = spec_std_new
             if self._storage:
                 if not await self._storage.save_async(
                         domain=self.DOMAIN, name='spec_std_lib',
@@ -583,27 +650,15 @@ class MIoTSpecParser:
             success_count += sum(1 for result in results if result is not None)
         return success_count
 
-    def __http_get(
-        self, url: str, params: dict = None, headers: dict = None
-    ) -> dict:
-        if params:
-            encoded_params = urlencode(params)
-            full_url = f'{url}?{encoded_params}'
-        else:
-            full_url = url
-        request = Request(full_url, method='GET', headers=headers or {})
-        content: bytes = None
-        with urlopen(request) as response:
-            content = response.read()
-        return (
-            json.loads(str(content, 'utf-8'))
-            if content is not None else None)
-
     async def __http_get_async(
-        self, url: str, params: dict = None, headers: dict = None
+        self, url: str,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None
     ) -> dict:
-        return await self._main_loop.run_in_executor(
-            None, self.__http_get, url, params, headers)
+        response = await self._session.get(
+            url, params=params, headers=headers)
+        response.raise_for_status()
+        return await response.json()
 
     async def __cache_get(self, urn: str) -> Optional[dict]:
         if self._storage is not None:
@@ -628,8 +683,8 @@ class MIoTSpecParser:
         return {'string': 'str', 'bool': 'bool', 'float': 'float'}.get(
             format_, 'int')
 
-    async def __request_spec_std_lib_async(self) -> Optional[SpecStdLib]:
-        std_libs: dict = None
+        std_libs: dict | None = None
+    async def __request_spec_std_lib_async(self) -> SpecStdLib | None:
         for index in range(3):
             try:
                 tasks: list = []
@@ -710,7 +765,7 @@ class MIoTSpecParser:
                 else:
                     _LOGGER.error(
                         'get external std lib failed, values')
-                return std_libs
+                return SpecStdLib(lang=self._lang, std_lib=std_libs)
             except Exception as err:  # pylint: disable=broad-exception-caught
                 _LOGGER.error(
                     'update spec std lib error, retry, %d, %s', index, err)
@@ -777,6 +832,8 @@ class MIoTSpecParser:
 
     async def __parse(self, urn: str) -> MIoTSpecInstance:
         _LOGGER.debug('parse urn, %s', urn)
+        if self._std_lib is None:
+            raise MIoTSpecError('std lib is not set')
         # Load spec instance
         instance: dict = await self.__get_instance(urn=urn)
         if (
@@ -787,6 +844,8 @@ class MIoTSpecParser:
         ):
             raise MIoTSpecError(f'invalid urn instance, {urn}')
         translation: dict = {}
+        urn_strs: list[str] = urn.split(':')
+        urn_key = ':'.join(urn_strs[:6])
         try:
             # Load multiple language configuration.
             res_trans = await self.__get_translation(urn=urn)
@@ -796,9 +855,7 @@ class MIoTSpecParser:
                 or not isinstance(res_trans['data'], dict)
             ):
                 raise MIoTSpecError('invalid translation data')
-            urn_strs: list[str] = urn.split(':')
-            urn_key: str = ':'.join(urn_strs[:6])
-            trans_data: dict[str, str] = None
+            trans_data: dict[str, str]
             if self._lang == 'zh-Hans':
                 # Simplified Chinese
                 trans_data = res_trans['data'].get('zh_cn', {})
@@ -916,11 +973,11 @@ class MIoTSpecParser:
                     or property_['description']
                     or spec_prop.name)
                 if 'value-range' in property_:
-                    spec_prop.value_range = {
+                    spec_prop.value_range = MIoTSpecProperty.ValueRange({
                         'min': property_['value-range'][0],
                         'max': property_['value-range'][1],
                         'step': property_['value-range'][2]
-                    }
+                    })
                     spec_prop.precision = len(str(
                         property_['value-range'][2]).split(
                         '.')[1].rstrip('0')) if '.' in str(
@@ -938,11 +995,11 @@ class MIoTSpecParser:
                                 f'{v["description"]}')
                             or v['name']
                         )
-                    spec_prop.value_list = v_list
+                    spec_prop.value_list = MIoTSpecProperty.ValueList(v_list)
                 elif property_['format'] == 'bool':
                     v_tag = ':'.join(p_type_strs[:5])
-                    v_descriptions: dict = (
-                        await self._bool_trans.translate_async(urn=v_tag))
+                    v_descriptions = (
+                        self._bool_trans.translate(urn=v_tag))
                     if v_descriptions:
                         spec_prop.value_list = v_descriptions
                 spec_service.properties.append(spec_prop)
@@ -956,8 +1013,16 @@ class MIoTSpecParser:
                 ):
                     continue
                 e_type_strs: list[str] = event['type'].split(':')
+                arg_list: list[MIoTSpecProperty] = []
+                for piid in event['arguments']:
+                    for prop in spec_service.properties:
+                        if prop.iid == piid:
+                            arg_list.append(prop)
+                            break
                 spec_event: MIoTSpecEvent = MIoTSpecEvent(
-                    spec=event, service=spec_service)
+                    spec=event,
+                    service=spec_service,
+                    argument=arg_list)
                 spec_event.name = e_type_strs[3]
                 # Filter spec event
                 spec_event.need_filter = (
@@ -974,13 +1039,6 @@ class MIoTSpecParser:
                     or event['description']
                     or spec_event.name
                 )
-                arg_list: list[MIoTSpecProperty] = []
-                for piid in event['arguments']:
-                    for prop in spec_service.properties:
-                        if prop.iid == piid:
-                            arg_list.append(prop)
-                            break
-                spec_event.argument = arg_list
                 spec_service.events.append(spec_event)
             # Parse service action
             for action in service.get('actions', []):

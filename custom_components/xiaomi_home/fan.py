@@ -119,11 +119,11 @@ class Fan(MIoTServiceEntity, FanEntity):
                 self._attr_supported_features |= FanEntityFeature.TURN_OFF
                 self._prop_on = prop
             elif prop.name == 'fan-level':
-                if isinstance(prop.value_range, dict):
+                if isinstance(prop.value_range, MIoTSpecProperty.ValueRange):
                     # Fan level with value-range
-                    self._speed_min = prop.value_range['min']
-                    self._speed_max = prop.value_range['max']
-                    self._speed_step = prop.value_range['step']
+                    self._speed_min = round(prop.value_range.min)
+                    self._speed_max = round(prop.value_range.max)
+                    self._speed_step = round(prop.value_range.step)
                     self._attr_speed_count = self._speed_max - self._speed_min+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
@@ -134,8 +134,8 @@ class Fan(MIoTServiceEntity, FanEntity):
                 ):
                     # Fan level with value-list
                     for item in prop.value_list:
-                        self._speed_min = min(self._speed_min, item['value'])
-                        self._speed_max = max(self._speed_max, item['value'])
+                        self._speed_min = min(self._speed_min, item.value)
+                        self._speed_max = max(self._speed_max, item.value)
                     self._attr_speed_count = self._speed_max - self._speed_min+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
@@ -148,7 +148,7 @@ class Fan(MIoTServiceEntity, FanEntity):
                         'mode value_list is None, %s', self.entity_id)
                     continue
                 self._mode_list = {
-                    item['value']: item['description']
+                    item.value: item.description
                     for item in prop.value_list}
                 self._attr_preset_modes = list(self._mode_list.values())
                 self._attr_supported_features |= FanEntityFeature.PRESET_MODE

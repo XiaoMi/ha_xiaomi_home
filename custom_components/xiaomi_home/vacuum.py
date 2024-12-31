@@ -128,7 +128,7 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                         'invalid status value_list, %s', self.entity_id)
                     continue
                 self._status_map = {
-                    item['value']: item['description']
+                    item.value: item.description
                     for item in prop.value_list}
                 self._prop_status = prop
             elif prop.name == 'fan-level':
@@ -140,7 +140,7 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                         'invalid fan-level value_list, %s', self.entity_id)
                     continue
                 self._fan_level_map = {
-                    item['value']: item['description']
+                    item.value: item.description
                     for item in prop.value_list}
                 self._attr_fan_speed_list = list(self._fan_level_map.values())
                 self._attr_supported_features |= VacuumEntityFeature.FAN_SPEED

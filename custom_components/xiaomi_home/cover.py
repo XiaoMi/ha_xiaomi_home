@@ -140,18 +140,18 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         'motor-control value_list is None, %s', self.entity_id)
                     continue
                 for item in prop.value_list:
-                    if item['name'].lower() in ['open']:
+                    if item.name.lower() in ['open']:
                         self._attr_supported_features |= (
                             CoverEntityFeature.OPEN)
-                        self._prop_motor_value_open = item['value']
-                    elif item['name'].lower() in ['close']:
+                        self._prop_motor_value_open = item.value
+                    elif item.name.lower() in ['close']:
                         self._attr_supported_features |= (
                             CoverEntityFeature.CLOSE)
-                        self._prop_motor_value_close = item['value']
-                    elif item['name'].lower() in ['pause']:
+                        self._prop_motor_value_close = item.value
+                    elif item.name.lower() in ['pause']:
                         self._attr_supported_features |= (
                             CoverEntityFeature.STOP)
-                        self._prop_motor_value_pause = item['value']
+                        self._prop_motor_value_pause = item.value
                 self._prop_motor_control = prop
             elif prop.name == 'status':
                 if (
@@ -162,23 +162,25 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         'status value_list is None, %s', self.entity_id)
                     continue
                 for item in prop.value_list:
-                    if item['name'].lower() in ['opening', 'open']:
-                        self._prop_status_opening = item['value']
-                    elif item['name'].lower() in ['closing', 'close']:
-                        self._prop_status_closing = item['value']
-                    elif item['name'].lower() in ['stop', 'pause']:
-                        self._prop_status_stop = item['value']
+                    if item.name.lower() in ['opening', 'open']:
+                        self._prop_status_opening = item.value
+                    elif item.name.lower() in ['closing', 'close']:
+                        self._prop_status_closing = item.value
+                    elif item.name.lower() in ['stop', 'pause']:
+                        self._prop_status_stop = item.value
                 self._prop_status = prop
             elif prop.name == 'current-position':
                 self._prop_current_position = prop
             elif prop.name == 'target-position':
-                if not isinstance(prop.value_range, dict):
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
                     _LOGGER.error(
                         'invalid target-position value_range format, %s',
                         self.entity_id)
                     continue
-                self._prop_position_value_min = prop.value_range['min']
-                self._prop_position_value_max = prop.value_range['max']
+                self._prop_position_value_min = round(prop.value_range.min)
+                self._prop_position_value_max = round(prop.value_range.max)
                 self._prop_position_value_range = (
                     self._prop_position_value_max -
                     self._prop_position_value_min)

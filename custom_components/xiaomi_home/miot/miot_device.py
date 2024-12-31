@@ -987,7 +987,7 @@ class MIoTPropertyEntity(Entity):
 
     _main_loop: asyncio.AbstractEventLoop
     # {'min':int, 'max':int, 'step': int}
-    _value_range: dict[str, int]
+    _value_range: MIoTSpecProperty.ValueRange | None
     # {Any: Any}
     _value_list: dict[Any, Any]
     _value: Any
@@ -1004,7 +1004,7 @@ class MIoTPropertyEntity(Entity):
         self._value_range = spec.value_range
         if spec.value_list:
             self._value_list = {
-                item['value']: item['description'] for item in spec.value_list}
+                item.value: item.description for item in spec.value_list}
         else:
             self._value_list = None
         self._value = None
@@ -1025,7 +1025,8 @@ class MIoTPropertyEntity(Entity):
         _LOGGER.info(
             'new miot property entity, %s, %s, %s, %s, %s, %s, %s',
             self.miot_device.name, self._attr_name, spec.platform,
-            spec.device_class, self.entity_id, self._value_range,
+            spec.device_class, self.entity_id,
+            self._value_range.dump() if self._value_range else None,
             self._value_list)
 
     @property

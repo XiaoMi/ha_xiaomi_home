@@ -130,9 +130,10 @@ class Light(MIoTServiceEntity, LightEntity):
                 self._prop_on = prop
             # brightness
             if prop.name == 'brightness':
-                if isinstance(prop.value_range, dict):
+                if isinstance(prop.value_range, MIoTSpecProperty.ValueRange):
                     self._brightness_scale = (
-                        prop.value_range['min'], prop.value_range['max'])
+                        round(prop.value_range.min),
+                        round(prop.value_range.max))
                     self._prop_brightness = prop
                 elif (
                     self._mode_list is None
@@ -141,7 +142,7 @@ class Light(MIoTServiceEntity, LightEntity):
                 ):
                     # For value-list brightness
                     self._mode_list = {
-                        item['value']: item['description']
+                        item.value: item.description
                         for item in prop.value_list}
                     self._attr_effect_list = list(self._mode_list.values())
                     self._attr_supported_features |= LightEntityFeature.EFFECT
@@ -152,13 +153,15 @@ class Light(MIoTServiceEntity, LightEntity):
                     continue
             # color-temperature
             if prop.name == 'color-temperature':
-                if not isinstance(prop.value_range, dict):
+                if not isinstance(
+                    prop.value_range,
+                    MIoTSpecProperty.ValueRange):
                     _LOGGER.error(
                         'invalid color-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_color_temp_kelvin = prop.value_range['min']
-                self._attr_max_color_temp_kelvin = prop.value_range['max']
+                self._attr_min_color_temp_kelvin = prop.value_range.min
+                self._attr_max_color_temp_kelvin = prop.value_range.max
                 self._attr_supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._attr_color_mode = ColorMode.COLOR_TEMP
                 self._prop_color_temp = prop
@@ -175,12 +178,13 @@ class Light(MIoTServiceEntity, LightEntity):
                     and prop.value_list
                 ):
                     mode_list = {
-                        item['value']: item['description']
+                        item.value: item.description
                         for item in prop.value_list}
-                elif isinstance(prop.value_range, dict):
+                elif isinstance(prop.value_range, MIoTSpecProperty.ValueRange):
                     mode_list = {}
                     for value in range(
-                            prop.value_range['min'], prop.value_range['max']):
+                            round(prop.value_range.min),
+                            round(prop.value_range.max)):
                         mode_list[value] = f'{value}'
                 if mode_list:
                     self._mode_list = mode_list

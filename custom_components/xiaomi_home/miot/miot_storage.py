@@ -56,7 +56,7 @@ import hashlib
 from datetime import datetime, timezone
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, cast, Optional, Type, TypeVar, Union
 import logging
 from urllib.request import Request, urlopen
 from cryptography.hazmat.primitives import serialization
@@ -65,6 +65,9 @@ from cryptography.x509.oid import NameOID
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives.asymmetric.types import \
+    CertificateIssuerPrivateKeyTypes
+from miot_spec import MIoTSpecProperty
 
 # pylint: disable=relative-beyond-top-level
 from .common import load_json_file
@@ -93,10 +96,10 @@ class MIoTStorage:
 
     User data will be stored in the `.storage` directory of Home Assistant.
     """
-    _main_loop: asyncio.AbstractEventLoop = None
+    _main_loop: asyncio.AbstractEventLoop
     _file_future: dict[str, tuple[MIoTStorageType, asyncio.Future]]
 
-    _root_path: str = None
+    _root_path: str
 
     def __init__(
         self, root_path: str,
@@ -125,9 +128,10 @@ class MIoTStorage:
         fut.add_done_callback(fut_done_callback)
         self._file_future[key] = op_type, fut
 
+    T = TypeVar('T')
     def __load(
-        self, full_path: str, type_: type = bytes, with_hash_check: bool = True
-    ) -> Union[bytes, str, dict, list, None]:
+        self, full_path: str, type_: Type[T] = bytes, with_hash_check: bool = True
+    ) -> T | None:
         if not os.path.exists(full_path):
             _LOGGER.debug('load error, file does not exist, %s', full_path)
             return None
@@ -136,11 +140,11 @@ class MIoTStorage:
             return None
         try:
             with open(full_path, 'rb') as r_file:
-                r_data: bytes = r_file.read()
+                r_data = r_file.read()
                 if r_data is None:
                     _LOGGER.error('load error, empty file, %s', full_path)
                     return None
-                data_bytes: bytes = None
+                data_bytes: bytes
                 # Hash check
                 if with_hash_check:
                     if len(r_data) <= 32:
@@ -154,11 +158,12 @@ class MIoTStorage:
                 else:
                     data_bytes = r_data
                 if type_ == bytes:
-                    return data_bytes
-                if type_ == str:
-                    return str(data_bytes, 'utf-8')
-                if type_ in [dict, list]:
-                    return json.loads(data_bytes)
+                    # Be aware, this WILL NOT actually cast the type
+                    return cast(type_, data_bytes)
+                elif type_ == str:
+                    return cast(type_, str(data_bytes, 'utf-8'))
+                elif type_ in [dict, list]:
+                    return cast(type_, json.loads(data_bytes))
                 _LOGGER.error(
                     'load error, unsupported data type, %s', type_.__name__)
                 return None
@@ -167,15 +172,15 @@ class MIoTStorage:
             return None
 
     def load(
-        self, domain: str, name: str, type_: type = bytes
-    ) -> Union[bytes, str, dict, list, None]:
+        self, domain: str, name: str, type_: Type[T] = bytes
+    ) -> T | None:
         full_path = self.__get_full_path(
             domain=domain, name=name, suffix=type_.__name__)
         return self.__load(full_path=full_path, type_=type_)
 
     async def load_async(
-        self, domain: str, name: str, type_: type = bytes
-    ) -> Union[bytes, str, dict, list, None]:
+        self, domain: str, name: str, type_: Type[T] = bytes
+    ) -> T | None:
         full_path = self.__get_full_path(
             domain=domain, name=name, suffix=type_.__name__)
         if full_path in self._file_future:
@@ -209,17 +214,17 @@ class MIoTStorage:
         else:
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
         try:
-            type_: type = type(data)
-            w_bytes: bytes = None
-            if type_ == bytes:
+            w_bytes: bytes
+            if isinstance(data, bytes):
                 w_bytes = data
-            elif type_ == str:
+            elif isinstance(data, str):
                 w_bytes = data.encode('utf-8')
-            elif type_ in [dict, list]:
+            elif isinstance(data, dict) or isinstance(data, list):
                 w_bytes = json.dumps(data).encode('utf-8')
             else:
                 _LOGGER.error(
-                    'save error, unsupported data type, %s', type_.__name__)
+                    'save error, unsupported data type, %s',
+                    type(data).__name__)
                 return False
             with open(full_path, 'wb') as w_file:
                 w_file.write(w_bytes)
@@ -519,7 +524,9 @@ class MIoTStorage:
             if key in local_config}
 
     def gen_storage_path(
-        self, domain: str = None, name_with_suffix: str = None
+        self,
+        domain: Optional[str] = None,
+        name_with_suffix: Optional[str] = None
     ) -> str:
         """Generate file path."""
         result = self._root_path
@@ -609,7 +616,6 @@ class MIoTCert:
         if cert_data is None:
             return 0
         # Check user cert
-        user_cert: x509.Certificate = None
         try:
             user_cert = x509.load_pem_x509_certificate(
                 cert_data, default_backend())
@@ -635,11 +641,11 @@ class MIoTCert:
                 raise MIoTCertError('invalid ORGANIZATION_NAME')
             now_utc: datetime = datetime.now(timezone.utc)
             if (
-                now_utc < user_cert.not_valid_before_utc or
-                    now_utc > user_cert.not_valid_after_utc
+                now_utc < user_cert.not_valid_before or
+                    now_utc > user_cert.not_valid_after
             ):
                 raise MIoTCertError('cert is not valid')
-            return int((user_cert.not_valid_after_utc-now_utc).total_seconds())
+            return int((user_cert.not_valid_after-now_utc).total_seconds())
         except (MIoTCertError, ValueError) as error:
             _LOGGER.error(
                 'load_pem_x509_certificate failed, %s, %s',
@@ -668,6 +674,8 @@ class MIoTCert:
                 x509.NameAttribute(
                     NameOID.COMMON_NAME, f'mips.{self._uid}.{did_hash}.2'),
             ]))
+        if not isinstance(private_key, CertificateIssuerPrivateKeyTypes):
+            raise MIoTCertError('invalid private key type')
         csr = builder.sign(
             private_key, algorithm=None, backend=default_backend())
         return csr.public_bytes(serialization.Encoding.PEM).decode('utf-8')
@@ -763,11 +771,13 @@ class SpecMultiLang:
                     return
         self._data = multi_lang_data
 
-    async def deinit_async(self) -> str:
+    async def deinit_async(self) -> None:
         self._data = None
 
     async def translate_async(self, urn_key: str) -> dict[str, str]:
         """MUST call init_async() first."""
+        if self._data is None:
+            raise MIoTError('_data not set')
         if urn_key in self._data:
             return self._data[urn_key].get(self._lang, {})
         return {}
@@ -780,8 +790,8 @@ class SpecBoolTranslation:
     BOOL_TRANS_FILE = 'specs/bool_trans.json'
     _main_loop: asyncio.AbstractEventLoop
     _lang: str
-    _data: Optional[dict[str, dict]]
-    _data_default: dict[str, dict]
+    _data: dict[str, MIoTSpecProperty.ValueList] | None = None
+    _data_default: MIoTSpecProperty.ValueList | None = None
 
     def __init__(
         self, lang: str, loop: Optional[asyncio.AbstractEventLoop] = None
@@ -821,10 +831,18 @@ class SpecBoolTranslation:
                 or data['translate']['default'].get(
                     DEFAULT_INTEGRATION_LANGUAGE, None))
             if data_default:
-                self._data_default = [
-                    {'value': True, 'description': data_default['true']},
-                    {'value': False, 'description': data_default['false']}
-                ]
+                self._data_default = MIoTSpecProperty.ValueList([
+                    {
+                        'value': True,
+                        'name': data_default['true'],
+                        'description': data_default['true']
+                    },
+                    {
+                        'value': False,
+                        'name': data_default['false'],
+                        'description': data_default['false']
+                    }
+                ])
 
         for urn, key in data['data'].items():
             if key not in data['translate']:
@@ -835,16 +853,24 @@ class SpecBoolTranslation:
                 or data['translate'][key].get(
                     DEFAULT_INTEGRATION_LANGUAGE, None))
             if trans_data:
-                self._data[urn] = [
-                    {'value': True, 'description': trans_data['true']},
-                    {'value': False, 'description': trans_data['false']}
-                ]
+                self._data[urn] = MIoTSpecProperty.ValueList([
+                    {
+                        'value': True,
+                        'name': trans_data['true'],
+                        'description': trans_data['true']
+                    },
+                    {
+                        'value': False,
+                        'name': trans_data['false'],
+                        'description': trans_data['false']
+                    }
+                ])
 
     async def deinit_async(self) -> None:
         self._data = None
         self._data_default = None
 
-    async def translate_async(self, urn: str) -> list[dict[bool, str]]:
+    def translate(self, urn: str) -> MIoTSpecProperty.ValueList:
         """
         MUST call init_async() before calling this method.
         [
@@ -852,7 +878,8 @@ class SpecBoolTranslation:
             {'value': False, 'description': 'False'}
         ]
         """
-
+        if self._data is None or self._data_default is None:
+            raise MIoTError('_data not set')
         return self._data.get(urn, self._data_default)
 
 
@@ -862,8 +889,8 @@ class SpecFilter:
     """
     SPEC_FILTER_FILE = 'specs/spec_filter.json'
     _main_loop: asyncio.AbstractEventLoop
-    _data: dict[str, dict[str, set]]
-    _cache: Optional[dict]
+    _data: dict[str, dict[str, set]] | None
+    _cache: dict | None
 
     def __init__(self, loop: Optional[asyncio.AbstractEventLoop]) -> None:
         self._main_loop = loop or asyncio.get_event_loop()
@@ -968,7 +995,7 @@ class DeviceManufacturer:
     DOMAIN: str = 'miot_specs'
     _main_loop: asyncio.AbstractEventLoop
     _storage: MIoTStorage
-    _data: dict
+    _data: dict | None
 
     def __init__(
         self, storage: MIoTStorage,
@@ -981,7 +1008,6 @@ class DeviceManufacturer:
     async def init_async(self) -> None:
         if self._data:
             return
-        data_cache: dict = None
         data_cache = await self._storage.load_async(
             domain=self.DOMAIN, name='manufacturer', type_=dict)
         if (
@@ -1018,13 +1044,13 @@ class DeviceManufacturer:
             return short_name
         return self._data[short_name].get('name', None) or short_name
 
-    def __get_manufacturer_data(self) -> dict:
+    def __get_manufacturer_data(self) -> dict | None:
         try:
             request = Request(
                 'https://cdn.cnbj1.fds.api.mi-img.com/res-conf/xiaomi-home/'
                 'manufacturer.json',
                 method='GET')
-            content: bytes = None
+            content: bytes
             with urlopen(request) as response:
                 content = response.read()
             return (
