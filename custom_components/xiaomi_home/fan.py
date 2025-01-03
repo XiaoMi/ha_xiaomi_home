@@ -172,15 +172,16 @@ class Fan(MIoTServiceEntity, FanEntity):
                     and prop.value_list
                 ):
                     for item in prop.value_list:
-                        if item['description'].lower() in ['foreward']:
+                        if item['name'].lower() in {'foreward'}:
                             self._prop_wind_reverse_forward = item['value']
-                        elif item['description'].lower() in [
-                                'reversal', 'reverse']:
+                        elif item['name'].lower() in {
+                                'reversal', 'reverse'}:
                             self._prop_wind_reverse_reverse = item['value']
                 if (
-                    not self._prop_wind_reverse_forward
-                    or not self._prop_wind_reverse_reverse
+                    self._prop_wind_reverse_forward is None
+                    or self._prop_wind_reverse_reverse is None
                 ):
+                    # NOTICE: Value may be 0 or False
                     _LOGGER.info(
                         'invalid wind-reverse, %s', self.entity_id)
                     continue
