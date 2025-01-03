@@ -46,14 +46,15 @@ off Xiaomi or its affiliates' products.
 Notify entities for Xiaomi Home.
 """
 from __future__ import annotations
-import json
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.notify import NotifyEntity
+from homeassistant.util import yaml
+from homeassistant.exceptions import HomeAssistantError
 
 from .miot.miot_spec import MIoTSpecAction
 from .miot.miot_device import MIoTDevice, MIoTActionEntity
@@ -82,6 +83,7 @@ async def async_setup_entry(
 
 class Notify(MIoTActionEntity, NotifyEntity):
     """Notify entities for Xiaomi Home."""
+    # pylint: disable=unused-argument
 
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecAction) -> None:
         """Initialize the Notify."""
@@ -96,34 +98,58 @@ class Notify(MIoTActionEntity, NotifyEntity):
         self, message: str, title: Optional[str] = None
     ) -> None:
         """Send a message."""
-        del title
         if not message:
             _LOGGER.error(
                 'action exec failed, %s(%s), empty action params',
                 self.name, self.entity_id)
             return
+        in_list: Any = None
         try:
-            in_list: list = json.loads(message)
-        except json.JSONDecodeError:
+            # YAML will convert yes, no, on, off, true, false to the bool type,
+            # and if it is a string, quotation marks need to be added.
+            in_list = yaml.parse_yaml(content=message)
+        except HomeAssistantError:
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid action params format, %s',
                 self.name, self.entity_id, message)
             return
-
+        if len(self.spec.in_) == 1 and not isinstance(in_list, list):
+            in_list = [in_list]
         if not isinstance(in_list, list) or len(in_list) != len(self.spec.in_):
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid action params, %s',
                 self.name, self.entity_id, message)
             return
-
         in_value: list[dict] = []
         for index, prop in enumerate(self.spec.in_):
-            if type(in_list[index]).__name__ != prop.format_:
-                _LOGGER.error(
-                    'action exec failed, %s(%s), invalid params item, '
-                    'which item(%s) in the list must be %s, %s',
-                    self.name, self.entity_id, prop.description_trans,
-                    prop.format_, message)
-                return
-            in_value.append({'piid': prop.iid, 'value': in_list[index]})
-        return await self.action_async(in_list=in_value)
+            if prop.format_ == 'str':
+                if isinstance(in_list[index], (bool, int, float, str)):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': str(in_list[index])})
+                    continue
+            elif prop.format_ == 'bool':
+                if isinstance(in_list[index], (bool, int)):
+                    # yes, no, on, off, true, false and other bool types
+                    # will also be parsed as 0 and 1 of int.
+                    in_value.append(
+                        {'piid': prop.iid, 'value': bool(in_list[index])})
+                    continue
+            elif prop.format_ == 'float':
+                if isinstance(in_list[index], (int, float)):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': in_list[index]})
+                    continue
+            elif prop.format_ == 'int':
+                if isinstance(in_list[index], int):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': in_list[index]})
+                    continue
+            # Invalid params type, raise error.
+            _LOGGER.error(
+                'action exec failed, %s(%s), invalid params item, '
+                'which item(%s) in the list must be %s, %s type was %s, %s',
+                self.name, self.entity_id, prop.description_trans,
+                prop.format_, in_list[index], type(
+                    in_list[index]).__name__, message)
+            return
+        await self.action_async(in_list=in_value)

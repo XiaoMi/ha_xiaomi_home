@@ -46,14 +46,15 @@ off Xiaomi or its affiliates' products.
 Text entities for Xiaomi Home.
 """
 from __future__ import annotations
-import json
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.text import TextEntity
+from homeassistant.util import yaml
+from homeassistant.exceptions import HomeAssistantError
 
 from .miot.const import DOMAIN
 from .miot.miot_spec import MIoTSpecAction, MIoTSpecProperty
@@ -119,16 +120,18 @@ class ActionText(MIoTActionEntity, TextEntity):
     async def async_set_value(self, value: str) -> None:
         if not value:
             return
-        in_list: list = None
+        in_list: Any = None
         try:
-            in_list = json.loads(value)
-        except json.JSONDecodeError as e:
+            in_list = yaml.parse_yaml(content=value)
+        except HomeAssistantError as e:
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid action params format, %s',
                 self.name, self.entity_id, value)
             raise ValueError(
                 f'action exec failed, {self.name}({self.entity_id}), '
                 f'invalid action params format, {value}') from e
+        if len(self.spec.in_) == 1 and not isinstance(in_list, list):
+            in_list = [in_list]
         if not isinstance(in_list, list) or len(in_list) != len(self.spec.in_):
             _LOGGER.error(
                 'action exec failed, %s(%s), invalid action params, %s',
@@ -138,16 +141,40 @@ class ActionText(MIoTActionEntity, TextEntity):
                 f'invalid action params, {value}')
         in_value: list[dict] = []
         for index, prop in enumerate(self.spec.in_):
-            if type(in_list[index]).__name__ != prop.format_:
-                logging.error(
-                    'action exec failed, %s(%s), invalid params item, which '
-                    'item(%s) in the list must be %s, %s', self.name,
-                    self.entity_id, prop.description_trans, prop.format_, value)
-                raise ValueError(
-                    f'action exec failed, {self.name}({self.entity_id}), '
-                    f'invalid params item, which item({prop.description_trans})'
-                    f' in the list must be {prop.format_}, {value}')
-            in_value.append({'piid': prop.iid, 'value': in_list[index]})
+            if prop.format_ == 'str':
+                if isinstance(in_list[index], (bool, int, float, str)):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': str(in_list[index])})
+                    continue
+            elif prop.format_ == 'bool':
+                if isinstance(in_list[index], (bool, int)):
+                    # yes, no, on, off, true, false and other bool types
+                    # will also be parsed as 0 and 1 of int.
+                    in_value.append(
+                        {'piid': prop.iid, 'value': bool(in_list[index])})
+                    continue
+            elif prop.format_ == 'float':
+                if isinstance(in_list[index], (int, float)):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': in_list[index]})
+                    continue
+            elif prop.format_ == 'int':
+                if isinstance(in_list[index], int):
+                    in_value.append(
+                        {'piid': prop.iid, 'value': in_list[index]})
+                    continue
+            # Invalid params type, raise error.
+            _LOGGER.error(
+                'action exec failed, %s(%s), invalid params item, '
+                'which item(%s) in the list must be %s, %s type was %s, %s',
+                self.name, self.entity_id, prop.description_trans,
+                prop.format_, in_list[index], type(
+                    in_list[index]).__name__, value)
+            raise ValueError(
+                f'action exec failed, {self.name}({self.entity_id}), '
+                f'invalid params item, which item({prop.description_trans}) '
+                f'in the list must be {prop.format_}, {in_list[index]} type '
+                f'was {type(in_list[index]).__name__}, {value}')
 
         self._attr_native_value = value
         if await self.action_async(in_list=in_value):

@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "Configuración básica",
-                "description": "### Región de inicio de sesión\r\nSeleccione la región donde se encuentra su cuenta de Xiaomi. Puede consultar esta información en `Xiaomi Home APP > Yo (ubicado en el menú inferior) > Más ajustes > Acerca de Xiaomi Home`.\r\n### Idioma\r\nSeleccione el idioma utilizado para los nombres de los dispositivos y entidades. Las partes de las frases que no están traducidas se mostrarán en inglés.\r\n### Dirección de redireccionamiento de autenticación de OAuth2\r\nLa dirección de redireccionamiento de autenticación de OAuth2 es **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant debe estar en la misma red local que el terminal de operación actual (por ejemplo, una computadora personal) y el terminal de operación debe poder acceder a la página de inicio de Home Assistant a través de esta dirección, de lo contrario, la autenticación de inicio de sesión podría fallar.\r\n### Nota\r\n- Para los usuarios con cientos o más dispositivos Mi Home, la adición inicial de la integración tomará algún tiempo. Por favor, sea paciente.\r\n- Si Home Assistant se está ejecutando en un entorno Docker, asegúrese de que el modo de red de Docker esté configurado en host, de lo contrario, la funcionalidad de control local puede no funcionar correctamente.\r\n- La funcionalidad de control local de la integración tiene algunas dependencias. Por favor, lea el README cuidadosamente.",
+                "description": "### Región de inicio de sesión\r\nSeleccione la región donde se encuentra su cuenta de Xiaomi. Puede consultar esta información en `Xiaomi Home APP > Yo (ubicado en el menú inferior) > Más ajustes > Acerca de Xiaomi Home`.\r\n### Idioma\r\nSeleccione el idioma utilizado para los nombres de los dispositivos y entidades. Las partes de las frases que no están traducidas se mostrarán en inglés.\r\n### Dirección de redireccionamiento de autenticación de OAuth2\r\nLa dirección de redireccionamiento de autenticación de OAuth2 es **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant debe estar en la misma red local que el terminal de operación actual (por ejemplo, una computadora personal) y el terminal de operación debe poder acceder a la página de inicio de Home Assistant a través de esta dirección, de lo contrario, la autenticación de inicio de sesión podría fallar.\r\n### Configuración de Red Integrada\r\nVerifique si la red local funciona correctamente y si los recursos de red relacionados son accesibles. **Se recomienda seleccionar esto al agregar por primera vez.**\r\n### Nota\r\n- Para los usuarios con cientos o más dispositivos Mi Home, la adición inicial de la integración tomará algún tiempo. Por favor, sea paciente.\r\n- Si Home Assistant se está ejecutando en un entorno Docker, asegúrese de que el modo de red de Docker esté configurado en host, de lo contrario, la funcionalidad de control local puede no funcionar correctamente.\r\n- La funcionalidad de control local de la integración tiene algunas dependencias. Por favor, lea el README cuidadosamente.",
                 "data": {
                     "cloud_server": "Región de inicio de sesión",
                     "integration_language": "Idioma",
-                    "oauth_redirect_url": "Dirección de redireccionamiento de autenticación de OAuth2"
+                    "oauth_redirect_url": "Dirección de redireccionamiento de autenticación de OAuth2",
+                    "network_detect_config": "Configuración de Red Integrada"
+                }
+            },
+            "network_detect_config": {
+                "title": "Configuración de Red Integrada",
+                "description": "## Introducción al Uso\r\n### Dirección de Detección de Red\r\nSe utiliza para verificar si la red funciona correctamente. Si no se establece, se utilizará la dirección predeterminada del sistema. Si la verificación de la dirección predeterminada falla, puede intentar ingresar una dirección personalizada.\r\n- Puede ingresar varias direcciones de detección, separadas por comas, como `8.8.8.8,https://www.bing.com`\r\n- Si es una dirección IP, la detección se realizará mediante ping. Si es una dirección HTTP(s), la detección se realizará mediante una solicitud HTTP GET.\r\n- Si desea restaurar la dirección de detección predeterminada del sistema, ingrese una coma `,` y haga clic en 'Siguiente'.\r\n- **Esta configuración es global y los cambios afectarán a otras instancias de integración. Modifique con precaución.**\r\n### Verificar Dependencias de Red\r\nVerifique una por una las siguientes dependencias de red para ver si son accesibles. Si las direcciones relacionadas no son accesibles, causará problemas de integración.\r\n- Dirección de Autenticación OAuth2: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Dirección de API HTTP de Xiaomi: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Dirección de API SPEC de Xiaomi: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Dirección del Broker MQTT de Xiaomi: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Dirección de Detección de Red",
+                    "check_network_deps": "Verificar Dependencias de Red"
                 }
             },
             "oauth_error": {
@@ -68,8 +77,17 @@
             "mdns_discovery_error": "Error en el servicio de descubrimiento de dispositivos locales.",
             "get_cert_error": "Error al obtener el certificado de la puerta de enlace.",
             "no_family_selected": "No se ha seleccionado ningún hogar.",
-            "no_devices": "No hay dispositivos en el hogar seleccionado. Seleccione un hogar con dispositivos y continúe.",
-            "no_central_device": "【Modo de puerta de enlace central】Se requiere una puerta de enlace Xiaomi disponible en la red local donde se encuentra Home Assistant. Verifique si el hogar seleccionado cumple con este requisito."
+            "no_devices": "No hay dispositivos en el hogar seleccionado. Por favor, seleccione un hogar con dispositivos y continúe.",
+            "no_filter_devices": "Los dispositivos filtrados están vacíos. Por favor, seleccione criterios de filtro válidos y continúe.",
+            "no_central_device": "【Modo de puerta de enlace central】Se requiere una puerta de enlace Xiaomi disponible en la red local donde se encuentra Home Assistant. Verifique si el hogar seleccionado cumple con este requisito.",
+            "invalid_network_addr": "Se detectó una dirección IP o HTTP no válida, por favor ingrese una dirección válida.",
+            "invalid_ip_addr": "Se detectó una dirección IP inaccesible, por favor ingrese una dirección IP válida.",
+            "invalid_http_addr": "Se detectó una dirección HTTP inaccesible, por favor ingrese una dirección HTTP válida.",
+            "invalid_default_addr": "La dirección de detección de red predeterminada no es accesible, por favor verifique la configuración de la red o use una dirección de detección de red personalizada.",
+            "unreachable_oauth2_host": "No se puede acceder a la dirección de autenticación OAuth2, por favor verifique la configuración de la red.",
+            "unreachable_http_host": "No se puede acceder a la dirección de la API HTTP de Xiaomi, por favor verifique la configuración de la red.",
+            "unreachable_spec_host": "No se puede acceder a la dirección de la API SPEC de Xiaomi, por favor verifique la configuración de la red.",
+            "unreachable_mqtt_broker": "No se puede acceder a la dirección del Broker MQTT de Xiaomi, por favor verifique la configuración de la red."
         },
         "abort": {
             "network_connect_error": "La configuración ha fallado. Existe un problema con la conexión de red, verifique la configuración de red del dispositivo.",
@@ -93,7 +111,7 @@
             },
             "config_options": {
                 "title": "Opciones de configuración",
-                "description": "### ¡Hola, {nick_name}!\r\n\r\nID de cuenta de Xiaomi: {uid}\r\nRegión de inicio de sesión actual: {cloud_server}\r\n\r\nSeleccione las opciones que desea reconfigurar y haga clic en \"Siguiente\".",
+                "description": "### ¡Hola, {nick_name}!\r\n\r\nID de cuenta de Xiaomi: {uid}\r\nRegión de inicio de sesión actual: {cloud_server}\r\nID de Instancia de Integración: {instance_id}\r\n\r\nSeleccione las opciones que desea reconfigurar y haga clic en \"Siguiente\".",
                 "data": {
                     "integration_language": "Idioma de la integración",
                     "update_user_info": "Actualizar información de usuario",
@@ -102,7 +120,8 @@
                     "hide_non_standard_entities": "Ocultar entidades generadas no estándar",
                     "display_devices_changed_notify": "Mostrar notificaciones de cambio de estado del dispositivo",
                     "update_trans_rules": "Actualizar reglas de conversión de entidad",
-                    "update_lan_ctrl_config": "Actualizar configuración de control LAN"
+                    "update_lan_ctrl_config": "Actualizar configuración de control LAN",
+                    "network_detect_config": "Configuración de Red Integrada"
                 }
             },
             "update_user_info": {
@@ -151,6 +170,14 @@
                     "enable_subscribe": "Habilitar suscripción LAN"
                 }
             },
+            "network_detect_config": {
+                "title": "Configuración de Red Integrada",
+                "description": "## Introducción al Uso\r\n### Dirección de Detección de Red\r\nSe utiliza para verificar si la red funciona correctamente. Si no se establece, se utilizará la dirección predeterminada del sistema. Si la verificación de la dirección predeterminada falla, puede intentar ingresar una dirección personalizada.\r\n- Puede ingresar varias direcciones de detección, separadas por comas, como `8.8.8.8,https://www.bing.com`\r\n- Si es una dirección IP, la detección se realizará mediante ping. Si es una dirección HTTP(s), la detección se realizará mediante una solicitud HTTP GET.\r\n- Si desea restaurar la dirección de detección predeterminada del sistema, ingrese una coma `,` y haga clic en 'Siguiente'.\r\n- **Esta configuración es global y los cambios afectarán a otras instancias de integración. Modifique con precaución.**\r\n### Verificar Dependencias de Red\r\nVerifique una por una las siguientes dependencias de red para ver si son accesibles. Si las direcciones relacionadas no son accesibles, causará problemas de integración.\r\n- Dirección de Autenticación OAuth2: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Dirección de API HTTP de Xiaomi: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Dirección de API SPEC de Xiaomi: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Dirección del Broker MQTT de Xiaomi: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Dirección de Detección de Red",
+                    "check_network_deps": "Verificar Dependencias de Red"
+                }
+            },
             "config_confirm": {
                 "title": "Confirmar configuración",
                 "description": "¡Hola, **{nick_name}**! Por favor, confirme la última información de configuración y haga clic en \"Enviar\" para finalizar la configuración.\r\nLa integración se volverá a cargar con la nueva configuración.\r\n\r\nIdioma de la integración:\t{lang_new}\r\nApodo de usuario:\t{nick_name_new}\r\nModo de depuración de Action:\t{action_debug}\r\nOcultar entidades generadas no estándar:\t{hide_non_standard_entities}\r\nMostrar notificaciones de cambio de estado del dispositivo:\t{display_devices_changed_notify}\r\nCambios de dispositivos:\t{devices_add} dispositivos agregados, {devices_remove} dispositivos eliminados\r\nCambios en las reglas de conversión:\t{trans_rules_count} reglas en total, {trans_rules_count_success} reglas actualizadas",
@@ -168,11 +195,20 @@
             "get_homeinfo_error": "Error al obtener la información del hogar.",
             "get_cert_error": "Error al obtener el certificado de la puerta de enlace.",
             "no_family_selected": "No se ha seleccionado ningún hogar.",
-            "no_devices": "No hay dispositivos en el hogar seleccionado. Seleccione un hogar con dispositivos y continúe.",
+            "no_devices": "No hay dispositivos en el hogar seleccionado. Por favor, seleccione un hogar con dispositivos y continúe.",
+            "no_filter_devices": "Los dispositivos filtrados están vacíos. Por favor, seleccione criterios de filtro válidos y continúe.",
             "no_central_device": "【Modo de puerta de enlace central】Se requiere una puerta de enlace Xiaomi disponible en la red local donde se encuentra Home Assistant. Verifique si el hogar seleccionado cumple con este requisito.",
             "mdns_discovery_error": "Error en el servicio de descubrimiento de dispositivos locales.",
             "update_config_error": "Error al actualizar la información de configuración.",
-            "not_confirm": "No se ha confirmado la opción de modificación. Seleccione y confirme la opción antes de enviar."
+            "not_confirm": "No se ha confirmado la opción de modificación. Seleccione y confirme la opción antes de enviar.",
+            "invalid_network_addr": "Se detectó una dirección IP o HTTP no válida, por favor ingrese una dirección válida.",
+            "invalid_ip_addr": "Se detectó una dirección IP inaccesible, por favor ingrese una dirección IP válida.",
+            "invalid_http_addr": "Se detectó una dirección HTTP inaccesible, por favor ingrese una dirección HTTP válida.",
+            "invalid_default_addr": "La dirección de detección de red predeterminada no es accesible, por favor verifique la configuración de la red o use una dirección de detección de red personalizada.",
+            "unreachable_oauth2_host": "No se puede acceder a la dirección de autenticación OAuth2, por favor verifique la configuración de la red.",
+            "unreachable_http_host": "No se puede acceder a la dirección de la API HTTP de Xiaomi, por favor verifique la configuración de la red.",
+            "unreachable_spec_host": "No se puede acceder a la dirección de la API SPEC de Xiaomi, por favor verifique la configuración de la red.",
+            "unreachable_mqtt_broker": "No se puede acceder a la dirección del Broker MQTT de Xiaomi, por favor verifique la configuración de la red."
         },
         "abort": {
             "network_connect_error": "La configuración ha fallado. Existe un problema con la conexión de red, verifique la configuración de red del dispositivo.",
