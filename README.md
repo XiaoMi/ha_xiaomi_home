@@ -140,13 +140,13 @@ In MIoT-Spec-V2 protocol, a product is defined as a device. A device contains se
 
 - Property
 
-| format       | access                | value-list   | value-range | Entity in Home Assistant |
-| ------------ | --------------------- | ------------ | ----------- | ------------------------ |
-| writable     | string                | -            | -           | Text                     |
-| writable     | bool                  | -            | -           | Switch                   |
-| writable     | not string & not bool | existent     | -           | Select                   |
-| writable     | not string & not bool | non-existent | existent    | Number                   |
-| not writable | -                     | -            | -           | Sensor                   |
+| access                | format                | value-list   | value-range | Entity in Home Assistant |
+|-----------------------|-----------------------| ------------ | ----------- | ------------------------ |
+| string                | writable              | -            | -           | Text                     |
+| bool                  | writable              | -            | -           | Switch                   |
+| not string & not bool | writable              | existent     | -           | Select                   |
+| not string & not bool | writable              | non-existent | existent    | Number                   |
+| -                     | not writable          | -            | -           | Sensor                   |
 
 - Event
 
