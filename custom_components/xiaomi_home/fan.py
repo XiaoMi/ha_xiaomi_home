@@ -96,7 +96,7 @@ class Fan(MIoTServiceEntity, FanEntity):
     _speed_max: Optional[int]
     _speed_step: Optional[int]
     _speed_names: Optional[list]
-    _speed_name_value: Optional[list]
+    _speed_name_map: Optional[dict[int, str]]
     _mode_list: Optional[dict[Any, Any]]
 
     def __init__(
@@ -115,7 +115,7 @@ class Fan(MIoTServiceEntity, FanEntity):
         self._speed_max = 0
         self._speed_step = 1
         self._speed_names = []
-        self._speed_name_value = []
+        self._speed_name_map = {}
 
         self._mode_list = None
 
@@ -137,9 +137,9 @@ class Fan(MIoTServiceEntity, FanEntity):
                     self._prop_fan_level = prop
                 elif isinstance(prop.value_list, list) and prop.value_list:
                     # Fan level with value-list
-                    for item in prop.value_list:
-                        self._speed_names.append(item['description'])
-                        self._speed_name_value.append(item['value'])
+                    self._speed_name_map = {item['value']: item['description']
+                                          for item in prop.value_list}
+                    self._speed_names = list(self._speed_name_map.values())
                     self._attr_speed_count = len(prop.value_list)
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
@@ -189,9 +189,10 @@ class Fan(MIoTServiceEntity, FanEntity):
             if self._speed_names:
                 speed = percentage_to_ordered_list_item(self._speed_names,
                                                         percentage)
-                order = self._speed_names.index(speed)
+                speed_value = self.get_map_value(map_=self._speed_name_map,
+                                                 description=speed)
                 await self.set_property_async(prop=self._prop_fan_level,
-                                            value=self._speed_name_value[order])
+                                              value=speed_value)
             else:
                 speed = int((self._speed_max - self._speed_min)*percentage/100
                             )+self._speed_min
@@ -263,9 +264,8 @@ class Fan(MIoTServiceEntity, FanEntity):
         if fan_level is None:
             return None
         if self._speed_names:
-            order = self._speed_name_value.index(fan_level)
             return ordered_list_item_to_percentage(self._speed_names,
-                                                   self._speed_names[order])
+                                                self._speed_name_map[fan_level])
         else:
             return ranged_value_to_percentage(
                 low_high_range=(self._speed_min, self._speed_max),
