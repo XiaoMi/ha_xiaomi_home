@@ -1080,6 +1080,8 @@ class SpecCustomService:
             return spec
         if 'services' not in spec:
             return spec
+        if isinstance(self._data[urn_key], str):
+            urn_key = self._data[urn_key]
         spec_services = spec['services']
         custom_spec = self._data.get(urn_key, None)
         # Replace services by custom defined spec

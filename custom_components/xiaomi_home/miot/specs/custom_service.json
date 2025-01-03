@@ -56,6 +56,77 @@
             }
         ]
     },
+    "urn:miot-spec-v2:device:light:0000A001:yeelink-ceiling19": "urn:miot-spec-v2:device:light:0000A001:yeelink-ceiling4",
+    "urn:miot-spec-v2:device:light:0000A001:yeelink-ceiling20": "urn:miot-spec-v2:device:light:0000A001:yeelink-ceiling4",
+    "urn:miot-spec-v2:device:light:0000A001:yeelink-ceiling4": {
+        "new": [
+            {
+                "iid": 200,
+                "type": "urn:miot-spec-v2:service:ambient-light:0000789D:yeelink-ceiling4:1",
+                "description": "Ambient Light",
+                "properties": [
+                    {
+                        "iid": 201,
+                        "type": "urn:miot-spec-v2:property:on:00000006:yeelink-ceiling4:1",
+                        "description": "Switch Status",
+                        "format": "bool",
+                        "access": [
+                            "read",
+                            "write"
+                        ]
+                    },
+                    {
+                        "iid": 202,
+                        "type": "urn:miot-spec-v2:property:brightness:0000000D:yeelink-ceiling4:1",
+                        "description": "Brightness",
+                        "format": "uint8",
+                        "access": [
+                            "read",
+                            "write"
+                        ],
+                        "unit": "percentage",
+                        "value-range": [
+                            1,
+                            100,
+                            1
+                        ]
+                    },
+                    {
+                        "iid": 203,
+                        "type": "urn:miot-spec-v2:property:color-temperature:0000000F:yeelink-ceiling4:1",
+                        "description": "Color Temperature",
+                        "format": "uint32",
+                        "access": [
+                            "read",
+                            "write"
+                        ],
+                        "unit": "kelvin",
+                        "value-range": [
+                            1700,
+                            6500,
+                            1
+                        ]
+                    },
+                    {
+                        "iid": 204,
+                        "type": "urn:miot-spec-v2:property:color:0000000E:yeelink-ceiling4:1",
+                        "description": "Color",
+                        "format": "uint32",
+                        "access": [
+                            "read",
+                            "write"
+                        ],
+                        "unit": "rgb",
+                        "value-range": [
+                            1,
+                            16777215,
+                            1
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
     "urn:miot-spec-v2:device:water-heater:0000A02A:zimi-h03": {
         "new": [
             {

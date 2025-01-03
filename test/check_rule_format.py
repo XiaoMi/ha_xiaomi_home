@@ -203,12 +203,21 @@ def is_integer(s: str) -> bool:
 
 
 def custom_service(d: dict) -> bool:
-    """restricted format: dict[str, dict[str, Any]]"""
-    if not dict_str_dict(d):
+    """restricted format: dict[str, dict[str, Any]] or dict[str, str]"""
+    if not isinstance(d, dict):
         return False
+    for k, v in d.items():
+        if not isinstance(k, str):
+            return False
+        if not (isinstance(v, dict) or isinstance(v, str)):
+            return False
     if not urn_key(d, CUSTOM_SERVICE_URN_KEY_COLON_NUM):
         return False
     for v in d.values():
+        if isinstance(v, str):
+            if CUSTOM_SERVICE_URN_KEY_COLON_NUM != v.count(':'):
+                return False
+            continue
         for key, value in v.items():
             if key=='new':
                 if not isinstance(value, list):
@@ -312,7 +321,10 @@ def sort_custom_service(file_path: str):
     service_data: dict = load_json_file(file_path=file_path)
     service_data = dict(sorted(service_data.items()))
     for urn, spec in service_data.items():
-        service_data[urn] = dict(sorted(spec.items()))
+        if isinstance(spec, dict):
+            service_data[urn] = dict(sorted(spec.items()))
+        else:
+            service_data[urn] = spec
     return service_data
 
 
