@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "Basic configuration",
-                "description": "### Login Region\r\nSelect the region of your Xiaomi account. You can find it in the Xiaomi Home APP > Profile (located in the menu at the bottom) > Additional settings > About Xiaomi Home.\r\n### Language\r\nSelect the language of the device and entity names. Some sentences without translation will be displayed in English.\r\n### OAuth2 Redirect URL\r\nThe OAuth2 authentication redirect address is **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. The Home Assistant needs to be in the same local area network as the current operating terminal (e.g., the personal computer) and the operating terminal can access the Home Assistant home page through this address. Otherwise, the login authentication may fail.\r\n### Note\r\n- For users with hundreds or more Mi Home devices, the initial addition of the integration will take some time. Please be patient.\r\n- If Home Assistant is running in a Docker environment, please ensure that the Docker network mode is set to host, otherwise local control functionality may not work properly.\r\n- The local control functionality of the integration has some dependencies. Please read the README carefully.",
+                "description": "### Login Region\r\nSelect the region of your Xiaomi account. You can find it in the Xiaomi Home APP > Profile (located in the menu at the bottom) > Additional settings > About Xiaomi Home.\r\n### Language\r\nSelect the language of the device and entity names. Some sentences without translation will be displayed in English.\r\n### OAuth2 Redirect URL\r\nThe OAuth2 authentication redirect address is **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. The Home Assistant needs to be in the same local area network as the current operating terminal (e.g., the personal computer) and the operating terminal can access the Home Assistant home page through this address. Otherwise, the login authentication may fail.\r\n### Integrated Network Configuration\r\nCheck if the local network is functioning properly and if the related network resources are accessible. **It is recommended to select this when adding for the first time.**\r\n### Note\r\n- For users with hundreds or more Mi Home devices, the initial addition of the integration will take some time. Please be patient.\r\n- If Home Assistant is running in a Docker environment, please ensure that the Docker network mode is set to host, otherwise local control functionality may not work properly.\r\n- The local control functionality of the integration has some dependencies. Please read the README carefully.",
                 "data": {
                     "cloud_server": "Login Region",
                     "integration_language": "Language",
-                    "oauth_redirect_url": "OAuth2 Redirect URL"
+                    "oauth_redirect_url": "OAuth2 Redirect URL",
+                    "network_detect_config": "Integrated Network Configuration"
+                }
+            },
+            "network_detect_config": {
+                "title": "Integrated Network Configuration",
+                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- If you want to restore the system default detection address, please enter a comma `,` and click 'Next'.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**\r\n### Check Network Dependencies\r\nCheck the following network dependencies one by one to see if they are accessible. If the related addresses are not accessible, it will cause integration issues.\r\n- OAuth2 Authentication Address: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API Address: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API Address: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker Address: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Network Detection Address",
+                    "check_network_deps": "Check Network Dependencies"
                 }
             },
             "oauth_error": {
@@ -68,8 +77,17 @@
             "mdns_discovery_error": "Local device discovery service exception.",
             "get_cert_error": "Failed to retrieve the central hub gateway certificate.",
             "no_family_selected": "No home selected.",
-            "no_devices": "The selected home does not have any devices. Please choose a home containing devices and continue.",
-            "no_central_device": "[Central Hub Gateway Mode] requires a Xiaomi central hub gateway available in the local network where Home Assistant exists. Please check if the selected home meets the requirement."
+            "no_devices": "There are no devices in the selected home. Please select a home with devices and continue.",
+            "no_filter_devices": "Filtered devices are empty. Please select valid filter criteria and continue.",
+            "no_central_device": "[Central Hub Gateway Mode] requires a Xiaomi central hub gateway available in the local network where Home Assistant exists. Please check if the selected home meets the requirement.",
+            "invalid_network_addr": "Invalid IP address or HTTP address detected, please enter a valid address.",
+            "invalid_ip_addr": "Unreachable IP address detected, please enter a valid IP address.",
+            "invalid_http_addr": "Unreachable HTTP address detected, please enter a valid HTTP address.",
+            "invalid_default_addr": "Default network detection address is unreachable, please check network configuration or use a custom network detection address.",
+            "unreachable_oauth2_host": "Unable to reach OAuth2 authentication address, please check network configuration.",
+            "unreachable_http_host": "Unable to reach Xiaomi HTTP API address, please check network configuration.",
+            "unreachable_spec_host": "Unable to reach Xiaomi SPEC API address, please check network configuration.",
+            "unreachable_mqtt_broker": "Unable to reach Xiaomi MQTT Broker address, please check network configuration."
         },
         "abort": {
             "network_connect_error": "Configuration failed. The network connection is abnormal. Please check the equipment network configuration.",
@@ -93,7 +111,7 @@
             },
             "config_options": {
                 "title": "Configuration Options",
-                "description": "### Hello, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nCurrent Login Region: {cloud_server}\r\n\r\nPlease select the options you need to configure, then click NEXT.",
+                "description": "### Hello, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nCurrent Login Region: {cloud_server}\r\nIntegration Instance ID: {instance_id}\r\n\r\nPlease select the options you need to configure, then click NEXT.",
                 "data": {
                     "integration_language": "Integration Language",
                     "update_user_info": "Update user information",
@@ -102,7 +120,8 @@
                     "hide_non_standard_entities": "Hide non-standard created entities",
                     "display_devices_changed_notify": "Display device status change notifications",
                     "update_trans_rules": "Update entity conversion rules",
-                    "update_lan_ctrl_config": "Update LAN control configuration"
+                    "update_lan_ctrl_config": "Update LAN control configuration",
+                    "network_detect_config": "Integrated Network Configuration"
                 }
             },
             "update_user_info": {
@@ -151,6 +170,14 @@
                     "enable_subscribe": "Enable LAN subscription"
                 }
             },
+            "network_detect_config": {
+                "title": "Integrated Network Configuration",
+                "description": "## Usage Introduction\r\n### Network Detection Address\r\nUsed to check if the network is functioning properly. If not set, the system default address will be used. If the default address check fails, you can try entering a custom address.\r\n- You can enter multiple detection addresses, separated by commas, such as `8.8.8.8,https://www.bing.com`\r\n- If it is an IP address, detection will be done via ping. If it is an HTTP(s) address, detection will be done via HTTP GET request.\r\n- If you want to restore the system default detection address, please enter a comma `,` and click 'Next'.\r\n- **This configuration is global, and changes will affect other integration instances. Please modify with caution.**\r\n### Check Network Dependencies\r\nCheck the following network dependencies one by one to see if they are accessible. If the related addresses are not accessible, it will cause integration issues.\r\n- OAuth2 Authentication Address: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API Address: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API Address: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker Address: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Network Detection Address",
+                    "check_network_deps": "Check Network Dependencies"
+                }
+            },
             "config_confirm": {
                 "title": "Confirm Configuration",
                 "description": "Hello **{nick_name}**, please confirm the latest configuration information and then Click SUBMIT.\r\nThe integration will reload using the updated configuration.\r\n\r\nIntegration Language: \t{lang_new}\r\nNickname: \t{nick_name_new}\r\nDebug mode for action: \t{action_debug}\r\nHide non-standard created entities: \t{hide_non_standard_entities}\r\nDisplay device status change notifications:\t{display_devices_changed_notify}\r\nDevice Changes: \tAdd **{devices_add}** devices, Remove **{devices_remove}** devices\r\nTransformation rules change: \tThere are a total of **{trans_rules_count}** rules, and updated **{trans_rules_count_success}** rules",
@@ -167,12 +194,21 @@
             "get_token_error": "Failed to retrieve login authorization information (OAuth token).",
             "get_homeinfo_error": "Failed to retrieve home information.",
             "get_cert_error": "Failed to retrieve the central hub gateway certificate.",
-            "no_devices": "The selected home does not have any devices. Please choose a home containing devices and continue.",
+            "no_devices": "There are no devices in the selected home. Please select a home with devices and continue.",
+            "no_filter_devices": "Filtered devices are empty. Please select valid filter criteria and continue.",
             "no_family_selected": "No home selected.",
             "no_central_device": "[Central Hub Gateway Mode] requires a Xiaomi central hub gateway available in the local network where Home Assistant exists. Please check if the selected home meets the requirement.",
             "mdns_discovery_error": "Local device discovery service exception.",
             "update_config_error": "Failed to update configuration information.",
-            "not_confirm": "Changes are not confirmed. Please confirm the change before submitting."
+            "not_confirm": "Changes are not confirmed. Please confirm the change before submitting.",
+            "invalid_network_addr": "Invalid IP address or HTTP address detected, please enter a valid address.",
+            "invalid_ip_addr": "Unreachable IP address detected, please enter a valid IP address.",
+            "invalid_http_addr": "Unreachable HTTP address detected, please enter a valid HTTP address.",
+            "invalid_default_addr": "Default network detection address is unreachable, please check network configuration or use a custom network detection address.",
+            "unreachable_oauth2_host": "Unable to reach OAuth2 authentication address, please check network configuration.",
+            "unreachable_http_host": "Unable to reach Xiaomi HTTP API address, please check network configuration.",
+            "unreachable_spec_host": "Unable to reach Xiaomi SPEC API address, please check network configuration.",
+            "unreachable_mqtt_broker": "Unable to reach Xiaomi MQTT Broker address, please check network configuration."
         },
         "abort": {
             "network_connect_error": "Configuration failed. The network connection is abnormal. Please check the equipment network configuration.",

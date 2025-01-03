@@ -224,20 +224,20 @@ class MIoTHttpClient:
     _client_id: str
     _access_token: str
 
-    _get_prop_timer: asyncio.TimerHandle
-    _get_prop_list: dict[str, dict[str, asyncio.Future | str | bool]]
+    _get_prop_timer: Optional[asyncio.TimerHandle]
+    _get_prop_list: dict[str, dict]
 
     def __init__(
             self, cloud_server: str, client_id: str, access_token: str,
             loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
-        self._host = None
-        self._base_url = None
-        self._client_id = None
-        self._access_token = None
+        self._host = DEFAULT_OAUTH2_API_HOST
+        self._base_url = ''
+        self._client_id = ''
+        self._access_token = ''
 
-        self._get_prop_timer: asyncio.TimerHandle = None
+        self._get_prop_timer = None
         self._get_prop_list = {}
 
         if (
@@ -258,8 +258,9 @@ class MIoTHttpClient:
             self._get_prop_timer.cancel()
             self._get_prop_timer = None
         for item in self._get_prop_list.values():
-            fut: asyncio.Future = item.get('fut')
-            fut.cancel()
+            fut: Optional[asyncio.Future] = item.get('fut', None)
+            if fut:
+                fut.cancel()
         self._get_prop_list.clear()
         if self._session and not self._session.closed:
             await self._session.close()
@@ -270,9 +271,7 @@ class MIoTHttpClient:
         access_token: Optional[str] = None
     ) -> None:
         if isinstance(cloud_server, str):
-            if cloud_server == 'cn':
-                self._host = DEFAULT_OAUTH2_API_HOST
-            else:
+            if cloud_server != 'cn':
                 self._host = f'{cloud_server}.{DEFAULT_OAUTH2_API_HOST}'
             self._base_url = f'https://{self._host}'
         if isinstance(client_id, str):
@@ -350,8 +349,8 @@ class MIoTHttpClient:
     async def get_user_info_async(self) -> dict:
         http_res = await self._session.get(
             url='https://open.account.xiaomi.com/user/profile',
-            params={'clientId': self._client_id,
-                    'token': self._access_token},
+            params={
+                'clientId': self._client_id, 'token': self._access_token},
             headers={'content-type': 'application/x-www-form-urlencoded'},
             timeout=MIHOME_HTTP_API_TIMEOUT
         )
@@ -386,7 +385,9 @@ class MIoTHttpClient:
 
         return cert
 
-    async def __get_dev_room_page_async(self, max_id: str = None) -> dict:
+    async def __get_dev_room_page_async(
+        self, max_id: Optional[str] = None
+    ) -> dict:
         res_obj = await self.__mihome_api_post_async(
             url_path='/app/v2/homeroom/get_dev_room_page',
             data={
@@ -442,7 +443,7 @@ class MIoTHttpClient:
         if 'result' not in res_obj:
             raise MIoTHttpError('invalid response result')
 
-        uid: str = None
+        uid: Optional[str] = None
         home_infos: dict = {}
         for device_source in ['homelist', 'share_home_list']:
             home_infos.setdefault(device_source, {})
@@ -507,7 +508,7 @@ class MIoTHttpClient:
         return (await self.get_homeinfos_async()).get('uid', None)
 
     async def __get_device_list_page_async(
-        self, dids: list[str], start_did: str = None
+        self, dids: list[str], start_did: Optional[str] = None
     ) -> dict[str, dict]:
         req_data: dict = {
             'limit': 200,
@@ -575,9 +576,9 @@ class MIoTHttpClient:
 
     async def get_devices_with_dids_async(
         self, dids: list[str]
-    ) -> dict[str, dict]:
+    ) -> Optional[dict[str, dict]]:
         results: list[dict[str, dict]] = await asyncio.gather(
-            *[self.__get_device_list_page_async(dids[index:index+150])
+            *[self.__get_device_list_page_async(dids=dids[index:index+150])
                 for index in range(0, len(dids), 150)])
         devices = {}
         for result in results:
@@ -587,7 +588,7 @@ class MIoTHttpClient:
         return devices
 
     async def get_devices_async(
-        self, home_ids: list[str] = None
+        self, home_ids: Optional[list[str]] = None
     ) -> dict[str, dict]:
         homeinfos = await self.get_homeinfos_async()
         homes: dict[str, dict[str, Any]] = {}
@@ -627,8 +628,9 @@ class MIoTHttpClient:
                             'group_id': group_id
                         } for did in room_info.get('dids', [])})
         dids = sorted(list(devices.keys()))
-        results: dict[str, dict] = await self.get_devices_with_dids_async(
-            dids=dids)
+        results = await self.get_devices_with_dids_async(dids=dids)
+        if results is None:
+            raise MIoTHttpError('get devices failed')
         for did in dids:
             if did not in results:
                 devices.pop(did, None)
@@ -706,7 +708,7 @@ class MIoTHttpClient:
             key = f'{result["did"]}.{result["siid"]}.{result["piid"]}'
             prop_obj = self._get_prop_list.pop(key, None)
             if prop_obj is None:
-                _LOGGER.error('get prop error, key not exists, %s', result)
+                _LOGGER.info('get prop error, key not exists, %s', result)
                 continue
             prop_obj['fut'].set_result(result['value'])
             props_req.remove(key)
@@ -717,7 +719,7 @@ class MIoTHttpClient:
                 continue
             prop_obj['fut'].set_result(None)
         if props_req:
-            _LOGGER.error(
+            _LOGGER.info(
                 'get prop from cloud failed, %s, %s', len(key), props_req)
 
         if self._get_prop_list:

@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "基本設定",
-                "description": "### ログインエリア\r\nXiaomi アカウントが属する地域を選択します。 `Xiaomi Home アプリ> マイ（ボトムメニューにあります）> その他の設定> Xiaomi Home について` で確認できます。\r\n### 言語\r\nデバイスおよびエンティティ名に使用される言語を選択します。一部の翻訳が欠落している場合、英語が表示されます。\r\n### OAuth2 認証リダイレクトアドレス\r\nOAuth2 認証リダイレクトアドレスは **[http://homeassistant.local:8123](http://homeassistant.local:8123)** です。Home Assistant は、現在の操作端末（たとえば、パーソナルコンピュータ）と同じ LAN 内にあり、操作端末がこのアドレスで Home Assistant ホームページにアクセスできる場合にのみログイン認証が成功する場合があります。\r\n### 注意事項\r\n- 数百台以上のMi Homeデバイスをお持ちのユーザーの場合、統合の初回追加には時間がかかります。しばらくお待ちください。\r\n- Home AssistantがDocker環境で実行されている場合は、Dockerのネットワークモードがhostに設定されていることを確認してください。そうしないと、ローカル制御機能が正しく動作しない可能性があります。\r\n- 統合のローカル制御機能にはいくつかの依存関係があります。READMEを注意深く読んでください。",
+                "description": "### ログインエリア\r\nXiaomi アカウントが属する地域を選択します。 `Xiaomi Home アプリ> マイ（ボトムメニューにあります）> その他の設定> Xiaomi Home について` で確認できます。\r\n### 言語\r\nデバイスおよびエンティティ名に使用される言語を選択します。一部の翻訳が欠落している場合、英語が表示されます。\r\n### OAuth2 認証リダイレクトアドレス\r\nOAuth2 認証リダイレクトアドレスは **[http://homeassistant.local:8123](http://homeassistant.local:8123)** です。Home Assistant は、現在の操作端末（たとえば、パーソナルコンピュータ）と同じ LAN 内にあり、操作端末がこのアドレスで Home Assistant ホームページにアクセスできる場合にのみログイン認証が成功する場合があります。\r\n### 統合ネットワーク構成\r\nローカルネットワークが正常に機能しているかどうか、および関連するネットワークリソースにアクセスできるかどうかを確認します。**初めて追加する場合は、これを選択することをお勧めします。**\r\n### 注意事項\r\n- 数百台以上のMi Homeデバイスをお持ちのユーザーの場合、統合の初回追加には時間がかかります。しばらくお待ちください。\r\n- Home AssistantがDocker環境で実行されている場合は、Dockerのネットワークモードがhostに設定されていることを確認してください。そうしないと、ローカル制御機能が正しく動作しない可能性があります。\r\n- 統合のローカル制御機能にはいくつかの依存関係があります。READMEを注意深く読んでください。",
                 "data": {
                     "cloud_server": "ログインエリア",
                     "integration_language": "言語",
-                    "oauth_redirect_url": "認証リダイレクトアドレス"
+                    "oauth_redirect_url": "認証リダイレクトアドレス",
+                    "network_detect_config": "統合ネットワーク構成"
+                }
+            },
+            "network_detect_config": {
+                "title": "統合ネットワーク構成",
+                "description": "## 使用方法の紹介\r\n### ネットワーク検出アドレス\r\nネットワークが正常に機能しているかどうかを確認するために使用されます。設定されていない場合、システムのデフォルトアドレスが使用されます。デフォルトアドレスのチェックが失敗した場合は、カスタムアドレスを入力してみてください。\r\n- 複数の検出アドレスを入力できます。アドレスはコンマで区切ります。例：`8.8.8.8,https://www.bing.com`\r\n- IPアドレスの場合、pingによる検出が行われます。HTTP(s)アドレスの場合、HTTP GETリクエストによる検出が行われます。\r\n- システムのデフォルト検出アドレスを復元する場合は、カンマ `,` を入力して「次へ」をクリックしてください。\r\n- **この設定はグローバルであり、変更は他の統合インスタンスに影響を与えます。慎重に変更してください。**\r\n### ネットワーク依存関係のチェック\r\n次のネットワーク依存関係がアクセス可能かどうかを順番に確認します。関連するアドレスにアクセスできない場合、統合に問題が発生します。\r\n- OAuth2 認証アドレス: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API アドレス: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API アドレス: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT ブローカーアドレス: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "ネットワーク検出アドレス",
+                    "check_network_deps": "ネットワーク依存関係のチェック"
                 }
             },
             "oauth_error": {
@@ -68,8 +77,17 @@
             "mdns_discovery_error": "ローカルデバイス検出サービスに異常があります。",
             "get_cert_error": "ゲートウェイ証明書を取得できませんでした。",
             "no_family_selected": "家庭が選択されていません。",
-            "no_devices": "選択された家庭にデバイスがありません。デバイスがある家庭を選択して続行してください。",
-            "no_central_device": "【中央ゲートウェイモード】Home Assistant が存在する LAN 内に使用可能な Xiaomi 中央ゲートウェイがある必要があります。選択された家庭がこの要件を満たしているかどうかを確認してください。"
+            "no_devices": "選択した家庭にはデバイスがありません。デバイスがある家庭を選択して続行してください。",
+            "no_filter_devices": "フィルタリングされたデバイスが空です。有効なフィルター条件を選択して続行してください。",
+            "no_central_device": "【中央ゲートウェイモード】Home Assistant が存在する LAN 内に使用可能な Xiaomi 中央ゲートウェイがある必要があります。選択された家庭がこの要件を満たしているかどうかを確認してください。",
+            "invalid_network_addr": "無効なIPアドレスまたはHTTPアドレスが検出されました。有効なアドレスを入力してください。",
+            "invalid_ip_addr": "アクセスできないIPアドレスが検出されました。有効なIPアドレスを入力してください。",
+            "invalid_http_addr": "アクセスできないHTTPアドレスが検出されました。有効なHTTPアドレスを入力してください。",
+            "invalid_default_addr": "デフォルトのネットワーク検出アドレスにアクセスできません。ネットワーク設定を確認するか、カスタムネットワーク検出アドレスを使用してください。",
+            "unreachable_oauth2_host": "OAuth2 認証アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_http_host": "Xiaomi HTTP API アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_spec_host": "Xiaomi SPEC API アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_mqtt_broker": "Xiaomi MQTT ブローカーアドレスにアクセスできません。ネットワーク設定を確認してください。"
         },
         "abort": {
             "network_connect_error": "設定に失敗しました。ネットワーク接続に異常があります。デバイスのネットワーク設定を確認してください。",
@@ -93,7 +111,7 @@
             },
             "config_options": {
                 "title": "設定オプション",
-                "description": "### {nick_name} さん、こんにちは！\r\n\r\nXiaomi アカウントID：{uid}\r\n現在のログインエリア：{cloud_server}\r\n\r\n必要な構成オプションを選択して、[次へ] をクリックしてください。",
+                "description": "### {nick_name} さん、こんにちは！\r\n\r\nXiaomi アカウントID：{uid}\r\n現在のログインエリア：{cloud_server}\r\n統合インスタンスID: {instance_id}\r\n\r\n必要な構成オプションを選択して、[次へ] をクリックしてください。",
                 "data": {
                     "integration_language": "統合言語",
                     "update_user_info": "ユーザー情報を更新する",
@@ -102,7 +120,8 @@
                     "hide_non_standard_entities": "非標準生成エンティティを非表示にする",
                     "display_devices_changed_notify": "デバイスの状態変化通知を表示",
                     "update_trans_rules": "エンティティ変換ルールを更新する",
-                    "update_lan_ctrl_config": "LAN制御構成を更新する"
+                    "update_lan_ctrl_config": "LAN制御構成を更新する",
+                    "network_detect_config": "統合ネットワーク構成"
                 }
             },
             "update_user_info": {
@@ -151,6 +170,14 @@
                     "enable_subscribe": "LANサブスクリプションを有効にする"
                 }
             },
+            "network_detect_config": {
+                "title": "統合ネットワーク構成",
+                "description": "## 使用方法の紹介\r\n### ネットワーク検出アドレス\r\nネットワークが正常に機能しているかどうかを確認するために使用されます。設定されていない場合、システムのデフォルトアドレスが使用されます。デフォルトアドレスのチェックが失敗した場合は、カスタムアドレスを入力してみてください。\r\n- 複数の検出アドレスを入力できます。アドレスはコンマで区切ります。例：`8.8.8.8,https://www.bing.com`\r\n- IPアドレスの場合、pingによる検出が行われます。HTTP(s)アドレスの場合、HTTP GETリクエストによる検出が行われます。\r\n- システムのデフォルト検出アドレスを復元する場合は、カンマ `,` を入力して「次へ」をクリックしてください。\r\n- **この設定はグローバルであり、変更は他の統合インスタンスに影響を与えます。慎重に変更してください。**\r\n### ネットワーク依存関係のチェック\r\n次のネットワーク依存関係がアクセス可能かどうかを順番に確認します。関連するアドレスにアクセスできない場合、統合に問題が発生します。\r\n- OAuth2 認証アドレス: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API アドレス: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API アドレス: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT ブローカーアドレス: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "ネットワーク検出アドレス",
+                    "check_network_deps": "ネットワーク依存関係のチェック"
+                }
+            },
             "config_confirm": {
                 "title": "構成を確認する",
                 "description": "**{nick_name}** さん、こんにちは！ 最新の構成情報を確認してください。[送信] をクリックして、更新された構成を使用して再度読み込みます。\r\n\r\n統合言語：\t{lang_new}\r\nユーザー名：\t{nick_name_new}\r\nAction デバッグモード：\t{action_debug}\r\n非標準生成エンティティを非表示にする：\t{hide_non_standard_entities}\r\nデバイスの状態変化通知を表示:\t{display_devices_changed_notify}\r\nデバイス変更：\t追加 **{devices_add}** 個のデバイス、削除 **{devices_remove}** 個のデバイス\r\n変換ルール変更：\t合計 **{trans_rules_count}** 個の規則、更新 **{trans_rules_count_success}** 個の規則",
@@ -168,11 +195,20 @@
             "get_homeinfo_error": "家庭情報の取得に失敗しました。",
             "get_cert_error": "中枢証明書の取得に失敗しました。",
             "no_family_selected": "家族が選択されていません。",
-            "no_devices": "選択された家庭にはデバイスがありません。デバイスがある家庭を選択してから続行してください。",
+            "no_devices": "選択した家庭にはデバイスがありません。デバイスがある家庭を選択して続行してください。",
+            "no_filter_devices": "フィルタリングされたデバイスが空です。有効なフィルター条件を選択して続行してください。",
             "no_central_device": "【中枢ゲートウェイモード】には、Home Assistantが存在するローカルネットワークに使用可能なXiaomi Central Hub Gatewayが存在する必要があります。選択された家庭がこの要件を満たしているかどうかを確認してください。",
             "mdns_discovery_error": "ローカルデバイス発見サービスが異常です。",
             "update_config_error": "構成情報の更新に失敗しました。",
-            "not_confirm": "変更を確認していません。確認をチェックしてから送信してください。"
+            "not_confirm": "変更を確認していません。確認をチェックしてから送信してください。",
+            "invalid_network_addr": "無効なIPアドレスまたはHTTPアドレスが検出されました。有効なアドレスを入力してください。",
+            "invalid_ip_addr": "アクセスできないIPアドレスが検出されました。有効なIPアドレスを入力してください。",
+            "invalid_http_addr": "アクセスできないHTTPアドレスが検出されました。有効なHTTPアドレスを入力してください。",
+            "invalid_default_addr": "デフォルトのネットワーク検出アドレスにアクセスできません。ネットワーク設定を確認するか、カスタムネットワーク検出アドレスを使用してください。",
+            "unreachable_oauth2_host": "OAuth2 認証アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_http_host": "Xiaomi HTTP API アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_spec_host": "Xiaomi SPEC API アドレスにアクセスできません。ネットワーク設定を確認してください。",
+            "unreachable_mqtt_broker": "Xiaomi MQTT ブローカーアドレスにアクセスできません。ネットワーク設定を確認してください。"
         },
         "abort": {
             "network_connect_error": "構成に失敗しました。ネットワーク接続に異常があります。デバイスのネットワーク構成を確認してください。",
