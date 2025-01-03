@@ -535,6 +535,14 @@ class MIoTHttpClient:
                 _LOGGER.error(
                     'get_device_list, cloud, invalid device, %s', device)
                 continue
+            if did.startswith('miwifi.'):
+                # All devices with did starting with "miwifi." are routers
+                # that interface between the Xiaomi home cloud and the Xiaomi
+                # router cloud. These routers have all defined functions but
+                # have not been implemented, so they are all filtered out; some
+                # routers that are not "miwifi.*" also have this problem.
+                _LOGGER.info('ignore miwifi.* device, %s', did)
+                continue
             device_infos[did] = {
                 'did': did,
                 'uid': device.get('uid', None),
