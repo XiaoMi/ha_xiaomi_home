@@ -257,6 +257,7 @@ class MIoTClient:
             client_id=OAUTH2_CLIENT_ID,
             redirect_url=self._entry_data['oauth_redirect_url'],
             cloud_server=self._cloud_server,
+            uuid=self._entry_data["uuid"],
             loop=self._main_loop)
         # MIoT http client instance
         self._http = MIoTHttpClient(

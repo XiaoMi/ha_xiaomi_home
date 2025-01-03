@@ -90,6 +90,7 @@
             "unreachable_mqtt_broker": "Impossible d'atteindre l'adresse du Broker MQTT de Xiaomi, veuillez vérifier la configuration réseau."
         },
         "abort": {
+            "ha_uuid_get_failed": "Échec de l'obtention de l'UUID de Home Assistant.",
             "network_connect_error": "La configuration a échoué. Erreur de connexion réseau. Veuillez vérifier la configuration du réseau de l'appareil.",
             "already_configured": "Cet utilisateur a déjà terminé la configuration. Veuillez accéder à la page d'intégration et cliquer sur le bouton \"Configurer\" pour modifier la configuration.",
             "invalid_auth_info": "Les informations d'authentification ont expiré. Veuillez accéder à la page d'intégration et cliquer sur le bouton \"Configurer\" pour vous authentifier à nouveau.",

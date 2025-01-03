@@ -68,6 +68,7 @@ from homeassistant.components.webhook import (
 )
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import AbortFlow
+from homeassistant.helpers.instance_id import async_get
 import homeassistant.helpers.config_validation as cv
 
 from .miot.const import (
@@ -247,6 +248,13 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input:
             self._cloud_server = user_input.get(
                 'cloud_server', self._cloud_server)
+            # Gen instance uuid
+            ha_uuid = await async_get(self.hass)
+            if not ha_uuid:
+                raise AbortFlow(reason='ha_uuid_get_failed')
+            self._uuid = hashlib.sha256(
+                f'{ha_uuid}.{self._virtual_did}.{self._cloud_server}'.encode(
+                    'utf-8')).hexdigest()[:32]
             self._integration_language = user_input.get(
                 'integration_language', DEFAULT_INTEGRATION_LANGUAGE)
             self._miot_i18n = MIoTI18n(
@@ -415,9 +423,11 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 miot_oauth = MIoTOauthClient(
                     client_id=OAUTH2_CLIENT_ID,
                     redirect_url=self._oauth_redirect_url_full,
-                    cloud_server=self._cloud_server
-                )
-                state = str(secrets.randbits(64))
+                    cloud_server=self._cloud_server,
+                    uuid=self._uuid,
+                    loop=self._main_loop)
+                state = hashlib.sha1(
+                    f'd=ha.{self._uuid}'.encode('utf-8')).hexdigest()
                 self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
                 self._cc_oauth_auth_url = miot_oauth.gen_auth_url(
                     redirect_url=self._oauth_redirect_url_full, state=state)
@@ -498,11 +508,6 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         client_id=OAUTH2_CLIENT_ID,
                         access_token=auth_info['access_token'])
                 self._auth_info = auth_info
-                # Gen uuid
-                self._uuid = hashlib.sha256(
-                    f'{self._virtual_did}.{auth_info["access_token"]}'.encode(
-                        'utf-8')
-                ).hexdigest()[:32]
                 try:
                     self._nick_name = (
                         await self._miot_http.get_user_info_async() or {}
