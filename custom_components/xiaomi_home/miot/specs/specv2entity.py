@@ -289,7 +289,7 @@ SPEC_SERVICE_TRANS_MAP: dict[str, dict | str] = {
             }
         },
         'optional': {
-            'properties': {'mode', 'horizontal-swing'}
+            'properties': {'mode', 'horizontal-swing', 'wind-reverse'}
         },
         'entity': 'fan'
     },
