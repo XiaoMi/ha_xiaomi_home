@@ -89,6 +89,9 @@ class Fan(MIoTServiceEntity, FanEntity):
     _prop_fan_level: Optional[MIoTSpecProperty]
     _prop_mode: Optional[MIoTSpecProperty]
     _prop_horizontal_swing: Optional[MIoTSpecProperty]
+    _prop_wind_reverse: Optional[MIoTSpecProperty]
+    _prop_wind_reverse_forward: Any
+    _prop_wind_reverse_reverse: Any
 
     _speed_min: Optional[int]
     _speed_max: Optional[int]
@@ -101,12 +104,16 @@ class Fan(MIoTServiceEntity, FanEntity):
         """Initialize the Fan."""
         super().__init__(miot_device=miot_device,  entity_data=entity_data)
         self._attr_preset_modes = []
+        self._attr_current_direction = None
         self._attr_supported_features = FanEntityFeature(0)
 
         self._prop_on = None
         self._prop_fan_level = None
         self._prop_mode = None
         self._prop_horizontal_swing = None
+        self._prop_wind_reverse = None
+        self._prop_wind_reverse_forward = None
+        self._prop_wind_reverse_reverse = None
         self._speed_min = 65535
         self._speed_max = 0
         self._speed_step = 1
@@ -156,6 +163,29 @@ class Fan(MIoTServiceEntity, FanEntity):
             elif prop.name == 'horizontal-swing':
                 self._attr_supported_features |= FanEntityFeature.OSCILLATE
                 self._prop_horizontal_swing = prop
+            elif prop.name == 'wind-reverse':
+                if prop.format_ == 'bool':
+                    self._prop_wind_reverse_forward = False
+                    self._prop_wind_reverse_reverse = True
+                elif (
+                    isinstance(prop.value_list, list)
+                    and prop.value_list
+                ):
+                    for item in prop.value_list:
+                        if item['description'].lower() in ['foreward']:
+                            self._prop_wind_reverse_forward = item['value']
+                        elif item['description'].lower() in [
+                                'reversal', 'reverse']:
+                            self._prop_wind_reverse_reverse = item['value']
+                if (
+                    not self._prop_wind_reverse_forward
+                    or not self._prop_wind_reverse_reverse
+                ):
+                    _LOGGER.info(
+                        'invalid wind-reverse, %s', self.entity_id)
+                    continue
+                self._attr_supported_features |= FanEntityFeature.DIRECTION
+                self._prop_wind_reverse = prop
 
     def __get_mode_description(self, key: int) -> Optional[str]:
         if self._mode_list is None:
@@ -221,6 +251,14 @@ class Fan(MIoTServiceEntity, FanEntity):
 
     async def async_set_direction(self, direction: str) -> None:
         """Set the direction of the fan."""
+        if not self._prop_wind_reverse:
+            return
+        await self.set_property_async(
+            prop=self._prop_wind_reverse,
+            value=(
+                self._prop_wind_reverse_reverse
+                if self.current_direction == 'reverse'
+                else self._prop_wind_reverse_forward))
 
     async def async_oscillate(self, oscillating: bool) -> None:
         """Oscillate the fan."""
@@ -241,6 +279,15 @@ class Fan(MIoTServiceEntity, FanEntity):
             self.__get_mode_description(
                 key=self.get_prop_value(prop=self._prop_mode))
             if self._prop_mode else None)
+
+    @property
+    def current_direction(self) -> Optional[str]:
+        """Return the current direction of the fan."""
+        if not self._prop_wind_reverse:
+            return None
+        return 'reverse' if self.get_prop_value(
+            prop=self._prop_wind_reverse
+        ) == self._prop_wind_reverse_reverse else 'forward'
 
     @property
     def percentage(self) -> Optional[int]:
