@@ -90,6 +90,7 @@
             "unreachable_mqtt_broker": "無法訪問小米 MQTT Broker 地址，請檢查網絡配置。"
         },
         "abort": {
+            "ha_uuid_get_failed": "獲取 Home Assistant UUID 失敗。",
             "network_connect_error": "配置失敗。網絡連接異常，請檢查設備網絡配置。",
             "already_configured": "該用戶已配置完成。請進入集成頁面，點擊“配置”按鈕修改配置。",
             "invalid_auth_info": "認證信息已過期。請進入集成頁面，點擊“配置”按鈕重新認證。",

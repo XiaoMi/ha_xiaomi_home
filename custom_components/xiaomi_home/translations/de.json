@@ -90,6 +90,7 @@
             "unreachable_mqtt_broker": "Xiaomi MQTT Broker-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration."
         },
         "abort": {
+            "ha_uuid_get_failed": "Fehler beim Abrufen der Home Assistant-UUID.",
             "network_connect_error": "Konfiguration fehlgeschlagen. Netzwerkverbindung fehlgeschlagen. Überprüfen Sie die Netzwerkkonfiguration des Geräts.",
             "already_configured": "Dieser Benutzer hat die Konfiguration bereits abgeschlossen. Gehen Sie zur Integrationsseite und klicken Sie auf die Schaltfläche \"Konfiguration\", um die Konfiguration zu ändern.",
             "invalid_auth_info": "Authentifizierungsinformationen sind abgelaufen. Gehen Sie zur Integrationsseite und klicken Sie auf die Schaltfläche \"Konfiguration\", um die Authentifizierung erneut durchzuführen.",
