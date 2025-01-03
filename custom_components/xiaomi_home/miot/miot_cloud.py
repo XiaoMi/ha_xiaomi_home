@@ -531,9 +531,18 @@ class MIoTHttpClient:
             name = device.get('name', None)
             urn = device.get('spec_type', None)
             model = device.get('model', None)
-            if did is None or name is None or urn is None or model is None:
-                _LOGGER.error(
-                    'get_device_list, cloud, invalid device, %s', device)
+            if did is None or name is None:
+                _LOGGER.info(
+                    'invalid device, cloud, %s', device)
+                continue
+            if urn is None or model is None:
+                _LOGGER.info(
+                    'missing the urn|model field, cloud, %s', device)
+                continue
+            if did.startswith('miwifi.'):
+                # The miwifi.* routers defined SPEC functions, but none of them
+                # were implemented.
+                _LOGGER.info('ignore miwifi.* device, cloud, %s', did)
                 continue
             device_infos[did] = {
                 'did': did,
@@ -634,7 +643,7 @@ class MIoTHttpClient:
         for did in dids:
             if did not in results:
                 devices.pop(did, None)
-                _LOGGER.error('get device info failed, %s', did)
+                _LOGGER.info('get device info failed, %s', did)
                 continue
             devices[did].update(results[did])
             # Whether sub devices
