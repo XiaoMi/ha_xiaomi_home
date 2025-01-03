@@ -155,7 +155,8 @@ async def async_setup_entry(
                     for entity in filter_entities:
                         device.entity_list[platform].remove(entity)
                         entity_id = device.gen_service_entity_id(
-                            ha_domain=platform, siid=entity.spec.iid)
+                            ha_domain=platform, siid=entity.spec.iid,
+                            description=entity.spec.description)
                         if er.async_get(entity_id_or_uuid=entity_id):
                             er.async_remove(entity_id=entity_id)
                 if platform in device.prop_list:

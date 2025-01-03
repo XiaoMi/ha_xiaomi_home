@@ -155,7 +155,7 @@
             "service:004:property:001": "事件名稱"
         }
     },
-    "urn:miot-spec-v2:device:switch:0000A003:lumi-acn040:1": {
+    "urn:miot-spec-v2:device:switch:0000A003:lumi-acn040": {
         "en": {
             "service:011": "Right Button On and Off",
             "service:011:property:001": "Right Button On and Off",
