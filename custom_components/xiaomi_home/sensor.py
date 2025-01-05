@@ -116,7 +116,7 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
             if spec.state_class:
                 self._attr_state_class = spec.state_class
         # Set icon
-        if spec.icon:
+        if spec.icon and not self.device_class:
             self._attr_icon = spec.icon
 
     @property
