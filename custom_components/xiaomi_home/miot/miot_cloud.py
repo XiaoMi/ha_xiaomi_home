@@ -166,7 +166,7 @@ class MIoTOauthClient:
                 key in res_obj['result']
                 for key in ['access_token', 'refresh_token', 'expires_in'])
         ):
-            raise MIoTOauthError(f'invalid http response, {http_res.text}')
+            raise MIoTOauthError(f'invalid http response, {res_str}')
 
         return {
             **res_obj['result'],

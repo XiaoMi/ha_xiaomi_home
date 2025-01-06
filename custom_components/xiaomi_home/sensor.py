@@ -106,6 +106,9 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
         # Set icon
         if spec.icon:
             self._attr_icon = spec.icon
+        # Set state_class
+        if spec.state_class:
+            self._attr_state_class = spec.state_class
 
     @property
     def native_value(self) -> Any:
