@@ -137,8 +137,8 @@ class Fan(MIoTServiceEntity, FanEntity):
                     self._prop_fan_level = prop
                 elif (
                     self._prop_fan_level is None
-                    # Fan level with value-range is prior to fan level with value-list
-                    # when a fan has both fan level properties.
+                    # Fan level with value-range is prior to fan level with
+                    # value-list when a fan has both fan level properties.
                     and isinstance(prop.value_list, list)
                     and prop.value_list
                 ):
