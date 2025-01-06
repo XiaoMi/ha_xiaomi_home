@@ -92,9 +92,9 @@ class Fan(MIoTServiceEntity, FanEntity):
     _prop_mode: Optional[MIoTSpecProperty]
     _prop_horizontal_swing: Optional[MIoTSpecProperty]
 
-    _speed_min: Optional[int]
-    _speed_max: Optional[int]
-    _speed_step: Optional[int]
+    _speed_min: int
+    _speed_max: int
+    _speed_step: int
     _speed_names: Optional[list]
     _speed_name_map: Optional[dict[int, str]]
     _mode_list: Optional[dict[Any, Any]]
@@ -131,20 +131,21 @@ class Fan(MIoTServiceEntity, FanEntity):
                     self._speed_min = prop.value_range['min']
                     self._speed_max = prop.value_range['max']
                     self._speed_step = prop.value_range['step']
-                    self._attr_speed_count = (self._speed_max - self._speed_min
-                                              )/self._speed_step+1
+                    self._attr_speed_count = int((
+                        self._speed_max - self._speed_min)/self._speed_step)+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
                 elif (
                     self._prop_fan_level is None
-                    # Fan level with value-range is prior to fan level with
-                    # value-list when a fan has both fan level properties.
                     and isinstance(prop.value_list, list)
                     and prop.value_list
                 ):
                     # Fan level with value-list
-                    self._speed_name_map = {item['value']: item['description']
-                                          for item in prop.value_list}
+                    # Fan level with value-range is prior to fan level with
+                    # value-list when a fan has both fan level properties.
+                    self._speed_name_map = {
+                        item['value']: item['description']
+                        for item in prop.value_list}
                     self._speed_names = list(self._speed_name_map.values())
                     self._attr_speed_count = len(prop.value_list)
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
@@ -193,14 +194,15 @@ class Fan(MIoTServiceEntity, FanEntity):
         # percentage
         if percentage:
             if self._speed_names:
-                speed = percentage_to_ordered_list_item(self._speed_names,
-                                                        percentage)
-                speed_value = self.get_map_value(map_=self._speed_name_map,
-                                                 description=speed)
-                await self.set_property_async(prop=self._prop_fan_level,
-                                              value=speed_value)
+                speed = percentage_to_ordered_list_item(
+                    self._speed_names, percentage)
+                speed_value = self.get_map_value(
+                    map_=self._speed_name_map, description=speed)
+                await self.set_property_async(
+                    prop=self._prop_fan_level, value=speed_value)
             else:
-                await self.set_property_async(prop=self._prop_fan_level,
+                await self.set_property_async(
+                    prop=self._prop_fan_level,
                     value=int(percentage_to_ranged_value(
                         low_high_range=(self._speed_min, self._speed_max),
                         percentage=percentage)))
@@ -222,14 +224,15 @@ class Fan(MIoTServiceEntity, FanEntity):
         """Set the percentage of the fan speed."""
         if percentage > 0:
             if self._speed_names:
-                speed = percentage_to_ordered_list_item(self._speed_names,
-                                                        percentage)
-                speed_value = self.get_map_value(map_=self._speed_name_map,
-                                                 description=speed)
-                await self.set_property_async(prop=self._prop_fan_level,
-                                              value=speed_value)
+                speed = percentage_to_ordered_list_item(
+                    self._speed_names, percentage)
+                speed_value = self.get_map_value(
+                    map_=self._speed_name_map, description=speed)
+                await self.set_property_async(
+                    prop=self._prop_fan_level, value=speed_value)
             else:
-                await self.set_property_async(prop=self._prop_fan_level,
+                await self.set_property_async(
+                    prop=self._prop_fan_level,
                     value=int(percentage_to_ranged_value(
                         low_high_range=(self._speed_min, self._speed_max),
                         percentage=percentage)))
@@ -275,8 +278,8 @@ class Fan(MIoTServiceEntity, FanEntity):
         if fan_level is None:
             return None
         if self._speed_names:
-            return ordered_list_item_to_percentage(self._speed_names,
-                                                self._speed_name_map[fan_level])
+            return ordered_list_item_to_percentage(
+                self._speed_names, self._speed_name_map[fan_level])
         else:
             return ranged_value_to_percentage(
                 low_high_range=(self._speed_min, self._speed_max),
