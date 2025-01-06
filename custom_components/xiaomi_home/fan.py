@@ -135,7 +135,13 @@ class Fan(MIoTServiceEntity, FanEntity):
                                               )/self._speed_step+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
-                elif isinstance(prop.value_list, list) and prop.value_list:
+                elif (
+                    self._prop_fan_level is None
+                    # Fan level with value-range is prior to fan level with value-list
+                    # when a fan has both fan level properties.
+                    and isinstance(prop.value_list, list)
+                    and prop.value_list
+                ):
                     # Fan level with value-list
                     self._speed_name_map = {item['value']: item['description']
                                           for item in prop.value_list}
