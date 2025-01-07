@@ -102,7 +102,6 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         self._attr_temperature_unit = None
         self._attr_supported_features = WaterHeaterEntityFeature(0)
-        self._attr_operation_list = None
         self._prop_on = None
         self._prop_temp = None
         self._prop_target_temp = None
@@ -114,6 +113,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
             # on
             if prop.name == 'on':
                 self._prop_on = prop
+                self._attr_supported_features |= (
+                    WaterHeaterEntityFeature.ON_OFF)
             # temperature
             if prop.name == 'temperature':
                 if isinstance(prop.value_range, dict):
@@ -153,10 +154,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                 self._attr_supported_features |= (
                     WaterHeaterEntityFeature.OPERATION_MODE)
                 self._prop_mode = prop
-        if self._attr_operation_list is None:
+        if not self._attr_operation_list:
             self._attr_operation_list = [STATE_ON]
-        else:
-            self._attr_operation_list.append(STATE_ON)
         self._attr_operation_list.append(STATE_OFF)
 
     async def async_turn_on(self) -> None:
