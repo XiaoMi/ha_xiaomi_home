@@ -93,7 +93,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     _prop_target_temp: Optional[MIoTSpecProperty]
     _prop_mode: Optional[MIoTSpecProperty]
 
-    _mode_list: Optional[dict[Any, Any]]
+    _mode_map: Optional[dict[int, str]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
@@ -102,6 +102,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         self._attr_temperature_unit = None
         self._attr_supported_features = WaterHeaterEntityFeature(0)
+        self._attr_operation_list = None
         self._prop_on = None
         self._prop_temp = None
         self._prop_target_temp = None
@@ -145,15 +146,17 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                     _LOGGER.error(
                         'mode value_list is None, %s', self.entity_id)
                     continue
-                self._mode_list = {
+                self._mode_map = {
                     item['value']: item['description']
                     for item in prop.value_list}
-                self._attr_operation_list = list(self._mode_list.values())
+                self._attr_operation_list = list(self._mode_map.values())
                 self._attr_supported_features |= (
                     WaterHeaterEntityFeature.OPERATION_MODE)
                 self._prop_mode = prop
-        if not self._attr_operation_list:
+        if self._attr_operation_list is None:
             self._attr_operation_list = [STATE_ON]
+        else:
+            self._attr_operation_list.append(STATE_ON)
         self._attr_operation_list.append(STATE_OFF)
 
     async def async_turn_on(self) -> None:
@@ -184,7 +187,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                 prop=self._prop_on, value=True, update=False)
         await self.set_property_async(
             prop=self._prop_mode,
-            value=self.__get_mode_value(description=operation_mode))
+            value=self.get_map_value(
+                map_=self._mode_map, description=operation_mode))
 
     async def async_turn_away_mode_on(self) -> None:
         """Set the water heater to away mode."""
@@ -207,20 +211,4 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
             return STATE_OFF
         if not self._prop_mode and self.get_prop_value(prop=self._prop_on):
             return STATE_ON
-        return self.__get_mode_description(
-            key=self.get_prop_value(prop=self._prop_mode))
-
-    def __get_mode_description(self, key: int) -> Optional[str]:
-        """Convert mode value to description."""
-        if self._mode_list is None:
-            return None
-        return self._mode_list.get(key, None)
-
-    def __get_mode_value(self, description: str) -> Optional[int]:
-        """Convert mode description to value."""
-        if self._mode_list is None:
-            return None
-        for key, value in self._mode_list.items():
-            if value == description:
-                return key
-        return None
+        return self._mode_map[self.get_prop_value(prop=self._prop_mode)]
