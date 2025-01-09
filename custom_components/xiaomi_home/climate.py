@@ -265,7 +265,7 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         # properties
         for prop in entity_data.props:
-            if prop.name == 'fan-level':
+            if prop.name == 'fan-level' and prop.service.name == 'fan-control':
                 if not isinstance(prop.value_list, list) or not prop.value_list:
                     _LOGGER.error(
                         'invalid fan-level value_list, %s', self.entity_id
@@ -319,9 +319,8 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
                 else FAN_OFF
             )
 
-        return self._fan_mode_map[
-            self.get_prop_value(prop=self._prop_fan_level)
-        ]
+        fan_level = self.get_prop_value(prop=self._prop_fan_level)
+        return None if fan_level is None else self._fan_mode_map[fan_level]
 
 
 class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
@@ -603,6 +602,11 @@ class AirConditioner(
                 self.sub_prop_changed(
                     prop=prop, handler=self.__ac_state_changed
                 )
+
+        if self._attr_hvac_modes is None:
+            self._attr_hvac_modes = [HVACMode.OFF]
+        elif HVACMode.OFF not in self._attr_hvac_modes:
+            self._attr_hvac_modes.append(HVACMode.OFF)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the target hvac mode."""
