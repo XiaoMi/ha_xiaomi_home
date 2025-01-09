@@ -1150,7 +1150,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_oauth(self, user_input=None):
         try:
             if self._cc_task_oauth is None:
-                state = str(secrets.randbits(64))
+                state = hashlib.sha1(
+                    f'd=ha.{self._entry_data["uuid"]}'.encode('utf-8')
+                ).hexdigest()
                 self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
                 self._miot_oauth.set_redirect_url(
                     redirect_url=self._oauth_redirect_url_full)
