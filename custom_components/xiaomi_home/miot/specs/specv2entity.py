@@ -228,7 +228,8 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
                     }
                 },
                 'optional': {
-                    'properties': {'target-temperature', 'mode', 'fan-level'}
+                    'properties': {'target-temperature', 'mode', 'fan-level',
+                                   'temperature'}
                 },
             }
         },

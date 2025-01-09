@@ -120,8 +120,11 @@ class FeatureOnOff(MIoTServiceEntity, ClimateEntity):
         for prop in entity_data.props:
             if prop.name == 'on':
                 if (
+                    # The "on" property of the "fan-control" service is not
+                    # the on/off feature of the entity.
                     prop.service.name == 'air-conditioner'
                     or prop.service.name == 'heater'
+                    or prop.service.name == 'thermostat'
                 ):
                     self._attr_supported_features |= (
                         ClimateEntityFeature.TURN_ON
@@ -634,10 +637,14 @@ class AirConditioner(
         """The current hvac mode."""
         if self.get_prop_value(prop=self._prop_on) is False:
             return HVACMode.OFF
-        return self.get_map_description(
-            map_=self._hvac_mode_map,
-            key=self.get_prop_value(prop=self._prop_mode)
-        ) if self._prop_mode else None
+        return (
+            self.get_map_description(
+                map_=self._hvac_mode_map,
+                key=self.get_prop_value(prop=self._prop_mode),
+            )
+            if self._prop_mode
+            else None
+        )
 
     def __ac_state_changed(self, prop: MIoTSpecProperty, value: Any) -> None:
         del prop
