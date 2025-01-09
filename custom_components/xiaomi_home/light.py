@@ -95,6 +95,7 @@ async def async_setup_entry(
 class Light(MIoTServiceEntity, LightEntity):
     """Light entities for Xiaomi Home."""
     # pylint: disable=unused-argument
+    _VALUE_RANGE_MODE_COUNT_MAX = 30
     _prop_on: Optional[MIoTSpecProperty]
     _prop_brightness: Optional[MIoTSpecProperty]
     _prop_color_temp: Optional[MIoTSpecProperty]
@@ -147,13 +148,13 @@ class Light(MIoTServiceEntity, LightEntity):
                     self._attr_supported_features |= LightEntityFeature.EFFECT
                     self._prop_mode = prop
                 else:
-                    _LOGGER.error(
+                    _LOGGER.info(
                         'invalid brightness format, %s', self.entity_id)
                     continue
             # color-temperature
             if prop.name == 'color-temperature':
                 if not isinstance(prop.value_range, dict):
-                    _LOGGER.error(
+                    _LOGGER.info(
                         'invalid color-temperature value_range format, %s',
                         self.entity_id)
                     continue
@@ -179,16 +180,29 @@ class Light(MIoTServiceEntity, LightEntity):
                         for item in prop.value_list}
                 elif isinstance(prop.value_range, dict):
                     mode_list = {}
-                    for value in range(
-                            prop.value_range['min'], prop.value_range['max']):
-                        mode_list[value] = f'{value}'
+                    if (
+                        int((
+                            prop.value_range['max']
+                            - prop.value_range['min']
+                        ) / prop.value_range['step'])
+                        > self._VALUE_RANGE_MODE_COUNT_MAX
+                    ):
+                        _LOGGER.info(
+                            'too many mode values, %s, %s, %s',
+                            self.entity_id, prop.name, prop.value_range)
+                    else:
+                        for value in range(
+                                prop.value_range['min'],
+                                prop.value_range['max'],
+                                prop.value_range['step']):
+                            mode_list[value] = f'mode {value}'
                 if mode_list:
                     self._mode_list = mode_list
                     self._attr_effect_list = list(self._mode_list.values())
                     self._attr_supported_features |= LightEntityFeature.EFFECT
                     self._prop_mode = prop
                 else:
-                    _LOGGER.error('invalid mode format, %s', self.entity_id)
+                    _LOGGER.info('invalid mode format, %s', self.entity_id)
                     continue
 
         if not self._attr_supported_color_modes:

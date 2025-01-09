@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "基礎配置",
-                "description": "### 登錄地區\r\n選擇小米帳號所在的地區。您可以在 `米家APP > 我的（位於底部菜單） > 更多設置 > 關於米家` 中查看。\r\n### 語言\r\n選擇設備及實體名稱所用的語言。缺少翻譯的部分語句將使用英文顯示。\r\n### OAuth2 認證跳轉地址\r\nOAuth2 認證跳轉地址為 **[http://homeassistant.local:8123](http://homeassistant.local:8123)**，Home Assistant 需要與當前操作終端（例如，個人電腦）在同一局域網內，且操作終端能通過該地址訪問 Home Assistant 首頁，否則登錄認證可能會失敗。\r\n### 注意事項\r\n- 對於數百個及以上米家設備的用戶，首次添加集成會耗費一些時間，請耐心等待。\r\n- 如果 Home Assistant 運行在docker環境下，請確保docker網絡模式為host，否則會導致本地控制功能異常。\r\n- 集成本地控制功能存在一些依賴項，請仔細閱讀README。",
+                "description": "### 登錄地區\r\n選擇小米帳號所在的地區。您可以在 `米家APP > 我的（位於底部菜單） > 更多設置 > 關於米家` 中查看。\r\n### 語言\r\n選擇設備及實體名稱所用的語言。缺少翻譯的部分語句將使用英文顯示。\r\n### OAuth2 認證跳轉地址\r\nOAuth2 認證跳轉地址為 **[http://homeassistant.local:8123](http://homeassistant.local:8123)**，Home Assistant 需要與當前操作終端（例如，個人電腦）在同一局域網內，且操作終端能通過該地址訪問 Home Assistant 首頁，否則登錄認證可能會失敗。\r\n### 集成網絡配置\r\n檢測本地網絡是否正常，相關網絡資源是否可訪問。**首次添加時建議勾選。**\r\n### 注意事項\r\n- 對於數百個及以上米家設備的用戶，首次添加集成會耗費一些時間，請耐心等待。\r\n- 如果 Home Assistant 運行在docker環境下，請確保docker網絡模式為host，否則會導致本地控制功能異常。\r\n- 集成本地控制功能存在一些依賴項，請仔細閱讀README。",
                 "data": {
                     "cloud_server": "登錄地區",
                     "integration_language": "語言",
-                    "oauth_redirect_url": "認證跳轉地址"
+                    "oauth_redirect_url": "認證跳轉地址",
+                    "network_detect_config": "集成網絡配置"
+                }
+            },
+            "network_detect_config": {
+                "title": "集成網絡配置",
+                "description": "## 使用介紹\r\n### 網絡檢測地址\r\n用於檢測網絡是否正常，未設置時將使用系統默認地址檢測。如果默認地址檢測異常時，可嘗試輸入可用的自定義地址檢測。\r\n- 可輸入多個檢測地址，地址之間使用`,`號間隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果為IP地址，將採用ping方式檢測，如果為http(s)地址，將採用 HTTP GET 訪問該地址檢測。\r\n- 如果想恢復系統默認檢測地址，請輸入`,`號，然後點擊'下一步'。\r\n- **該配置為全局配置，修改會影響其它集成實例的網絡檢測，請謹慎修改。**\r\n### 檢測網絡依賴項\r\n依次檢查下述網絡依賴項是否可訪問。如果相關地址無法訪問，將會導致集成異常。\r\n- OAuth2 認證地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`。",
+                "data": {
+                    "network_detect_addr": "網絡檢測地址",
+                    "check_network_deps": "檢測網絡依賴項"
                 }
             },
             "oauth_error": {
@@ -68,8 +77,17 @@
             "mdns_discovery_error": "本地設備發現服務異常。",
             "get_cert_error": "獲取中樞證書失敗。",
             "no_family_selected": "未選擇家庭。",
-            "no_devices": "選擇的家庭中沒有設備。請選擇有設備的家庭，而後繼續。",
-            "no_central_device": "【中樞網關模式】需要 Home Assistant 所在的局域網中存在可用的小米中樞網關。請檢查選擇的家庭是否符合該要求。"
+            "no_devices": "選擇的家庭中沒有設備。請選擇有設備的家庭，然後繼續。",
+            "no_filter_devices": "篩選設備為空。請選擇有效的篩選條件，然後繼續。",
+            "no_central_device": "【中樞網關模式】需要 Home Assistant 所在的局域網中存在可用的小米中樞網關。請檢查選擇的家庭是否符合該要求。",
+            "invalid_network_addr": "存在無效的IP地址或者HTTP地址，請輸入有效的地址。",
+            "invalid_ip_addr": "存在無法訪問的IP地址，請輸入有效的IP地址。",
+            "invalid_http_addr": "存在無法訪問的HTTP地址，請輸入有效的HTTP地址。",
+            "invalid_default_addr": "默認網絡檢測地址無法訪問，請檢查網絡配置或者使用自定義網絡檢測地址。",
+            "unreachable_oauth2_host": "無法訪問 OAuth2 認證地址，請檢查網絡配置。",
+            "unreachable_http_host": "無法訪問小米 HTTP API 地址，請檢查網絡配置。",
+            "unreachable_spec_host": "無法訪問小米 SPEC API 地址，請檢查網絡配置。",
+            "unreachable_mqtt_broker": "無法訪問小米 MQTT Broker 地址，請檢查網絡配置。"
         },
         "abort": {
             "network_connect_error": "配置失敗。網絡連接異常，請檢查設備網絡配置。",
@@ -93,7 +111,7 @@
             },
             "config_options": {
                 "title": "配置選項",
-                "description": "### {nick_name} 您好！\r\n\r\n小米帳號ID：{uid}\r\n當前登錄區域：{cloud_server}\r\n\r\n請勾選需要重新配置的選項，然後點擊“下一步”。",
+                "description": "### {nick_name} 您好！\r\n\r\n小米帳號ID：{uid}\r\n當前登錄區域：{cloud_server}\r\n集成實例ID：{instance_id}\r\n\r\n請勾選需要重新配置的選項，然後點擊“下一步”。",
                 "data": {
                     "integration_language": "集成語言",
                     "update_user_info": "更新用戶信息",
@@ -102,7 +120,8 @@
                     "hide_non_standard_entities": "隱藏非標準生成實體",
                     "display_devices_changed_notify": "顯示設備狀態變化通知",
                     "update_trans_rules": "更新實體轉換規則",
-                    "update_lan_ctrl_config": "更新局域網控制配置"
+                    "update_lan_ctrl_config": "更新局域網控制配置",
+                    "network_detect_config": "集成網絡配置"
                 }
             },
             "update_user_info": {
@@ -151,6 +170,14 @@
                     "enable_subscribe": "啟用局域網訂閱"
                 }
             },
+            "network_detect_config": {
+                "title": "集成網絡配置",
+                "description": "## 使用介紹\r\n### 網絡檢測地址\r\n用於檢測網絡是否正常，未設置時將使用系統默認地址檢測。如果默認地址檢測異常時，可嘗試輸入可用的自定義地址檢測。\r\n- 可輸入多個檢測地址，地址之間使用`,`號間隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果為IP地址，將採用ping方式檢測，如果為http(s)地址，將採用 HTTP GET 訪問該地址檢測。\r\n- 如果想恢復系統默認檢測地址，請輸入`,`號，然後點擊'下一步'。\r\n- **該配置為全局配置，修改會影響其它集成實例的網絡檢測，請謹慎修改。**\r\n### 檢測網絡依賴項\r\n依次檢查下述網絡依賴項是否可訪問。如果相關地址無法訪問，將會導致集成異常。\r\n- OAuth2 認證地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`。",
+                "data": {
+                    "network_detect_addr": "網絡檢測地址",
+                    "check_network_deps": "檢測網絡依賴項"
+                }
+            },
             "config_confirm": {
                 "title": "確認配置",
                 "description": "**{nick_name}** 您好！請確認最新的配置信息，然後點擊“提交”。\r\n集成將會使用更新後的配置重新載入。\r\n\r\n集成語言：\t{lang_new}\r\n用戶暱稱：\t{nick_name_new}\r\nAction 調試模式：\t{action_debug}\r\n隱藏非標準生成實體：\t{hide_non_standard_entities}\r\n顯示設備狀態變化通知：\t{display_devices_changed_notify}\r\n設備變化：\t新增 **{devices_add}** 個設備，移除 **{devices_remove}** 個設備\r\n轉換規則變化：\t共條 **{trans_rules_count}** 規則，更新 **{trans_rules_count_success}** 條規則",
@@ -168,11 +195,20 @@
             "get_homeinfo_error": "獲取家庭信息失敗。",
             "get_cert_error": "獲取中樞證書失敗。",
             "no_family_selected": "未選擇家庭。",
-            "no_devices": "選擇的家庭中沒有設備，請選擇有設備的家庭，而後繼續。",
+            "no_devices": "選擇的家庭中沒有設備。請選擇有設備的家庭，然後繼續。",
+            "no_filter_devices": "篩選設備為空。請選擇有效的篩選條件，然後繼續。",
             "no_central_device": "【中樞網關模式】需要 Home Assistant 所在的局域網中存在可用的小米中樞網關。請檢查選擇的家庭是否符合該要求。",
             "mdns_discovery_error": "本地設備發現服務異常。",
             "update_config_error": "配置信息更新失敗。",
-            "not_confirm": "未確認修改項。請勾選確認後再提交。"
+            "not_confirm": "未確認修改項。請勾選確認後再提交。",
+            "invalid_network_addr": "存在無效的IP地址或者HTTP地址，請輸入有效的地址。",
+            "invalid_ip_addr": "存在無法訪問的IP地址，請輸入有效的IP地址。",
+            "invalid_http_addr": "存在無法訪問的HTTP地址，請輸入有效的HTTP地址。",
+            "invalid_default_addr": "默認網絡檢測地址無法訪問，請檢查網絡配置或者使用自定義網絡檢測地址。",
+            "unreachable_oauth2_host": "無法訪問 OAuth2 認證地址，請檢查網絡配置。",
+            "unreachable_http_host": "無法訪問小米 HTTP API 地址，請檢查網絡配置。",
+            "unreachable_spec_host": "無法訪問小米 SPEC API 地址，請檢查網絡配置。",
+            "unreachable_mqtt_broker": "無法訪問小米 MQTT Broker 地址，請檢查網絡配置。"
         },
         "abort": {
             "network_connect_error": "配置失敗。網絡連接異常，請檢查設備網絡配置。",

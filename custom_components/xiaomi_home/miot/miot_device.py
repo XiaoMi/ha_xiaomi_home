@@ -515,9 +515,15 @@ class MIoTDevice:
             prop.icon = self.icon_convert(prop.unit)
         device_class = SPEC_PROP_TRANS_MAP['properties'][prop_name][
             'device_class']
-        prop.platform = device_class
-
-        return {'platform': platform, 'device_class': device_class}
+        result = {'platform': platform, 'device_class': device_class}
+        # optional:
+        if 'optional' in SPEC_PROP_TRANS_MAP['properties'][prop_name]:
+            optional = SPEC_PROP_TRANS_MAP['properties'][prop_name]['optional']
+            if 'state_class' in optional:
+                result['state_class'] = optional['state_class']
+            if not prop.unit and 'unit_of_measurement' in optional:
+                result['unit_of_measurement'] = optional['unit_of_measurement']
+        return result
 
     def spec_transform(self) -> None:
         """Parse service, property, event, action from device spec."""
@@ -544,6 +550,13 @@ class MIoTDevice:
                 if prop_entity:
                     prop.platform = prop_entity['platform']
                     prop.device_class = prop_entity['device_class']
+                    if 'state_class' in prop_entity:
+                        prop.state_class = prop_entity['state_class']
+                    if 'unit_of_measurement' in prop_entity:
+                        prop.external_unit = self.unit_convert(
+                            prop_entity['unit_of_measurement'])
+                        prop.icon = self.icon_convert(
+                            prop_entity['unit_of_measurement'])
                 # general conversion
                 if not prop.platform:
                     if prop.writable:

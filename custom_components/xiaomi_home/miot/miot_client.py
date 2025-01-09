@@ -1089,7 +1089,7 @@ class MIoTClient:
                 handler=self.__on_lan_device_state_changed)
             for did, info in (
                     await self._miot_lan.get_dev_list_async()).items():
-                self.__on_lan_device_state_changed(
+                await self.__on_lan_device_state_changed(
                     did=did, state=info, ctx=None)
             _LOGGER.info('lan device list, %s', self._device_list_lan)
             self._miot_lan.update_devices(devices={
@@ -1558,7 +1558,7 @@ class MIoTClient:
                     None)
                 self.__on_prop_msg(params=result, ctx=None)
             if request_list:
-                _LOGGER.error(
+                _LOGGER.info(
                     'refresh props failed, cloud, %s',
                     list(request_list.keys()))
                 request_list = None
@@ -1614,7 +1614,7 @@ class MIoTClient:
             succeed_once = True
         if succeed_once:
             return True
-        _LOGGER.error(
+        _LOGGER.info(
             'refresh props failed, gw, %s', list(request_list.keys()))
         # Add failed request back to the list
         self._refresh_props_list.update(request_list)
@@ -1657,7 +1657,7 @@ class MIoTClient:
             succeed_once = True
         if succeed_once:
             return True
-        _LOGGER.error(
+        _LOGGER.info(
             'refresh props failed, lan, %s', list(request_list.keys()))
         # Add failed request back to the list
         self._refresh_props_list.update(request_list)
@@ -1689,10 +1689,10 @@ class MIoTClient:
             if self._refresh_props_timer:
                 self._refresh_props_timer.cancel()
                 self._refresh_props_timer = None
-            _LOGGER.error('refresh props failed, retry count exceed')
+            _LOGGER.info('refresh props failed, retry count exceed')
             return
         self._refresh_props_retry_count += 1
-        _LOGGER.error(
+        _LOGGER.info(
             'refresh props failed, retry, %s', self._refresh_props_retry_count)
         self._refresh_props_timer = self._main_loop.call_later(
             3, lambda: self._main_loop.create_task(
@@ -1851,15 +1851,6 @@ async def get_miot_instance_async(
         loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         if loop is None:
             raise MIoTClientError('loop is None')
-        # MIoT network
-        network: Optional[MIoTNetwork] = hass.data[DOMAIN].get(
-            'miot_network', None)
-        if not network:
-            network = MIoTNetwork(loop=loop)
-            hass.data[DOMAIN]['miot_network'] = network
-            await network.init_async(
-                refresh_interval=NETWORK_REFRESH_INTERVAL)
-            _LOGGER.info('create miot_network instance')
         # MIoT storage
         storage: Optional[MIoTStorage] = hass.data[DOMAIN].get(
             'miot_storage', None)
@@ -1868,12 +1859,29 @@ async def get_miot_instance_async(
                 root_path=entry_data['storage_path'], loop=loop)
             hass.data[DOMAIN]['miot_storage'] = storage
             _LOGGER.info('create miot_storage instance')
+        global_config: dict = await storage.load_user_config_async(
+            uid='global_config', cloud_server='all',
+            keys=['network_detect_addr', 'net_interfaces', 'enable_subscribe'])
+        # MIoT network
+        network_detect_addr: dict = global_config.get(
+            'network_detect_addr', {})
+        network: Optional[MIoTNetwork] = hass.data[DOMAIN].get(
+            'miot_network', None)
+        if not network:
+            network = MIoTNetwork(
+                ip_addr_list=network_detect_addr.get('ip', []),
+                url_addr_list=network_detect_addr.get('url', []),
+                refresh_interval=NETWORK_REFRESH_INTERVAL,
+                loop=loop)
+            hass.data[DOMAIN]['miot_network'] = network
+            await network.init_async()
+            _LOGGER.info('create miot_network instance')
         # MIoT service
         mips_service: Optional[MipsService] = hass.data[DOMAIN].get(
             'mips_service', None)
         if not mips_service:
             aiozc = await zeroconf.async_get_async_instance(hass)
-            mips_service: MipsService = MipsService(aiozc=aiozc, loop=loop)
+            mips_service = MipsService(aiozc=aiozc, loop=loop)
             hass.data[DOMAIN]['mips_service'] = mips_service
             await mips_service.init_async()
             _LOGGER.info('create mips_service instance')
@@ -1881,15 +1889,11 @@ async def get_miot_instance_async(
         miot_lan: Optional[MIoTLan] = hass.data[DOMAIN].get(
             'miot_lan', None)
         if not miot_lan:
-            lan_config = (await storage.load_user_config_async(
-                uid='global_config',
-                cloud_server='all',
-                keys=['net_interfaces', 'enable_subscribe'])) or {}
             miot_lan = MIoTLan(
-                net_ifs=lan_config.get('net_interfaces', []),
+                net_ifs=global_config.get('net_interfaces', []),
                 network=network,
                 mips_service=mips_service,
-                enable_subscribe=lan_config.get('enable_subscribe', False),
+                enable_subscribe=global_config.get('enable_subscribe', False),
                 loop=loop)
             hass.data[DOMAIN]['miot_lan'] = miot_lan
             _LOGGER.info('create miot_lan instance')

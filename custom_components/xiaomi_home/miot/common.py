@@ -83,6 +83,9 @@ def randomize_int(value: int, ratio: float) -> int:
     """Randomize an integer value."""
     return int(value * (1 - ratio + random.random()*2*ratio))
 
+def randomize_float(value: float, ratio: float) -> float:
+    """Randomize a float value."""
+    return value * (1 - ratio + random.random()*2*ratio)
 
 class MIoTMatcher(MQTTMatcher):
     """MIoT Pub/Sub topic matcher."""

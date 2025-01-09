@@ -26,6 +26,7 @@ For example, update to version v1.0.0
 
 ```bash
 cd config/ha_xiaomi_home
+git fetch
 git checkout v1.0.0
 ./install.sh /config
 ```
@@ -140,7 +141,7 @@ In MIoT-Spec-V2 protocol, a product is defined as a device. A device contains se
 
 - Property
 
-| format       | access                | value-list   | value-range | Entity in Home Assistant |
+| access       | format                | value-list   | value-range | Entity in Home Assistant |
 | ------------ | --------------------- | ------------ | ----------- | ------------------------ |
 | writable     | string                | -            | -           | Text                     |
 | writable     | bool                  | -            | -           | Switch                   |
@@ -350,7 +351,7 @@ The instance code is the code of the MIoT-Spec-V2 instance, which is in the form
 ```
 service:<siid>                  # service
 service:<siid>:property:<piid>  # property
-service:<siid>:property:<piid>:valuelist:<value> # the value in value-list of a property
+service:<siid>:property:<piid>:valuelist:<index> # The index of a value in the value-list of a property
 service:<siid>:event:<eiid>     # event
 service:<siid>:action:<aiid>    # action
 ```

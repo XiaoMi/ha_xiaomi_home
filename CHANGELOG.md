@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v0.1.5b0
+### Added
+- Add missing parameter state_class  [#101](https://github.com/XiaoMi/ha_xiaomi_home/pull/101)
+### Changed
+- Make git update guide more accurate [#561](https://github.com/XiaoMi/ha_xiaomi_home/pull/561)
+### Fixed
+- Limit *light.mode count (value-range) [#535](https://github.com/XiaoMi/ha_xiaomi_home/pull/535)
+- Update miot cloud raise error msg [#551](https://github.com/XiaoMi/ha_xiaomi_home/pull/551)
+- Fix table header misplacement [#554](https://github.com/XiaoMi/ha_xiaomi_home/pull/554)
+
+## v0.1.4
+### Added
+- Refactor miot network, add network detection logic, improve devices filter logic. [458](https://github.com/XiaoMi/ha_xiaomi_home/pull/458) [#191](https://github.com/XiaoMi/ha_xiaomi_home/pull/191)
+### Changed
+- Remove tev dependency for lan control & fixs. [#333](https://github.com/XiaoMi/ha_xiaomi_home/pull/333)
+- Use yaml to parse action params. [#447](https://github.com/XiaoMi/ha_xiaomi_home/pull/447)
+- Update issue template. [#445](https://github.com/XiaoMi/ha_xiaomi_home/pull/445)
+- Remove duplicate dependency(aiohttp) [#390](https://github.com/XiaoMi/ha_xiaomi_home/pull/390)
+### Fixed
+
 ## v0.1.4b1
 ### Added
 - Support devices filter, and device changed notify logical refinement. [#332](https://github.com/XiaoMi/ha_xiaomi_home/pull/332)
