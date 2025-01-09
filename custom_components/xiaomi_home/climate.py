@@ -53,7 +53,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.climate import (
-    SWING_ON,
+    FAN_ON,
+    FAN_OFF,
     SWING_OFF,
     SWING_BOTH,
     SWING_VERTICAL,
@@ -61,7 +62,7 @@ from homeassistant.components.climate import (
     ATTR_TEMPERATURE,
     HVACMode,
     ClimateEntity,
-    ClimateEntityFeature
+    ClimateEntityFeature,
 )
 
 from .miot.const import DOMAIN
@@ -72,99 +73,510 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a config entry."""
     device_list: list[MIoTDevice] = hass.data[DOMAIN]['devices'][
-        config_entry.entry_id]
+        config_entry.entry_id
+    ]
 
     new_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get('air-conditioner', []):
             new_entities.append(
-                AirConditioner(miot_device=miot_device, entity_data=data))
+                AirConditioner(miot_device=miot_device, entity_data=data)
+            )
         for data in miot_device.entity_list.get('heater', []):
             new_entities.append(
-                Heater(miot_device=miot_device, entity_data=data))
+                Heater(miot_device=miot_device, entity_data=data)
+            )
         for data in miot_device.entity_list.get('bath-heater', []):
             new_entities.append(
-                BathHeater(miot_device=miot_device, entity_data=data))
+                PtcBathHeater(miot_device=miot_device, entity_data=data)
+            )
+        for data in miot_device.entity_list.get('thermostat', []):
+            new_entities.append(
+                Thermostat(miot_device=miot_device, entity_data=data)
+            )
 
     if new_entities:
         async_add_entities(new_entities)
 
 
-class AirConditioner(MIoTServiceEntity, ClimateEntity):
-    """Air conditioner entities for Xiaomi Home."""
-    # service: air-conditioner
+class FeatureOnOff(MIoTServiceEntity, ClimateEntity):
+    """TURN_ON and TURN_OFF feature of the climate entity."""
+
     _prop_on: Optional[MIoTSpecProperty]
-    _prop_mode: Optional[MIoTSpecProperty]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_on = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        for prop in entity_data.props:
+            if prop.name == 'on':
+                if (
+                    prop.service.name == 'air-conditioner'
+                    or prop.service.name == 'heater'
+                ):
+                    self._attr_supported_features |= (
+                        ClimateEntityFeature.TURN_ON
+                    )
+                    self._attr_supported_features |= (
+                        ClimateEntityFeature.TURN_OFF
+                    )
+                    self._prop_on = prop
+
+    async def async_turn_on(self) -> None:
+        """Turn on."""
+        await self.set_property_async(prop=self._prop_on, value=True)
+
+    async def async_turn_off(self) -> None:
+        """Turn off."""
+        await self.set_property_async(prop=self._prop_on, value=False)
+
+
+class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
+    """TARGET_TEMPERATURE feature of the climate entity."""
+
     _prop_target_temp: Optional[MIoTSpecProperty]
-    _prop_target_humi: Optional[MIoTSpecProperty]
-    # service: fan-control
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_target_temp = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        for prop in entity_data.props:
+            if prop.name == 'target-temperature':
+                if not isinstance(prop.value_range, dict):
+                    _LOGGER.error(
+                        'invalid target-temperature value_range format, %s',
+                        self.entity_id,
+                    )
+                    continue
+                self._attr_min_temp = prop.value_range['min']
+                self._attr_max_temp = prop.value_range['max']
+                self._attr_target_temperature_step = prop.value_range['step']
+                self._attr_temperature_unit = prop.external_unit
+                self._attr_supported_features |= (
+                    ClimateEntityFeature.TARGET_TEMPERATURE
+                )
+                self._prop_target_temp = prop
+
+    async def async_set_temperature(self, **kwargs):
+        """Set new target temperature."""
+        if ATTR_TEMPERATURE in kwargs:
+            temp = kwargs[ATTR_TEMPERATURE]
+            if temp > self._attr_max_temp:
+                temp = self._attr_max_temp
+            elif temp < self._attr_min_temp:
+                temp = self._attr_min_temp
+
+            await self.set_property_async(
+                prop=self._prop_target_temp, value=temp
+            )
+
+    @property
+    def target_temperature(self) -> Optional[float]:
+        """Return the target temperature."""
+        return (
+            self.get_prop_value(prop=self._prop_target_temp)
+            if self._prop_target_temp
+            else None
+        )
+
+
+class FeaturePresetMode(MIoTServiceEntity, ClimateEntity):
+    """PRESET_MODE feature of the climate entity."""
+
+    _prop_mode: Optional[MIoTSpecProperty]
+    _mode_map: Optional[dict[int, str]]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_mode = None
+        self._mode_map = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        for prop in entity_data.props:
+            if prop.name == 'heat-level' and prop.service.name == 'heater':
+                if not isinstance(prop.value_list, list) or not prop.value_list:
+                    _LOGGER.error(
+                        'invalid heater heat-level value_list, %s',
+                        self.entity_id,
+                    )
+                    continue
+                self._mode_map = {
+                    item['value']: item['description']
+                    for item in prop.value_list
+                }
+                self._attr_preset_modes = list(self._mode_map.values())
+                self._attr_supported_features |= (
+                    ClimateEntityFeature.PRESET_MODE
+                )
+                self._prop_mode = prop
+
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set the preset mode."""
+        await self.set_property_async(
+            self._prop_mode,
+            value=self.get_map_value(
+                map_=self._mode_map, description=preset_mode
+            ),
+        )
+
+    @property
+    def preset_mode(self) -> Optional[str]:
+        return (
+            self.get_map_description(
+                map_=self._mode_map,
+                key=self.get_prop_value(prop=self._prop_mode),
+            )
+            if self._prop_mode
+            else None
+        )
+
+
+class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
+    """FAN_MODE feature of the climate entity."""
+
     _prop_fan_on: Optional[MIoTSpecProperty]
     _prop_fan_level: Optional[MIoTSpecProperty]
-    _prop_horizontal_swing: Optional[MIoTSpecProperty]
-    _prop_vertical_swing: Optional[MIoTSpecProperty]
-    # service: environment
-    _prop_env_temp: Optional[MIoTSpecProperty]
-    _prop_env_humi: Optional[MIoTSpecProperty]
-    # service: air-condition-outlet-matching
-    _prop_ac_state: Optional[MIoTSpecProperty]
-    _value_ac_state: Optional[dict[str, int]]
-
-    _hvac_mode_map: Optional[dict[int, HVACMode]]
     _fan_mode_map: Optional[dict[int, str]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
-        """Initialize the Air conditioner."""
-        super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._attr_icon = 'mdi:air-conditioner'
-        self._attr_supported_features = ClimateEntityFeature(0)
-        self._attr_swing_mode = None
-        self._attr_swing_modes = []
-
-        self._prop_on = None
-        self._prop_mode = None
-        self._prop_target_temp = None
-        self._prop_target_humi = None
         self._prop_fan_on = None
         self._prop_fan_level = None
-        self._prop_horizontal_swing = None
-        self._prop_vertical_swing = None
-        self._prop_env_temp = None
-        self._prop_env_humi = None
-        self._prop_ac_state = None
-        self._value_ac_state = None
-        self._hvac_mode_map = None
         self._fan_mode_map = None
 
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
         # properties
         for prop in entity_data.props:
-            if prop.name == 'on':
-                if prop.service.name == 'air-conditioner':
-                    self._attr_supported_features |= (
-                        ClimateEntityFeature.TURN_ON)
-                    self._attr_supported_features |= (
-                        ClimateEntityFeature.TURN_OFF)
-                    self._prop_on = prop
-                elif prop.service.name == 'fan-control':
-                    self._attr_swing_modes.append(SWING_ON)
-                    self._prop_fan_on = prop
-                else:
+            if prop.name == 'fan-level':
+                if not isinstance(prop.value_list, list) or not prop.value_list:
                     _LOGGER.error(
-                        'unknown on property, %s', self.entity_id)
-            elif prop.name == 'mode':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                        'invalid fan-level value_list, %s', self.entity_id
+                    )
+                    continue
+                self._fan_mode_map = {
+                    item['value']: item['description']
+                    for item in prop.value_list
+                }
+                self._attr_fan_modes = list(self._fan_mode_map.values())
+                self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
+                self._prop_fan_level = prop
+            elif prop.name == 'on' and prop.service.name == 'fan-control':
+                self._prop_fan_on = prop
+                self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
+
+        if self._prop_fan_on:
+            if self._attr_fan_modes is None:
+                self._attr_fan_modes = [FAN_ON, FAN_OFF]
+            else:
+                self._attr_fan_modes.append(FAN_OFF)
+
+    async def async_set_fan_mode(self, fan_mode):
+        """Set the target fan mode."""
+        if fan_mode == FAN_OFF:
+            await self.set_property_async(prop=self._prop_fan_on, value=False)
+            return
+        if fan_mode == FAN_ON:
+            await self.set_property_async(prop=self._prop_fan_on, value=True)
+            return
+        mode_value = self.get_map_value(
+            map_=self._fan_mode_map, description=fan_mode
+        )
+        if mode_value is None or not await self.set_property_async(
+            prop=self._prop_fan_level, value=mode_value
+        ):
+            raise RuntimeError(
+                f'set climate prop.fan_mode failed, {fan_mode}, '
+                f'{self.entity_id}'
+            )
+
+    @property
+    def fan_mode(self) -> Optional[str]:
+        """The current fan mode."""
+        if self._prop_fan_level is None and self._prop_fan_on is None:
+            return None
+        if self._prop_fan_level is None and self._prop_fan_on:
+            return (
+                FAN_ON
+                if self.get_prop_value(prop=self._prop_fan_on)
+                else FAN_OFF
+            )
+
+        return self._fan_mode_map[
+            self.get_prop_value(prop=self._prop_fan_level)
+        ]
+
+
+class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
+    """SWING_MODE feature of the climate entity."""
+
+    _prop_horizontal_swing: Optional[MIoTSpecProperty]
+    _prop_vertical_swing: Optional[MIoTSpecProperty]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_horizontal_swing = None
+        self._prop_vertical_swing = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        swing_modes = []
+        for prop in entity_data.props:
+            if prop.name == 'horizontal-swing':
+                swing_modes.append(SWING_HORIZONTAL)
+                self._prop_horizontal_swing = prop
+            elif prop.name == 'vertical-swing':
+                swing_modes.append(SWING_VERTICAL)
+                self._prop_vertical_swing = prop
+        # swing modes
+        if SWING_HORIZONTAL in swing_modes and SWING_VERTICAL in swing_modes:
+            swing_modes.append(SWING_BOTH)
+        if swing_modes:
+            swing_modes.insert(0, SWING_OFF)
+            self._attr_supported_features |= ClimateEntityFeature.SWING_MODE
+            self._attr_swing_modes = swing_modes
+
+    async def async_set_swing_mode(self, swing_mode):
+        """Set the target swing operation."""
+        if swing_mode == SWING_BOTH:
+            await self.set_property_async(
+                prop=self._prop_horizontal_swing, value=True
+            )
+            await self.set_property_async(
+                prop=self._prop_vertical_swing, value=True
+            )
+        elif swing_mode == SWING_HORIZONTAL:
+            await self.set_property_async(
+                prop=self._prop_horizontal_swing, value=True
+            )
+        elif swing_mode == SWING_VERTICAL:
+            await self.set_property_async(
+                prop=self._prop_vertical_swing, value=True
+            )
+        elif swing_mode == SWING_OFF:
+            if self._prop_horizontal_swing:
+                await self.set_property_async(
+                    prop=self._prop_horizontal_swing, value=False
+                )
+            if self._prop_vertical_swing:
+                await self.set_property_async(
+                    prop=self._prop_vertical_swing, value=False
+                )
+        else:
+            raise RuntimeError(
+                f'unknown swing_mode, {swing_mode}, {self.entity_id}'
+            )
+
+    @property
+    def swing_mode(self) -> Optional[str]:
+        """The current swing mode of the fan."""
+        if (
+            self._prop_horizontal_swing is None
+            and self._prop_vertical_swing is None
+        ):
+            return None
+        horizontal: bool = (
+            self.get_prop_value(prop=self._prop_horizontal_swing)
+            if self._prop_horizontal_swing
+            else False
+        )
+        vertical: bool = (
+            self.get_prop_value(prop=self._prop_vertical_swing)
+            if self._prop_vertical_swing
+            else False
+        )
+        if horizontal and vertical:
+            return SWING_BOTH
+        elif horizontal:
+            return SWING_HORIZONTAL
+        elif vertical:
+            return SWING_VERTICAL
+        else:
+            return SWING_OFF
+
+
+class FeatureTemperature(MIoTServiceEntity, ClimateEntity):
+    """Temperature of the climate entity."""
+
+    _prop_env_temperature: Optional[MIoTSpecProperty]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_env_temperature = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        for prop in entity_data.props:
+            if prop.name == 'temperature':
+                self._prop_env_temperature = prop
+
+    @property
+    def current_temperature(self) -> Optional[float]:
+        """The current environment temperature."""
+        return (
+            self.get_prop_value(prop=self._prop_env_temperature)
+            if self._prop_env_temperature
+            else None
+        )
+
+
+class FeatureHumidity(MIoTServiceEntity, ClimateEntity):
+    """Humidity of the climate entity."""
+
+    _prop_env_humidity: Optional[MIoTSpecProperty]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_env_humidity = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        for prop in entity_data.props:
+            if prop.name == 'relative-humidity':
+                self._prop_env_humidity = prop
+
+    @property
+    def current_humidity(self) -> Optional[float]:
+        """The current environment humidity."""
+        return (
+            self.get_prop_value(prop=self._prop_env_humidity)
+            if self._prop_env_humidity
+            else None
+        )
+
+
+class FeatureTargetHumidity(MIoTServiceEntity, ClimateEntity):
+    """TARGET_HUMIDITY feature of the climate entity."""
+
+    _prop_target_humidity: Optional[MIoTSpecProperty]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        self._prop_target_humidity = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        # properties
+        for prop in entity_data.props:
+            if prop.name == 'target-humidity':
+                if not isinstance(prop.value_range, dict):
                     _LOGGER.error(
-                        'invalid mode value_list, %s', self.entity_id)
+                        'invalid target-humidity value_range format, %s',
+                        self.entity_id,
+                    )
+                    continue
+                self._attr_min_humidity = prop.value_range['min']
+                self._attr_max_humidity = prop.value_range['max']
+                self._attr_supported_features |= (
+                    ClimateEntityFeature.TARGET_HUMIDITY
+                )
+                self._prop_target_humidity = prop
+
+    async def async_set_humidity(self, humidity):
+        """Set the target humidity."""
+        if humidity > self._attr_max_humidity:
+            humidity = self._attr_max_humidity
+        elif humidity < self._attr_min_humidity:
+            humidity = self._attr_min_humidity
+        await self.set_property_async(
+            prop=self._prop_target_humidity, value=humidity
+        )
+
+    @property
+    def target_humidity(self) -> Optional[int]:
+        """The current target humidity."""
+        return (
+            self.get_prop_value(prop=self._prop_target_humidity)
+            if self._prop_target_humidity
+            else None
+        )
+
+
+class Heater(
+    FeatureOnOff,
+    FeatureTargetTemperature,
+    FeatureTemperature,
+    FeatureHumidity,
+    FeaturePresetMode,
+):
+    """Heater"""
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        """Initialize the Heater."""
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+
+        self._attr_icon = 'mdi:radiator'
+        # hvac modes
+        self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set the target hvac mode."""
+        await self.set_property_async(
+            prop=self._prop_on,
+            value=False if hvac_mode == HVACMode.OFF else True,
+        )
+
+    @property
+    def hvac_mode(self) -> Optional[HVACMode]:
+        """The current hvac mode."""
+        return (
+            HVACMode.HEAT
+            if self.get_prop_value(prop=self._prop_on)
+            else HVACMode.OFF
+        )
+
+
+class AirConditioner(
+    FeatureOnOff,
+    FeatureTargetTemperature,
+    FeatureTargetHumidity,
+    FeatureTemperature,
+    FeatureHumidity,
+    FeatureFanMode,
+    FeatureSwingMode,
+):
+    """Air conditioner"""
+
+    _prop_mode: Optional[MIoTSpecProperty]
+    _hvac_mode_map: Optional[dict[int, HVACMode]]
+    _prop_ac_state: Optional[MIoTSpecProperty]
+    _value_ac_state: Optional[dict[str, int]]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        """Initialize the Heater."""
+        self._prop_mode = None
+        self._hvac_mode_map = None
+        self._prop_ac_state = None
+        self._value_ac_state = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        self._attr_icon = 'mdi:air-conditioner'
+        # hvac modes
+        for prop in entity_data.props:
+            if prop.name == 'mode':
+                if not isinstance(prop.value_list, list) or not prop.value_list:
+                    _LOGGER.error('invalid mode value_list, %s', self.entity_id)
                     continue
                 self._hvac_mode_map = {}
                 for item in prop.value_list:
@@ -182,247 +594,55 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                         self._hvac_mode_map[item['value']] = HVACMode.FAN_ONLY
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
                 self._prop_mode = prop
-            elif prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
-                    _LOGGER.error(
-                        'invalid target-temperature value_range format, %s',
-                        self.entity_id)
-                    continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
-                self._attr_temperature_unit = prop.external_unit
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TARGET_TEMPERATURE)
-                self._prop_target_temp = prop
-            elif prop.name == 'target-humidity':
-                if not isinstance(prop.value_range, dict):
-                    _LOGGER.error(
-                        'invalid target-humidity value_range format, %s',
-                        self.entity_id)
-                    continue
-                self._attr_min_humidity = prop.value_range['min']
-                self._attr_max_humidity = prop.value_range['max']
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TARGET_HUMIDITY)
-                self._prop_target_humi = prop
-            elif prop.name == 'fan-level':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
-                    _LOGGER.error(
-                        'invalid fan-level value_list, %s', self.entity_id)
-                    continue
-                self._fan_mode_map = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
-                self._attr_fan_modes = list(self._fan_mode_map.values())
-                self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
-                self._prop_fan_level = prop
-            elif prop.name == 'horizontal-swing':
-                self._attr_swing_modes.append(SWING_HORIZONTAL)
-                self._prop_horizontal_swing = prop
-            elif prop.name == 'vertical-swing':
-                self._attr_swing_modes.append(SWING_VERTICAL)
-                self._prop_vertical_swing = prop
-            elif prop.name == 'temperature':
-                self._prop_env_temp = prop
-            elif prop.name == 'relative-humidity':
-                self._prop_env_humi = prop
-
             elif prop.name == 'ac-state':
                 self._prop_ac_state = prop
                 self._value_ac_state = {}
                 self.sub_prop_changed(
-                    prop=prop, handler=self.__ac_state_changed)
-
-        # hvac modes
-        if HVACMode.OFF not in self._attr_hvac_modes:
-            self._attr_hvac_modes.append(HVACMode.OFF)
-        # swing modes
-        if (
-            SWING_HORIZONTAL in self._attr_swing_modes
-            and SWING_VERTICAL in self._attr_swing_modes
-        ):
-            self._attr_swing_modes.append(SWING_BOTH)
-        if self._attr_swing_modes:
-            self._attr_swing_modes.insert(0, SWING_OFF)
-            self._attr_supported_features |= ClimateEntityFeature.SWING_MODE
-
-    async def async_turn_on(self) -> None:
-        """Turn the entity on."""
-        await self.set_property_async(prop=self._prop_on, value=True)
-
-    async def async_turn_off(self) -> None:
-        """Turn the entity off."""
-        await self.set_property_async(prop=self._prop_on, value=False)
+                    prop=prop, handler=self.__ac_state_changed
+                )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        """Set new target hvac mode."""
-        # set air-conditioner off
+        """Set the target hvac mode."""
+        # set the device off
         if hvac_mode == HVACMode.OFF:
             if not await self.set_property_async(
-                    prop=self._prop_on, value=False):
+                prop=self._prop_on, value=False
+            ):
                 raise RuntimeError(
                     f'set climate prop.on failed, {hvac_mode}, '
-                    f'{self.entity_id}')
+                    f'{self.entity_id}'
+                )
             return
-        # set air-conditioner on
+        # set the device on
         elif self.get_prop_value(prop=self._prop_on) is False:
             await self.set_property_async(prop=self._prop_on, value=True)
         # set mode
+        if self._prop_mode is None:
+            return
         mode_value = self.get_map_value(
-            map_=self._hvac_mode_map, description=hvac_mode)
-        if (
-            mode_value is None or
-            not await self.set_property_async(
-                prop=self._prop_mode, value=mode_value)
+            map_=self._hvac_mode_map, description=hvac_mode
+        )
+        if mode_value is None or not await self.set_property_async(
+            prop=self._prop_mode, value=mode_value
         ):
             raise RuntimeError(
-                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}')
-
-    async def async_set_temperature(self, **kwargs):
-        """Set new target temperature."""
-        if ATTR_TEMPERATURE in kwargs:
-            temp = kwargs[ATTR_TEMPERATURE]
-            if temp > self.max_temp:
-                temp = self.max_temp
-            elif temp < self.min_temp:
-                temp = self.min_temp
-
-            await self.set_property_async(
-                prop=self._prop_target_temp, value=temp)
-
-    async def async_set_humidity(self, humidity):
-        """Set new target humidity."""
-        if humidity > self.max_humidity:
-            humidity = self.max_humidity
-        elif humidity < self.min_humidity:
-            humidity = self.min_humidity
-        await self.set_property_async(
-            prop=self._prop_target_humi, value=humidity)
-
-    async def async_set_swing_mode(self, swing_mode):
-        """Set new target swing operation."""
-        if swing_mode == SWING_BOTH:
-            if await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=True, update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=True)
-            if await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=True, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=True)
-        elif swing_mode == SWING_HORIZONTAL:
-            if await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=True, update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=True)
-        elif swing_mode == SWING_VERTICAL:
-            if await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=True, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=True)
-        elif swing_mode == SWING_ON:
-            if await self.set_property_async(
-                    prop=self._prop_fan_on, value=True, update=False):
-                self.set_prop_value(self._prop_fan_on, value=True)
-        elif swing_mode == SWING_OFF:
-            if self._prop_fan_on and await self.set_property_async(
-                    prop=self._prop_fan_on, value=False, update=False):
-                self.set_prop_value(self._prop_fan_on, value=False)
-            if self._prop_horizontal_swing and await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=False,
-                    update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=False)
-            if self._prop_vertical_swing and await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=False, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=False)
-        else:
-            raise RuntimeError(
-                f'unknown swing_mode, {swing_mode}, {self.entity_id}')
-        self.async_write_ha_state()
-
-    async def async_set_fan_mode(self, fan_mode):
-        """Set new target fan mode."""
-        mode_value = self.get_map_value(
-            map_=self._fan_mode_map, description=fan_mode)
-        if mode_value is None or not await self.set_property_async(
-                prop=self._prop_fan_level, value=mode_value):
-            raise RuntimeError(
-                f'set climate prop.fan_mode failed, {fan_mode}, '
-                f'{self.entity_id}')
-
-    @property
-    def target_temperature(self) -> Optional[float]:
-        """Return the target temperature."""
-        return self.get_prop_value(
-            prop=self._prop_target_temp) if self._prop_target_temp else None
-
-    @property
-    def target_humidity(self) -> Optional[int]:
-        """Return the target humidity."""
-        return self.get_prop_value(
-            prop=self._prop_target_humi) if self._prop_target_humi else None
-
-    @property
-    def current_temperature(self) -> Optional[float]:
-        """Return the current temperature."""
-        return self.get_prop_value(
-            prop=self._prop_env_temp) if self._prop_env_temp else None
-
-    @property
-    def current_humidity(self) -> Optional[int]:
-        """Return the current humidity."""
-        return self.get_prop_value(
-            prop=self._prop_env_humi) if self._prop_env_humi else None
+                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}'
+            )
 
     @property
     def hvac_mode(self) -> Optional[HVACMode]:
-        """Return the hvac mode. e.g., heat, cool mode."""
+        """The current hvac mode."""
         if self.get_prop_value(prop=self._prop_on) is False:
             return HVACMode.OFF
         return self.get_map_description(
             map_=self._hvac_mode_map,
-            key=self.get_prop_value(prop=self._prop_mode))
-
-    @property
-    def fan_mode(self) -> Optional[str]:
-        """Return the fan mode.
-
-        Requires ClimateEntityFeature.FAN_MODE.
-        """
-        return self.get_map_description(
-            map_=self._fan_mode_map,
-            key=self.get_prop_value(prop=self._prop_fan_level))
-
-    @property
-    def swing_mode(self) -> Optional[str]:
-        """Return the swing mode.
-
-        Requires ClimateEntityFeature.SWING_MODE.
-        """
-        horizontal: bool = (
-            self.get_prop_value(prop=self._prop_horizontal_swing)
-            if self._prop_horizontal_swing else None)
-        vertical: bool = (
-            self.get_prop_value(prop=self._prop_vertical_swing)
-            if self._prop_vertical_swing else None)
-        if horizontal and vertical:
-            return SWING_BOTH
-        if horizontal:
-            return SWING_HORIZONTAL
-        if vertical:
-            return SWING_VERTICAL
-        if self._prop_fan_on:
-            if self.get_prop_value(prop=self._prop_fan_on):
-                return SWING_ON
-            else:
-                return SWING_OFF
-        return None
+            key=self.get_prop_value(prop=self._prop_mode)
+        ) if self._prop_mode else None
 
     def __ac_state_changed(self, prop: MIoTSpecProperty, value: Any) -> None:
         del prop
         if not isinstance(value, str):
-            _LOGGER.error(
-                'ac_status value format error, %s', value)
+            _LOGGER.error('ac_status value format error, %s', value)
             return
         v_ac_state = {}
         v_split = value.split('_')
@@ -436,8 +656,7 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                 _LOGGER.error('ac_status value error, %s', item)
         # P: status. 0: on, 1: off
         if 'P' in v_ac_state and self._prop_on:
-            self.set_prop_value(prop=self._prop_on,
-                                value=v_ac_state['P'] == 0)
+            self.set_prop_value(prop=self._prop_on, value=v_ac_state['P'] == 0)
         # M: model. 0: cool, 1: heat, 2: auto, 3: fan, 4: dry
         if 'M' in v_ac_state and self._prop_mode:
             mode: Optional[HVACMode] = {
@@ -445,20 +664,25 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                 1: HVACMode.HEAT,
                 2: HVACMode.AUTO,
                 3: HVACMode.FAN_ONLY,
-                4: HVACMode.DRY
+                4: HVACMode.DRY,
             }.get(v_ac_state['M'], None)
             if mode:
                 self.set_prop_value(
-                    prop=self._prop_mode, value=self.get_map_value(
-                        map_=self._hvac_mode_map, description=mode))
+                    prop=self._prop_mode,
+                    value=self.get_map_value(
+                        map_=self._hvac_mode_map, description=mode
+                    ),
+                )
         # T: target temperature
         if 'T' in v_ac_state and self._prop_target_temp:
-            self.set_prop_value(prop=self._prop_target_temp,
-                                value=v_ac_state['T'])
+            self.set_prop_value(
+                prop=self._prop_target_temp, value=v_ac_state['T']
+            )
         # S: fan level. 0: auto, 1: low, 2: media, 3: high
         if 'S' in v_ac_state and self._prop_fan_level:
-            self.set_prop_value(prop=self._prop_fan_level,
-                                value=v_ac_state['S'])
+            self.set_prop_value(
+                prop=self._prop_fan_level, value=v_ac_state['S']
+            )
         # D: swing mode. 0: on, 1: off
         if 'D' in v_ac_state and len(self._attr_swing_modes) == 2:
             if (
@@ -466,238 +690,45 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                 and self._prop_horizontal_swing
             ):
                 self.set_prop_value(
-                    prop=self._prop_horizontal_swing,
-                    value=v_ac_state['D'] == 0)
+                    prop=self._prop_horizontal_swing, value=v_ac_state['D'] == 0
+                )
             elif (
                 SWING_VERTICAL in self._attr_swing_modes
                 and self._prop_vertical_swing
             ):
                 self.set_prop_value(
-                    prop=self._prop_vertical_swing,
-                    value=v_ac_state['D'] == 0)
+                    prop=self._prop_vertical_swing, value=v_ac_state['D'] == 0
+                )
 
         self._value_ac_state.update(v_ac_state)
-        _LOGGER.debug(
-            'ac_state update, %s', self._value_ac_state)
+        _LOGGER.debug('ac_state update, %s', self._value_ac_state)
 
 
-class Heater(MIoTServiceEntity, ClimateEntity):
-    """Heater entities for Xiaomi Home."""
-    # service: heater
-    _prop_on: Optional[MIoTSpecProperty]
+class PtcBathHeater(
+    FeatureTargetTemperature,
+    FeatureTemperature,
+    FeatureFanMode,
+    FeatureSwingMode,
+):
+    """Ptc bath heater"""
+
     _prop_mode: Optional[MIoTSpecProperty]
-    _prop_target_temp: Optional[MIoTSpecProperty]
-    _prop_heat_level: Optional[MIoTSpecProperty]
-    # service: environment
-    _prop_env_temp: Optional[MIoTSpecProperty]
-    _prop_env_humi: Optional[MIoTSpecProperty]
-
-    _heat_level_map: Optional[dict[int, str]]
-
-    def __init__(
-        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
-    ) -> None:
-        """Initialize the Heater."""
-        super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._attr_icon = 'mdi:air-conditioner'
-        self._attr_supported_features = ClimateEntityFeature(0)
-        self._attr_preset_modes = []
-
-        self._prop_on = None
-        self._prop_mode = None
-        self._prop_target_temp = None
-        self._prop_heat_level = None
-        self._prop_env_temp = None
-        self._prop_env_humi = None
-        self._heat_level_map = None
-
-        # properties
-        for prop in entity_data.props:
-            if prop.name == 'on':
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TURN_ON)
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TURN_OFF)
-                self._prop_on = prop
-            elif prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
-                    _LOGGER.error(
-                        'invalid target-temperature value_range format, %s',
-                        self.entity_id)
-                    continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
-                self._attr_temperature_unit = prop.external_unit
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TARGET_TEMPERATURE)
-                self._prop_target_temp = prop
-            elif prop.name == 'heat-level':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
-                    _LOGGER.error(
-                        'invalid heat-level value_list, %s', self.entity_id)
-                    continue
-                self._heat_level_map = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
-                self._attr_preset_modes = list(self._heat_level_map.values())
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.PRESET_MODE)
-                self._prop_heat_level = prop
-            elif prop.name == 'temperature':
-                self._prop_env_temp = prop
-            elif prop.name == 'relative-humidity':
-                self._prop_env_humi = prop
-
-        # hvac modes
-        self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
-
-    async def async_turn_on(self) -> None:
-        """Turn the entity on."""
-        await self.set_property_async(prop=self._prop_on, value=True)
-
-    async def async_turn_off(self) -> None:
-        """Turn the entity off."""
-        await self.set_property_async(prop=self._prop_on, value=False)
-
-    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        """Set new target hvac mode."""
-        await self.set_property_async(
-            prop=self._prop_on, value=False
-            if hvac_mode == HVACMode.OFF else True)
-
-    async def async_set_temperature(self, **kwargs):
-        """Set new target temperature."""
-        if ATTR_TEMPERATURE in kwargs:
-            temp = kwargs[ATTR_TEMPERATURE]
-            if temp > self.max_temp:
-                temp = self.max_temp
-            elif temp < self.min_temp:
-                temp = self.min_temp
-
-            await self.set_property_async(
-                prop=self._prop_target_temp, value=temp)
-
-    async def async_set_preset_mode(self, preset_mode: str) -> None:
-        """Set the preset mode."""
-        await self.set_property_async(
-            self._prop_heat_level,
-            value=self.get_map_value(
-                map_=self._heat_level_map, description=preset_mode))
-
-    @property
-    def target_temperature(self) -> Optional[float]:
-        """Return the target temperature."""
-        return self.get_prop_value(
-            prop=self._prop_target_temp) if self._prop_target_temp else None
-
-    @property
-    def current_temperature(self) -> Optional[float]:
-        """Return the current temperature."""
-        return self.get_prop_value(
-            prop=self._prop_env_temp) if self._prop_env_temp else None
-
-    @property
-    def current_humidity(self) -> Optional[int]:
-        """Return the current humidity."""
-        return self.get_prop_value(
-            prop=self._prop_env_humi) if self._prop_env_humi else None
-
-    @property
-    def hvac_mode(self) -> Optional[HVACMode]:
-        """Return the hvac mode."""
-        return (
-            HVACMode.HEAT if self.get_prop_value(prop=self._prop_on)
-            else HVACMode.OFF)
-
-    @property
-    def preset_mode(self) -> Optional[str]:
-        return (
-            self.get_map_description(
-                map_=self._heat_level_map,
-                key=self.get_prop_value(prop=self._prop_heat_level))
-            if self._prop_heat_level else None)
-
-class BathHeater(MIoTServiceEntity, ClimateEntity):
-    """Heater entities for Xiaomi Home."""
-    # service: ptc-bath-heater
-    _prop_target_temp: Optional[MIoTSpecProperty]
-    _prop_heat_level: Optional[MIoTSpecProperty]
-    _prop_mode: Optional[MIoTSpecProperty]
-    _prop_env_temp: Optional[MIoTSpecProperty]
-    # service: fan-control
-    _prop_fan_on: Optional[MIoTSpecProperty]
-    _prop_fan_level: Optional[MIoTSpecProperty]
-    _prop_horizontal_swing: Optional[MIoTSpecProperty]
-    _prop_vertical_swing: Optional[MIoTSpecProperty]
-
-    _heat_level_map: Optional[dict[int, str]]
     _hvac_mode_map: Optional[dict[int, HVACMode]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
-        """Initialize the Bath Heater."""
-        super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._attr_icon = 'mdi:air-conditioner'
-        self._attr_supported_features = ClimateEntityFeature(0)
-        self._attr_preset_modes = []
-        self._attr_hvac_modes = []
-        self._attr_swing_modes = []
-
+        """Initialize the ptc bath heater."""
         self._prop_mode = None
-        self._prop_target_temp = None
-        self._prop_heat_level = None
-        self._prop_env_temp = None
-        self._prop_fan_on = None
-        self._prop_fan_level = None
-        self._prop_horizontal_swing = None
-        self._prop_vertical_swing = None
-        self._heat_level_map = None
         self._hvac_mode_map = None
 
-        # properties
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        self._attr_icon = 'mdi:hvac'
+        # hvac modes
         for prop in entity_data.props:
-            if prop.name == 'target-temperature':
-                if not isinstance(prop.value_range, dict):
-                    _LOGGER.error(
-                        'invalid target-temperature value_range format, %s',
-                        self.entity_id)
-                    continue
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_target_temperature_step = prop.value_range['step']
-                self._attr_temperature_unit = prop.external_unit
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TARGET_TEMPERATURE)
-                self._prop_target_temp = prop
-            elif prop.name == 'heat-level':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
-                    _LOGGER.error(
-                        'invalid heat-level value_list, %s', self.entity_id)
-                    continue
-                self._heat_level_map = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
-                self._attr_preset_modes = list(self._heat_level_map.values())
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.PRESET_MODE)
-                self._prop_heat_level = prop
-            elif prop.name == 'temperature':
-                self._prop_env_temp = prop
-            elif prop.name == 'mode':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
-                    _LOGGER.error(
-                        'invalid mode value_list, %s', self.entity_id)
+            if prop.name == 'mode':
+                if not isinstance(prop.value_list, list) or not prop.value_list:
+                    _LOGGER.error('invalid mode value_list, %s', self.entity_id)
                     continue
                 self._hvac_mode_map = {}
                 for item in prop.value_list:
@@ -705,153 +736,131 @@ class BathHeater(MIoTServiceEntity, ClimateEntity):
                         self._hvac_mode_map[item['value']] = HVACMode.OFF
                     elif item['name'].lower() in {'auto'}:
                         self._hvac_mode_map[item['value']] = HVACMode.AUTO
-                    elif item['name'].lower() in {'heat', 'quick heat'}:
+                    elif item['name'].lower() in {'ventilate'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.COOL
+                    elif item['name'].lower() in {'heat'}:
                         self._hvac_mode_map[item['value']] = HVACMode.HEAT
                     elif item['name'].lower() in {'dry'}:
                         self._hvac_mode_map[item['value']] = HVACMode.DRY
-                    elif item['name'].lower() in {'fan', 'ventilate'}:
+                    elif item['name'].lower() in {'fan'}:
                         self._hvac_mode_map[item['value']] = HVACMode.FAN_ONLY
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
                 self._prop_mode = prop
-            elif prop.name == 'on':
-                if prop.service.name == 'fan-control':
-                    self._attr_swing_modes.append(SWING_ON)
-                    self._prop_fan_on = prop
-            elif prop.name == 'fan-level':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
-                    _LOGGER.error(
-                        'invalid fan-level value_list, %s', self.entity_id)
-                    continue
-                self._fan_mode_map = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
-                self._attr_fan_modes = list(self._fan_mode_map.values())
-                self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
-                self._prop_fan_level = prop
-            elif prop.name == 'horizontal-swing':
-                self._attr_swing_modes.append(SWING_HORIZONTAL)
-                self._prop_horizontal_swing = prop
-            elif prop.name == 'vertical-swing':
-                self._attr_swing_modes.append(SWING_VERTICAL)
-        # hvac modes
-        if HVACMode.OFF not in self._attr_hvac_modes:
-            self._attr_hvac_modes.append(HVACMode.OFF)
-        # swing modes
-        if (
-            SWING_HORIZONTAL in self._attr_swing_modes
-            and SWING_VERTICAL in self._attr_swing_modes
-        ):
-            self._attr_swing_modes.append(SWING_BOTH)
-        if self._attr_swing_modes:
-            self._attr_swing_modes.insert(0, SWING_OFF)
-            self._attr_supported_features |= ClimateEntityFeature.SWING_MODE
-
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        """Set target hvac mode."""
-        # set mode
+        """Set the target hvac mode."""
+        if self._prop_mode is None:
+            return
         mode_value = self.get_map_value(
-            map_=self._hvac_mode_map, description=hvac_mode)
-        if (
-            mode_value is None or
-            not await self.set_property_async(
-                prop=self._prop_mode, value=mode_value)
+            map_=self._hvac_mode_map, description=hvac_mode
+        )
+        if mode_value is None or not await self.set_property_async(
+            prop=self._prop_mode, value=mode_value
         ):
             raise RuntimeError(
-                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}')
-
-    async def async_set_temperature(self, **kwargs):
-        """Set target temperature."""
-        if ATTR_TEMPERATURE in kwargs:
-            temp = kwargs[ATTR_TEMPERATURE]
-            if temp > self.max_temp:
-                temp = self.max_temp
-            elif temp < self.min_temp:
-                temp = self.min_temp
-
-            await self.set_property_async(
-                prop=self._prop_target_temp, value=temp)
-
-    async def async_set_swing_mode(self, swing_mode):
-        """Set target swing operation."""
-        if swing_mode == SWING_BOTH:
-            if await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=True, update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=True)
-            if await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=True, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=True)
-        elif swing_mode == SWING_HORIZONTAL:
-            if await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=True, update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=True)
-        elif swing_mode == SWING_VERTICAL:
-            if await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=True, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=True)
-        elif swing_mode == SWING_ON:
-            if await self.set_property_async(
-                    prop=self._prop_fan_on, value=True, update=False):
-                self.set_prop_value(self._prop_fan_on, value=True)
-        elif swing_mode == SWING_OFF:
-            if self._prop_fan_on and await self.set_property_async(
-                    prop=self._prop_fan_on, value=False, update=False):
-                self.set_prop_value(self._prop_fan_on, value=False)
-            if self._prop_horizontal_swing and await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=False,
-                    update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=False)
-            if self._prop_vertical_swing and await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=False, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=False)
-        else:
-            raise RuntimeError(
-                f'unknown swing_mode, {swing_mode}, {self.entity_id}')
-        self.async_write_ha_state()
-
-    async def async_set_fan_mode(self, fan_mode):
-        """Set target fan mode."""
-        mode_value = self.get_map_value(
-            map_=self._fan_mode_map, description=fan_mode)
-        if mode_value is None or not await self.set_property_async(
-                prop=self._prop_fan_level, value=mode_value):
-            raise RuntimeError(
-                f'set climate prop.fan_mode failed, {fan_mode}, '
-                f'{self.entity_id}')
-
-    async def async_set_preset_mode(self, preset_mode: str) -> None:
-        """Set the preset mode."""
-        await self.set_property_async(
-            self._prop_heat_level,
-            value=self.get_map_value(
-                map_=self._heat_level_map, description=preset_mode))
-
-    @property
-    def target_temperature(self) -> Optional[float]:
-        """Return the target temperature."""
-        return self.get_prop_value(
-            prop=self._prop_target_temp) if self._prop_target_temp else None
-
-    @property
-    def current_temperature(self) -> Optional[float]:
-        """Return the current temperature."""
-        return self.get_prop_value(
-            prop=self._prop_env_temp) if self._prop_env_temp else None
+                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}'
+            )
 
     @property
     def hvac_mode(self) -> Optional[HVACMode]:
-        """Return the hvac mode. e.g., heat, idle mode."""
-        return self.get_map_description(
-            map_=self._hvac_mode_map,
-            key=self.get_prop_value(prop=self._prop_mode))
-
-    @property
-    def preset_mode(self) -> Optional[str]:
+        """The current hvac mode."""
         return (
             self.get_map_description(
-                map_=self._heat_level_map,
-                key=self.get_prop_value(prop=self._prop_heat_level))
-            if self._prop_heat_level else None)
+                map_=self._hvac_mode_map,
+                key=self.get_prop_value(prop=self._prop_mode),
+            )
+            if self._prop_mode
+            else None
+        )
+
+
+class Thermostat(
+    FeatureOnOff,
+    FeatureTargetTemperature,
+    FeatureTemperature,
+    FeatureHumidity,
+    FeatureFanMode,
+):
+    """Thermostat"""
+
+    _prop_mode: Optional[MIoTSpecProperty]
+    _hvac_mode_map: Optional[dict[int, HVACMode]]
+
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+    ) -> None:
+        """Initialize the thermostat."""
+        self._prop_mode = None
+        self._hvac_mode_map = None
+
+        super().__init__(miot_device=miot_device, entity_data=entity_data)
+        self._attr_icon = 'mdi:thermostat'
+        # hvac modes
+        for prop in entity_data.props:
+            if prop.name == 'mode':
+                if not isinstance(prop.value_list, list) or not prop.value_list:
+                    _LOGGER.error('invalid mode value_list, %s', self.entity_id)
+                    continue
+                self._hvac_mode_map = {}
+                for item in prop.value_list:
+                    if item['name'].lower() in {'off', 'idle'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.OFF
+                    elif item['name'].lower() in {'auto'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.AUTO
+                    elif item['name'].lower() in {'cool'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.COOL
+                    elif item['name'].lower() in {'heat'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.HEAT
+                    elif item['name'].lower() in {'dry'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.DRY
+                    elif item['name'].lower() in {'fan'}:
+                        self._hvac_mode_map[item['value']] = HVACMode.FAN_ONLY
+                self._attr_hvac_modes = list(self._hvac_mode_map.values())
+                self._prop_mode = prop
+
+        if self._attr_hvac_modes is None:
+            self._attr_hvac_modes = [HVACMode.OFF, HVACMode.AUTO]
+        elif HVACMode.OFF not in self._attr_hvac_modes:
+            self._attr_hvac_modes.insert(0, HVACMode.OFF)
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target hvac mode."""
+        # set the device off
+        if hvac_mode == HVACMode.OFF:
+            if not await self.set_property_async(
+                prop=self._prop_on, value=False
+            ):
+                raise RuntimeError(
+                    f'set climate prop.on failed, {hvac_mode}, '
+                    f'{self.entity_id}'
+                )
+            return
+        # set the device on
+        elif self.get_prop_value(prop=self._prop_on) is False:
+            await self.set_property_async(prop=self._prop_on, value=True)
+        # set mode
+        if self._prop_mode is None:
+            return
+        mode_value = self.get_map_value(
+            map_=self._hvac_mode_map, description=hvac_mode
+        )
+        if mode_value is None or not await self.set_property_async(
+            prop=self._prop_mode, value=mode_value
+        ):
+            raise RuntimeError(
+                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}'
+            )
+
+    @property
+    def hvac_mode(self) -> Optional[HVACMode]:
+        """The current hvac mode."""
+        if self.get_prop_value(prop=self._prop_on) is False:
+            return HVACMode.OFF
+        return (
+            self.get_map_description(
+                map_=self._hvac_mode_map,
+                key=self.get_prop_value(prop=self._prop_mode),
+            )
+            if self._prop_mode
+            else None
+        )

@@ -219,7 +219,29 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
         'entity': 'air-conditioner'
     },
     'air-condition-outlet': 'air-conditioner',
-    'thermostat': 'air-conditioner',
+    'thermostat': {
+        'required': {
+            'thermostat': {
+                'required': {
+                    'properties': {
+                        'on': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'target-temperature', 'mode', 'fan-level'}
+                },
+            }
+        },
+        'optional': {
+            'environment': {
+                'required': {},
+                'optional': {
+                    'properties': {'temperature', 'relative-humidity'}
+                }
+            },
+        },
+        'entity': 'thermostat'
+    },
     'heater': {
         'required': {
             'heater': {
