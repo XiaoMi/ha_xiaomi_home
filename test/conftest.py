@@ -7,9 +7,15 @@ from os import path, makedirs
 TEST_ROOT_PATH: str = path.dirname(path.abspath(__file__))
 TEST_FILES_PATH: str = path.join(TEST_ROOT_PATH, 'miot')
 TEST_CACHE_PATH: str = path.join(TEST_ROOT_PATH, 'test_cache')
+TEST_OAUTH2_REDIRECT_URL: str = 'http://homeassistant.local:8123'
 TEST_LANG: str = 'zh-Hans'
 TEST_UID: str = '123456789'
+TEST_RANDOM_DID: str = '6720871318229644562'
+TEST_UUID: str = '8b06ba169c304b788a37bdc3f1210bb1'
 TEST_CLOUD_SERVER: str = 'cn'
+
+DOMAIN_OAUTH2: str = 'oauth2_info'
+DOMAIN_USER_INFO: str = 'user_info'
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -24,6 +30,7 @@ def load_py_file():
         'miot_i18n.py',
         'miot_lan.py',
         'miot_mdns.py',
+        'miot_mips.py',
         'miot_network.py',
         'miot_spec.py',
         'miot_storage.py']
@@ -60,6 +67,10 @@ def load_py_file():
 
     yield
 
+    # NOTICE: All test files and data (tokens, device information, etc.) will
+    # be deleted after the test is completed. For some test cases that
+    # require caching data, you can comment out the following code.
+
     if path.exists(TEST_FILES_PATH):
         shutil.rmtree(TEST_FILES_PATH)
         print('\nremoved test files, ', TEST_FILES_PATH)
@@ -81,6 +92,11 @@ def test_cache_path() -> str:
 
 
 @pytest.fixture(scope='session')
+def test_oauth2_redirect_url() -> str:
+    return TEST_OAUTH2_REDIRECT_URL
+
+
+@pytest.fixture(scope='session')
 def test_lang() -> str:
     return TEST_LANG
 
@@ -91,5 +107,25 @@ def test_uid() -> str:
 
 
 @pytest.fixture(scope='session')
+def test_random_did() -> str:
+    return TEST_RANDOM_DID
+
+
+@pytest.fixture(scope='session')
+def test_uuid() -> str:
+    return TEST_UUID
+
+
+@pytest.fixture(scope='session')
 def test_cloud_server() -> str:
     return TEST_CLOUD_SERVER
+
+
+@pytest.fixture(scope='session')
+def test_domain_oauth2() -> str:
+    return DOMAIN_OAUTH2
+
+
+@pytest.fixture(scope='session')
+def test_domain_user_info() -> str:
+    return DOMAIN_USER_INFO
