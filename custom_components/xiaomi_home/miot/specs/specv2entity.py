@@ -431,6 +431,14 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
                 'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
             }
         },
+        'power': {
+            'device_class': SensorDeviceClass.POWER,
+            'entity': 'sensor',
+            'optional': {
+                'state_class': SensorStateClass.MEASUREMENT,
+                'unit_of_measurement': UnitOfPower.WATT
+            }
+        },
         'total-battery': {
             'device_class': SensorDeviceClass.ENERGY,
             'entity': 'sensor',
