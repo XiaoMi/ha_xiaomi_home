@@ -308,3 +308,43 @@ async def async_remove_entry(
     await miot_cert.remove_user_cert_async()
     await miot_cert.remove_user_key_async()
     return True
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    device_entry: device_registry.DeviceEntry
+) -> bool:
+    """Remove the device."""
+    miot_client: MIoTClient = await get_miot_instance_async(
+        hass=hass, entry_id=config_entry.entry_id)
+
+    if len(device_entry.identifiers) != 1:
+        _LOGGER.error(
+            'remove device failed, invalid identifiers, %s, %s',
+            device_entry.id, device_entry.identifiers)
+        return False
+    identifiers = list(device_entry.identifiers)[0]
+    if identifiers[0] != DOMAIN:
+        _LOGGER.error(
+            'remove device failed, invalid domain, %s, %s',
+            device_entry.id, device_entry.identifiers)
+        return False
+    device_info = identifiers[1].split('_')
+    if len(device_info) != 2:
+        _LOGGER.error(
+            'remove device failed, invalid device info, %s, %s',
+            device_entry.id, device_entry.identifiers)
+        return False
+    did = device_info[1]
+    if did not in miot_client.device_list:
+        _LOGGER.error(
+            'remove device failed, device not found, %s, %s',
+            device_entry.id, device_entry.identifiers)
+        return False
+    # Remove device
+    await miot_client.remove_device_async(did)
+    device_registry.async_get(hass).async_remove_device(device_entry.id)
+    _LOGGER.info(
+        'remove device, %s, %s, %s', device_info[0], did, device_entry.id)
+    return True
