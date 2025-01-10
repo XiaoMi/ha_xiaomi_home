@@ -318,9 +318,10 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
                 if self.get_prop_value(prop=self._prop_fan_on)
                 else FAN_OFF
             )
-
-        fan_level = self.get_prop_value(prop=self._prop_fan_level)
-        return None if fan_level is None else self._fan_mode_map[fan_level]
+        return self.get_map_description(
+            map_=self._fan_mode_map,
+            key=self.get_prop_value(prop=self._prop_fan_level)
+        )
 
 
 class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
