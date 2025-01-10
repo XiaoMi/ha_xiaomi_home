@@ -426,14 +426,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     cloud_server=self._cloud_server,
                     uuid=self._uuid,
                     loop=self._main_loop)
-                state = hashlib.sha1(
-                    f'd=ha.{self._uuid}'.encode('utf-8')).hexdigest()
-                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
                 self._cc_oauth_auth_url = miot_oauth.gen_auth_url(
-                    redirect_url=self._oauth_redirect_url_full, state=state)
+                    redirect_url=self._oauth_redirect_url_full)
+                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = (
+                    miot_oauth.state)
                 _LOGGER.info(
-                    'async_step_oauth, oauth_url: %s',
-                    self._cc_oauth_auth_url)
+                    'async_step_oauth, oauth_url: %s', self._cc_oauth_auth_url)
                 webhook_async_unregister(
                     self.hass, webhook_id=self._virtual_did)
                 webhook_async_register(
@@ -1150,17 +1148,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_oauth(self, user_input=None):
         try:
             if self._cc_task_oauth is None:
-                state = hashlib.sha1(
-                    f'd=ha.{self._entry_data["uuid"]}'.encode('utf-8')
-                ).hexdigest()
-                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
-                self._miot_oauth.set_redirect_url(
-                    redirect_url=self._oauth_redirect_url_full)
                 self._cc_oauth_auth_url = self._miot_oauth.gen_auth_url(
-                    redirect_url=self._oauth_redirect_url_full, state=state)
+                    redirect_url=self._oauth_redirect_url_full)
+                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = (
+                    self._miot_oauth.state)
                 _LOGGER.info(
-                    'async_step_oauth, oauth_url: %s',
-                    self._cc_oauth_auth_url)
+                    'async_step_oauth, oauth_url: %s', self._cc_oauth_auth_url)
                 webhook_async_unregister(
                     self.hass, webhook_id=self._virtual_did)
                 webhook_async_register(
