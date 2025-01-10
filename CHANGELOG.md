@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v0.1.5b1
+This version will cause some Xiaomi routers that do not support access (#564) to become unavailable. You can update the device list in the configuration or delete it manually.
+### Added
+- Fan entity support direction ctrl [#556](https://github.com/XiaoMi/ha_xiaomi_home/pull/556)
+### Changed
+- Filter miwifi.* devices and xiaomi.router.rd03 [#564](https://github.com/XiaoMi/ha_xiaomi_home/pull/564)
+### Fixed
+- Fix multi ha instance login [#560](https://github.com/XiaoMi/ha_xiaomi_home/pull/560)
+- Fix fan speed [#464](https://github.com/XiaoMi/ha_xiaomi_home/pull/464)
+- The number of profile models updated from 660 to 823. [#583](https://github.com/XiaoMi/ha_xiaomi_home/pull/583)
+
 ## v0.1.5b0
 ### Added
 - Add missing parameter state_class  [#101](https://github.com/XiaoMi/ha_xiaomi_home/pull/101)
