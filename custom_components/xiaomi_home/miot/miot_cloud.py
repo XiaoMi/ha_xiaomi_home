@@ -47,6 +47,7 @@ MIoT http client.
 """
 import asyncio
 import base64
+import hashlib
 import json
 import logging
 import re
@@ -136,7 +137,9 @@ class MIoTOauthClient:
             'redirect_uri': redirect_url or self._redirect_url,
             'client_id': self._client_id,
             'response_type': 'code',
-            'device_id': self._device_id
+            'device_id': self._device_id,
+            'state': hashlib.sha1(
+                f'd={self._device_id}'.encode('utf-8')).hexdigest()
         }
         if state:
             params['state'] = state
