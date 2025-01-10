@@ -54,9 +54,13 @@ async def test_miot_oauth_async(
             test_domain_oauth2, test_cloud_server, oauth_info)
         assert rc
         print('save oauth info')
-    print(f'access_token: {oauth_info["access_token"]}')
-    print(f'refresh_token: {oauth_info["refresh_token"]}')
 
+    access_token = oauth_info.get('access_token', None)
+    assert isinstance(access_token, str)
+    print(f'access_token: {access_token}')
+    refresh_token = oauth_info.get('refresh_token', None)
+    assert isinstance(refresh_token, str)
+    print(f'refresh_token: {refresh_token}')
     return oauth_info
 
 
@@ -126,7 +130,8 @@ async def test_miot_cloud_get_nickname_async(
     # Get nickname
     user_info = await miot_http.get_user_info_async()
     assert isinstance(user_info, dict) and 'miliaoNick' in user_info
-    print(f'your nickname: {user_info["miliaoNick"]}\n')
+    nickname = user_info['miliaoNick']
+    print(f'your nickname: {nickname}\n')
 
 
 @pytest.mark.asyncio
@@ -196,9 +201,11 @@ async def test_miot_cloud_get_homeinfos_async(
     assert uid == uid2
     print(f'your uid: {uid}\n')
     # Get homes
-    print(f'your home_list: {homeinfos["home_list"]}\n')
+    home_list = homeinfos.get('home_list', {})
+    print(f'your home_list: {home_list}\n')
     # Get share homes
-    print(f'your share_home_list: {homeinfos["share_home_list"]}\n')
+    share_home_list = homeinfos.get('share_home_list', {})
+    print(f'your share_home_list: {share_home_list}\n')
 
 
 @pytest.mark.asyncio
@@ -315,7 +322,8 @@ async def test_miot_cloud_get_prop_async(
     test_list = did_list[:6]
     for did in test_list:
         prop_value = await miot_http.get_prop_async(did=did, siid=2, piid=1)
-        print(f'{local_devices[did]["name"]}({did}), prop.2.1: {prop_value}\n')
+        device_name = local_devices[did]['name']
+        print(f'{device_name}({did}), prop.2.1: {prop_value}\n')
 
 
 @pytest.mark.asyncio
