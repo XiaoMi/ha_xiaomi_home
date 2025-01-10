@@ -357,7 +357,7 @@ class MIoTClient:
         # Cloud mips
         self._mips_cloud.unsub_mips_state(
             key=f'{self._uid}-{self._cloud_server}')
-        self._mips_cloud.disconnect()
+        self._mips_cloud.deinit()
         # Cancel refresh cloud devices
         if self._refresh_cloud_devices_timer:
             self._refresh_cloud_devices_timer.cancel()
@@ -370,7 +370,7 @@ class MIoTClient:
                 for mips in self._mips_local.values():
                     mips.on_dev_list_changed = None
                     mips.unsub_mips_state(key=mips.group_id)
-                    mips.disconnect()
+                    mips.deinit()
                 if self._mips_local_state_changed_timers:
                     for timer_item in (
                             self._mips_local_state_changed_timers.values()):
