@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Unit test for miot_cloud.py."""
+import asyncio
 import time
 import webbrowser
 import pytest
@@ -264,7 +265,6 @@ async def test_miot_cloud_get_devices_with_dids_async(
     oauth_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
-
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
         access_token=oauth_info['access_token'])
@@ -276,11 +276,13 @@ async def test_miot_cloud_get_devices_with_dids_async(
     assert isinstance(local_devices, dict)
     did_list = list(local_devices.keys())
     assert len(did_list) > 0
-    print(f'your devices id list: {did_list}\n')
-
+    # Get device with dids
+    test_list = did_list[:6]
     devices_info = await miot_http.get_devices_with_dids_async(
-        dids=did_list[:6])
+        dids=test_list)
     assert isinstance(devices_info, dict)
+    print(f'test did list, {len(test_list)}, {test_list}\n')
+    print(f'test result: {len(devices_info)}, {list(devices_info.keys())}\n')
 
 
 @pytest.mark.asyncio
@@ -298,10 +300,22 @@ async def test_miot_cloud_get_prop_async(
     oauth_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
-
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
         access_token=oauth_info['access_token'])
+
+    # Load devices
+    local_devices = await miot_storage.load_async(
+        domain=test_domain_user_info,
+        name=f'devices_{test_cloud_server}', type_=dict)
+    assert isinstance(local_devices, dict)
+    did_list = list(local_devices.keys())
+    assert len(did_list) > 0
+    # Get prop
+    test_list = did_list[:6]
+    for did in test_list:
+        prop_value = await miot_http.get_prop_async(did=did, siid=2, piid=1)
+        print(f'{local_devices[did]["name"]}({did}), prop.2.1: {prop_value}\n')
 
 
 @pytest.mark.asyncio
@@ -319,18 +333,36 @@ async def test_miot_cloud_get_props_async(
     oauth_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
-
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
         access_token=oauth_info['access_token'])
 
+    # Load devices
+    local_devices = await miot_storage.load_async(
+        domain=test_domain_user_info,
+        name=f'devices_{test_cloud_server}', type_=dict)
+    assert isinstance(local_devices, dict)
+    did_list = list(local_devices.keys())
+    assert len(did_list) > 0
+    # Get props
+    test_list = did_list[:6]
+    prop_values = await miot_http.get_props_async(params=[
+        {'did': did, 'siid': 2, 'piid': 1} for did in test_list])
+    print(f'test did list, {len(test_list)}, {test_list}\n')
+    print(f'test result: {len(prop_values)}, {prop_values}\n')
 
+
+@pytest.mark.skip(reason='skip danger operation')
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_set_prop_async(
     test_cache_path, test_cloud_server,
     test_domain_oauth2, test_domain_user_info
 ):
+    """
+    WARNING: This test case will control the actual device and is not enabled
+    by default. You can uncomment @pytest.mark.skip to enable it.
+    """
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
     from miot.miot_storage import MIoTStorage
@@ -340,18 +372,45 @@ async def test_miot_cloud_set_prop_async(
     oauth_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
-
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
         access_token=oauth_info['access_token'])
 
+    # Load devices
+    local_devices = await miot_storage.load_async(
+        domain=test_domain_user_info,
+        name=f'devices_{test_cloud_server}', type_=dict)
+    assert isinstance(local_devices, dict)
+    assert len(local_devices) > 0
+    # Set prop
+    # Find central hub gateway, control its indicator light switch
+    # You can replace it with the device you want to control.
+    test_did = ''
+    for did, dev in local_devices.items():
+        if dev['model'] == 'xiaomi.gateway.hub1':
+            test_did = did
+            break
+    assert test_did != '', 'no central hub gateway found'
+    result = await miot_http.set_prop_async(params=[{
+        'did': test_did, 'siid': 3, 'piid': 1, 'value': False}])
+    print(f'test did, {test_did}, prop.3.1=False -> {result}\n')
+    await asyncio.sleep(1)
+    result = await miot_http.set_prop_async(params=[{
+        'did': test_did, 'siid': 3, 'piid': 1, 'value': True}])
+    print(f'test did, {test_did}, prop.3.1=True -> {result}\n')
 
+
+@pytest.mark.skip(reason='skip danger operation')
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_action_async(
     test_cache_path, test_cloud_server,
     test_domain_oauth2, test_domain_user_info
 ):
+    """
+    WARNING: This test case will control the actual device and is not enabled
+    by default. You can uncomment @pytest.mark.skip to enable it.
+    """
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
     from miot.miot_storage import MIoTStorage
@@ -361,7 +420,26 @@ async def test_miot_cloud_action_async(
     oauth_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
-
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
         access_token=oauth_info['access_token'])
+
+    # Load devices
+    local_devices = await miot_storage.load_async(
+        domain=test_domain_user_info,
+        name=f'devices_{test_cloud_server}', type_=dict)
+    assert isinstance(local_devices, dict)
+    assert len(local_devices) > 0
+    # Action
+    # Find central hub gateway, trigger its virtual events
+    # You can replace it with the device you want to control.
+    test_did = ''
+    for did, dev in local_devices.items():
+        if dev['model'] == 'xiaomi.gateway.hub1':
+            test_did = did
+            break
+    assert test_did != '', 'no central hub gateway found'
+    result = await miot_http.action_async(
+        did=test_did, siid=4, aiid=1,
+        in_list=[{'piid': 1, 'value': 'hello world.'}])
+    print(f'test did, {test_did}, action.4.1 -> {result}\n')
