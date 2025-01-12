@@ -17,7 +17,7 @@ Xiaomi Home Integration is an integrated component of Home Assistant supported b
 cd config
 git clone https://github.com/XiaoMi/ha_xiaomi_home.git
 cd ha_xiaomi_home
-./install.sh /config
+./install.sh ..
 ```
 
 We recommend this installation method, for it is convenient to switch to a tag when updating `xiaomi_home` to a certain version.
@@ -28,7 +28,7 @@ For example, update to version v1.0.0
 cd config/ha_xiaomi_home
 git fetch
 git checkout v1.0.0
-./install.sh /config
+./install.sh ..
 ```
 
 ### Method 2: [HACS](https://hacs.xyz/)
