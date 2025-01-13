@@ -106,7 +106,7 @@ class MIoTOauthClient:
 
     @property
     def state(self) -> str:
-        return self.state
+        return self._state
 
     async def deinit_async(self) -> None:
         if self._session and not self._session.closed:
