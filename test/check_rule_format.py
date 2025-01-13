@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Test rule format."""
 import json
+import logging
 from os import listdir, path
 from typing import Optional
 import pytest
 import yaml
+
+_LOGGER = logging.getLogger(__name__)
 
 ROOT_PATH: str = path.dirname(path.abspath(__file__))
 TRANS_RELATIVE_PATH: str = path.join(
@@ -27,10 +30,10 @@ def load_json_file(file_path: str) -> Optional[dict]:
         with open(file_path, 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
-        print(file_path, 'is not found.')
+        _LOGGER.info('%s is not found.', file_path,)
         return None
     except json.JSONDecodeError:
-        print(file_path, 'is not a valid JSON file.')
+        _LOGGER.info('%s is not a valid JSON file.', file_path)
         return None
 
 
@@ -44,10 +47,10 @@ def load_yaml_file(file_path: str) -> Optional[dict]:
         with open(file_path, 'r', encoding='utf-8') as file:
             return yaml.safe_load(file)
     except FileNotFoundError:
-        print(file_path, 'is not found.')
+        _LOGGER.info('%s is not found.', file_path)
         return None
     except yaml.YAMLError:
-        print(file_path, 'is not a valid YAML file.')
+        _LOGGER.info('%s, is not a valid YAML file.', file_path)
         return None
 
 
@@ -116,37 +119,43 @@ def bool_trans(d: dict) -> bool:
         return False
     default_trans: dict = d['translate'].pop('default')
     if not default_trans:
-        print('default trans is empty')
+        _LOGGER.info('default trans is empty')
         return False
     default_keys: set[str] = set(default_trans.keys())
     for key, trans in d['translate'].items():
         trans_keys: set[str] = set(trans.keys())
         if set(trans.keys()) != default_keys:
-            print('bool trans inconsistent', key, default_keys, trans_keys)
+            _LOGGER.info(
+                'bool trans inconsistent, %s, %s, %s',
+                key, default_keys, trans_keys)
             return False
     return True
 
 
 def compare_dict_structure(dict1: dict, dict2: dict) -> bool:
     if not isinstance(dict1, dict) or not isinstance(dict2, dict):
-        print('invalid type')
+        _LOGGER.info('invalid type')
         return False
     if dict1.keys() != dict2.keys():
-        print('inconsistent key values, ', dict1.keys(), dict2.keys())
+        _LOGGER.info(
+            'inconsistent key values, %s, %s', dict1.keys(), dict2.keys())
         return False
     for key in dict1:
         if isinstance(dict1[key], dict) and isinstance(dict2[key], dict):
             if not compare_dict_structure(dict1[key], dict2[key]):
-                print('inconsistent key values, dict, ', key)
+                _LOGGER.info(
+                    'inconsistent key values, dict, %s', key)
                 return False
         elif isinstance(dict1[key], list) and isinstance(dict2[key], list):
             if not all(
                     isinstance(i, type(j))
                     for i, j in zip(dict1[key], dict2[key])):
-                print('inconsistent key values, list, ', key)
+                _LOGGER.info(
+                    'inconsistent key values, list, %s', key)
                 return False
         elif not isinstance(dict1[key], type(dict2[key])):
-            print('inconsistent key values, type, ', key)
+            _LOGGER.info(
+                'inconsistent key values, type, %s', key)
             return False
     return True
 
@@ -239,7 +248,8 @@ def test_miot_lang_integrity():
         compare_dict: dict = load_json_file(
             path.join(TRANS_RELATIVE_PATH, name))
         if not compare_dict_structure(default_dict, compare_dict):
-            print('compare_dict_structure failed /translations, ', name)
+            _LOGGER.info(
+                'compare_dict_structure failed /translations, %s', name)
             assert False
     # Check i18n files structure
     default_dict = load_json_file(
@@ -248,7 +258,8 @@ def test_miot_lang_integrity():
         compare_dict: dict = load_json_file(
             path.join(MIOT_I18N_RELATIVE_PATH, name))
         if not compare_dict_structure(default_dict, compare_dict):
-            print('compare_dict_structure failed /miot/i18n, ', name)
+            _LOGGER.info(
+                'compare_dict_structure failed /miot/i18n, %s', name)
             assert False
 
 
@@ -284,10 +295,10 @@ def test_miot_data_sort():
 def test_sort_spec_data():
     sort_data: dict = sort_bool_trans(file_path=SPEC_BOOL_TRANS_FILE)
     save_json_file(file_path=SPEC_BOOL_TRANS_FILE, data=sort_data)
-    print(SPEC_BOOL_TRANS_FILE, 'formatted.')
+    _LOGGER.info('%s formatted.', SPEC_BOOL_TRANS_FILE)
     sort_data = sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)
     save_json_file(file_path=SPEC_MULTI_LANG_FILE, data=sort_data)
-    print(SPEC_MULTI_LANG_FILE, 'formatted.')
+    _LOGGER.info('%s formatted.', SPEC_MULTI_LANG_FILE)
     sort_data = sort_spec_filter(file_path=SPEC_FILTER_FILE)
     save_json_file(file_path=SPEC_FILTER_FILE, data=sort_data)
-    print(SPEC_FILTER_FILE, 'formatted.')
+    _LOGGER.info('%s formatted.', SPEC_FILTER_FILE)

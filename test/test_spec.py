@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Unit test for miot_spec.py."""
 import json
+import logging
 import random
 import time
 from urllib.request import Request, urlopen
 import pytest
+
+_LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=import-outside-toplevel, unused-argument
 
@@ -79,10 +82,10 @@ async def test_spec_random_parse_async(test_cache_path, test_lang):
     storage = MIoTStorage(test_cache_path)
     spec_parser = MIoTSpecParser(lang=test_lang, storage=storage)
     await spec_parser.init_async()
-    start_ts: int = time.time()*1000
+    start_ts = time.time()*1000
     for index in test_urn_index:
         urn: str = test_urns[int(index)]
         result = await spec_parser.parse(urn=urn, skip_cache=True)
         assert result is not None
-    end_ts: int = time.time()*1000
-    print(f'takes time, {test_count}, {end_ts-start_ts}')
+    end_ts = time.time()*1000
+    _LOGGER.info('takes time, %s, %s', test_count, end_ts-start_ts)

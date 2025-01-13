@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Pytest fixtures."""
+import logging
 import random
 import shutil
 import pytest
@@ -16,6 +17,21 @@ TEST_CLOUD_SERVER: str = 'cn'
 
 DOMAIN_OAUTH2: str = 'oauth2_info'
 DOMAIN_USER_INFO: str = 'user_info'
+
+_LOGGER = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope='session', autouse=True)
+def set_logger():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    _LOGGER.info('set logger, %s', logger)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -41,28 +57,28 @@ def load_py_file():
                 TEST_ROOT_PATH, '../custom_components/xiaomi_home/miot',
                 file_name),
             path.join(TEST_FILES_PATH, file_name))
-    print('\nloaded test py files, ', file_list)
+    _LOGGER.info('\nloaded test py files, %s', file_list)
     # Copy spec files to test folder
     shutil.copytree(
         src=path.join(
             TEST_ROOT_PATH, '../custom_components/xiaomi_home/miot/specs'),
         dst=path.join(TEST_FILES_PATH, 'specs'),
         dirs_exist_ok=True)
-    print('loaded spec test folder, specs')
+    _LOGGER.info('loaded spec test folder, specs')
     # Copy lan files to test folder
     shutil.copytree(
         src=path.join(
             TEST_ROOT_PATH, '../custom_components/xiaomi_home/miot/lan'),
         dst=path.join(TEST_FILES_PATH, 'lan'),
         dirs_exist_ok=True)
-    print('loaded lan test folder, lan')
+    _LOGGER.info('loaded lan test folder, lan')
     # Copy i18n files to test folder
     shutil.copytree(
         src=path.join(
             TEST_ROOT_PATH, '../custom_components/xiaomi_home/miot/i18n'),
         dst=path.join(TEST_FILES_PATH, 'i18n'),
         dirs_exist_ok=True)
-    print('loaded i18n test folder, i18n')
+    _LOGGER.info('loaded i18n test folder, i18n')
 
     yield
 
@@ -125,6 +141,11 @@ def test_cloud_server() -> str:
 @pytest.fixture(scope='session')
 def test_domain_oauth2() -> str:
     return DOMAIN_OAUTH2
+
+
+@pytest.fixture(scope='session')
+def test_name_uuid() -> str:
+    return f'{TEST_CLOUD_SERVER}_uuid'
 
 
 @pytest.fixture(scope='session')
