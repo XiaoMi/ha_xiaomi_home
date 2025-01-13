@@ -90,7 +90,7 @@ class Notify(MIoTActionEntity, NotifyEntity):
         super().__init__(miot_device=miot_device, spec=spec)
         self._attr_extra_state_attributes = {}
         action_in: str = ', '.join([
-            f'{prop.description_trans}({prop.format_})'
+            f'{prop.description_trans}({prop.format_.__name__})'
             for prop in self.spec.in_])
         self._attr_extra_state_attributes['action params'] = f'[{action_in}]'
 
@@ -122,24 +122,24 @@ class Notify(MIoTActionEntity, NotifyEntity):
             return
         in_value: list[dict] = []
         for index, prop in enumerate(self.spec.in_):
-            if prop.format_ == 'str':
+            if prop.format_ == str:
                 if isinstance(in_list[index], (bool, int, float, str)):
                     in_value.append(
                         {'piid': prop.iid, 'value': str(in_list[index])})
                     continue
-            elif prop.format_ == 'bool':
+            elif prop.format_ == bool:
                 if isinstance(in_list[index], (bool, int)):
                     # yes, no, on, off, true, false and other bool types
                     # will also be parsed as 0 and 1 of int.
                     in_value.append(
                         {'piid': prop.iid, 'value': bool(in_list[index])})
                     continue
-            elif prop.format_ == 'float':
+            elif prop.format_ == float:
                 if isinstance(in_list[index], (int, float)):
                     in_value.append(
                         {'piid': prop.iid, 'value': in_list[index]})
                     continue
-            elif prop.format_ == 'int':
+            elif prop.format_ == int:
                 if isinstance(in_list[index], int):
                     in_value.append(
                         {'piid': prop.iid, 'value': in_list[index]})

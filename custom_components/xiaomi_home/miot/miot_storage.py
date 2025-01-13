@@ -719,60 +719,6 @@ class MIoTCert:
         return binascii.hexlify(sha1_hash.finalize()).decode('utf-8')
 
 
-class SpecMultiLang:
-    """
-    MIoT-Spec-V2 multi-language for entities.
-    """
-    MULTI_LANG_FILE = 'specs/multi_lang.json'
-    _main_loop: asyncio.AbstractEventLoop
-    _lang: str
-    _data: Optional[dict[str, dict]]
-
-    def __init__(
-        self, lang: str, loop: Optional[asyncio.AbstractEventLoop] = None
-    ) -> None:
-        self._main_loop = loop or asyncio.get_event_loop()
-        self._lang = lang
-        self._data = None
-
-    async def init_async(self) -> None:
-        if isinstance(self._data, dict):
-            return
-        multi_lang_data = None
-        self._data = {}
-        try:
-            multi_lang_data = await self._main_loop.run_in_executor(
-                None, load_json_file,
-                os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)),
-                    self.MULTI_LANG_FILE))
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            _LOGGER.error('multi lang, load file error, %s', err)
-            return
-        # Check if the file is a valid JSON file
-        if not isinstance(multi_lang_data, dict):
-            _LOGGER.error('multi lang, invalid file data')
-            return
-        for lang_data in multi_lang_data.values():
-            if not isinstance(lang_data, dict):
-                _LOGGER.error('multi lang, invalid lang data')
-                return
-            for data in lang_data.values():
-                if not isinstance(data, dict):
-                    _LOGGER.error('multi lang, invalid lang data item')
-                    return
-        self._data = multi_lang_data
-
-    async def deinit_async(self) -> str:
-        self._data = None
-
-    async def translate_async(self, urn_key: str) -> dict[str, str]:
-        """MUST call init_async() first."""
-        if urn_key in self._data:
-            return self._data[urn_key].get(self._lang, {})
-        return {}
-
-
 class SpecBoolTranslation:
     """
     Boolean value translation.
