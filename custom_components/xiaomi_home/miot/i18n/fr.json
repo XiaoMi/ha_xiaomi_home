@@ -64,6 +64,22 @@
             "net_unavailable": "Interface non disponible"
         }
     },
+    "oauth2": {
+        "success": {
+            "title": "Authentification réussie",
+            "content": "Veuillez fermer cette page et revenir à la page d'authentification du compte pour cliquer sur 'Suivant'.",
+            "button": "Fermer"
+        },
+        "fail": {
+            "title": "Échec de l'authentification",
+            "content": "{error_msg}, veuillez fermer cette page et revenir à la page d'authentification du compte pour cliquer à nouveau sur le lien d'authentification.",
+            "button": "Fermer"
+        },
+        "error_msg": {
+            "-10100": "Paramètres de réponse invalides ('code' ou 'state' est vide)",
+            "-10101": "Le champ 'state' transmis ne correspond pas"
+        }
+    },
     "miot": {
         "client": {
             "invalid_oauth_info": "Informations d'authentification non valides, le lien cloud ne sera pas disponible, veuillez accéder à la page d'intégration Xiaomi Home, cliquez sur \"Options\" pour vous réauthentifier",

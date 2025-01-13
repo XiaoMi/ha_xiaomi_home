@@ -64,6 +64,22 @@
             "net_unavailable": "Interface indisponível"
         }
     },
+    "oauth2": {
+        "success": {
+            "title": "Autenticação bem-sucedida",
+            "content": "Por favor, feche esta página e volte para a página de autenticação da conta para clicar em 'Próximo'.",
+            "button": "Fechar"
+        },
+        "fail": {
+            "title": "Falha na autenticação",
+            "content": "{error_msg}, por favor, feche esta página e volte para a página de autenticação da conta para clicar no link de autenticação novamente.",
+            "button": "Fechar"
+        },
+        "error_msg": {
+            "-10100": "Parâmetros de resposta inválidos ('code' ou 'state' está vazio)",
+            "-10101": "O campo 'state' fornecido não corresponde"
+        }
+    },
     "miot": {
         "client": {
             "invalid_oauth_info": "Informações de autenticação inválidas, a conexão com a nuvem estará indisponível. Vá para a página de integração do Xiaomi Home e clique em 'Opções' para reautenticar.",

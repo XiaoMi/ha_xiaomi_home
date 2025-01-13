@@ -64,6 +64,22 @@
             "net_unavailable": "Schnittstelle nicht verfügbar"
         }
     },
+    "oauth2": {
+        "success": {
+            "title": "Authentifizierung erfolgreich",
+            "content": "Bitte schließen Sie diese Seite und kehren Sie zur Kontoauthentifizierungsseite zurück, um auf „Weiter“ zu klicken.",
+            "button": "Schließen"
+        },
+        "fail": {
+            "title": "Authentifizierung fehlgeschlagen",
+            "content": "{error_msg}, bitte schließen Sie diese Seite und kehren Sie zur Kontoauthentifizierungsseite zurück, um den Authentifizierungslink erneut zu klicken.",
+            "button": "Schließen"
+        },
+        "error_msg": {
+            "-10100": "Ungültige Antwortparameter ('code' oder 'state' Feld ist leer)",
+            "-10101": "Übergebenes 'state' Feld stimmt nicht überein"
+        }
+    },
     "miot": {
         "client": {
             "invalid_oauth_info": "Ungültige Authentifizierungsinformationen, Cloud-Verbindung nicht verfügbar, bitte betreten Sie die Xiaomi Home-Integrationsseite und klicken Sie auf 'Optionen', um die Authentifizierung erneut durchzuführen",

@@ -64,6 +64,22 @@
             "net_unavailable": "Interface unavailable"
         }
     },
+    "oauth2": {
+        "success": {
+            "title": "Authentication Successful",
+            "content": "Please close this page and return to the account authentication page to click 'Next'.",
+            "button": "Close"
+        },
+        "fail": {
+            "title": "Authentication Failed",
+            "content": "{error_msg}, please close this page and return to the account authentication page to click the authentication link again.",
+            "button": "Close"
+        },
+        "error_msg": {
+            "-10100": "Invalid response parameters ('code' or 'state' field is empty)",
+            "-10101": "Passed-in 'state' field mismatch"
+        }
+    },
     "miot": {
         "client": {
             "invalid_oauth_info": "Authentication information is invalid, cloud link will be unavailable, please enter the Xiaomi Home integration page, click 'Options' to re-authenticate",
