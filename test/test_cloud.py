@@ -75,6 +75,8 @@ async def test_miot_oauth_async(
     refresh_token = oauth_info.get('refresh_token', None)
     assert isinstance(refresh_token, str)
     _LOGGER.info('refresh_token: %s', refresh_token)
+
+    await miot_oauth.deinit_async()
     return oauth_info
 
 
@@ -125,6 +127,8 @@ async def test_miot_oauth_refresh_token(
         test_domain_oauth2, test_cloud_server, update_info)
     assert rc
     _LOGGER.info('refresh token success, %s', update_info)
+
+    await miot_oauth.deinit_async()
 
 
 @pytest.mark.asyncio
