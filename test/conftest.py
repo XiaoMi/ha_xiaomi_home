@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Pytest fixtures."""
+import random
 import shutil
 import pytest
 from os import path, makedirs
+from uuid import uuid4
 
 TEST_ROOT_PATH: str = path.dirname(path.abspath(__file__))
 TEST_FILES_PATH: str = path.join(TEST_ROOT_PATH, 'miot')
