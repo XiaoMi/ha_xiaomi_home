@@ -17,7 +17,7 @@
 cd config
 git clone https://github.com/XiaoMi/ha_xiaomi_home.git
 cd ha_xiaomi_home
-./install.sh /config
+./install.sh ..
 ```
 
 推荐使用此方法安装米家集成。当您想要更新至特定版本时，只需要切换至相应的 Tag 。
@@ -28,7 +28,7 @@ cd ha_xiaomi_home
 cd config/ha_xiaomi_home
 git fetch
 git checkout v1.0.0
-./install.sh /config
+./install.sh ..
 ```
 
 ### 方法 2: [HACS](https://hacs.xyz/)
