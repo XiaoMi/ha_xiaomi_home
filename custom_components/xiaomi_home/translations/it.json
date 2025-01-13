@@ -1,0 +1,144 @@
+{
+    "config": {
+        "flow_title": "Integrazione Xiaomi Home",
+        "step": {
+            "eula": {
+                "title": "Avviso sui Rischi",
+                "description": "1. Le informazioni del tuo utente Xiaomi e le informazioni del dispositivo saranno memorizzate nel sistema Home Assistant. **Xiaomi non può garantire la sicurezza del meccanismo di archiviazione di Home Assistant**. Sei responsabile per prevenire il furto delle tue informazioni.\r\n2. Questa integrazione è mantenuta dalla comunità open-source. Potrebbero esserci problemi di stabilità o altri problemi. In caso di problemi o bug con questa integrazione, **dovresti cercare aiuto dalla comunità open-source piuttosto che contattare il servizio clienti Xiaomi**.\r\n3. È necessaria una certa abilità tecnica per mantenere il tuo ambiente operativo locale. L'integrazione non è user-friendly per i principianti.\r\n4. Si prega di leggere il file README prima di iniziare.\n\n5. Per garantire un uso stabile dell'integrazione e prevenire l'abuso dell'interfaccia, **questa integrazione può essere utilizzata solo in Home Assistant. Per i dettagli, consulta il LICENSE**.",
+                "data": {
+                    "eula": "Sono consapevole dei rischi sopra indicati e sono disposto ad assumermi volontariamente qualsiasi rischio associato all'uso dell'integrazione."
+                }
+            },
+            "auth_config": {
+                "title": "Configurazione di base",
+                "description": "### Regione di Login\r\nSeleziona la regione del tuo account Xiaomi. Puoi trovarla nell'APP Xiaomi Home > Profilo (nel menu in basso) > Impostazioni aggiuntive > Informazioni su Xiaomi Home.\r\n### Lingua\r\nSeleziona la lingua dei nomi dei dispositivi e delle entità. Alcune frasi senza traduzione verranno visualizzate in inglese.\r\n### URL di reindirizzamento OAuth2\r\nL'indirizzo di reindirizzamento dell'autenticazione OAuth2 è **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant deve trovarsi nella stessa rete locale del terminale operativo corrente (ad esempio, il computer personale) e il terminale operativo deve poter accedere alla home page di Home Assistant tramite questo indirizzo. Altrimenti, l'autenticazione del login potrebbe fallire.\r\n### Nota\r\n- Per gli utenti con centinaia o più dispositivi Mi Home, l'aggiunta iniziale dell'integrazione richiederà del tempo. Si prega di essere pazienti.\r\n- Se Home Assistant è in esecuzione in un ambiente Docker, assicurarsi che la modalità di rete Docker sia impostata su host, altrimenti la funzionalità di controllo locale potrebbe non funzionare correttamente.\r\n- La funzionalità di controllo locale dell'integrazione ha alcune dipendenze. Si prega di leggere attentamente il README.",
+                "data": {
+                    "cloud_server": "Regione di Login",
+                    "integration_language": "Lingua",
+                    "oauth_redirect_url": "URL di reindirizzamento OAuth2"
+                }
+            },
+            "oauth_error": {
+                "title": "Errore di Login",
+                "description": "Clicca AVANTI per riprovare."
+            },
+            "devices_filter": {
+                "title": "Seleziona Casa e Dispositivi",
+                "description": "## Istruzioni per l'uso\r\n### Modalità di controllo\r\n- Auto: Quando è disponibile un gateway centrale Xiaomi nella rete locale, Home Assistant darà priorità all'invio dei comandi di controllo del dispositivo tramite il gateway centrale per ottenere il controllo locale. Se non c'è un gateway centrale nella rete locale, tenterà di inviare comandi di controllo tramite la funzione di controllo LAN di Xiaomi. Solo quando le condizioni di controllo locale sopra indicate non sono soddisfatte, i comandi di controllo del dispositivo verranno inviati tramite il cloud.\r\n- Cloud: Tutti i comandi di controllo vengono inviati tramite il cloud.\r\n### Importa dispositivi da casa\r\nL'integrazione aggiungerà dispositivi dalle case selezionate.\n### Modalità di sincronizzazione del nome della stanza\nQuando si importano dispositivi dall'APP Xiaomi Home a Home Assistant, la convenzione di denominazione dell'area in cui viene aggiunto il dispositivo è la seguente. Si noti che il processo di sincronizzazione del dispositivo non modifica le impostazioni della casa o della stanza nell'APP Xiaomi Home.\r\n- Non sincronizzare: Il dispositivo non verrà aggiunto a nessuna area.\r\n- Altre opzioni: Il dispositivo verrà aggiunto a un'area denominata come la casa e/o il nome della stanza già esistente nell'APP Xiaomi Home.\r\n### Modalità debug per azione\r\nPer l'azione definita in MIoT-Spec-V2 del dispositivo, verranno creati un'entità di testo insieme a un'entità di notifica, in cui è possibile inviare comandi di controllo al dispositivo per il debug.\r\n### Nascondi entità create non standard\r\nNascondi le entità generate da istanze non standard di MIoT-Spec-V2, i cui nomi iniziano con \"*\".\r\n\r\n&emsp;\r\n### Ciao {nick_name}, seleziona la modalità di controllo dell'integrazione e la casa in cui vuoi importare il dispositivo.",
+                "data": {
+                    "ctrl_mode": "Modalità di controllo",
+                    "home_infos": "Importa dispositivi da casa",
+                    "area_name_rule": "Modalità di sincronizzazione del nome della stanza",
+                    "action_debug": "Modalità debug per azione",
+                    "hide_non_standard_entities": "Nascondi entità create non standard"
+                }
+            }
+        },
+        "progress": {
+            "oauth": "### {link_left}Clicca qui per accedere{link_right}\r\n(Verrai reindirizzato automaticamente alla pagina successiva dopo un accesso riuscito)"
+        },
+        "error": {
+            "eula_not_agree": "Si prega di leggere l'avviso sui rischi.",
+            "get_token_error": "Impossibile recuperare le informazioni di autorizzazione per il login (token OAuth).",
+            "get_homeinfo_error": "Impossibile recuperare le informazioni della casa.",
+            "mdns_discovery_error": "Eccezione del servizio di scoperta dei dispositivi locali.",
+            "get_cert_error": "Impossibile recuperare il certificato del gateway centrale.",
+            "no_family_selected": "Nessuna casa selezionata.",
+            "no_devices": "La casa selezionata non ha dispositivi. Si prega di scegliere una casa che contiene dispositivi e continuare.",
+            "no_central_device": "[Modalità Gateway Centrale] richiede un gateway centrale Xiaomi disponibile nella rete locale in cui si trova Home Assistant. Si prega di verificare se la casa selezionata soddisfa il requisito."
+        },
+        "abort": {
+            "network_connect_error": "Configurazione fallita. La connessione di rete è anomala. Si prega di controllare la configurazione della rete del dispositivo.",
+            "already_configured": "La configurazione per questo utente è già completata. Si prega di andare alla pagina dell'integrazione e cliccare sul pulsante CONFIGURA per le modifiche.",
+            "invalid_auth_info": "Le informazioni di autenticazione sono scadute. Si prega di andare alla pagina dell'integrazione e cliccare sul pulsante CONFIGURA per ri-autenticarsi.",
+            "config_flow_error": "Errore di configurazione dell'integrazione: {error}."
+        }
+    },
+    "options": {
+        "step": {
+            "auth_config": {
+                "title": "Configurazione dell'Autenticazione",
+                "description": "Le informazioni di autenticazione locale sono scadute. Si prega di riavviare il processo di autenticazione.\r\n### Regione di Login Corrente: {cloud_server}\r\n### URL di reindirizzamento OAuth2\r\nL'indirizzo di reindirizzamento dell'autenticazione OAuth2 è **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant deve trovarsi nella stessa rete locale del terminale operativo corrente (ad esempio, il computer personale) e il terminale operativo deve poter accedere alla home page di Home Assistant tramite questo indirizzo. Altrimenti, l'autenticazione del login potrebbe fallire.",
+                "data": {
+                    "oauth_redirect_url": "URL di reindirizzamento OAuth2"
+                }
+            },
+            "oauth_error": {
+                "title": "Si è verificato un errore durante il login.",
+                "description": "Clicca AVANTI per riprovare."
+            },
+            "config_options": {
+                "title": "Opzioni di Configurazione",
+                "description": "### Ciao, {nick_name}\r\n\r\nID Xiaomi: {uid}\r\nRegione di Login Corrente: {cloud_server}\r\n\r\nSeleziona le opzioni che desideri configurare, poi clicca AVANTI.",
+                "data": {
+                    "integration_language": "Lingua dell'Integrazione",
+                    "update_user_info": "Aggiorna le informazioni dell'utente",
+                    "update_devices": "Aggiorna l'elenco dei dispositivi",
+                    "action_debug": "Modalità debug per azione",
+                    "hide_non_standard_entities": "Nascondi entità create non standard",
+                    "update_trans_rules": "Aggiorna le regole di conversione delle entità",
+                    "update_lan_ctrl_config": "Aggiorna configurazione del controllo LAN"
+                }
+            },
+            "update_user_info": {
+                "title": "Aggiorna il Nickname dell'Utente",
+                "description": "Ciao {nick_name}, puoi modificare il tuo nickname personalizzato qui sotto.",
+                "data": {
+                    "nick_name": "Nickname"
+                }
+            },
+            "devices_filter": {
+                "title": "Riesegui la selezione di Casa e Dispositivi",
+                "description": "## Istruzioni per l'uso\r\n### Modalità di controllo\r\n- Auto: Quando è disponibile un gateway centrale Xiaomi nella rete locale, Home Assistant darà priorità all'invio dei comandi di controllo del dispositivo tramite il gateway centrale per ottenere il controllo locale. Se non c'è un gateway centrale nella rete locale, tenterà di inviare comandi di controllo tramite la funzione di controllo LAN di Xiaomi. Solo quando le condizioni di controllo locale sopra indicate non sono soddisfatte, i comandi di controllo del dispositivo verranno inviati tramite il cloud.\r\n- Cloud: Tutti i comandi di controllo vengono inviati tramite il cloud.\r\n### Importa dispositivi da casa\r\nL'integrazione aggiungerà dispositivi dalle case selezionate.\r\n&emsp;\r\n### Ciao {nick_name}, seleziona la modalità di controllo dell'integrazione e la casa in cui vuoi importare il dispositivo.",
+                "data": {
+                    "ctrl_mode": "Modalità di controllo",
+                    "home_infos": "Importa dispositivi da casa"
+                }
+            },
+            "update_trans_rules": {
+                "title": "Aggiorna le Regole di Trasformazione delle Entità",
+                "description": "## Istruzioni per l'uso\r\n- Aggiorna le informazioni delle entità dei dispositivi nell'istanza dell'integrazione corrente, incluse la configurazione multilingue MIoT-Spec-V2, la traduzione booleana e il filtro dei modelli.\r\n- **Avviso**: Questa è una configurazione globale e aggiornerà la cache locale. Influenzando tutte le istanze di integrazione.\r\n- Questa operazione richiederà del tempo, si prega di essere pazienti. Seleziona \"Conferma Aggiornamento\" e clicca \"Avanti\" per iniziare l'aggiornamento di **{urn_count}** regole, altrimenti salta l'aggiornamento.",
+                "data": {
+                    "confirm": "Conferma l'aggiornamento"
+                }
+            },
+            "update_lan_ctrl_config": {
+                "title": "Aggiorna configurazione del controllo LAN",
+                "description": "## Istruzioni per l'uso\r\nAggiorna le configurazioni per la funzione di controllo LAN di Xiaomi. Quando il cloud e il gateway centrale non possono controllare i dispositivi, l'integrazione tenterà di controllare i dispositivi tramite la LAN. Se nessuna scheda di rete è selezionata, la funzione di controllo LAN non avrà effetto.\r\n- Solo i dispositivi compatibili con MIoT-Spec-V2 nella LAN sono supportati. Alcuni dispositivi prodotti prima del 2020 potrebbero non supportare il controllo LAN o l'abbonamento LAN.\r\n- Seleziona la/le scheda/e di rete nella stessa rete dei dispositivi da controllare. È possibile selezionare più schede di rete. Se Home Assistant ha due o più connessioni alla rete locale a causa della selezione multipla delle schede di rete, si consiglia di selezionare quella con la migliore connessione di rete, altrimenti potrebbe avere un effetto negativo sui dispositivi.\r\n- Se ci sono dispositivi terminali (altoparlanti Xiaomi con schermo, telefono cellulare, ecc.) nella LAN che supportano il controllo locale, abilitare l'abbonamento LAN potrebbe causare anomalie nell'automazione locale e nei dispositivi.\r\n- **Avviso**: Questa è una configurazione globale. Influenzando tutte le istanze di integrazione. Usala con cautela.\r\n{notice_net_dup}",
+                "data": {
+                    "net_interfaces": "Si prega di selezionare la scheda di rete da utilizzare",
+                    "enable_subscribe": "Abilita abbonamento LAN"
+                }
+            },
+            "config_confirm": {
+                "title": "Conferma Configurazione",
+                "description": "Ciao **{nick_name}**, conferma le ultime informazioni di configurazione e clicca su INVIA.\r\nL'integrazione si ricaricherà utilizzando la configurazione aggiornata.\r\n\r\nLingua dell'Integrazione: \t{lang_new}\r\nNickname: \t{nick_name_new}\r\nModalità debug per azione: \t{action_debug}\r\nNascondi entità create non standard: \t{hide_non_standard_entities}\r\nCambiamenti Dispositivi: \tAggiungi **{devices_add}** dispositivi, Rimuovi **{devices_remove}** dispositivi\r\nCambiamento delle regole di trasformazione: \tCi sono in totale **{trans_rules_count}** regole, e **{trans_rules_count_success}** regole aggiornate",
+                "data": {
+                    "confirm": "Conferma il cambiamento"
+                }
+            }
+        },
+        "progress": {
+            "oauth": "### {link_left}Clicca qui per riaccedere{link_right}"
+        },
+        "error": {
+            "not_auth": "Non autenticato. Clicca sul link di autenticazione per autenticare l'identità dell'utente.",
+            "get_token_error": "Impossibile recuperare le informazioni di autorizzazione per il login (token OAuth).",
+            "get_homeinfo_error": "Impossibile recuperare le informazioni della casa.",
+            "get_cert_error": "Impossibile recuperare il certificato del gateway centrale.",
+            "no_devices": "La casa selezionata non ha dispositivi. Si prega di scegliere una casa che contiene dispositivi e continuare.",
+            "no_family_selected": "Nessuna casa selezionata.",
+            "no_central_device": "[Modalità Gateway Centrale] richiede un gateway centrale Xiaomi disponibile nella rete locale in cui si trova Home Assistant. Si prega di verificare se la casa selezionata soddisfa il requisito.",
+            "mdns_discovery_error": "Eccezione del servizio di scoperta dei dispositivi locali.",
+            "update_config_error": "Impossibile aggiornare le informazioni di configurazione.",
+            "not_confirm": "Le modifiche non sono state confermate. Si prega di confermare il cambiamento prima di inviare."
+        },
+        "abort": {
+            "network_connect_error": "Configurazione fallita. La connessione di rete è anomala. Si prega di controllare la configurazione della rete del dispositivo.",
+            "options_flow_error": "Errore di riconfigurazione dell'integrazione: {error}",
+            "re_add": "Si prega di riaggiungere l'integrazione. Messaggio di errore: {error}",
+            "storage_error": "Eccezione del modulo di archiviazione dell'integrazione. Si prega di riprovare o riaggiungere l'integrazione: {error}",
+            "inconsistent_account": "Le informazioni dell'account sono incoerenti."
+        }
+    }
+}
