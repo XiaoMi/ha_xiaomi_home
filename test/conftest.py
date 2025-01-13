@@ -15,8 +15,7 @@ TEST_LANG: str = 'zh-Hans'
 TEST_UID: str = '123456789'
 TEST_CLOUD_SERVER: str = 'cn'
 
-DOMAIN_OAUTH2: str = 'oauth2_info'
-DOMAIN_USER_INFO: str = 'user_info'
+DOMAIN_CLOUD_CACHE: str = 'cloud_cache'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -139,8 +138,18 @@ def test_cloud_server() -> str:
 
 
 @pytest.fixture(scope='session')
-def test_domain_oauth2() -> str:
-    return DOMAIN_OAUTH2
+def test_domain_cloud_cache() -> str:
+    return DOMAIN_CLOUD_CACHE
+
+
+@pytest.fixture(scope='session')
+def test_name_oauth2_info() -> str:
+    return f'{TEST_CLOUD_SERVER}_oauth2_info'
+
+
+@pytest.fixture(scope='session')
+def test_name_uid() -> str:
+    return f'{TEST_CLOUD_SERVER}_uid'
 
 
 @pytest.fixture(scope='session')
@@ -149,5 +158,15 @@ def test_name_uuid() -> str:
 
 
 @pytest.fixture(scope='session')
-def test_domain_user_info() -> str:
-    return DOMAIN_USER_INFO
+def test_name_rd_did() -> str:
+    return f'{TEST_CLOUD_SERVER}_rd_did'
+
+
+@pytest.fixture(scope='session')
+def test_name_homes() -> str:
+    return f'{TEST_CLOUD_SERVER}_homes'
+
+
+@pytest.fixture(scope='session')
+def test_name_devices() -> str:
+    return f'{TEST_CLOUD_SERVER}_devices'

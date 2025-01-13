@@ -16,8 +16,9 @@ async def test_miot_oauth_async(
     test_cache_path: str,
     test_cloud_server: str,
     test_oauth2_redirect_url: str,
-    test_domain_oauth2: str,
     test_uuid: str,
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
     test_name_uuid: str
 ) -> dict:
     from miot.const import OAUTH2_CLIENT_ID
@@ -26,7 +27,7 @@ async def test_miot_oauth_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     local_uuid = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_name_uuid, type_=str)
+        domain=test_domain_cloud_cache, name=test_name_uuid, type_=str)
     uuid = str(local_uuid or test_uuid)
     _LOGGER.info('uuid: %s', uuid)
     miot_oauth = MIoTOauthClient(
@@ -37,7 +38,7 @@ async def test_miot_oauth_async(
 
     oauth_info = None
     load_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     if (
         isinstance(load_info, dict)
         and 'access_token' in load_info
@@ -61,11 +62,11 @@ async def test_miot_oauth_async(
         oauth_info = res_obj
         _LOGGER.info('get_access_token result: %s', res_obj)
         rc = await miot_storage.save_async(
-            test_domain_oauth2, test_cloud_server, oauth_info)
+            test_domain_cloud_cache, test_name_oauth2_info, oauth_info)
         assert rc
         _LOGGER.info('save oauth info')
         rc = await miot_storage.save_async(
-            test_domain_oauth2, test_name_uuid, uuid)
+            test_domain_cloud_cache, test_name_uuid, uuid)
         assert rc
         _LOGGER.info('save uuid')
 
@@ -86,7 +87,8 @@ async def test_miot_oauth_refresh_token(
     test_cache_path: str,
     test_cloud_server: str,
     test_oauth2_redirect_url: str,
-    test_domain_oauth2: str,
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
     test_name_uuid: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
@@ -95,10 +97,10 @@ async def test_miot_oauth_refresh_token(
 
     miot_storage = MIoTStorage(test_cache_path)
     uuid = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_name_uuid, type_=str)
+        domain=test_domain_cloud_cache, name=test_name_uuid, type_=str)
     assert isinstance(uuid, str)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict)
     assert 'access_token' in oauth_info
     assert 'refresh_token' in oauth_info
@@ -122,9 +124,9 @@ async def test_miot_oauth_refresh_token(
     remaining_time = update_info['expires_ts'] - int(time.time())
     assert remaining_time > 0
     _LOGGER.info('refresh token, remaining valid time: %ss', remaining_time)
-    # Save token
+    # Save oauth2 info
     rc = await miot_storage.save_async(
-        test_domain_oauth2, test_cloud_server, update_info)
+        test_domain_cloud_cache, test_name_oauth2_info, update_info)
     assert rc
     _LOGGER.info('refresh token success, %s', update_info)
 
@@ -136,7 +138,8 @@ async def test_miot_oauth_refresh_token(
 async def test_miot_cloud_get_nickname_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -144,7 +147,7 @@ async def test_miot_cloud_get_nickname_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -164,8 +167,9 @@ async def test_miot_cloud_get_nickname_async(
 async def test_miot_cloud_get_uid_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_uid: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -173,7 +177,7 @@ async def test_miot_cloud_get_uid_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -184,8 +188,7 @@ async def test_miot_cloud_get_uid_async(
     _LOGGER.info('your uid: %s', uid)
     # Save uid
     rc = await miot_storage.save_async(
-        domain=test_domain_user_info,
-        name=f'uid_{test_cloud_server}', data=uid)
+        domain=test_domain_cloud_cache, name=test_name_uid, data=uid)
     assert rc
 
     await miot_http.deinit_async()
@@ -196,8 +199,9 @@ async def test_miot_cloud_get_uid_async(
 async def test_miot_cloud_get_homeinfos_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_uid: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -205,7 +209,7 @@ async def test_miot_cloud_get_homeinfos_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -223,8 +227,7 @@ async def test_miot_cloud_get_homeinfos_async(
     uid = homeinfos.get('uid', '')
     # Compare uid with uid in storage
     uid2 = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'uid_{test_cloud_server}', type_=str)
+        domain=test_domain_cloud_cache, name=test_name_uid, type_=str)
     assert uid == uid2
     _LOGGER.info('your uid: %s', uid)
     # Get homes
@@ -242,8 +245,11 @@ async def test_miot_cloud_get_homeinfos_async(
 async def test_miot_cloud_get_devices_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_uid: str,
+    test_name_homes: str,
+    test_name_devices: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -251,7 +257,7 @@ async def test_miot_cloud_get_devices_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -266,8 +272,7 @@ async def test_miot_cloud_get_devices_async(
     # Compare uid with uid in storage
     uid = devices.get('uid', '')
     uid2 = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'uid_{test_cloud_server}', type_=str)
+        domain=test_domain_cloud_cache, name=test_name_uid, type_=str)
     assert uid == uid2
     _LOGGER.info('your uid: %s', uid)
     # Get homes
@@ -278,12 +283,10 @@ async def test_miot_cloud_get_devices_async(
     _LOGGER.info('your devices count: %s', len(devices))
     # Storage homes and devices
     rc = await miot_storage.save_async(
-        domain=test_domain_user_info,
-        name=f'homes_{test_cloud_server}', data=homes)
+        domain=test_domain_cloud_cache, name=test_name_homes, data=homes)
     assert rc
     rc = await miot_storage.save_async(
-        domain=test_domain_user_info,
-        name=f'devices_{test_cloud_server}', data=devices)
+        domain=test_domain_cloud_cache, name=test_name_devices, data=devices)
     assert rc
 
     await miot_http.deinit_async()
@@ -294,8 +297,9 @@ async def test_miot_cloud_get_devices_async(
 async def test_miot_cloud_get_devices_with_dids_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_devices: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -303,7 +307,7 @@ async def test_miot_cloud_get_devices_with_dids_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -311,8 +315,7 @@ async def test_miot_cloud_get_devices_with_dids_async(
 
     # Load devices
     local_devices = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'devices_{test_cloud_server}', type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_devices, type_=dict)
     assert isinstance(local_devices, dict)
     did_list = list(local_devices.keys())
     assert len(did_list) > 0
@@ -329,12 +332,95 @@ async def test_miot_cloud_get_devices_with_dids_async(
 
 
 @pytest.mark.asyncio
+async def test_miot_cloud_get_cert(
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_random_did: str,
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_uid: str,
+    test_name_rd_did: str
+):
+    """
+    NOTICE: Currently, only certificate acquisition in the CN region is 
+    supported.
+    """
+    from miot.const import OAUTH2_CLIENT_ID
+    from miot.miot_cloud import MIoTHttpClient
+    from miot.miot_storage import MIoTCert, MIoTStorage
+
+    if test_cloud_server.lower() != 'cn':
+        _LOGGER.info('only support CN region')
+        return
+
+    miot_storage = MIoTStorage(test_cache_path)
+    uid = await miot_storage.load_async(
+        domain=test_domain_cloud_cache, name=test_name_uid, type_=str)
+    assert isinstance(uid, str)
+    _LOGGER.info('your uid: %s', uid)
+    random_did = await miot_storage.load_async(
+        domain=test_domain_cloud_cache, name=test_name_rd_did, type_=str)
+    if not random_did:
+        random_did = test_random_did
+        rc = await miot_storage.save_async(
+            domain=test_domain_cloud_cache, name=test_name_rd_did,
+            data=random_did)
+        assert rc
+    assert isinstance(random_did, str)
+    _LOGGER.info('your random_did: %s', random_did)
+    oauth_info = await miot_storage.load_async(
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
+    assert isinstance(oauth_info, dict)
+    assert 'access_token' in oauth_info
+    access_token = oauth_info['access_token']
+
+    # Get certificates
+    miot_cert = MIoTCert(storage=miot_storage, uid=uid, cloud_server='CN')
+    assert await miot_cert.verify_ca_cert_async(), 'invalid ca cert'
+    remaining_time: int = await miot_cert.user_cert_remaining_time_async()
+    if remaining_time > 0:
+        _LOGGER.info(
+            'user cert is valid, remaining time, %ss', remaining_time)
+        _LOGGER.info((
+            'if you want to obtain it again, please delete the '
+            'key, csr, and cert files in %s.'), test_cache_path)
+        return
+
+    miot_http = MIoTHttpClient(
+        cloud_server=test_cloud_server,
+        client_id=OAUTH2_CLIENT_ID,
+        access_token=access_token)
+
+    user_key = miot_cert.gen_user_key()
+    assert isinstance(user_key, str)
+    _LOGGER.info('user_key str, %s', user_key)
+    user_csr = miot_cert.gen_user_csr(user_key=user_key, did=random_did)
+    assert isinstance(user_csr, str)
+    _LOGGER.info('user_csr str, %s', user_csr)
+    cert_str = await miot_http.get_central_cert_async(csr=user_csr)
+    assert isinstance(cert_str, str)
+    _LOGGER.info('user_cert str, %s', cert_str)
+    rc = await miot_cert.update_user_key_async(key=user_key)
+    assert rc
+    rc = await miot_cert.update_user_cert_async(cert=cert_str)
+    assert rc
+    # verify user certificates
+    remaining_time = await miot_cert.user_cert_remaining_time_async(
+        cert_data=cert_str.encode('utf-8'), did=random_did)
+    assert remaining_time > 0
+    _LOGGER.info('user cert remaining time, %ss', remaining_time)
+
+    await miot_http.deinit_async()
+
+
+@pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_prop_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_devices: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -342,7 +428,7 @@ async def test_miot_cloud_get_prop_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -350,8 +436,7 @@ async def test_miot_cloud_get_prop_async(
 
     # Load devices
     local_devices = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'devices_{test_cloud_server}', type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_devices, type_=dict)
     assert isinstance(local_devices, dict)
     did_list = list(local_devices.keys())
     assert len(did_list) > 0
@@ -370,8 +455,9 @@ async def test_miot_cloud_get_prop_async(
 async def test_miot_cloud_get_props_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_devices: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -379,7 +465,7 @@ async def test_miot_cloud_get_props_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -387,8 +473,7 @@ async def test_miot_cloud_get_props_async(
 
     # Load devices
     local_devices = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'devices_{test_cloud_server}', type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_devices, type_=dict)
     assert isinstance(local_devices, dict)
     did_list = list(local_devices.keys())
     assert len(did_list) > 0
@@ -409,8 +494,9 @@ async def test_miot_cloud_get_props_async(
 async def test_miot_cloud_set_prop_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_devices: str
 ):
     """
     WARNING: This test case will control the actual device and is not enabled
@@ -422,7 +508,7 @@ async def test_miot_cloud_set_prop_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -430,8 +516,7 @@ async def test_miot_cloud_set_prop_async(
 
     # Load devices
     local_devices = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'devices_{test_cloud_server}', type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_devices, type_=dict)
     assert isinstance(local_devices, dict)
     assert len(local_devices) > 0
     # Set prop
@@ -460,8 +545,9 @@ async def test_miot_cloud_set_prop_async(
 async def test_miot_cloud_action_async(
     test_cache_path: str,
     test_cloud_server: str,
-    test_domain_oauth2: str,
-    test_domain_user_info: str
+    test_domain_cloud_cache: str,
+    test_name_oauth2_info: str,
+    test_name_devices: str
 ):
     """
     WARNING: This test case will control the actual device and is not enabled
@@ -473,7 +559,7 @@ async def test_miot_cloud_action_async(
 
     miot_storage = MIoTStorage(test_cache_path)
     oauth_info = await miot_storage.load_async(
-        domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_oauth2_info, type_=dict)
     assert isinstance(oauth_info, dict) and 'access_token' in oauth_info
     miot_http = MIoTHttpClient(
         cloud_server=test_cloud_server, client_id=OAUTH2_CLIENT_ID,
@@ -481,8 +567,7 @@ async def test_miot_cloud_action_async(
 
     # Load devices
     local_devices = await miot_storage.load_async(
-        domain=test_domain_user_info,
-        name=f'devices_{test_cloud_server}', type_=dict)
+        domain=test_domain_cloud_cache, name=test_name_devices, type_=dict)
     assert isinstance(local_devices, dict)
     assert len(local_devices) > 0
     # Action
