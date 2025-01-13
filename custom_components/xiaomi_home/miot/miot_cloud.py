@@ -47,6 +47,7 @@ MIoT http client.
 """
 import asyncio
 import base64
+import hashlib
 import json
 import logging
 import re
@@ -76,6 +77,7 @@ class MIoTOauthClient:
     _client_id: int
     _redirect_url: str
     _device_id: str
+    _state: str
 
     def __init__(
             self, client_id: str, redirect_url: str, cloud_server: str,
@@ -98,7 +100,13 @@ class MIoTOauthClient:
         else:
             self._oauth_host = f'{cloud_server}.{DEFAULT_OAUTH2_API_HOST}'
         self._device_id = f'ha.{uuid}'
+        self._state = hashlib.sha1(
+            f'd={self._device_id}'.encode('utf-8')).hexdigest()
         self._session = aiohttp.ClientSession(loop=self._main_loop)
+
+    @property
+    def state(self) -> str:
+        return self._state
 
     async def deinit_async(self) -> None:
         if self._session and not self._session.closed:
@@ -136,7 +144,8 @@ class MIoTOauthClient:
             'redirect_uri': redirect_url or self._redirect_url,
             'client_id': self._client_id,
             'response_type': 'code',
-            'device_id': self._device_id
+            'device_id': self._device_id,
+            'state': self._state
         }
         if state:
             params['state'] = state
