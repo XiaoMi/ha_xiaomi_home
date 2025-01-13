@@ -869,6 +869,8 @@ class MIoTClient:
             domain='miot_devices',
             name=f'{self._uid}_{self._cloud_server}',
             data=self._device_list_cache)
+        # Update notify
+        self.__request_show_devices_changed_notify()
 
     def __get_exec_error_with_rc(self, rc: int) -> str:
         err_msg: str = self._i18n.translate(key=f'error.common.{rc}')
