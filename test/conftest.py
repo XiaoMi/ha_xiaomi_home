@@ -10,8 +10,6 @@ TEST_CACHE_PATH: str = path.join(TEST_ROOT_PATH, 'test_cache')
 TEST_OAUTH2_REDIRECT_URL: str = 'http://homeassistant.local:8123'
 TEST_LANG: str = 'zh-Hans'
 TEST_UID: str = '123456789'
-TEST_RANDOM_DID: str = '6720871318229644562'
-TEST_UUID: str = '8b06ba169c304b788a37bdc3f1210bb1'
 TEST_CLOUD_SERVER: str = 'cn'
 
 DOMAIN_OAUTH2: str = 'oauth2_info'
@@ -107,12 +105,14 @@ def test_uid() -> str:
 
 @pytest.fixture(scope='session')
 def test_random_did() -> str:
-    return TEST_RANDOM_DID
+    # Gen random did
+    return str(random.getrandbits(64))
 
 
 @pytest.fixture(scope='session')
 def test_uuid() -> str:
-    return TEST_UUID
+    # Gen uuid
+    return uuid4().hex
 
 
 @pytest.fixture(scope='session')

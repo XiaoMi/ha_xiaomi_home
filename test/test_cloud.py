@@ -11,20 +11,28 @@ import pytest
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_oauth_async(
-    test_cache_path, test_cloud_server, test_oauth2_redirect_url,
-    test_domain_oauth2, test_uuid
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_oauth2_redirect_url: str,
+    test_domain_oauth2: str,
+    test_uuid: str
 ) -> dict:
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTOauthClient
     from miot.miot_storage import MIoTStorage
     print('')  # separate from previous output
 
+    miot_storage = MIoTStorage(test_cache_path)
+    local_uuid = await miot_storage.load_async(
+        domain=test_domain_oauth2, name=f'{test_cloud_server}_uuid', type_=str)
+    uuid = str(local_uuid or test_uuid)
+    print(f'uuid: {uuid}')
     miot_oauth = MIoTOauthClient(
         client_id=OAUTH2_CLIENT_ID,
         redirect_url=test_oauth2_redirect_url,
         cloud_server=test_cloud_server,
-        uuid=test_uuid)
-    miot_storage = MIoTStorage(test_cache_path)
+        uuid=uuid)
+
     oauth_info = None
     load_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
@@ -54,6 +62,10 @@ async def test_miot_oauth_async(
             test_domain_oauth2, test_cloud_server, oauth_info)
         assert rc
         print('save oauth info')
+        rc = await miot_storage.save_async(
+            test_domain_oauth2, f'{test_cloud_server}_uuid', uuid)
+        assert rc
+        print('save uuid')
 
     access_token = oauth_info.get('access_token', None)
     assert isinstance(access_token, str)
@@ -67,9 +79,10 @@ async def test_miot_oauth_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency(on=['test_miot_oauth_async'])
 async def test_miot_oauth_refresh_token(
-        test_cache_path: str, test_cloud_server: str,
-        test_oauth2_redirect_url: str, test_domain_oauth2: str,
-        test_uuid: str
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_oauth2_redirect_url: str,
+    test_domain_oauth2: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTOauthClient
@@ -77,6 +90,9 @@ async def test_miot_oauth_refresh_token(
     print('')  # separate from previous output
 
     miot_storage = MIoTStorage(test_cache_path)
+    uuid = await miot_storage.load_async(
+        domain=test_domain_oauth2, name=f'{test_cloud_server}_uuid', type_=str)
+    assert isinstance(uuid, str)
     oauth_info = await miot_storage.load_async(
         domain=test_domain_oauth2, name=test_cloud_server, type_=dict)
     assert isinstance(oauth_info, dict)
@@ -90,7 +106,7 @@ async def test_miot_oauth_refresh_token(
         client_id=OAUTH2_CLIENT_ID,
         redirect_url=test_oauth2_redirect_url,
         cloud_server=test_cloud_server,
-        uuid=test_uuid)
+        uuid=uuid)
     refresh_token = oauth_info.get('refresh_token', None)
     assert refresh_token
     update_info = await miot_oauth.refresh_access_token_async(
@@ -112,7 +128,9 @@ async def test_miot_oauth_refresh_token(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_nickname_async(
-    test_cache_path, test_cloud_server, test_domain_oauth2
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -137,10 +155,10 @@ async def test_miot_cloud_get_nickname_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_uid_async(
-    test_cache_path,
-    test_cloud_server,
-    test_domain_oauth2,
-    test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -168,8 +186,10 @@ async def test_miot_cloud_get_uid_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_homeinfos_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -211,8 +231,10 @@ async def test_miot_cloud_get_homeinfos_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_devices_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -260,8 +282,10 @@ async def test_miot_cloud_get_devices_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_devices_with_dids_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -295,8 +319,10 @@ async def test_miot_cloud_get_devices_with_dids_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_prop_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -329,8 +355,10 @@ async def test_miot_cloud_get_prop_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_get_props_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     from miot.const import OAUTH2_CLIENT_ID
     from miot.miot_cloud import MIoTHttpClient
@@ -364,8 +392,10 @@ async def test_miot_cloud_get_props_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_set_prop_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     """
     WARNING: This test case will control the actual device and is not enabled
@@ -412,8 +442,10 @@ async def test_miot_cloud_set_prop_async(
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_cloud_action_async(
-    test_cache_path, test_cloud_server,
-    test_domain_oauth2, test_domain_user_info
+    test_cache_path: str,
+    test_cloud_server: str,
+    test_domain_oauth2: str,
+    test_domain_user_info: str
 ):
     """
     WARNING: This test case will control the actual device and is not enabled
