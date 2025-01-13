@@ -241,6 +241,29 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
             },
         },
         'entity': 'heater'
+    },
+    'electric-blanket': {
+        'required': {
+            'electric-blanket': {
+                'required': {
+                    'properties': {
+                        'on': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'target-temperature'}
+                },
+            }
+        },
+        'optional': {
+            'environment': {
+                'required': {},
+                'optional': {
+                    'properties': {'temperature'}
+                }
+            },
+        },
+        'entity': 'heater'
     }
 }
 
