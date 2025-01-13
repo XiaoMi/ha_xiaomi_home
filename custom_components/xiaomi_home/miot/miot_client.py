@@ -851,20 +851,19 @@ class MIoTClient:
     async def remove_device_async(self, did: str) -> None:
         if did not in self._device_list_cache:
             return
-        self._mips_cloud.unsub_prop(did=did)
-        self._mips_cloud.unsub_event(did=did)
-        if self._ctrl_mode == CtrlMode.AUTO:
-            if did in self._device_list_gateway:
-                mips = self._mips_local.get(
-                    self._device_list_gateway[did]['group_id'], None)
-                if mips:
-                    mips.unsub_prop(did=did)
-                    mips.unsub_event(did=did)
-            elif self._miot_lan.init_done and did in self._device_list_lan:
+        sub_from = self._sub_source_list.pop(did, None)
+        # Unsub
+        if sub_from:
+            if sub_from == 'cloud':
+                self._mips_cloud.unsub_prop(did=did)
+                self._mips_cloud.unsub_event(did=did)
+            elif sub_from == 'lan':
                 self._miot_lan.unsub_prop(did=did)
                 self._miot_lan.unsub_event(did=did)
-        self._sub_source_list.pop(did, None)
-        self._device_list_cache.pop(did, None)
+            elif sub_from in self._mips_local:
+                mips = self._mips_local[sub_from]
+                mips.unsub_prop(did=did)
+                mips.unsub_event(did=did)
         # Storage
         await self._storage.save_async(
             domain='miot_devices',
