@@ -399,7 +399,7 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
                 'unit_of_measurement': UnitOfElectricPotential.VOLT
             }
         },
-        'current': {
+        'electric-current': {
             'device_class': SensorDeviceClass.CURRENT,
             'entity': 'sensor',
             'optional': {
@@ -423,7 +423,7 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
                 'unit_of_measurement': UnitOfPower.WATT
             }
         },
-        'over-electric-power': {
+        'surge-power': {
             'device_class': SensorDeviceClass.POWER,
             'entity': 'sensor',
             'optional': {
