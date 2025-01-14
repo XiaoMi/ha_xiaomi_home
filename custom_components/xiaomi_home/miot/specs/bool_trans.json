@@ -78,6 +78,10 @@
                 "true": "Vrai",
                 "false": "Faux"
             },
+            "it": {
+                "true": "Vero",
+                "false": "Falso"
+            },
             "ja": {
                 "true": "真",
                 "false": "偽"
@@ -123,6 +127,10 @@
             "fr": {
                 "true": "Ouvert",
                 "false": "Fermer"
+            },
+            "it": {
+                "true": "Aperto",
+                "false": "Chiuso"
             },
             "ja": {
                 "true": "開く",
@@ -170,6 +178,10 @@
                 "true": "Oui",
                 "false": "Non"
             },
+            "it": {
+                "true": "Si",
+                "false": "No"
+            },
             "ja": {
                 "true": "はい",
                 "false": "いいえ"
@@ -216,6 +228,10 @@
                 "true": "Mouvement détecté",
                 "false": "Aucun mouvement détecté"
             },
+            "it": {
+                "true": "Movimento Rilevato",
+                "false": "Nessun Movimento Rilevato"
+            },
             "ja": {
                 "true": "動きを検知",
                 "false": "動きが検出されません"
@@ -261,6 +277,10 @@
             "fr": {
                 "true": "Contact",
                 "false": "Pas de contact"
+            },
+            "it": {
+                "true": "Contatto",
+                "false": "Nessun Contatto"
             },
             "ja": {
                 "true": "接触",

@@ -88,6 +88,28 @@
             "service:004:event:001": "Événement virtuel survenu",
             "service:004:property:001": "Nom de l'événement"
         },
+        "it": {
+            "service:001": "Informazioni sul Dispositivo",
+            "service:001:property:003": "ID Dispositivo",
+            "service:001:property:005": "Numero di Serie (SN)",
+            "service:002": "Gateway",
+            "service:002:event:001": "Rete Modificata",
+            "service:002:event:002": "Rete Modificata",
+            "service:002:property:001": "Metodo di Accesso",
+            "service:002:property:001:valuelist:000": "Cablato",
+            "service:002:property:001:valuelist:001": "Wireless 5G",
+            "service:002:property:001:valuelist:002": "Wireless 2.4G",
+            "service:002:property:002": "Indirizzo IP",
+            "service:002:property:003": "Nome Rete WiFi",
+            "service:002:property:004": "Ora Attuale",
+            "service:002:property:005": "Indirizzo MAC del Server DHCP",
+            "service:003": "Luce Indicatore",
+            "service:003:property:001": "Interruttore",
+            "service:004": "Servizio Virtuale",
+            "service:004:action:001": "Genera Evento Virtuale",
+            "service:004:event:001": "Evento Virtuale Avvenuto",
+            "service:004:property:001": "Nome Evento"
+        },
         "ja": {
             "service:001": "デバイス情報",
             "service:001:property:003": "デバイスID",
