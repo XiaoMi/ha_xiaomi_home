@@ -289,7 +289,7 @@ SPEC_SERVICE_TRANS_MAP: dict[str, dict | str] = {
             }
         },
         'optional': {
-            'properties': {'mode', 'horizontal-swing'}
+            'properties': {'mode', 'horizontal-swing', 'wind-reverse'}
         },
         'entity': 'fan'
     },
@@ -437,6 +437,14 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
             'optional': {
                 'state_class': SensorStateClass.TOTAL_INCREASING,
                 'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
+            }
+        },
+        'power': {
+            'device_class': SensorDeviceClass.POWER,
+            'entity': 'sensor',
+            'optional': {
+                'state_class': SensorStateClass.MEASUREMENT,
+                'unit_of_measurement': UnitOfPower.WATT
             }
         },
         'total-battery': {

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Unit test for miot_lan.py."""
+import logging
 from typing import Any
 import pytest
 import asyncio
 from zeroconf import IPVersion
 from zeroconf.asyncio import AsyncZeroconf
+
+_LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=import-outside-toplevel, unused-argument
 
@@ -67,7 +70,7 @@ async def test_lan_async(test_devices: dict):
 
     miot_network = MIoTNetwork()
     await miot_network.init_async()
-    print('miot_network, ', miot_network.network_info)
+    _LOGGER.info('miot_network, %s', miot_network.network_info)
     mips_service = MipsService(
         aiozc=AsyncZeroconf(ip_version=IPVersion.V4Only))
     await mips_service.init_async()
@@ -81,7 +84,7 @@ async def test_lan_async(test_devices: dict):
     await miot_lan.vote_for_lan_ctrl_async(key='test', vote=True)
 
     async def device_state_change(did: str, state: dict, ctx: Any):
-        print('device state change, ', did, state)
+        _LOGGER.info('device state change, %s, %s', did, state)
         if did != test_did:
             return
         if (
@@ -91,10 +94,10 @@ async def test_lan_async(test_devices: dict):
             # Test sub prop
             miot_lan.sub_prop(
                 did=did, siid=3, piid=1, handler=lambda msg, ctx:
-                    print(f'sub prop.3.1 msg, {did}={msg}'))
+                    _LOGGER.info('sub prop.3.1 msg, %s=%s', did, msg))
             miot_lan.sub_prop(
                 did=did, handler=lambda msg, ctx:
-                    print(f'sub all device msg, {did}={msg}'))
+                    _LOGGER.info('sub all device msg, %s=%s', did, msg))
             evt_push_available.set()
         else:
             # miot_lan.unsub_prop(did=did, siid=3, piid=1)
@@ -102,7 +105,7 @@ async def test_lan_async(test_devices: dict):
             evt_push_unavailable.set()
 
     async def lan_state_change(state: bool):
-        print('lan state change, ', state)
+        _LOGGER.info('lan state change, %s', state)
         if not state:
             return
         miot_lan.update_devices(devices={

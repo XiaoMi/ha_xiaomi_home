@@ -64,6 +64,22 @@
             "net_unavailable": "接口不可用"
         }
     },
+    "oauth2": {
+        "success": {
+            "title": "認證成功",
+            "content": "請關閉此頁面，返回帳號認證頁面點擊“下一步”",
+            "button": "關閉"
+        },
+        "fail": {
+            "title": "認證失敗",
+            "content": "{error_msg}，請關閉此頁面，返回帳號認證頁面重新點擊認鏈接進行認證。",
+            "button": "關閉"
+        },
+        "error_msg": {
+            "-10100": "無效的響應參數（“code”或者“state”字段為空）",
+            "-10101": "傳入的“state”字段不一致"
+        }
+    },
     "miot": {
         "client": {
             "invalid_oauth_info": "認證信息失效，雲端鏈路將不可用，請進入 Xiaomi Home 集成頁面，點擊“選項”重新認證",

@@ -117,7 +117,7 @@ class MipsServiceData:
         self.type = service_info.type
         self.server = service_info.server or ''
         # Parse profile
-        self.did = str(int.from_bytes(self.profile_bin[1:9]))
+        self.did = str(int.from_bytes(self.profile_bin[1:9], byteorder='big'))
         self.group_id = binascii.hexlify(
             self.profile_bin[9:17][::-1]).decode('utf-8')
         self.role = int(self.profile_bin[20] >> 4)

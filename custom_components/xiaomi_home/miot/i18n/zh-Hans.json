@@ -64,6 +64,22 @@
             "net_unavailable": "接口不可用"
         }
     },
+    "oauth2": {
+        "success": {
+            "title": "认证成功",
+            "content": "请关闭此页面，返回账号认证页面点击“下一步”",
+            "button": "关闭"
+        },
+        "fail": {
+            "title": "认证失败",
+            "content": "{error_msg}，请关闭此页面，返回账号认证页面重新点击认链接进行认证。",
+            "button": "关闭"
+        },
+        "error_msg": {
+            "-10100": "无效的响应参数（“code”或者“state”字段为空）",
+            "-10101": "传入“state”字段不一致"
+        }
+    },
     "miot": {
         "client": {
             "invalid_oauth_info": "认证信息失效，云端链路将不可用，请进入 Xiaomi Home 集成页面，点击“选项”重新认证",

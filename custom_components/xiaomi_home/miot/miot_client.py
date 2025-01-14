@@ -257,6 +257,7 @@ class MIoTClient:
             client_id=OAUTH2_CLIENT_ID,
             redirect_url=self._entry_data['oauth_redirect_url'],
             cloud_server=self._cloud_server,
+            uuid=self._entry_data["uuid"],
             loop=self._main_loop)
         # MIoT http client instance
         self._http = MIoTHttpClient(
@@ -356,7 +357,7 @@ class MIoTClient:
         # Cloud mips
         self._mips_cloud.unsub_mips_state(
             key=f'{self._uid}-{self._cloud_server}')
-        self._mips_cloud.disconnect()
+        self._mips_cloud.deinit()
         # Cancel refresh cloud devices
         if self._refresh_cloud_devices_timer:
             self._refresh_cloud_devices_timer.cancel()
@@ -369,7 +370,7 @@ class MIoTClient:
                 for mips in self._mips_local.values():
                     mips.on_dev_list_changed = None
                     mips.unsub_mips_state(key=mips.group_id)
-                    mips.disconnect()
+                    mips.deinit()
                 if self._mips_local_state_changed_timers:
                     for timer_item in (
                             self._mips_local_state_changed_timers.values()):
@@ -846,6 +847,30 @@ class MIoTClient:
         self._sub_device_state.pop(did, None)
         _LOGGER.debug('client unsub device state, %s', did)
         return True
+
+    async def remove_device_async(self, did: str) -> None:
+        if did not in self._device_list_cache:
+            return
+        sub_from = self._sub_source_list.pop(did, None)
+        # Unsub
+        if sub_from:
+            if sub_from == 'cloud':
+                self._mips_cloud.unsub_prop(did=did)
+                self._mips_cloud.unsub_event(did=did)
+            elif sub_from == 'lan':
+                self._miot_lan.unsub_prop(did=did)
+                self._miot_lan.unsub_event(did=did)
+            elif sub_from in self._mips_local:
+                mips = self._mips_local[sub_from]
+                mips.unsub_prop(did=did)
+                mips.unsub_event(did=did)
+        # Storage
+        await self._storage.save_async(
+            domain='miot_devices',
+            name=f'{self._uid}_{self._cloud_server}',
+            data=self._device_list_cache)
+        # Update notify
+        self.__request_show_devices_changed_notify()
 
     def __get_exec_error_with_rc(self, rc: int) -> str:
         err_msg: str = self._i18n.translate(key=f'error.common.{rc}')

@@ -59,5 +59,10 @@
             "1",
             "5"
         ]
+    },
+    "urn:miot-spec-v2:device:router:0000A036:xiaomi-rd03": {
+        "services": [
+            "*"
+        ]
     }
 }

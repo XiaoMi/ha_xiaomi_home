@@ -351,7 +351,7 @@ The instance code is the code of the MIoT-Spec-V2 instance, which is in the form
 ```
 service:<siid>                  # service
 service:<siid>:property:<piid>  # property
-service:<siid>:property:<piid>:valuelist:<value> # the value in value-list of a property
+service:<siid>:property:<piid>:valuelist:<index> # The index of a value in the value-list of a property
 service:<siid>:event:<eiid>     # event
 service:<siid>:action:<aiid>    # action
 ```
