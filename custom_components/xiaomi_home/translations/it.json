@@ -15,7 +15,8 @@
                 "data": {
                     "cloud_server": "Regione di Login",
                     "integration_language": "Lingua",
-                    "oauth_redirect_url": "URL di reindirizzamento OAuth2"
+                    "oauth_redirect_url": "URL di reindirizzamento OAuth2",
+                     "network_detect_config": "Configurazione di rete integrata"
                 }
             },
             "network_detect_config": {
