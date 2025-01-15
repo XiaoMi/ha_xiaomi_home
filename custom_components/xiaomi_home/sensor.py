@@ -91,7 +91,7 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
             self._attr_device_class = SensorDeviceClass.ENUM
             self._attr_icon = 'mdi:message-text'
             self._attr_native_unit_of_measurement = None
-            self._attr_options = list(self._value_list.values())
+            self._attr_options = self._value_list.descriptions
         else:
             self._attr_device_class = spec.device_class
             if spec.external_unit:
@@ -115,14 +115,14 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
         """Return the current value of the sensor."""
         if self._value_range and isinstance(self._value, (int, float)):
             if (
-                self._value < self._value_range['min']
-                or self._value > self._value_range['max']
+                self._value < self._value_range.min_
+                or self._value > self._value_range.max_
             ):
                 _LOGGER.info(
                     '%s, data exception, out of range, %s, %s',
                     self.entity_id, self._value, self._value_range)
         if self._value_list:
-            return self._value_list.get(self._value, None)
+            return self.get_vlist_description(self._value)
         if isinstance(self._value, str):
             return self._value[:255]
         return self._value

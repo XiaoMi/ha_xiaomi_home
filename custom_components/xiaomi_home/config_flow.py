@@ -473,6 +473,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self._miot_oauth.deinit_async()
                 self._miot_oauth = None
             return self.async_show_progress_done(next_step_id='homes_select')
+        # pylint: disable=unexpected-keyword-arg
         return self.async_show_progress(
             step_id='oauth',
             progress_action='oauth',
@@ -481,7 +482,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     f'<a href="{self._cc_oauth_auth_url}" target="_blank">',
                 'link_right': '</a>'
             },
-            progress_task=self._cc_task_oauth,
+            progress_task=self._cc_task_oauth,  # type: ignore
         )
 
     async def __check_oauth_async(self) -> None:
@@ -1196,7 +1197,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 err, traceback.format_exc())
             self._cc_config_rc = str(err)
             return self.async_show_progress_done(next_step_id='oauth_error')
-
+        # pylint: disable=unexpected-keyword-arg
         return self.async_show_progress(
             step_id='oauth',
             progress_action='oauth',
@@ -1205,7 +1206,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     f'<a href="{self._cc_oauth_auth_url}" target="_blank">',
                 'link_right': '</a>'
             },
-            progress_task=self._cc_task_oauth,
+            progress_task=self._cc_task_oauth,  # type: ignore
         )
 
     async def __check_oauth_async(self) -> None:

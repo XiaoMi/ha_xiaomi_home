@@ -744,7 +744,7 @@ class MIoTHttpClient:
             prop_obj['fut'].set_result(None)
         if props_req:
             _LOGGER.info(
-                'get prop from cloud failed, %s, %s', len(key), props_req)
+                'get prop from cloud failed, %s', props_req)
 
         if self._get_prop_list:
             self._get_prop_timer = self._main_loop.call_later(
