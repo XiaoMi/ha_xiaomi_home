@@ -2,11 +2,47 @@
     "config": {
         "other": {
             "devices": "Dispositivi",
-            "found_central_gateway": ", Gateway Centrale Locale Trovato"
+            "found_central_gateway": ", Trovato Gateway Hub Centrale Locale",
+            "without_room": "Nessuna stanza assegnata",
+            "no_display": "Non visualizzare"
         },
         "control_mode": {
             "auto": "Auto",
             "cloud": "Cloud"
+        },
+        "statistics_logic": {
+            "or": "Logica OR",
+            "and": "Logica AND"
+        },
+        "filter_mode": {
+            "exclude": "Escludere",
+            "include": "Includere"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "Dispositivo yunyi",
+            "2": "Dispositivo Cloud",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "Dispositivo Virtuale",
+            "6": "BLE",
+            "7": "AP Locale",
+            "8": "WiFi+BLE",
+            "9": "Altro",
+            "10": "Plug-in Funzionale",
+            "11": "Rete Cellulare",
+            "12": "Cavo",
+            "13": "NB-IoT",
+            "14": "Accesso cloud di terze parti",
+            "15": "Dispositivo di controllo remoto a infrarossi",
+            "16": "BLE-Mesh",
+            "17": "Gruppo di Dispositivi Virtuali",
+            "18": "Sottodispositivo Gateway",
+            "19": "Sottodispositivo Gateway di livello di sicurezza",
+            "22": "PLC",
+            "23": "Solo Cavo",
+            "24": "Matter",
+            "25": "WiFi+Rete Cellulare"
         },
         "room_name_rule": {
             "none": "Non sincronizzare",
@@ -18,9 +54,30 @@
             "enable": "Abilita",
             "disable": "Disabilita"
         },
+        "device_state": {
+            "add": "Aggiungere",
+            "del": "Non disponibile",
+            "offline": "Offline"
+        },
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Avviso]** Rilevate più schede di rete che potrebbero essere connesse alla stessa rete. Si prega di prestare attenzione alla selezione.",
             "net_unavailable": "Interfaccia non disponibile"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Autenticazione Avvenuta",
+            "content": "Chiudere questa pagina e tornare alla pagina di autenticazione dell'account per fare clic su 'Avanti'.",
+            "button": "Chiudi"
+        },
+        "fail": {
+            "title": "Autenticazione Fallita",
+            "content": "{error_msg}, chiudere questa pagina e tornare alla pagina di autenticazione dell'account per fare clic nuovamente sul link di autenticazione.",
+            "button": "Chiudi"
+        },
+        "error_msg": {
+            "-10100": "Parametri di risposta non validi (i campi 'code' o 'state' sono vuoti)",
+            "-10101": "Campo 'state' passato non corrispondente"
         }
     },
     "miot": {
