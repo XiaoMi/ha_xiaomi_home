@@ -97,6 +97,7 @@ footer ：（可选）关联的 issue 或 pull request 编号。
 ## 许可
 
 在为本项目做出贡献时，您同意您的贡献遵循本项目的[许可证](../LICENSE.md) 。
+并且请在第一次提交代码时，签署CLA （Contributor License Agreement，贡献者许可协议）。
 
 ## 获取帮助
 
