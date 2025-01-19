@@ -382,7 +382,7 @@ class MIoTHttpClient:
 
         return res_obj['data']
 
-    async def get_central_cert_async(self, csr: str) -> Optional[str]:
+    async def get_central_cert_async(self, csr: str) -> str:
         if not isinstance(csr, str):
             raise MIoTHttpError('invalid params')
 
