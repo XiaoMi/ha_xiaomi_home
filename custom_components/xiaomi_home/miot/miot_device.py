@@ -243,12 +243,12 @@ class MIoTDevice:
     def sub_device_state(
         self, key: str, handler: Callable[[str, MIoTDeviceState], None]
     ) -> int:
-        self._sub_id += 1
+        sub_id = self.__gen_sub_id()
         if key in self._device_state_sub_list:
-            self._device_state_sub_list[key][str(self._sub_id)] = handler
+            self._device_state_sub_list[key][str(sub_id)] = handler
         else:
-            self._device_state_sub_list[key] = {str(self._sub_id): handler}
-        return self._sub_id
+            self._device_state_sub_list[key] = {str(sub_id): handler}
+        return sub_id
 
     def unsub_device_state(self, key: str, sub_id: int) -> None:
         sub_list = self._device_state_sub_list.get(key, None)
@@ -266,14 +266,14 @@ class MIoTDevice:
             for handler in self._value_sub_list[key].values():
                 handler(params, ctx)
 
-        self._sub_id += 1
+        sub_id = self.__gen_sub_id()
         if key in self._value_sub_list:
-            self._value_sub_list[key][str(self._sub_id)] = handler
+            self._value_sub_list[key][str(sub_id)] = handler
         else:
-            self._value_sub_list[key] = {str(self._sub_id): handler}
+            self._value_sub_list[key] = {str(sub_id): handler}
             self.miot_client.sub_prop(
                 did=self._did, handler=_on_prop_changed, siid=siid, piid=piid)
-        return self._sub_id
+        return sub_id
 
     def unsub_property(self, siid: int, piid: int, sub_id: int) -> None:
         key: str = f'p.{siid}.{piid}'
@@ -294,14 +294,14 @@ class MIoTDevice:
             for handler in self._value_sub_list[key].values():
                 handler(params, ctx)
 
-        self._sub_id += 1
+        sub_id = self.__gen_sub_id()
         if key in self._value_sub_list:
-            self._value_sub_list[key][str(self._sub_id)] = handler
+            self._value_sub_list[key][str(sub_id)] = handler
         else:
-            self._value_sub_list[key] = {str(self._sub_id): handler}
+            self._value_sub_list[key] = {str(sub_id): handler}
             self.miot_client.sub_event(
                 did=self._did, handler=_on_event_occurred, siid=siid, eiid=eiid)
-        return self._sub_id
+        return sub_id
 
     def unsub_event(self, siid: int, eiid: int, sub_id: int) -> None:
         key: str = f'e.{siid}.{eiid}'
@@ -755,6 +755,10 @@ class MIoTDevice:
         if spec_unit in ['calorie', 'kCal']:
             return 'mdi:food'
         return None
+
+    def __gen_sub_id(self) -> int:
+        self._sub_id += 1
+        return self._sub_id
 
     def __on_device_state_changed(
         self, did: str, state: MIoTDeviceState, ctx: Any
