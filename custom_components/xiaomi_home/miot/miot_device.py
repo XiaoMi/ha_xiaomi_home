@@ -56,6 +56,7 @@ from homeassistant.const import (
     CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,
     CONCENTRATION_PARTS_PER_MILLION,
+    DEGREE,
     LIGHT_LUX,
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS,
@@ -72,6 +73,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfVolume,
     UnitOfVolumeFlowRate,
+    UnitOfDataRate
 )
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.components.switch import SwitchDeviceClass
@@ -653,11 +655,66 @@ class MIoTDevice:
                 self.append_action(action=action)
 
     def unit_convert(self, spec_unit: str) -> Optional[str]:
-        """Convert MIoT unit to Home Assistant unit."""
+        """Convert MIoT unit to Home Assistant unit.
+        25/01/20: All online prop unit statistical tables: unit, quantity.
+        {
+            "no_unit": 148499,
+            "percentage": 10042,
+            "kelvin": 1895,
+            "rgb": 772,                // color
+            "celsius": 5762,
+            "none": 16106,
+            "hours": 1540,
+            "minutes": 5061,
+            "ms": 27,
+            "watt": 216,
+            "arcdegrees": 159,
+            "ppm": 177,
+            "μg/m3": 106,
+            "days": 571,
+            "seconds": 2749,
+            "B/s": 21,
+            "pascal": 110,
+            "mg/m3": 339,
+            "lux": 125,
+            "kWh": 124,
+            "mv": 2,
+            "V": 38,
+            "A": 29,
+            "mV": 4,
+            "L": 352,
+            "m": 37,
+            "毫摩尔每升": 2,              // blood-sugar, cholesterol
+            "mmol/L": 1,                // urea
+            "weeks": 26,
+            "meter": 3,
+            "dB": 26,
+            "hour": 14,
+            "calorie": 19,              // 1 cal = 4.184 J
+            "ppb": 3,
+            "arcdegress": 30,
+            "bpm": 4,                   // realtime-heartrate
+            "gram": 7,
+            "km/h": 9,
+            "W": 1,
+            "m3/h": 2,
+            "kilopascal": 1,
+            "mL": 4,
+            "mmHg": 4,
+            "w": 1,
+            "liter": 1,
+            "cm": 3,
+            "mA": 2,
+            "kilogram": 2,
+            "kcal/d": 2,                // basal-metabolism
+            "times": 1                  // exercise-count
+            }
+        """
         unit_map = {
             'percentage': PERCENTAGE,
             'weeks': UnitOfTime.WEEKS,
             'days': UnitOfTime.DAYS,
+            'hour': UnitOfTime.HOURS,
             'hours': UnitOfTime.HOURS,
             'minutes': UnitOfTime.MINUTES,
             'seconds': UnitOfTime.SECONDS,
@@ -672,23 +729,35 @@ class MIoTDevice:
             'ppb': CONCENTRATION_PARTS_PER_BILLION,
             'lux': LIGHT_LUX,
             'pascal': UnitOfPressure.PA,
+            'kilopascal': UnitOfPressure.KPA,
+            'mmHg': UnitOfPressure.MMHG,
             'bar': UnitOfPressure.BAR,
-            'watt': UnitOfPower.WATT,
             'L': UnitOfVolume.LITERS,
+            'liter': UnitOfVolume.LITERS,
             'mL': UnitOfVolume.MILLILITERS,
             'km/h': UnitOfSpeed.KILOMETERS_PER_HOUR,
             'm/s': UnitOfSpeed.METERS_PER_SECOND,
+            'watt': UnitOfPower.WATT,
+            'w': UnitOfPower.WATT,
+            'W': UnitOfPower.WATT,
             'kWh': UnitOfEnergy.KILO_WATT_HOUR,
             'A': UnitOfElectricCurrent.AMPERE,
             'mA': UnitOfElectricCurrent.MILLIAMPERE,
             'V': UnitOfElectricPotential.VOLT,
+            'mv': UnitOfElectricPotential.MILLIVOLT,
             'mV': UnitOfElectricPotential.MILLIVOLT,
+            'cm': UnitOfLength.CENTIMETERS,
             'm': UnitOfLength.METERS,
+            'meter': UnitOfLength.METERS,
             'km': UnitOfLength.KILOMETERS,
             'm3/h': UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
             'gram': UnitOfMass.GRAMS,
+            'kilogram': UnitOfMass.KILOGRAMS,
             'dB': SIGNAL_STRENGTH_DECIBELS,
             'kB': UnitOfInformation.KILOBYTES,
+            'arcdegrees': DEGREE,
+            'arcdegress': DEGREE,
+            'B/s': UnitOfDataRate.BYTES_PER_SECOND,
         }
 
         # Handle UnitOfConductivity separately since
@@ -703,56 +772,59 @@ class MIoTDevice:
         return unit_map.get(spec_unit, None)
 
     def icon_convert(self, spec_unit: str) -> Optional[str]:
-        if spec_unit in ['percentage']:
+        if spec_unit in {'percentage'}:
             return 'mdi:percent'
-        if spec_unit in [
-                'weeks', 'days', 'hours', 'minutes', 'seconds', 'ms', 'μs']:
+        if spec_unit in {
+            'weeks', 'days', 'hour', 'hours', 'minutes', 'seconds', 'ms', 'μs'
+        }:
             return 'mdi:clock'
-        if spec_unit in ['celsius']:
+        if spec_unit in {'celsius'}:
             return 'mdi:temperature-celsius'
-        if spec_unit in ['fahrenheit']:
+        if spec_unit in {'fahrenheit'}:
             return 'mdi:temperature-fahrenheit'
-        if spec_unit in ['kelvin']:
+        if spec_unit in {'kelvin'}:
             return 'mdi:temperature-kelvin'
-        if spec_unit in ['μg/m3', 'mg/m3', 'ppm', 'ppb']:
+        if spec_unit in {'μg/m3', 'mg/m3', 'ppm', 'ppb'}:
             return 'mdi:blur'
-        if spec_unit in ['lux']:
+        if spec_unit in {'lux'}:
             return 'mdi:brightness-6'
-        if spec_unit in ['pascal', 'megapascal', 'bar']:
+        if spec_unit in {'pascal', 'kilopascal', 'megapascal', 'mmHg', 'bar'}:
             return 'mdi:gauge'
-        if spec_unit in ['watt']:
+        if spec_unit in {'watt', 'w', 'W'}:
             return 'mdi:flash-triangle'
-        if spec_unit in ['L', 'mL']:
+        if spec_unit in {'L', 'mL'}:
             return 'mdi:gas-cylinder'
-        if spec_unit in ['km/h', 'm/s']:
+        if spec_unit in {'km/h', 'm/s'}:
             return 'mdi:speedometer'
-        if spec_unit in ['kWh']:
+        if spec_unit in {'kWh'}:
             return 'mdi:transmission-tower'
-        if spec_unit in ['A', 'mA']:
+        if spec_unit in {'A', 'mA'}:
             return 'mdi:current-ac'
-        if spec_unit in ['V', 'mV']:
+        if spec_unit in {'V', 'mv', 'mV'}:
             return 'mdi:current-dc'
-        if spec_unit in ['m', 'km']:
+        if spec_unit in {'cm', 'm', 'meter', 'km'}:
             return 'mdi:ruler'
-        if spec_unit in ['rgb']:
+        if spec_unit in {'rgb'}:
             return 'mdi:palette'
-        if spec_unit in ['m3/h', 'L/s']:
+        if spec_unit in {'m3/h', 'L/s'}:
             return 'mdi:pipe-leak'
-        if spec_unit in ['μS/cm']:
+        if spec_unit in {'μS/cm'}:
             return 'mdi:resistor-nodes'
-        if spec_unit in ['gram']:
+        if spec_unit in {'gram', 'kilogram'}:
             return 'mdi:weight'
-        if spec_unit in ['dB']:
+        if spec_unit in {'dB'}:
             return 'mdi:signal-distance-variant'
-        if spec_unit in ['times']:
+        if spec_unit in {'times'}:
             return 'mdi:counter'
-        if spec_unit in ['mmol/L']:
+        if spec_unit in {'mmol/L'}:
             return 'mdi:dots-hexagon'
-        if spec_unit in ['arcdegress']:
-            return 'mdi:angle-obtuse'
-        if spec_unit in ['kB']:
+        if spec_unit in {'kB'}:
             return 'mdi:network-pos'
-        if spec_unit in ['calorie', 'kCal']:
+        if spec_unit in {'arcdegress', 'arcdegrees'}:
+            return 'mdi:angle-obtuse'
+        if spec_unit in {'B/s'}:
+            return 'mdi:download'
+        if spec_unit in {'calorie', 'kCal'}:
             return 'mdi:food'
         return None
 
