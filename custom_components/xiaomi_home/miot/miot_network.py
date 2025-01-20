@@ -283,8 +283,8 @@ class MIoTNetwork:
                     [
                         'ping', '-c', '1', '-w',
                         str(self._DETECT_TIMEOUT), address]),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
             await process.communicate()
             if process.returncode == 0:
