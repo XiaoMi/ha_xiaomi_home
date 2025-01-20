@@ -413,13 +413,15 @@ class MIoTDevice:
     ) -> Optional[MIoTEntityData]:
         if spec_instance.name not in SPEC_DEVICE_TRANS_MAP:
             return None
+        if 'required' not in SPEC_DEVICE_TRANS_MAP[spec_instance.name]:
+            return None
         spec_name: str = spec_instance.name
         if isinstance(SPEC_DEVICE_TRANS_MAP[spec_name], str):
             spec_name = SPEC_DEVICE_TRANS_MAP[spec_name]
         # 1. The device shall have all required services.
         required_services = SPEC_DEVICE_TRANS_MAP[spec_name]['required'].keys()
         if not {
-                service.name for service in spec_instance.services
+            service.name for service in spec_instance.services
         }.issuperset(required_services):
             return None
         optional_services = SPEC_DEVICE_TRANS_MAP[spec_name]['optional'].keys()
@@ -429,9 +431,13 @@ class MIoTDevice:
         for service in spec_instance.services:
             if service.platform:
                 continue
+            required_properties: dict
+            optional_properties: dict
+            required_actions: set
+            optional_actions: set
             # 2. The service shall have all required properties, actions.
             if service.name in required_services:
-                required_properties: dict = SPEC_DEVICE_TRANS_MAP[spec_name][
+                required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'required'].get(
                         service.name, {}
                 ).get('required', {}).get('properties', {})
@@ -448,7 +454,7 @@ class MIoTDevice:
                         service.name, {}
                 ).get('optional', {}).get('actions', set({}))
             elif service.name in optional_services:
-                required_properties: dict = SPEC_DEVICE_TRANS_MAP[spec_name][
+                required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'optional'].get(
                         service.name, {}
                 ).get('required', {}).get('properties', {})
@@ -501,33 +507,39 @@ class MIoTDevice:
         return entity_data
 
     def parse_miot_service_entity(
-        self, service_instance: MIoTSpecService
+        self, miot_service: MIoTSpecService
     ) -> Optional[MIoTEntityData]:
-        service = service_instance
-        if service.platform or (service.name not in SPEC_SERVICE_TRANS_MAP):
+        if (
+            miot_service.platform
+            or miot_service.name not in SPEC_SERVICE_TRANS_MAP
+        ):
             return None
-
-        service_name = service.name
+        if 'required' not in SPEC_SERVICE_TRANS_MAP[miot_service.name]:
+            return None
+        service_name = miot_service.name
         if isinstance(SPEC_SERVICE_TRANS_MAP[service_name], str):
             service_name = SPEC_SERVICE_TRANS_MAP[service_name]
-        # 1. The service shall have all required properties.
+
+        # Required properties, required access mode
         required_properties: dict = SPEC_SERVICE_TRANS_MAP[service_name][
             'required'].get('properties', {})
         if not {
-            prop.name for prop in service.properties if prop.access
+            prop.name for prop in miot_service.properties if prop.access
         }.issuperset(set(required_properties.keys())):
             return None
-        # 2. The required property shall have all required access mode.
-        for prop in service.properties:
+        for prop in miot_service.properties:
             if prop.name in required_properties:
                 if not set(prop.access).issuperset(
                         required_properties[prop.name]):
                     return None
+        # Required actions
+        # Required events
         platform = SPEC_SERVICE_TRANS_MAP[service_name]['entity']
-        entity_data = MIoTEntityData(platform=platform, spec=service_instance)
+        entity_data = MIoTEntityData(platform=platform, spec=miot_service)
+        # Optional properties
         optional_properties = SPEC_SERVICE_TRANS_MAP[service_name][
             'optional'].get('properties', set({}))
-        for prop in service.properties:
+        for prop in miot_service.properties:
             if prop.name in set.union(
                     set(required_properties.keys()), optional_properties):
                 if prop.unit:
@@ -535,51 +547,50 @@ class MIoTDevice:
                     prop.icon = self.icon_convert(prop.unit)
                 prop.platform = platform
                 entity_data.props.add(prop)
-        # action
-        # event
-        # No actions or events is in SPEC_SERVICE_TRANS_MAP now.
-        service.platform = platform
+        # Optional actions
+        # Optional events
+        miot_service.platform = platform
         return entity_data
 
-    def parse_miot_property_entity(
-        self, property_instance: MIoTSpecProperty
-    ) -> Optional[dict[str, str]]:
-        prop = property_instance
+    def parse_miot_property_entity(self, miot_prop: MIoTSpecProperty) -> bool:
         if (
-            prop.platform
-            or (prop.name not in SPEC_PROP_TRANS_MAP['properties'])
+            miot_prop.platform
+            or miot_prop.name not in SPEC_PROP_TRANS_MAP['properties']
         ):
-            return None
-
-        prop_name = prop.name
+            return False
+        prop_name = miot_prop.name
         if isinstance(SPEC_PROP_TRANS_MAP['properties'][prop_name], str):
             prop_name = SPEC_PROP_TRANS_MAP['properties'][prop_name]
         platform = SPEC_PROP_TRANS_MAP['properties'][prop_name]['entity']
+        # Check
         prop_access: set = set({})
-        if prop.readable:
+        if miot_prop.readable:
             prop_access.add('read')
-        if prop.writable:
+        if miot_prop.writable:
             prop_access.add('write')
         if prop_access != (SPEC_PROP_TRANS_MAP[
                 'entities'][platform]['access']):
-            return None
-        if prop.format_.__name__ not in SPEC_PROP_TRANS_MAP[
+            return False
+        if miot_prop.format_.__name__ not in SPEC_PROP_TRANS_MAP[
                 'entities'][platform]['format']:
-            return None
-        if prop.unit:
-            prop.external_unit = self.unit_convert(prop.unit)
-            prop.icon = self.icon_convert(prop.unit)
-        device_class = SPEC_PROP_TRANS_MAP['properties'][prop_name][
+            return False
+        miot_prop.device_class = SPEC_PROP_TRANS_MAP['properties'][prop_name][
             'device_class']
-        result = {'platform': platform, 'device_class': device_class}
-        # optional:
-        if 'optional' in SPEC_PROP_TRANS_MAP['properties'][prop_name]:
-            optional = SPEC_PROP_TRANS_MAP['properties'][prop_name]['optional']
-            if 'state_class' in optional:
-                result['state_class'] = optional['state_class']
-            if not prop.unit and 'unit_of_measurement' in optional:
-                result['unit_of_measurement'] = optional['unit_of_measurement']
-        return result
+        # Optional params
+        if 'state_class' in SPEC_PROP_TRANS_MAP['properties'][prop_name]:
+            miot_prop.state_class = SPEC_PROP_TRANS_MAP['properties'][
+                prop_name]['state_class']
+        if (
+            not miot_prop.external_unit
+            and 'unit_of_measurement' in SPEC_PROP_TRANS_MAP['properties'][
+                prop_name]
+        ):
+            # Priority: modify unit > spec unit > unit_of_measurement
+            miot_prop.external_unit = SPEC_PROP_TRANS_MAP['properties'][
+                prop_name]['unit_of_measurement']
+            # TODO: icon trans
+        miot_prop.platform = platform
+        return True
 
     def spec_transform(self) -> None:
         """Parse service, property, event, action from device spec."""
@@ -591,7 +602,7 @@ class MIoTDevice:
         # STEP 2: service conversion
         for service in self.spec_instance.services:
             service_entity = self.parse_miot_service_entity(
-                service_instance=service)
+                miot_service=service)
             if service_entity:
                 self.append_entity(entity_data=service_entity)
             # STEP 3.1: property conversion
@@ -601,20 +612,8 @@ class MIoTDevice:
                 if prop.unit:
                     prop.external_unit = self.unit_convert(prop.unit)
                     prop.icon = self.icon_convert(prop.unit)
-                prop_entity = self.parse_miot_property_entity(
-                    property_instance=prop)
-                if prop_entity:
-                    prop.platform = prop_entity['platform']
-                    prop.device_class = prop_entity['device_class']
-                    if 'state_class' in prop_entity:
-                        prop.state_class = prop_entity['state_class']
-                    if 'unit_of_measurement' in prop_entity:
-                        prop.external_unit = self.unit_convert(
-                            prop_entity['unit_of_measurement'])
-                        prop.icon = self.icon_convert(
-                            prop_entity['unit_of_measurement'])
-                # general conversion
-                if not prop.platform:
+                # General conversion
+                if not self.parse_miot_property_entity(miot_prop=prop):
                     if prop.writable:
                         if prop.format_ == str:
                             prop.platform = 'text'
@@ -627,7 +626,7 @@ class MIoTDevice:
                             prop.platform = 'number'
                         else:
                             # Irregular property will not be transformed.
-                            pass
+                            continue
                     elif prop.readable or prop.notifiable:
                         if prop.format_ == bool:
                             prop.platform = 'binary_sensor'
@@ -661,7 +660,7 @@ class MIoTDevice:
             "no_unit": 148499,
             "percentage": 10042,
             "kelvin": 1895,
-            "rgb": 772,                // color
+            "rgb": 772,            // color
             "celsius": 5762,
             "none": 16106,
             "hours": 1540,
@@ -684,16 +683,16 @@ class MIoTDevice:
             "mV": 4,
             "L": 352,
             "m": 37,
-            "毫摩尔每升": 2,              // blood-sugar, cholesterol
-            "mmol/L": 1,                // urea
+            "毫摩尔每升": 2,          // blood-sugar, cholesterol
+            "mmol/L": 1,            // urea
             "weeks": 26,
             "meter": 3,
             "dB": 26,
             "hour": 14,
-            "calorie": 19,              // 1 cal = 4.184 J
+            "calorie": 19,          // 1 cal = 4.184 J
             "ppb": 3,
             "arcdegress": 30,
-            "bpm": 4,                   // realtime-heartrate
+            "bpm": 4,               // realtime-heartrate
             "gram": 7,
             "km/h": 9,
             "W": 1,
@@ -706,9 +705,9 @@ class MIoTDevice:
             "cm": 3,
             "mA": 2,
             "kilogram": 2,
-            "kcal/d": 2,                // basal-metabolism
-            "times": 1                  // exercise-count
-            }
+            "kcal/d": 2,            // basal-metabolism
+            "times": 1              // exercise-count
+        }
         """
         unit_map = {
             'percentage': PERCENTAGE,
@@ -764,7 +763,7 @@ class MIoTDevice:
         # it might not be available in all HA versions
         try:
             # pylint: disable=import-outside-toplevel
-            from homeassistant.const import UnitOfConductivity
+            from homeassistant.const import UnitOfConductivity  # type: ignore
             unit_map['μS/cm'] = UnitOfConductivity.MICROSIEMENS_PER_CM
         except Exception:  # pylint: disable=broad-except
             unit_map['μS/cm'] = 'μS/cm'
@@ -1260,6 +1259,7 @@ class MIoTPropertyEntity(Entity):
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
         self._value = self.spec.value_format(params['value'])
+        self._value = self.spec.eval_expr(self._value)
         if not self._pending_write_ha_state_timer:
             self.async_write_ha_state()
 

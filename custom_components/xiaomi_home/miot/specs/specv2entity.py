@@ -54,6 +54,8 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
+    UnitOfTemperature,
+    PERCENTAGE
 )
 
 # pylint: disable=pointless-string-statement
@@ -96,7 +98,7 @@ from homeassistant.const import (
     }
 }
 """
-SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
+SPEC_DEVICE_TRANS_MAP: dict = {
     'humidifier': {
         'required': {
             'humidifier': {
@@ -263,7 +265,7 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
     }
 }
 """
-SPEC_SERVICE_TRANS_MAP: dict[str, dict | str] = {
+SPEC_SERVICE_TRANS_MAP: dict = {
     'light': {
         'required': {
             'properties': {
@@ -334,15 +336,13 @@ SPEC_SERVICE_TRANS_MAP: dict[str, dict | str] = {
         '<property instance name>':{
             'device_class': str,
             'entity': str,
-            'optional':{
-                'state_class': str,
-                'unit_of_measurement': str
-            }
+            'state_class'?: str,
+            'unit_of_measurement'?: str
         }
     }
 }
 """
-SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
+SPEC_PROP_TRANS_MAP: dict = {
     'entities': {
         'sensor': {
             'format': {'int', 'float'},
@@ -356,11 +356,15 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
     'properties': {
         'temperature': {
             'device_class': SensorDeviceClass.TEMPERATURE,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': UnitOfTemperature.CELSIUS
         },
         'relative-humidity': {
             'device_class': SensorDeviceClass.HUMIDITY,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': PERCENTAGE
         },
         'air-quality-index': {
             'device_class': SensorDeviceClass.AQI,
@@ -394,10 +398,8 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
         'voltage': {
             'device_class': SensorDeviceClass.VOLTAGE,
             'entity': 'sensor',
-            'optional': {
-                'state_class': SensorStateClass.MEASUREMENT,
-                'unit_of_measurement': UnitOfElectricPotential.VOLT
-            }
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': UnitOfElectricPotential.VOLT
         },
         'illumination': {
             'device_class': SensorDeviceClass.ILLUMINANCE,
@@ -410,42 +412,32 @@ SPEC_PROP_TRANS_MAP: dict[str, dict | str] = {
         'electric-power': {
             'device_class': SensorDeviceClass.POWER,
             'entity': 'sensor',
-            'optional': {
-                'state_class': SensorStateClass.MEASUREMENT,
-                'unit_of_measurement': UnitOfPower.WATT
-            }
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': UnitOfPower.WATT
         },
         'electric-current': {
             'device_class': SensorDeviceClass.CURRENT,
             'entity': 'sensor',
-            'optional': {
-                'state_class': SensorStateClass.MEASUREMENT,
-                'unit_of_measurement': UnitOfElectricCurrent.AMPERE
-            }
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': UnitOfElectricCurrent.AMPERE
         },
         'power-consumption': {
             'device_class': SensorDeviceClass.ENERGY,
             'entity': 'sensor',
-            'optional': {
-                'state_class': SensorStateClass.TOTAL_INCREASING,
-                'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
-            }
+            'state_class': SensorStateClass.TOTAL_INCREASING,
+            'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
         },
         'power': {
             'device_class': SensorDeviceClass.POWER,
             'entity': 'sensor',
-            'optional': {
-                'state_class': SensorStateClass.MEASUREMENT,
-                'unit_of_measurement': UnitOfPower.WATT
-            }
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': UnitOfPower.WATT
         },
         'total-battery': {
             'device_class': SensorDeviceClass.ENERGY,
             'entity': 'sensor',
-            'optional': {
-                'state_class': SensorStateClass.TOTAL_INCREASING,
-                'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
-            }
+            'state_class': SensorStateClass.TOTAL_INCREASING,
+            'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
         },
         'has-someone-duration': 'no-one-determine-time',
         'no-one-duration': 'no-one-determine-time'
