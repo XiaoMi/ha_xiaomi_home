@@ -94,7 +94,7 @@ class MIoTNetwork:
     _main_loop: asyncio.AbstractEventLoop
 
     _ip_addr_map: dict[str, float]
-    _url_addr_list: dict[str, float]
+    _http_addr_map: dict[str, float]
     _http_session: aiohttp.ClientSession
 
     _refresh_interval: int
