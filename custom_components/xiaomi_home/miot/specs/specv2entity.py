@@ -50,11 +50,14 @@ from homeassistant.components.sensor import SensorStateClass
 from homeassistant.components.event import EventDeviceClass
 
 from homeassistant.const import (
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    LIGHT_LUX,
     UnitOfEnergy,
     UnitOfPower,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfTemperature,
+    UnitOfPressure,
     PERCENTAGE
 )
 
@@ -368,32 +371,44 @@ SPEC_PROP_TRANS_MAP: dict = {
         },
         'air-quality-index': {
             'device_class': SensorDeviceClass.AQI,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
         },
         'pm2.5-density': {
             'device_class': SensorDeviceClass.PM25,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
         },
         'pm10-density': {
             'device_class': SensorDeviceClass.PM10,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
         },
         'pm1': {
             'device_class': SensorDeviceClass.PM1,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
         },
         'atmospheric-pressure': {
             'device_class': SensorDeviceClass.ATMOSPHERIC_PRESSURE,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': UnitOfPressure.PA
         },
         'tvoc-density': {
             'device_class': SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT
         },
         'voc-density': 'tvoc-density',
         'battery-level': {
             'device_class': SensorDeviceClass.BATTERY,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': PERCENTAGE
         },
         'voltage': {
             'device_class': SensorDeviceClass.VOLTAGE,
@@ -403,12 +418,16 @@ SPEC_PROP_TRANS_MAP: dict = {
         },
         'illumination': {
             'device_class': SensorDeviceClass.ILLUMINANCE,
-            'entity': 'sensor'
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': LIGHT_LUX
         },
         'no-one-determine-time': {
             'device_class': SensorDeviceClass.DURATION,
             'entity': 'sensor'
         },
+        'has-someone-duration': 'no-one-determine-time',
+        'no-one-duration': 'no-one-determine-time',
         'electric-power': {
             'device_class': SensorDeviceClass.POWER,
             'entity': 'sensor',
@@ -438,9 +457,7 @@ SPEC_PROP_TRANS_MAP: dict = {
             'entity': 'sensor',
             'state_class': SensorStateClass.TOTAL_INCREASING,
             'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
-        },
-        'has-someone-duration': 'no-one-determine-time',
-        'no-one-duration': 'no-one-determine-time'
+        }
     }
 }
 
