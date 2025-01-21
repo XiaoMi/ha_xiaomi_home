@@ -469,12 +469,12 @@ class _MIoTSpecBase:
     proprietary: bool
     need_filter: bool
     name: str
+    icon: Optional[str]
 
     # External params
     platform: Optional[str]
     device_class: Any
     state_class: Any
-    icon: Optional[str]
     external_unit: Any
 
     spec_id: int
@@ -488,11 +488,11 @@ class _MIoTSpecBase:
         self.proprietary = spec.get('proprietary', False)
         self.need_filter = spec.get('need_filter', False)
         self.name = spec.get('name', 'xiaomi')
+        self.icon = spec.get('icon', None)
 
         self.platform = None
         self.device_class = None
         self.state_class = None
-        self.icon = None
         self.external_unit = None
 
         self.spec_id = hash(f'{self.type_}.{self.iid}')
@@ -653,7 +653,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
                 self._value_range.dump() if self._value_range else None),
             'value_list': self._value_list.dump() if self._value_list else None,
             'precision': self.precision,
-            'expr': self.expr
+            'expr': self.expr,
+            'icon': self.icon
         }
 
 
@@ -1151,6 +1152,7 @@ class _SpecModify:
             return
         modify_data = None
         self._data = {}
+        self._selected = None
         try:
             modify_data = await self._main_loop.run_in_executor(
                 None, load_yaml_file,
@@ -1186,6 +1188,15 @@ class _SpecModify:
 
     def get_prop_expr(self, siid: int, piid: int) -> Optional[str]:
         return self.__get_prop_item(siid=siid, piid=piid, key='expr')
+
+    def get_prop_icon(self, siid: int, piid: int) -> Optional[str]:
+        return self.__get_prop_item(siid=siid, piid=piid, key='icon')
+
+    def get_prop_access(self, siid: int, piid: int) -> Optional[list]:
+        access = self.__get_prop_item(siid=siid, piid=piid, key='access')
+        if not isinstance(access, list):
+            return None
+        return access
 
     def __get_prop_item(self, siid: int, piid: int, key: str) -> Optional[str]:
         if not self._selected:
@@ -1454,7 +1465,13 @@ class MIoTSpecParser:
                 ) or spec_prop.unit
                 spec_prop.expr = self._spec_modify.get_prop_expr(
                     siid=service['iid'], piid=property_['iid'])
+                spec_prop.icon = self._spec_modify.get_prop_icon(
+                    siid=service['iid'], piid=property_['iid'])
                 spec_service.properties.append(spec_prop)
+                custom_access = self._spec_modify.get_prop_access(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_access:
+                    spec_prop.access = custom_access
             # Parse service event
             for event in service.get('events', []):
                 if (
