@@ -15,9 +15,9 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
-  prop.5.6:
-    name: electric-power
-    expr: round(src_value/100, 2)
+  prop.5.1:
+    name: power-consumption
+    expr: round(src_value/1000, 3)
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
