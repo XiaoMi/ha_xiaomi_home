@@ -413,11 +413,11 @@ class MIoTDevice:
     ) -> Optional[MIoTEntityData]:
         if spec_instance.name not in SPEC_DEVICE_TRANS_MAP:
             return None
-        if 'required' not in SPEC_DEVICE_TRANS_MAP[spec_instance.name]:
-            return None
         spec_name: str = spec_instance.name
         if isinstance(SPEC_DEVICE_TRANS_MAP[spec_name], str):
             spec_name = SPEC_DEVICE_TRANS_MAP[spec_name]
+        if 'required' not in SPEC_DEVICE_TRANS_MAP[spec_name]:
+            return None
         # 1. The device shall have all required services.
         required_services = SPEC_DEVICE_TRANS_MAP[spec_name]['required'].keys()
         if not {
@@ -492,7 +492,7 @@ class MIoTDevice:
                         set(required_properties.keys()), optional_properties):
                     if prop.unit:
                         prop.external_unit = self.unit_convert(prop.unit)
-                        prop.icon = self.icon_convert(prop.unit)
+                    #     prop.icon = self.icon_convert(prop.unit)
                     prop.platform = platform
                     entity_data.props.add(prop)
             # action
@@ -514,12 +514,11 @@ class MIoTDevice:
             or miot_service.name not in SPEC_SERVICE_TRANS_MAP
         ):
             return None
-        if 'required' not in SPEC_SERVICE_TRANS_MAP[miot_service.name]:
-            return None
         service_name = miot_service.name
         if isinstance(SPEC_SERVICE_TRANS_MAP[service_name], str):
             service_name = SPEC_SERVICE_TRANS_MAP[service_name]
-
+        if 'required' not in SPEC_SERVICE_TRANS_MAP[service_name]:
+            return None
         # Required properties, required access mode
         required_properties: dict = SPEC_SERVICE_TRANS_MAP[service_name][
             'required'].get('properties', {})
@@ -544,7 +543,7 @@ class MIoTDevice:
                     set(required_properties.keys()), optional_properties):
                 if prop.unit:
                     prop.external_unit = self.unit_convert(prop.unit)
-                    prop.icon = self.icon_convert(prop.unit)
+                    # prop.icon = self.icon_convert(prop.unit)
                 prop.platform = platform
                 entity_data.props.add(prop)
         # Optional actions
@@ -585,10 +584,16 @@ class MIoTDevice:
             and 'unit_of_measurement' in SPEC_PROP_TRANS_MAP['properties'][
                 prop_name]
         ):
-            # Priority: modify unit > spec unit > unit_of_measurement
+            # Priority: spec_modify.unit > unit_convert > specv2entity.unit
             miot_prop.external_unit = SPEC_PROP_TRANS_MAP['properties'][
                 prop_name]['unit_of_measurement']
-            # TODO: icon trans
+        if (
+            not miot_prop.icon
+            and 'icon' in SPEC_PROP_TRANS_MAP['properties'][prop_name]
+        ):
+            # Priority: spec_modify.icon > icon_convert > specv2entity.icon
+            miot_prop.icon = SPEC_PROP_TRANS_MAP['properties'][prop_name][
+                'icon']
         miot_prop.platform = platform
         return True
 
@@ -611,9 +616,12 @@ class MIoTDevice:
                     continue
                 if prop.unit:
                     prop.external_unit = self.unit_convert(prop.unit)
-                    prop.icon = self.icon_convert(prop.unit)
+                    if not prop.icon:
+                        prop.icon = self.icon_convert(prop.unit)
+                # Special conversion
+                self.parse_miot_property_entity(miot_prop=prop)
                 # General conversion
-                if not self.parse_miot_property_entity(miot_prop=prop):
+                if not prop.platform:
                     if prop.writable:
                         if prop.format_ == str:
                             prop.platform = 'text'
@@ -753,10 +761,16 @@ class MIoTDevice:
             'gram': UnitOfMass.GRAMS,
             'kilogram': UnitOfMass.KILOGRAMS,
             'dB': SIGNAL_STRENGTH_DECIBELS,
-            'kB': UnitOfInformation.KILOBYTES,
             'arcdegrees': DEGREE,
             'arcdegress': DEGREE,
+            'kB': UnitOfInformation.KILOBYTES,
+            'MB': UnitOfInformation.MEGABYTES,
+            'GB': UnitOfInformation.GIGABYTES,
+            'TB': UnitOfInformation.TERABYTES,
             'B/s': UnitOfDataRate.BYTES_PER_SECOND,
+            'KB/s': UnitOfDataRate.KILOBYTES_PER_SECOND,
+            'MB/s': UnitOfDataRate.MEGABYTES_PER_SECOND,
+            'GB/s': UnitOfDataRate.GIGABYTES_PER_SECOND
         }
 
         # Handle UnitOfConductivity separately since
@@ -817,12 +831,12 @@ class MIoTDevice:
             return 'mdi:counter'
         if spec_unit in {'mmol/L'}:
             return 'mdi:dots-hexagon'
-        if spec_unit in {'kB'}:
+        if spec_unit in {'kB', 'MB', 'GB'}:
             return 'mdi:network-pos'
         if spec_unit in {'arcdegress', 'arcdegrees'}:
             return 'mdi:angle-obtuse'
-        if spec_unit in {'B/s'}:
-            return 'mdi:download'
+        if spec_unit in {'B/s', 'KB/s', 'MB/s', 'GB/s'}:
+            return 'mdi:network'
         if spec_unit in {'calorie', 'kCal'}:
             return 'mdi:food'
         return None
