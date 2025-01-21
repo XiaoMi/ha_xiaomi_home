@@ -1414,12 +1414,14 @@ class MIoTSpecParser:
                 ):
                     continue
                 p_type_strs: list[str] = property_['type'].split(':')
+                # Handle special property.unit
+                unit = property_.get('unit', None)
                 spec_prop: MIoTSpecProperty = MIoTSpecProperty(
                     spec=property_,
                     service=spec_service,
                     format_=property_['format'],
                     access=property_['access'],
-                    unit=property_.get('unit', None))
+                    unit=unit if unit != 'none' else None)
                 spec_prop.name = p_type_strs[3]
                 # Filter spec property
                 spec_prop.need_filter = (
