@@ -700,9 +700,9 @@ class PtcBathHeater(
     def hvac_mode(self) -> Optional[HVACMode]:
         """The current hvac mode."""
         return (
-            self.get_map_key(
+            self.get_map_value(
                 map_=self._hvac_mode_map,
-                value=self.get_prop_value(prop=self._prop_mode))
+                key=self.get_prop_value(prop=self._prop_mode))
             if self._prop_mode else None)
 
 
