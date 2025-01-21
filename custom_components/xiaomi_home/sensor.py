@@ -95,7 +95,7 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
         # Set device_class
         if self._value_list:
             self._attr_device_class = SensorDeviceClass.ENUM
-            self._attr_icon = 'mdi:message-text'
+            self._attr_icon = 'mdi:format-text'
             self._attr_native_unit_of_measurement = None
             self._attr_options = self._value_list.descriptions
         else:
