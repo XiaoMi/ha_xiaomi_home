@@ -56,7 +56,7 @@ async def test_lan_async(test_devices: dict):
 
     # Your central hub gateway did
     test_did = '111111'
-    # Your central hub gateway did
+    # Your central hub gateway token
     test_token = '11223344556677d9a03d43936fc384205'
     test_model = 'xiaomi.gateway.hub1'
     # Your computer interface list, such as enp3s0, wlp5s0
@@ -152,3 +152,5 @@ async def test_lan_async(test_devices: dict):
     await asyncio.sleep(0.2)
 
     await miot_lan.deinit_async()
+    await mips_service.deinit_async()
+    await miot_network.deinit_async()
