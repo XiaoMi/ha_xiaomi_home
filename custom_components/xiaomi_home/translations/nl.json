@@ -42,12 +42,13 @@
             },
             "advanced_options": {
                 "title": "Geavanceerde Instellingen",
-                "description": "## Inleiding\r\n### Tenzij u zeer goed op de hoogte bent van de betekenis van de volgende opties, houdt u de standaardinstellingen.\r\n### Apparaten filteren\r\nOndersteunt het filteren van apparaten op basis van kamer- en apparaattypen, en ondersteunt ook apparaatdimensiefiltering.\r\n### Besturingsmodus\r\n- Automatisch: Wanneer er een beschikbare Xiaomi centrale hubgateway in het lokale netwerk is, zal Home Assistant eerst apparaatbesturingsinstructies via de centrale hubgateway verzenden om lokale controlefunctionaliteit te bereiken. Als er geen centrale hub in het lokale netwerk is, zal het proberen om besturingsinstructies via het Xiaomi OT-protocol te verzenden om lokale controlefunctionaliteit te bereiken. Alleen als de bovenstaande lokale controlevoorwaarden niet worden vervuld, worden apparaatbesturingsinstructies via de cloud verzonden.\r\n- Cloud: Besturingsinstructies worden alleen via de cloud verzonden.\r\n### Actie-debugmodus\r\nVoor methoden die zijn gedefinieerd in de MIoT-Spec-V2 van het apparaat, wordt naast het genereren van een meldingsentiteit ook een tekstinvoerveldentiteit gegenereerd. U kunt dit gebruiken om besturingsinstructies naar het apparaat te sturen tijdens het debuggen.\r\n### Niet-standaard entiteiten verbergen\r\nVerberg entiteiten die zijn gegenereerd door niet-standaard MIoT-Spec-V2-instanties die beginnen met \"*\".\r\n### Apparaatstatuswijzigingen weergeven\r\nGedetailleerde apparaatstatuswijzigingen weergeven, alleen de geselecteerde meldingen weergeven.",
+                "description": "## Inleiding\r\n### Tenzij u zeer goed op de hoogte bent van de betekenis van de volgende opties, houdt u de standaardinstellingen.\r\n### Apparaten filteren\r\nOndersteunt het filteren van apparaten op basis van kamer- en apparaattypen, en ondersteunt ook apparaatdimensiefiltering.\r\n### Besturingsmodus\r\n- Automatisch: Wanneer er een beschikbare Xiaomi centrale hubgateway in het lokale netwerk is, zal Home Assistant eerst apparaatbesturingsinstructies via de centrale hubgateway verzenden om lokale controlefunctionaliteit te bereiken. Als er geen centrale hub in het lokale netwerk is, zal het proberen om besturingsinstructies via het Xiaomi OT-protocol te verzenden om lokale controlefunctionaliteit te bereiken. Alleen als de bovenstaande lokale controlevoorwaarden niet worden vervuld, worden apparaatbesturingsinstructies via de cloud verzonden.\r\n- Cloud: Besturingsinstructies worden alleen via de cloud verzonden.\r\n### Actie-debugmodus\r\nVoor methoden die zijn gedefinieerd in de MIoT-Spec-V2 van het apparaat, wordt naast het genereren van een meldingsentiteit ook een tekstinvoerveldentiteit gegenereerd. U kunt dit gebruiken om besturingsinstructies naar het apparaat te sturen tijdens het debuggen.\r\n### Niet-standaard entiteiten verbergen\r\nVerberg entiteiten die zijn gegenereerd door niet-standaard MIoT-Spec-V2-instanties die beginnen met \"*\".\r\n### Binaire sensorweergavemodus\r\nToont binaire sensoren in Xiaomi Home als tekstsensor-entiteit of binairesensor-entiteit。\r\n### Apparaatstatuswijzigingen weergeven\r\nGedetailleerde apparaatstatuswijzigingen weergeven, alleen de geselecteerde meldingen weergeven.",
                 "data": {
                     "devices_filter": "Apparaten filteren",
                     "ctrl_mode": "Besturingsmodus",
                     "action_debug": "Actie-debugmodus",
                     "hide_non_standard_entities": "Niet-standaard entiteiten verbergen",
+                    "display_binary_mode": "Binaire sensorweergavemodus",
                     "display_devices_changed_notify": "Apparaatstatuswijzigingen weergeven"
                 }
             },
@@ -90,6 +91,7 @@
             "unreachable_mqtt_broker": "Kan Xiaomi MQTT Broker-adres niet bereiken, controleer de netwerkconfiguratie."
         },
         "abort": {
+            "ha_uuid_get_failed": "Mislukt bij het ophalen van Home Assistant UUID.",
             "network_connect_error": "Configuratie mislukt. De netwerkverbinding is abnormaal. Controleer de netwerkinstellingen van de apparatuur.",
             "already_configured": "Configuratie voor deze gebruiker is al voltooid. Ga naar de integratiepagina en klik op de CONFIGUREER-knop om wijzigingen aan te brengen.",
             "invalid_auth_info": "Authenticatie-informatie is verlopen. Ga naar de integratiepagina en klik op de CONFIGUREER-knop om opnieuw te authentiseren.",
@@ -118,6 +120,7 @@
                     "update_devices": "Werk apparatenlijst bij",
                     "action_debug": "Debugmodus voor actie",
                     "hide_non_standard_entities": "Verberg niet-standaard gemaakte entiteiten",
+                    "display_binary_mode": "Binaire sensorweergavemodus",
                     "display_devices_changed_notify": "Apparaatstatuswijzigingen weergeven",
                     "update_trans_rules": "Werk entiteitsconversieregels bij",
                     "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij",

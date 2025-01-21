@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Unit test for miot_storage.py."""
 import asyncio
+import logging
 from os import path
 import pytest
+
+_LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=import-outside-toplevel, unused-argument
 
@@ -101,7 +104,7 @@ async def test_multi_task_load_async(test_cache_path):
         for _ in range(task_count):
             task_list.append(asyncio.create_task(storage.load_async(
                 domain=test_domain, name=name, type_=dict)))
-    print(f'\ntask count, {len(task_list)}')
+    _LOGGER.info('task count, %s', len(task_list))
     result: list = await asyncio.gather(*task_list)
     assert None not in result
 
@@ -178,28 +181,28 @@ async def test_user_config_async(
         config=config_update, replace=True)
     assert (config_replace := await storage.load_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server)) == config_update
-    print('replace result, ', config_replace)
+    _LOGGER.info('replace result, %s', config_replace)
     # Test query
     query_keys = list(config_base.keys())
-    print('query keys, ', query_keys)
+    _LOGGER.info('query keys, %s', query_keys)
     query_result = await storage.load_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server, keys=query_keys)
-    print('query result 1, ', query_result)
+    _LOGGER.info('query result 1, %s', query_result)
     assert await storage.update_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server,
         config=config_base, replace=True)
     query_result = await storage.load_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server, keys=query_keys)
-    print('query result 2, ', query_result)
+    _LOGGER.info('query result 2, %s', query_result)
     query_result = await storage.load_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server)
-    print('query result all, ', query_result)
+    _LOGGER.info('query result all, %s', query_result)
     # Remove config
     assert await storage.update_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server, config=None)
     query_result = await storage.load_user_config_async(
         uid=test_uid, cloud_server=test_cloud_server)
-    print('remove result, ', query_result)
+    _LOGGER.info('remove result, %s', query_result)
     # Remove domain
     assert await storage.remove_domain_async(domain='miot_config')
 

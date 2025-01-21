@@ -82,7 +82,8 @@ class Select(MIoTPropertyEntity, SelectEntity):
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecProperty) -> None:
         """Initialize the Select."""
         super().__init__(miot_device=miot_device, spec=spec)
-        self._attr_options = list(self._value_list.values())
+        if self._value_list:
+            self._attr_options = self._value_list.descriptions
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""

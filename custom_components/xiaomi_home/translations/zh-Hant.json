@@ -42,12 +42,13 @@
             },
             "advanced_options": {
                 "title": "高級設置選項",
-                "description": "## 使用介紹\r\n### 除非您非常清楚下列選項的含義，否則請保持默認。\r\n### 篩選設備\r\n支持按照房間名稱和設備類型篩選設備，同時也支持設備維度篩選。\r\n### 控制模式\r\n- 自動：本地局域網內存在可用的小米中樞網關時， Home Assistant 會優先通過中樞網關發送設備控制指令，以實現本地化控制功能。本地局域網不存在中樞時，會嘗試通過小米OT協議發送控制指令，以實現本地化控制功能。只有當上述本地化控制條件不滿足時，設備控制指令才會通過雲端發送。\r\n- 雲端：控制指令僅通過雲端發送。\r\n### Action 調試模式\r\n對於設備 MIoT-Spec-V2 定義的方法，在生成通知實體之外，還會生成一個文本輸入框實體，您可以在調試時用它向設備發送控制指令。\r\n### 隱藏非標準生成實體\r\n隱藏名稱以“*”開頭的非標準 MIoT-Spec-V2 實例生成的實體。\r\n### 顯示設備狀態變化通知\r\n細化顯示設備狀態變化通知，只顯示勾選的通知消息。",
+                "description": "## 使用介紹\r\n### 除非您非常清楚下列選項的含義，否則請保持默認。\r\n### 篩選設備\r\n支持按照房間名稱和設備類型篩選設備，同時也支持設備維度篩選。\r\n### 控制模式\r\n- 自動：本地局域網內存在可用的小米中樞網關時， Home Assistant 會優先通過中樞網關發送設備控制指令，以實現本地化控制功能。本地局域網不存在中樞時，會嘗試通過小米OT協議發送控制指令，以實現本地化控制功能。只有當上述本地化控制條件不滿足時，設備控制指令才會通過雲端發送。\r\n- 雲端：控制指令僅通過雲端發送。\r\n### Action 調試模式\r\n對於設備 MIoT-Spec-V2 定義的方法，在生成通知實體之外，還會生成一個文本輸入框實體，您可以在調試時用它向設備發送控制指令。\r\n### 隱藏非標準生成實體\r\n隱藏名稱以“*”開頭的非標準 MIoT-Spec-V2 實例生成的實體。\r\n### 二進制傳感器顯示模式\r\n將米家中的二進制傳感器顯示為文本傳感器實體或者二進制傳感器實體。\r\n### 顯示設備狀態變化通知\r\n細化顯示設備狀態變化通知，只顯示勾選的通知消息。",
                 "data": {
                     "devices_filter": "篩選設備",
                     "ctrl_mode": "控制模式",
                     "action_debug": "Action 調試模式",
                     "hide_non_standard_entities": "隱藏非標準生成實體",
+                    "display_binary_mode": "二進制傳感器顯示模式",
                     "display_devices_changed_notify": "顯示設備狀態變化通知"
                 }
             },
@@ -90,6 +91,7 @@
             "unreachable_mqtt_broker": "無法訪問小米 MQTT Broker 地址，請檢查網絡配置。"
         },
         "abort": {
+            "ha_uuid_get_failed": "獲取 Home Assistant UUID 失敗。",
             "network_connect_error": "配置失敗。網絡連接異常，請檢查設備網絡配置。",
             "already_configured": "該用戶已配置完成。請進入集成頁面，點擊“配置”按鈕修改配置。",
             "invalid_auth_info": "認證信息已過期。請進入集成頁面，點擊“配置”按鈕重新認證。",
@@ -118,6 +120,7 @@
                     "update_devices": "更新設備列表",
                     "action_debug": "Action 調試模式",
                     "hide_non_standard_entities": "隱藏非標準生成實體",
+                    "display_binary_mode": "二進制傳感器顯示模式",
                     "display_devices_changed_notify": "顯示設備狀態變化通知",
                     "update_trans_rules": "更新實體轉換規則",
                     "update_lan_ctrl_config": "更新局域網控制配置",

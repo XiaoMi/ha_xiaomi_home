@@ -1,0 +1,43 @@
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ma4:
+  properties:
+  - 9.*
+  - 13.*
+  - 15.*
+  services:
+  - '10'
+urn:miot-spec-v2:device:curtain:0000A00C:lumi-hmcn01:
+  properties:
+  - '5.1'
+  services:
+  - '4'
+  - '7'
+  - '8'
+urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
+  events:
+  - '2.1'
+urn:miot-spec-v2:device:health-pot:0000A051:chunmi-a1:
+  services:
+  - '5'
+urn:miot-spec-v2:device:light:0000A001:philips-strip3:
+  properties:
+  - '2.2'
+  services:
+  - '1'
+  - '3'
+urn:miot-spec-v2:device:light:0000A001:yeelink-color2:
+  properties:
+  - 3.*
+  - '2.5'
+urn:miot-spec-v2:device:light:0000A001:yeelink-dnlight2:
+  services:
+  - '3'
+urn:miot-spec-v2:device:light:0000A001:yeelink-mbulb3:
+  services:
+  - '3'
+urn:miot-spec-v2:device:motion-sensor:0000A014:xiaomi-pir1:
+  services:
+  - '1'
+  - '5'
+urn:miot-spec-v2:device:router:0000A036:xiaomi-rd03:
+  services:
+  - '*'

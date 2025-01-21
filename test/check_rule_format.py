@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Test rule format."""
 import json
+import logging
 from os import listdir, path
 from typing import Optional
 import pytest
 import yaml
+
+_LOGGER = logging.getLogger(__name__)
 
 ROOT_PATH: str = path.dirname(path.abspath(__file__))
 TRANS_RELATIVE_PATH: str = path.join(
@@ -13,13 +16,10 @@ MIOT_I18N_RELATIVE_PATH: str = path.join(
     ROOT_PATH, '../custom_components/xiaomi_home/miot/i18n')
 SPEC_BOOL_TRANS_FILE = path.join(
     ROOT_PATH,
-    '../custom_components/xiaomi_home/miot/specs/bool_trans.json')
-SPEC_MULTI_LANG_FILE = path.join(
-    ROOT_PATH,
-    '../custom_components/xiaomi_home/miot/specs/multi_lang.json')
+    '../custom_components/xiaomi_home/miot/specs/bool_trans.yaml')
 SPEC_FILTER_FILE = path.join(
     ROOT_PATH,
-    '../custom_components/xiaomi_home/miot/specs/spec_filter.json')
+    '../custom_components/xiaomi_home/miot/specs/spec_filter.yaml')
 
 
 def load_json_file(file_path: str) -> Optional[dict]:
@@ -27,10 +27,10 @@ def load_json_file(file_path: str) -> Optional[dict]:
         with open(file_path, 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
-        print(file_path, 'is not found.')
+        _LOGGER.info('%s is not found.', file_path,)
         return None
     except json.JSONDecodeError:
-        print(file_path, 'is not a valid JSON file.')
+        _LOGGER.info('%s is not a valid JSON file.', file_path)
         return None
 
 
@@ -44,11 +44,17 @@ def load_yaml_file(file_path: str) -> Optional[dict]:
         with open(file_path, 'r', encoding='utf-8') as file:
             return yaml.safe_load(file)
     except FileNotFoundError:
-        print(file_path, 'is not found.')
+        _LOGGER.info('%s is not found.', file_path)
         return None
     except yaml.YAMLError:
-        print(file_path, 'is not a valid YAML file.')
+        _LOGGER.info('%s, is not a valid YAML file.', file_path)
         return None
+
+
+def save_yaml_file(file_path: str, data: dict) -> None:
+    with open(file_path, 'w', encoding='utf-8') as file:
+        yaml.safe_dump(
+            data, file, default_flow_style=False, allow_unicode=True, indent=2)
 
 
 def dict_str_str(d: dict) -> bool:
@@ -116,61 +122,59 @@ def bool_trans(d: dict) -> bool:
         return False
     default_trans: dict = d['translate'].pop('default')
     if not default_trans:
-        print('default trans is empty')
+        _LOGGER.info('default trans is empty')
         return False
     default_keys: set[str] = set(default_trans.keys())
     for key, trans in d['translate'].items():
         trans_keys: set[str] = set(trans.keys())
         if set(trans.keys()) != default_keys:
-            print('bool trans inconsistent', key, default_keys, trans_keys)
+            _LOGGER.info(
+                'bool trans inconsistent, %s, %s, %s',
+                key, default_keys, trans_keys)
             return False
     return True
 
 
 def compare_dict_structure(dict1: dict, dict2: dict) -> bool:
     if not isinstance(dict1, dict) or not isinstance(dict2, dict):
-        print('invalid type')
+        _LOGGER.info('invalid type')
         return False
     if dict1.keys() != dict2.keys():
-        print('inconsistent key values, ', dict1.keys(), dict2.keys())
+        _LOGGER.info(
+            'inconsistent key values, %s, %s', dict1.keys(), dict2.keys())
         return False
     for key in dict1:
         if isinstance(dict1[key], dict) and isinstance(dict2[key], dict):
             if not compare_dict_structure(dict1[key], dict2[key]):
-                print('inconsistent key values, dict, ', key)
+                _LOGGER.info(
+                    'inconsistent key values, dict, %s', key)
                 return False
         elif isinstance(dict1[key], list) and isinstance(dict2[key], list):
             if not all(
                     isinstance(i, type(j))
                     for i, j in zip(dict1[key], dict2[key])):
-                print('inconsistent key values, list, ', key)
+                _LOGGER.info(
+                    'inconsistent key values, list, %s', key)
                 return False
         elif not isinstance(dict1[key], type(dict2[key])):
-            print('inconsistent key values, type, ', key)
+            _LOGGER.info(
+                'inconsistent key values, type, %s', key)
             return False
     return True
 
 
 def sort_bool_trans(file_path: str):
-    trans_data: dict = load_json_file(file_path=file_path)
+    trans_data = load_yaml_file(file_path=file_path)
+    assert isinstance(trans_data, dict), f'{file_path} format error'
     trans_data['data'] = dict(sorted(trans_data['data'].items()))
     for key, trans in trans_data['translate'].items():
         trans_data['translate'][key] = dict(sorted(trans.items()))
     return trans_data
 
 
-def sort_multi_lang(file_path: str):
-    multi_lang: dict = load_json_file(file_path=file_path)
-    multi_lang = dict(sorted(multi_lang.items()))
-    for urn, trans in multi_lang.items():
-        multi_lang[urn] = dict(sorted(trans.items()))
-        for lang, spec in multi_lang[urn].items():
-            multi_lang[urn][lang] = dict(sorted(spec.items()))
-    return multi_lang
-
-
 def sort_spec_filter(file_path: str):
-    filter_data: dict = load_json_file(file_path=file_path)
+    filter_data = load_yaml_file(file_path=file_path)
+    assert isinstance(filter_data, dict), f'{file_path} format error'
     filter_data = dict(sorted(filter_data.items()))
     for urn, spec in filter_data.items():
         filter_data[urn] = dict(sorted(spec.items()))
@@ -179,30 +183,26 @@ def sort_spec_filter(file_path: str):
 
 @pytest.mark.github
 def test_bool_trans():
-    data: dict = load_json_file(SPEC_BOOL_TRANS_FILE)
+    data = load_yaml_file(SPEC_BOOL_TRANS_FILE)
+    assert isinstance(data, dict)
     assert data, f'load {SPEC_BOOL_TRANS_FILE} failed'
     assert bool_trans(data), f'{SPEC_BOOL_TRANS_FILE} format error'
 
 
 @pytest.mark.github
 def test_spec_filter():
-    data: dict = load_json_file(SPEC_FILTER_FILE)
+    data = load_yaml_file(SPEC_FILTER_FILE)
+    assert isinstance(data, dict)
     assert data, f'load {SPEC_FILTER_FILE} failed'
     assert spec_filter(data), f'{SPEC_FILTER_FILE} format error'
-
-
-@pytest.mark.github
-def test_multi_lang():
-    data: dict = load_json_file(SPEC_MULTI_LANG_FILE)
-    assert data, f'load {SPEC_MULTI_LANG_FILE} failed'
-    assert nested_3_dict_str_str(data), f'{SPEC_MULTI_LANG_FILE} format error'
 
 
 @pytest.mark.github
 def test_miot_i18n():
     for file_name in listdir(MIOT_I18N_RELATIVE_PATH):
         file_path: str = path.join(MIOT_I18N_RELATIVE_PATH, file_name)
-        data: dict = load_json_file(file_path)
+        data = load_json_file(file_path)
+        assert isinstance(data, dict)
         assert data, f'load {file_path} failed'
         assert nested_3_dict_str_str(data), f'{file_path} format error'
 
@@ -211,7 +211,8 @@ def test_miot_i18n():
 def test_translations():
     for file_name in listdir(TRANS_RELATIVE_PATH):
         file_path: str = path.join(TRANS_RELATIVE_PATH, file_name)
-        data: dict = load_json_file(file_path)
+        data = load_json_file(file_path)
+        assert isinstance(data, dict)
         assert data, f'load {file_path} failed'
         assert dict_str_dict(data), f'{file_path} format error'
 
@@ -228,27 +229,30 @@ def test_miot_lang_integrity():
     i18n_names: set[str] = set(listdir(MIOT_I18N_RELATIVE_PATH))
     assert len(i18n_names) == len(translations_names)
     assert i18n_names == translations_names
-    bool_trans_data: set[str] = load_json_file(SPEC_BOOL_TRANS_FILE)
+    bool_trans_data = load_yaml_file(SPEC_BOOL_TRANS_FILE)
+    assert isinstance(bool_trans_data, dict)
     bool_trans_names: set[str] = set(
         bool_trans_data['translate']['default'].keys())
     assert len(bool_trans_names) == len(translations_names)
     # Check translation files structure
-    default_dict: dict = load_json_file(
+    default_dict = load_json_file(
         path.join(TRANS_RELATIVE_PATH, integration_lang_list[0]))
     for name in list(integration_lang_list)[1:]:
-        compare_dict: dict = load_json_file(
+        compare_dict = load_json_file(
             path.join(TRANS_RELATIVE_PATH, name))
         if not compare_dict_structure(default_dict, compare_dict):
-            print('compare_dict_structure failed /translations, ', name)
+            _LOGGER.info(
+                'compare_dict_structure failed /translations, %s', name)
             assert False
     # Check i18n files structure
     default_dict = load_json_file(
         path.join(MIOT_I18N_RELATIVE_PATH, integration_lang_list[0]))
     for name in list(integration_lang_list)[1:]:
-        compare_dict: dict = load_json_file(
+        compare_dict = load_json_file(
             path.join(MIOT_I18N_RELATIVE_PATH, name))
         if not compare_dict_structure(default_dict, compare_dict):
-            print('compare_dict_structure failed /miot/i18n, ', name)
+            _LOGGER.info(
+                'compare_dict_structure failed /miot/i18n, %s', name)
             assert False
 
 
@@ -261,19 +265,13 @@ def test_miot_data_sort():
         'INTEGRATION_LANGUAGES not sorted, correct order\r\n'
         f'{list(sort_langs.keys())}')
     assert json.dumps(
-        load_json_file(file_path=SPEC_BOOL_TRANS_FILE)) == json.dumps(
+        load_yaml_file(file_path=SPEC_BOOL_TRANS_FILE)) == json.dumps(
             sort_bool_trans(file_path=SPEC_BOOL_TRANS_FILE)), (
                 f'{SPEC_BOOL_TRANS_FILE} not sorted, goto project root path'
                 ' and run the following command sorting, ',
                 'pytest -s -v -m update ./test/check_rule_format.py')
     assert json.dumps(
-        load_json_file(file_path=SPEC_MULTI_LANG_FILE)) == json.dumps(
-            sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)), (
-                f'{SPEC_MULTI_LANG_FILE} not sorted, goto project root path'
-                ' and run the following command sorting, ',
-                'pytest -s -v -m update ./test/check_rule_format.py')
-    assert json.dumps(
-        load_json_file(file_path=SPEC_FILTER_FILE)) == json.dumps(
+        load_yaml_file(file_path=SPEC_FILTER_FILE)) == json.dumps(
             sort_spec_filter(file_path=SPEC_FILTER_FILE)), (
                 f'{SPEC_FILTER_FILE} not sorted, goto project root path'
                 ' and run the following command sorting, ',
@@ -283,11 +281,8 @@ def test_miot_data_sort():
 @pytest.mark.update
 def test_sort_spec_data():
     sort_data: dict = sort_bool_trans(file_path=SPEC_BOOL_TRANS_FILE)
-    save_json_file(file_path=SPEC_BOOL_TRANS_FILE, data=sort_data)
-    print(SPEC_BOOL_TRANS_FILE, 'formatted.')
-    sort_data = sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)
-    save_json_file(file_path=SPEC_MULTI_LANG_FILE, data=sort_data)
-    print(SPEC_MULTI_LANG_FILE, 'formatted.')
+    save_yaml_file(file_path=SPEC_BOOL_TRANS_FILE, data=sort_data)
+    _LOGGER.info('%s formatted.', SPEC_BOOL_TRANS_FILE)
     sort_data = sort_spec_filter(file_path=SPEC_FILTER_FILE)
-    save_json_file(file_path=SPEC_FILTER_FILE, data=sort_data)
-    print(SPEC_FILTER_FILE, 'formatted.')
+    save_yaml_file(file_path=SPEC_FILTER_FILE, data=sort_data)
+    _LOGGER.info('%s formatted.', SPEC_FILTER_FILE)

@@ -76,9 +76,10 @@ async def async_setup_entry(
         for prop in miot_device.prop_list.get('text', []):
             new_entities.append(Text(miot_device=miot_device, spec=prop))
 
-        for action in miot_device.action_list.get('action_text', []):
-            new_entities.append(ActionText(
-                miot_device=miot_device, spec=action))
+        if miot_device.miot_client.action_debug:
+            for action in miot_device.action_list.get('notify', []):
+                new_entities.append(ActionText(
+                    miot_device=miot_device, spec=action))
 
     if new_entities:
         async_add_entities(new_entities)
@@ -111,11 +112,9 @@ class ActionText(MIoTActionEntity, TextEntity):
         self._attr_extra_state_attributes = {}
         self._attr_native_value = ''
         action_in: str = ', '.join([
-            f'{prop.description_trans}({prop.format_})'
+            f'{prop.description_trans}({prop.format_.__name__})'
             for prop in self.spec.in_])
         self._attr_extra_state_attributes['action params'] = f'[{action_in}]'
-        # For action debug
-        self.action_platform = 'action_text'
 
     async def async_set_value(self, value: str) -> None:
         if not value:
@@ -141,24 +140,24 @@ class ActionText(MIoTActionEntity, TextEntity):
                 f'invalid action params, {value}')
         in_value: list[dict] = []
         for index, prop in enumerate(self.spec.in_):
-            if prop.format_ == 'str':
+            if prop.format_ == str:
                 if isinstance(in_list[index], (bool, int, float, str)):
                     in_value.append(
                         {'piid': prop.iid, 'value': str(in_list[index])})
                     continue
-            elif prop.format_ == 'bool':
+            elif prop.format_ == bool:
                 if isinstance(in_list[index], (bool, int)):
                     # yes, no, on, off, true, false and other bool types
                     # will also be parsed as 0 and 1 of int.
                     in_value.append(
                         {'piid': prop.iid, 'value': bool(in_list[index])})
                     continue
-            elif prop.format_ == 'float':
+            elif prop.format_ == float:
                 if isinstance(in_list[index], (int, float)):
                     in_value.append(
                         {'piid': prop.iid, 'value': in_list[index]})
                     continue
-            elif prop.format_ == 'int':
+            elif prop.format_ == int:
                 if isinstance(in_list[index], int):
                     in_value.append(
                         {'piid': prop.iid, 'value': in_list[index]})

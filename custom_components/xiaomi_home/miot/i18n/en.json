@@ -54,6 +54,10 @@
             "enable": "Enable",
             "disable": "Disable"
         },
+        "binary_mode": {
+            "text": "Text Sensor Entity",
+            "bool": "Binary Sensor Entity"
+        },
         "device_state": {
             "add": "Add",
             "del": "Unavailable",
@@ -62,6 +66,22 @@
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Notice]** Multiple network cards detected that may be connected to the same network. Please pay attention to the selection.",
             "net_unavailable": "Interface unavailable"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Authentication Successful",
+            "content": "Please close this page and return to the account authentication page to click 'Next'.",
+            "button": "Close"
+        },
+        "fail": {
+            "title": "Authentication Failed",
+            "content": "{error_msg}, please close this page and return to the account authentication page to click the authentication link again.",
+            "button": "Close"
+        },
+        "error_msg": {
+            "-10100": "Invalid response parameters ('code' or 'state' field is empty)",
+            "-10101": "Passed-in 'state' field mismatch"
         }
     },
     "miot": {

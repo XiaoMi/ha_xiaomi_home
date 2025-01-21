@@ -42,12 +42,13 @@
             },
             "advanced_options": {
                 "title": "Paramètres Avancés",
-                "description": "## Introduction\r\n### Sauf si vous comprenez très bien la signification des options suivantes, veuillez les laisser par défaut.\r\n### Filtrer les appareils\r\nPrend en charge le filtrage des appareils en fonction du nom de la pièce et du type d'appareil, ainsi que le filtrage basé sur les appareils.\r\n### Mode de Contrôle\r\n- Automatique : Lorsqu'une passerelle Xiaomi est disponible dans le réseau local, Home Assistant enverra les commandes de contrôle des appareils via la passerelle pour permettre le contrôle local. Si aucune passerelle n'est disponible dans le réseau local, Home Assistant essaiera d'envoyer les commandes de contrôle des appareils via le protocole OT Xiaomi pour permettre le contrôle local. Seules si les conditions de contrôle local ci-dessus ne sont pas remplies, les commandes de contrôle des appareils seront envoyées via le cloud.\r\n- Cloud : Les commandes de contrôle des appareils sont envoyées uniquement via le cloud.\r\n### Mode de Débogage d’Actions\r\nPour les méthodes définies par les appareils MIoT-Spec-V2, en plus de générer une entité de notification, une entité de champ de texte sera également générée pour vous permettre d'envoyer des commandes de contrôle aux appareils lors du débogage.\r\n### Masquer les Entités Non Standard\r\nMasquer les entités générées par des instances MIoT-Spec-V2 non standard et commençant par \"*\".\r\n### Afficher les notifications de changement d'état de l'appareil\r\nAfficher les notifications détaillées de changement d'état de l'appareil, en affichant uniquement les notifications sélectionnées.",
+                "description": "## Introduction\r\n### Sauf si vous comprenez très bien la signification des options suivantes, veuillez les laisser par défaut.\r\n### Filtrer les appareils\r\nPrend en charge le filtrage des appareils en fonction du nom de la pièce et du type d'appareil, ainsi que le filtrage basé sur les appareils.\r\n### Mode de Contrôle\r\n- Automatique : Lorsqu'une passerelle Xiaomi est disponible dans le réseau local, Home Assistant enverra les commandes de contrôle des appareils via la passerelle pour permettre le contrôle local. Si aucune passerelle n'est disponible dans le réseau local, Home Assistant essaiera d'envoyer les commandes de contrôle des appareils via le protocole OT Xiaomi pour permettre le contrôle local. Seules si les conditions de contrôle local ci-dessus ne sont pas remplies, les commandes de contrôle des appareils seront envoyées via le cloud.\r\n- Cloud : Les commandes de contrôle des appareils sont envoyées uniquement via le cloud.\r\n### Mode de Débogage d’Actions\r\nPour les méthodes définies par les appareils MIoT-Spec-V2, en plus de générer une entité de notification, une entité de champ de texte sera également générée pour vous permettre d'envoyer des commandes de contrôle aux appareils lors du débogage.\r\n### Masquer les Entités Non Standard\r\nMasquer les entités générées par des instances MIoT-Spec-V2 non standard et commençant par \"*\".\r\n### Mode d'affichage du capteur binaire\r\nAffiche les capteurs binaires dans Xiaomi Home comme entité de capteur de texte ou entité de capteur binaire。\r\n### Afficher les notifications de changement d'état de l'appareil\r\nAfficher les notifications détaillées de changement d'état de l'appareil, en affichant uniquement les notifications sélectionnées.",
                 "data": {
                     "devices_filter": "Filtrer les Appareils",
                     "ctrl_mode": "Mode de Contrôle",
                     "action_debug": "Mode de Débogage d’Actions",
                     "hide_non_standard_entities": "Masquer les Entités Non Standard",
+                    "display_binary_mode": "Mode d'affichage du capteur binaire",
                     "display_devices_changed_notify": "Afficher les notifications de changement d'état de l'appareil"
                 }
             },
@@ -90,6 +91,7 @@
             "unreachable_mqtt_broker": "Impossible d'atteindre l'adresse du Broker MQTT de Xiaomi, veuillez vérifier la configuration réseau."
         },
         "abort": {
+            "ha_uuid_get_failed": "Échec de l'obtention de l'UUID de Home Assistant.",
             "network_connect_error": "La configuration a échoué. Erreur de connexion réseau. Veuillez vérifier la configuration du réseau de l'appareil.",
             "already_configured": "Cet utilisateur a déjà terminé la configuration. Veuillez accéder à la page d'intégration et cliquer sur le bouton \"Configurer\" pour modifier la configuration.",
             "invalid_auth_info": "Les informations d'authentification ont expiré. Veuillez accéder à la page d'intégration et cliquer sur le bouton \"Configurer\" pour vous authentifier à nouveau.",
@@ -118,6 +120,7 @@
                     "update_devices": "Mettre à jour la liste des appareils",
                     "action_debug": "Mode de débogage d'action",
                     "hide_non_standard_entities": "Masquer les entités générées non standard",
+                    "display_binary_mode": "Mode d'affichage du capteur binaire",
                     "display_devices_changed_notify": "Afficher les notifications de changement d'état de l'appareil",
                     "update_trans_rules": "Mettre à jour les règles de conversion d'entités",
                     "update_lan_ctrl_config": "Mettre à jour la configuration de contrôle LAN",

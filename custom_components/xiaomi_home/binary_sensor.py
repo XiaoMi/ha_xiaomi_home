@@ -68,9 +68,10 @@ async def async_setup_entry(
 
     new_entities = []
     for miot_device in device_list:
-        for prop in miot_device.prop_list.get('binary_sensor', []):
-            new_entities.append(BinarySensor(
-                miot_device=miot_device, spec=prop))
+        if miot_device.miot_client.display_binary_bool:
+            for prop in miot_device.prop_list.get('binary_sensor', []):
+                new_entities.append(BinarySensor(
+                    miot_device=miot_device, spec=prop))
 
     if new_entities:
         async_add_entities(new_entities)

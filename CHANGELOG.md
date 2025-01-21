@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## v0.1.5b2
+### Added
+- Support binary sensors to be displayed as text sensor entities and binary sensor entities. [#592](https://github.com/XiaoMi/ha_xiaomi_home/pull/592)
+- Add miot cloud test case. [#620](https://github.com/XiaoMi/ha_xiaomi_home/pull/620)
+- Add test case for user cert. [#638](https://github.com/XiaoMi/ha_xiaomi_home/pull/638)
+- Add mips test case & Change mips reconnect logic. [#641](https://github.com/XiaoMi/ha_xiaomi_home/pull/641)
+- Support remove device. [#622](https://github.com/XiaoMi/ha_xiaomi_home/pull/622)
+- Support italian translation. [#183](https://github.com/XiaoMi/ha_xiaomi_home/pull/183)
+### Changed
+- Refactor miot spec. [#592](https://github.com/XiaoMi/ha_xiaomi_home/pull/592)
+- Refactor miot mips & fix type errors. [#365](https://github.com/XiaoMi/ha_xiaomi_home/pull/365)
+- Using logging for test case log print. [#636](https://github.com/XiaoMi/ha_xiaomi_home/pull/636)
+- Add power properties trans. [#571](https://github.com/XiaoMi/ha_xiaomi_home/pull/571)
+- Move web page to html. [#627](https://github.com/XiaoMi/ha_xiaomi_home/pull/627)
+### Fixed
+- Fix miot cloud and mdns error. [#637](https://github.com/XiaoMi/ha_xiaomi_home/pull/637)
+- Fix type error
+
+## v0.1.5b1
+This version will cause some Xiaomi routers that do not support access (#564) to become unavailable. You can update the device list in the configuration or delete it manually.
+### Added
+- Fan entity support direction ctrl [#556](https://github.com/XiaoMi/ha_xiaomi_home/pull/556)
+### Changed
+- Filter miwifi.* devices and xiaomi.router.rd03 [#564](https://github.com/XiaoMi/ha_xiaomi_home/pull/564)
+### Fixed
+- Fix multi ha instance login [#560](https://github.com/XiaoMi/ha_xiaomi_home/pull/560)
+- Fix fan speed [#464](https://github.com/XiaoMi/ha_xiaomi_home/pull/464)
+- The number of profile models updated from 660 to 823. [#583](https://github.com/XiaoMi/ha_xiaomi_home/pull/583)
+
 ## v0.1.5b0
 ### Added
 - Add missing parameter state_class  [#101](https://github.com/XiaoMi/ha_xiaomi_home/pull/101)

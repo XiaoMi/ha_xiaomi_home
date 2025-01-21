@@ -381,7 +381,8 @@ class _MIoTLanDevice:
                     _MIoTLanDeviceState(state.value+1))
                 # Fast ping
                 if self._if_name is None:
-                    _LOGGER.error('if_name is Not set for device, %s', self.did)
+                    _LOGGER.error(
+                        'if_name is Not set for device, %s', self.did)
                     return
                 if self.ip is None:
                     _LOGGER.error('ip is Not set for device, %s', self.did)
@@ -419,10 +420,10 @@ class _MIoTLanDevice:
                 self.online = True
             else:
                 _LOGGER.info('unstable device detected, %s', self.did)
-                self._online_offline_timer = \
+                self._online_offline_timer = (
                     self._manager.internal_loop.call_later(
                         self.NETWORK_UNSTABLE_RESUME_TH,
-                        self.__online_resume_handler)
+                        self.__online_resume_handler))
 
     def __online_resume_handler(self) -> None:
         _LOGGER.info('unstable resume threshold past, %s', self.did)
@@ -508,9 +509,9 @@ class MIoTLan:
             key='miot_lan', group_id='*',
             handler=self.__on_mips_service_change)
         self._enable_subscribe = enable_subscribe
-        self._virtual_did = str(virtual_did) \
-            if (virtual_did is not None) \
-            else str(secrets.randbits(64))
+        self._virtual_did = (
+            str(virtual_did) if (virtual_did is not None)
+            else str(secrets.randbits(64)))
         # Init socket probe message
         probe_bytes = bytearray(self.OT_PROBE_LEN)
         probe_bytes[:20] = (
@@ -948,7 +949,7 @@ class MIoTLan:
 
 # The following methods SHOULD ONLY be called in the internal loop
 
-    def ping(self, if_name: str | None, target_ip: str) -> None:
+    def ping(self, if_name: Optional[str], target_ip: str) -> None:
         if not target_ip:
             return
         self.__sendto(
@@ -964,7 +965,7 @@ class MIoTLan:
     ) -> None:
         if timeout_ms and not handler:
             raise ValueError('handler is required when timeout_ms is set')
-        device: _MIoTLanDevice | None = self._lan_devices.get(did)
+        device: Optional[_MIoTLanDevice] = self._lan_devices.get(did)
         if not device:
             raise ValueError('invalid device')
         if not device.cipher:
@@ -1232,7 +1233,7 @@ class MIoTLan:
             return
         # Keep alive message
         did: str = str(struct.unpack('>Q', data[4:12])[0])
-        device: _MIoTLanDevice | None = self._lan_devices.get(did)
+        device: Optional[_MIoTLanDevice] = self._lan_devices.get(did)
         if not device:
             return
         timestamp: int = struct.unpack('>I', data[12:16])[0]
@@ -1272,8 +1273,8 @@ class MIoTLan:
             _LOGGER.warning('invalid message, no id, %s, %s', did, msg)
             return
         # Reply
-        req: _MIoTLanRequestData | None = \
-            self._pending_requests.pop(msg['id'], None)
+        req: Optional[_MIoTLanRequestData] = (
+            self._pending_requests.pop(msg['id'], None))
         if req:
             if req.timeout:
                 req.timeout.cancel()
@@ -1334,7 +1335,7 @@ class MIoTLan:
         return False
 
     def __sendto(
-        self, if_name: str | None, data: bytes, address: str, port: int
+        self, if_name: Optional[str], data: bytes, address: str, port: int
     ) -> None:
         if if_name is None:
             # Broadcast
@@ -1356,7 +1357,7 @@ class MIoTLan:
         try:
             # Scan devices
             self.ping(if_name=None, target_ip='255.255.255.255')
-        except Exception as err: # pylint: disable=broad-exception-caught
+        except Exception as err:  # pylint: disable=broad-exception-caught
             # Ignore any exceptions to avoid blocking the loop
             _LOGGER.error('ping device error, %s', err)
             pass

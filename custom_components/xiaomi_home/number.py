@@ -92,9 +92,9 @@ class Number(MIoTPropertyEntity, NumberEntity):
             self._attr_icon = self.spec.icon
         # Set value range
         if self._value_range:
-            self._attr_native_min_value = self._value_range['min']
-            self._attr_native_max_value = self._value_range['max']
-            self._attr_native_step = self._value_range['step']
+            self._attr_native_min_value = self._value_range.min_
+            self._attr_native_max_value = self._value_range.max_
+            self._attr_native_step = self._value_range.step
 
     @property
     def native_value(self) -> Optional[float]:

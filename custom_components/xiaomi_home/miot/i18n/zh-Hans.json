@@ -54,6 +54,10 @@
             "enable": "启用",
             "disable": "禁用"
         },
+        "binary_mode": {
+            "text": "文本传感器实体",
+            "bool": "二进制传感器实体"
+        },
         "device_state": {
             "add": "新增",
             "del": "不可用",
@@ -62,6 +66,22 @@
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[提示]** 检测到多个网卡可能连接同一个网络，请注意选择。",
             "net_unavailable": "接口不可用"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "认证成功",
+            "content": "请关闭此页面，返回账号认证页面点击“下一步”",
+            "button": "关闭"
+        },
+        "fail": {
+            "title": "认证失败",
+            "content": "{error_msg}，请关闭此页面，返回账号认证页面重新点击认链接进行认证。",
+            "button": "关闭"
+        },
+        "error_msg": {
+            "-10100": "无效的响应参数（“code”或者“state”字段为空）",
+            "-10101": "传入“state”字段不一致"
         }
     },
     "miot": {

@@ -1,0 +1,156 @@
+{
+    "config": {
+        "other": {
+            "devices": "Dispositivi",
+            "found_central_gateway": ", Trovato Gateway Hub Centrale Locale",
+            "without_room": "Nessuna stanza assegnata",
+            "no_display": "Non visualizzare"
+        },
+        "control_mode": {
+            "auto": "Auto",
+            "cloud": "Cloud"
+        },
+        "statistics_logic": {
+            "or": "Logica OR",
+            "and": "Logica AND"
+        },
+        "filter_mode": {
+            "exclude": "Escludere",
+            "include": "Includere"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "Dispositivo yunyi",
+            "2": "Dispositivo Cloud",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "Dispositivo Virtuale",
+            "6": "BLE",
+            "7": "AP Locale",
+            "8": "WiFi+BLE",
+            "9": "Altro",
+            "10": "Plug-in Funzionale",
+            "11": "Rete Cellulare",
+            "12": "Cavo",
+            "13": "NB-IoT",
+            "14": "Accesso cloud di terze parti",
+            "15": "Dispositivo di controllo remoto a infrarossi",
+            "16": "BLE-Mesh",
+            "17": "Gruppo di Dispositivi Virtuali",
+            "18": "Sottodispositivo Gateway",
+            "19": "Sottodispositivo Gateway di livello di sicurezza",
+            "22": "PLC",
+            "23": "Solo Cavo",
+            "24": "Matter",
+            "25": "WiFi+Rete Cellulare"
+        },
+        "room_name_rule": {
+            "none": "Non sincronizzare",
+            "home_room": "Nome Casa e Nome Stanza (Camera da Letto Xiaomi Home)",
+            "room": "Nome Stanza (Camera da Letto)",
+            "home": "Nome Casa (Xiaomi Home)"
+        },
+        "option_status": {
+            "enable": "Abilita",
+            "disable": "Disabilita"
+        },
+        "binary_mode": {
+            "text": "Entità Sensore Testo",
+            "bool": "Entità Sensore Binario"
+        },
+        "device_state": {
+            "add": "Aggiungere",
+            "del": "Non disponibile",
+            "offline": "Offline"
+        },
+        "lan_ctrl_config": {
+            "notice_net_dup": "\r\n**[Avviso]** Rilevate più schede di rete che potrebbero essere connesse alla stessa rete. Si prega di prestare attenzione alla selezione.",
+            "net_unavailable": "Interfaccia non disponibile"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Autenticazione Avvenuta",
+            "content": "Chiudere questa pagina e tornare alla pagina di autenticazione dell'account per fare clic su 'Avanti'.",
+            "button": "Chiudi"
+        },
+        "fail": {
+            "title": "Autenticazione Fallita",
+            "content": "{error_msg}, chiudere questa pagina e tornare alla pagina di autenticazione dell'account per fare clic nuovamente sul link di autenticazione.",
+            "button": "Chiudi"
+        },
+        "error_msg": {
+            "-10100": "Parametri di risposta non validi (i campi 'code' o 'state' sono vuoti)",
+            "-10101": "Campo 'state' passato non corrispondente"
+        }
+    },
+    "miot": {
+        "client": {
+            "invalid_oauth_info": "Le informazioni di autenticazione non sono valide, il collegamento al cloud non sarà disponibile, si prega di accedere alla pagina di integrazione Xiaomi Home e cliccare 'Opzioni' per ri-autenticarsi",
+            "invalid_device_cache": "Le informazioni memorizzate nella cache del dispositivo sono anomale, si prega di accedere alla pagina di integrazione Xiaomi Home e cliccare 'Opzioni->Aggiorna elenco dispositivi' per aggiornare la cache locale",
+            "invalid_cert_info": "Certificato utente non valido, il collegamento centrale locale non sarà disponibile, si prega di accedere alla pagina di integrazione Xiaomi Home e cliccare 'Opzioni' per ri-autenticarsi",
+            "device_cloud_error": "Si è verificata un'eccezione durante l'ottenimento delle informazioni del dispositivo dal cloud, si prega di controllare la connessione alla rete locale",
+            "xiaomi_home_error_title": "Errore di Integrazione Xiaomi Home",
+            "xiaomi_home_error": "Rilevato errore per **{nick_name}({uid}, {cloud_server})**, si prega di accedere alla pagina delle opzioni per riconfigurare.\n\n**Messaggio di errore**: \n{message}",
+            "device_list_changed_title": "Modifiche all'elenco dispositivi Xiaomi Home",
+            "device_list_changed": "Rilevato cambiamento nelle informazioni del dispositivo per **{nick_name}({uid}, {cloud_server})**, si prega di accedere alla pagina delle opzioni di integrazione, cliccare `Opzioni->Aggiorna elenco dispositivi` per aggiornare le informazioni locali dei dispositivi.\n\nStato corrente della rete: {network_status}\n{message}\n",
+            "device_list_add": "\n**{count} nuovi dispositivi:** \n{message}",
+            "device_list_del": "\n**{count} dispositivi non disponibili:** \n{message}",
+            "device_list_offline": "\n**{count} dispositivi offline:** \n{message}",
+            "network_status_online": "Online",
+            "network_status_offline": "Offline",
+            "device_exec_error": "Errore di esecuzione"
+        }
+    },
+    "error": {
+        "common": {
+            "-10000": "Errore sconosciuto",
+            "-10001": "Servizio non disponibile",
+            "-10002": "Parametro non valido",
+            "-10003": "Risorse insufficienti",
+            "-10004": "Errore interno",
+            "-10005": "Permessi insufficienti",
+            "-10006": "Timeout di esecuzione",
+            "-10007": "Dispositivo offline o inesistente",
+            "-10020": "Non autorizzato (OAuth2)",
+            "-10030": "Token non valido (HTTP)",
+            "-10040": "Formato messaggio non valido",
+            "-10050": "Certificato non valido",
+            "-704000000": "Errore sconosciuto",
+            "-704010000": "Non autorizzato (il dispositivo potrebbe essere stato eliminato)",
+            "-704014006": "Descrizione del dispositivo non trovata",
+            "-704030013": "Proprietà non leggibile",
+            "-704030023": "Proprietà non scrivibile",
+            "-704030033": "Proprietà non sottoscrivibile",
+            "-704040002": "Servizio inesistente",
+            "-704040003": "Proprietà inesistente",
+            "-704040004": "Evento inesistente",
+            "-704040005": "Azione inesistente",
+            "-704040999": "Funzione non online",
+            "-704042001": "Dispositivo inesistente",
+            "-704042011": "Dispositivo offline",
+            "-704053036": "Timeout operazione del dispositivo",
+            "-704053100": "Il dispositivo non può eseguire questa operazione nello stato attuale",
+            "-704083036": "Timeout operazione del dispositivo",
+            "-704090001": "Dispositivo inesistente",
+            "-704220008": "ID non valido",
+            "-704220025": "Conteggio parametri azione non corrispondente",
+            "-704220035": "Errore del parametro azione",
+            "-704220043": "Errore valore proprietà",
+            "-704222034": "Errore valore di ritorno dell'azione",
+            "-705004000": "Errore sconosciuto",
+            "-705004501": "Errore sconosciuto",
+            "-705201013": "Proprietà non leggibile",
+            "-705201015": "Errore di esecuzione azione",
+            "-705201023": "Proprietà non scrivibile",
+            "-705201033": "Proprietà non sottoscrivibile",
+            "-706012000": "Errore sconosciuto",
+            "-706012013": "Proprietà non leggibile",
+            "-706012015": "Errore di esecuzione azione",
+            "-706012023": "Proprietà non scrivibile",
+            "-706012033": "Proprietà non sottoscrivibile",
+            "-706012043": "Errore valore proprietà",
+            "-706014006": "Descrizione del dispositivo non trovata"
+        }
+    }
+}

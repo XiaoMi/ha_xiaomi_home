@@ -42,12 +42,13 @@
             },
             "advanced_options": {
                 "title": "Erweiterte Einstellungen",
-                "description": "## Gebrauchsanweisung\r\n### Wenn Sie die Bedeutung der folgenden Optionen nicht genau kennen, belassen Sie sie bitte auf den Standardeinstellungen.\r\n### Geräte filtern\r\nUnterstützt das Filtern von Geräten nach Raumnamen und Gerätetypen sowie das Filtern nach Gerätedimensionen.\r\n\r\n### Steuerungsmodus\r\n- Automatisch: Wenn ein verfügbarer Xiaomi-Hub im lokalen Netzwerk vorhanden ist, priorisiert Home Assistant das Senden von Steuerbefehlen über den Hub, um eine lokale Steuerung zu ermöglichen. Wenn kein Hub vorhanden ist, wird versucht, Steuerbefehle über das Xiaomi-OT-Protokoll zu senden. Nur wenn diese Bedingungen für die lokale Steuerung nicht erfüllt sind, werden die Befehle über die Cloud gesendet.\r\n- Cloud: Steuerbefehle werden ausschließlich über die Cloud gesendet.\r\n### Action-Debug-Modus\r\nFür Methoden, die von MIoT-Spec-V2-Geräten definiert werden, wird neben der Benachrichtigungsentität auch eine Texteingabe-Entität erstellt, mit der Sie während des Debuggens Steuerbefehle an das Gerät senden können.\r\n### Nicht standardmäßige Entitäten ausblenden\r\nBlendet Entitäten aus, die von nicht-standardmäßigen MIoT-Spec-V2-Instanzen generiert werden und deren Name mit „*“ beginnt.\r\n### Gerätestatusänderungen anzeigen\r\nDetaillierte Anzeige von Gerätestatusänderungen, es werden nur die ausgewählten Benachrichtigungen angezeigt.",
+                "description": "## Gebrauchsanweisung\r\n### Wenn Sie die Bedeutung der folgenden Optionen nicht genau kennen, belassen Sie sie bitte auf den Standardeinstellungen.\r\n### Geräte filtern\r\nUnterstützt das Filtern von Geräten nach Raumnamen und Gerätetypen sowie das Filtern nach Gerätedimensionen.\r\n\r\n### Steuerungsmodus\r\n- Automatisch: Wenn ein verfügbarer Xiaomi-Hub im lokalen Netzwerk vorhanden ist, priorisiert Home Assistant das Senden von Steuerbefehlen über den Hub, um eine lokale Steuerung zu ermöglichen. Wenn kein Hub vorhanden ist, wird versucht, Steuerbefehle über das Xiaomi-OT-Protokoll zu senden. Nur wenn diese Bedingungen für die lokale Steuerung nicht erfüllt sind, werden die Befehle über die Cloud gesendet.\r\n- Cloud: Steuerbefehle werden ausschließlich über die Cloud gesendet.\r\n### Action-Debug-Modus\r\nFür Methoden, die von MIoT-Spec-V2-Geräten definiert werden, wird neben der Benachrichtigungsentität auch eine Texteingabe-Entität erstellt, mit der Sie während des Debuggens Steuerbefehle an das Gerät senden können.\r\n### Nicht standardmäßige Entitäten ausblenden\r\nBlendet Entitäten aus, die von nicht-standardmäßigen MIoT-Spec-V2-Instanzen generiert werden und deren Name mit „*“ beginnt.\r\n### Binärsensor-Anzeigemodus\r\nZeigt Binärsensoren in Xiaomi Home als Textsensor-Entität oder Binärsensor-Entität an。\r\n### Gerätestatusänderungen anzeigen\r\nDetaillierte Anzeige von Gerätestatusänderungen, es werden nur die ausgewählten Benachrichtigungen angezeigt.",
                 "data": {
                     "devices_filter": "Geräte filtern",
                     "ctrl_mode": "Steuerungsmodus",
                     "action_debug": "Action-Debug-Modus",
                     "hide_non_standard_entities": "Nicht standardmäßige Entitäten ausblenden",
+                    "display_binary_mode": "Binärsensor-Anzeigemodus",
                     "display_devices_changed_notify": "Gerätestatusänderungen anzeigen"
                 }
             },
@@ -90,6 +91,7 @@
             "unreachable_mqtt_broker": "Xiaomi MQTT Broker-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration."
         },
         "abort": {
+            "ha_uuid_get_failed": "Fehler beim Abrufen der Home Assistant-UUID.",
             "network_connect_error": "Konfiguration fehlgeschlagen. Netzwerkverbindung fehlgeschlagen. Überprüfen Sie die Netzwerkkonfiguration des Geräts.",
             "already_configured": "Dieser Benutzer hat die Konfiguration bereits abgeschlossen. Gehen Sie zur Integrationsseite und klicken Sie auf die Schaltfläche \"Konfiguration\", um die Konfiguration zu ändern.",
             "invalid_auth_info": "Authentifizierungsinformationen sind abgelaufen. Gehen Sie zur Integrationsseite und klicken Sie auf die Schaltfläche \"Konfiguration\", um die Authentifizierung erneut durchzuführen.",
@@ -118,6 +120,7 @@
                     "update_devices": "Geräteliste aktualisieren",
                     "action_debug": "Action-Debug-Modus",
                     "hide_non_standard_entities": "Verstecke Nicht-Standard-Entitäten",
+                    "display_binary_mode": "Binärsensor-Anzeigemodus",
                     "display_devices_changed_notify": "Gerätestatusänderungen anzeigen",
                     "update_trans_rules": "Entitätskonvertierungsregeln aktualisieren",
                     "update_lan_ctrl_config": "LAN-Steuerungskonfiguration aktualisieren",

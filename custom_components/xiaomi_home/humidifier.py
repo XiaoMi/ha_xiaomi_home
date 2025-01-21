@@ -97,7 +97,7 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
     _prop_target_humidity: Optional[MIoTSpecProperty]
     _prop_humidity: Optional[MIoTSpecProperty]
 
-    _mode_list: dict[Any, Any]
+    _mode_map: dict[Any, Any]
 
     def __init__(
         self, miot_device: MIoTDevice,  entity_data: MIoTEntityData
@@ -110,7 +110,7 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
         self._prop_mode = None
         self._prop_target_humidity = None
         self._prop_humidity = None
-        self._mode_list = None
+        self._mode_map = None
 
         # properties
         for prop in entity_data.props:
@@ -119,28 +119,23 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
                 self._prop_on = prop
             # target-humidity
             elif prop.name == 'target-humidity':
-                if not isinstance(prop.value_range, dict):
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid target-humidity value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_humidity = prop.value_range['min']
-                self._attr_max_humidity = prop.value_range['max']
+                self._attr_min_humidity = prop.value_range.min_
+                self._attr_max_humidity = prop.value_range.max_
                 self._prop_target_humidity = prop
             # mode
             elif prop.name == 'mode':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'mode value_list is None, %s', self.entity_id)
                     continue
-                self._mode_list = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
+                self._mode_map = prop.value_list.to_map()
                 self._attr_available_modes = list(
-                    self._mode_list.values())
+                    self._mode_map.values())
                 self._attr_supported_features |= HumidifierEntityFeature.MODES
                 self._prop_mode = prop
             # relative-humidity
@@ -163,7 +158,8 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
     async def async_set_mode(self, mode: str) -> None:
         """Set new target preset mode."""
         await self.set_property_async(
-            prop=self._prop_mode, value=self.__get_mode_value(description=mode))
+            prop=self._prop_mode,
+            value=self.get_map_key(map_=self._mode_map, value=mode))
 
     @property
     def is_on(self) -> Optional[bool]:
@@ -183,20 +179,6 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
     @property
     def mode(self) -> Optional[str]:
         """Return the current preset mode."""
-        return self.__get_mode_description(
+        return self.get_map_value(
+            map_=self._mode_map,
             key=self.get_prop_value(prop=self._prop_mode))
-
-    def __get_mode_description(self, key: int) -> Optional[str]:
-        """Convert mode value to description."""
-        if self._mode_list is None:
-            return None
-        return self._mode_list.get(key, None)
-
-    def __get_mode_value(self, description: str) -> Optional[int]:
-        """Convert mode description to value."""
-        if self._mode_list is None:
-            return None
-        for key, value in self._mode_list.items():
-            if value == description:
-                return key
-        return None

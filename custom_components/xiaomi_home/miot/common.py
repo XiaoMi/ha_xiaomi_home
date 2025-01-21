@@ -45,13 +45,17 @@ off Xiaomi or its affiliates' products.
 
 Common utilities.
 """
+import asyncio
 import json
 from os import path
 import random
 from typing import Any, Optional
 import hashlib
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from paho.mqtt.matcher import MQTTMatcher
 import yaml
+from slugify import slugify
 
 MIOT_ROOT_PATH: str = path.dirname(path.abspath(__file__))
 
@@ -83,9 +87,21 @@ def randomize_int(value: int, ratio: float) -> int:
     """Randomize an integer value."""
     return int(value * (1 - ratio + random.random()*2*ratio))
 
+
 def randomize_float(value: float, ratio: float) -> float:
     """Randomize a float value."""
     return value * (1 - ratio + random.random()*2*ratio)
+
+
+def slugify_name(name: str, separator: str = '_') -> str:
+    """Slugify a name."""
+    return slugify(name, separator=separator)
+
+
+def slugify_did(cloud_server: str, did: str) -> str:
+    """Slugify a device id."""
+    return slugify(f'{cloud_server}_{did}', separator='_')
+
 
 class MIoTMatcher(MQTTMatcher):
     """MIoT Pub/Sub topic matcher."""
@@ -105,3 +121,68 @@ class MIoTMatcher(MQTTMatcher):
             return self[topic]
         except KeyError:
             return None
+
+
+class MIoTHttp:
+    """MIoT Common HTTP API."""
+    @staticmethod
+    def get(
+        url: str, params: Optional[dict] = None, headers: Optional[dict] = None
+    ) -> Optional[str]:
+        full_url = url
+        if params:
+            encoded_params = urlencode(params)
+            full_url = f'{url}?{encoded_params}'
+        request = Request(full_url, method='GET', headers=headers or {})
+        content: Optional[bytes] = None
+        with urlopen(request) as response:
+            content = response.read()
+        return str(content, 'utf-8') if content else None
+
+    @staticmethod
+    def get_json(
+        url: str, params: Optional[dict] = None, headers: Optional[dict] = None
+    ) -> Optional[dict]:
+        response = MIoTHttp.get(url, params, headers)
+        return json.loads(response) if response else None
+
+    @staticmethod
+    def post(
+        url: str, data: Optional[dict] = None, headers: Optional[dict] = None
+    ) -> Optional[str]:
+        pass
+
+    @staticmethod
+    def post_json(
+        url: str, data: Optional[dict] = None, headers: Optional[dict] = None
+    ) -> Optional[dict]:
+        response = MIoTHttp.post(url, data, headers)
+        return json.loads(response) if response else None
+
+    @staticmethod
+    async def get_async(
+        url: str, params: Optional[dict] = None, headers: Optional[dict] = None,
+        loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> Optional[str]:
+        # TODO: Use aiohttp
+        ev_loop = loop or asyncio.get_running_loop()
+        return await ev_loop.run_in_executor(
+            None, MIoTHttp.get, url, params, headers)
+
+    @staticmethod
+    async def get_json_async(
+        url: str, params: Optional[dict] = None, headers: Optional[dict] = None,
+        loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> Optional[dict]:
+        ev_loop = loop or asyncio.get_running_loop()
+        return await ev_loop.run_in_executor(
+            None, MIoTHttp.get_json, url, params, headers)
+
+    @ staticmethod
+    async def post_async(
+        url: str, data: Optional[dict] = None, headers: Optional[dict] = None,
+        loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> Optional[str]:
+        ev_loop = loop or asyncio.get_running_loop()
+        return await ev_loop.run_in_executor(
+            None, MIoTHttp.post, url, data, headers)

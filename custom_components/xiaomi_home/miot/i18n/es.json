@@ -54,6 +54,10 @@
             "enable": "habilitar",
             "disable": "deshabilitar"
         },
+        "binary_mode": {
+            "text": "Entidad del sensor de texto",
+            "bool": "Entidad del sensor binario"
+        },
         "device_state": {
             "add": "agregar",
             "del": "no disponible",
@@ -62,6 +66,22 @@
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Aviso]** Se detectaron varias tarjetas de red que pueden estar conectadas a la misma red. Por favor, preste atención a la selección.",
             "net_unavailable": "Interfaz no disponible"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Autenticación exitosa",
+            "content": "Por favor, cierre esta página y regrese a la página de autenticación de la cuenta para hacer clic en 'Siguiente'.",
+            "button": "Cerrar"
+        },
+        "fail": {
+            "title": "Autenticación fallida",
+            "content": "{error_msg}, por favor, cierre esta página y regrese a la página de autenticación de la cuenta para hacer clic en el enlace de autenticación nuevamente.",
+            "button": "Cerrar"
+        },
+        "error_msg": {
+            "-10100": "Parámetros de respuesta inválidos ('code' o 'state' está vacío)",
+            "-10101": "El campo 'state' proporcionado no coincide"
         }
     },
     "miot": {

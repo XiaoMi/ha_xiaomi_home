@@ -54,6 +54,10 @@
             "enable": "Inschakelen",
             "disable": "Uitschakelen"
         },
+        "binary_mode": {
+            "text": "Tekstsensor-entiteit",
+            "bool": "Binairesensor-entiteit"
+        },
         "device_state": {
             "add": "Toevoegen",
             "del": "Niet beschikbaar",
@@ -62,6 +66,22 @@
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Let op]** Meerdere netwerkkaarten gedetecteerd die mogelijk zijn verbonden met hetzelfde netwerk. Let op bij de selectie.",
             "net_unavailable": "Interface niet beschikbaar"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Authenticatie geslaagd",
+            "content": "Sluit deze pagina en ga terug naar de accountauthenticatiepagina om op 'Volgende' te klikken.",
+            "button": "Sluiten"
+        },
+        "fail": {
+            "title": "Authenticatie mislukt",
+            "content": "{error_msg}, sluit deze pagina en ga terug naar de accountauthenticatiepagina om opnieuw op de authenticatielink te klikken.",
+            "button": "Sluiten"
+        },
+        "error_msg": {
+            "-10100": "Ongeldige antwoordparameters ('code' of 'state' veld is leeg)",
+            "-10101": "Doorgegeven 'state' veld komt niet overeen"
         }
     },
     "miot": {

@@ -42,12 +42,13 @@
             },
             "advanced_options": {
                 "title": "Opções Avançadas",
-                "description": "## Introdução\r\n### A menos que você entenda claramente o significado das opções abaixo, mantenha as configurações padrão.\r\n### Filtrar Dispositivos\r\nSuporte para filtrar dispositivos por nome da sala e tipo de dispositivo, bem como filtragem por família.\r\n### Modo de Controle\r\n- Automático: Quando um gateway central Xiaomi está disponível na rede local, o Home Assistant enviará comandos de controlo de dispositivos através do gateway central para realizar o controlo local. Quando não há gateway central na rede local, tentará enviar comandos de controlo através do protocolo Xiaomi OT para realizar o controlo local. Apenas quando as condições de controlo local acima não são atendidas, os comandos de controlo de dispositivos serão enviados através da nuvem.\r\n- Nuvem: Os comandos de controlo são enviados apenas através da nuvem.\r\n### Modo de Depuração de Ações\r\nPara métodos definidos pelo MIoT-Spec-V2, além de gerar uma entidade de notificação, também será gerada uma entidade de caixa de texto para depuração de controlo de dispositivos.\r\n### Ocultar Entidades Geradas Não Padrão\r\nOcultar entidades geradas por instâncias MIoT-Spec-V2 não padrão, cujos nomes começam com \"*\".\r\n### Exibir notificações de mudança de status do dispositivo\r\nExibir notificações detalhadas de mudança de status do dispositivo, mostrando apenas as notificações selecionadas.",
+                "description": "## Introdução\r\n### A menos que você entenda claramente o significado das opções abaixo, mantenha as configurações padrão.\r\n### Filtrar Dispositivos\r\nSuporte para filtrar dispositivos por nome da sala e tipo de dispositivo, bem como filtragem por família.\r\n### Modo de Controle\r\n- Automático: Quando um gateway central Xiaomi está disponível na rede local, o Home Assistant enviará comandos de controlo de dispositivos através do gateway central para realizar o controlo local. Quando não há gateway central na rede local, tentará enviar comandos de controlo através do protocolo Xiaomi OT para realizar o controlo local. Apenas quando as condições de controlo local acima não são atendidas, os comandos de controlo de dispositivos serão enviados através da nuvem.\r\n- Nuvem: Os comandos de controlo são enviados apenas através da nuvem.\r\n### Modo de Depuração de Ações\r\nPara métodos definidos pelo MIoT-Spec-V2, além de gerar uma entidade de notificação, também será gerada uma entidade de caixa de texto para depuração de controlo de dispositivos.\r\n### Ocultar Entidades Geradas Não Padrão\r\nOcultar entidades geradas por instâncias MIoT-Spec-V2 não padrão, cujos nomes começam com \"*\".\r\n### Modo de exibição do sensor binário\r\nExibe sensores binários no Xiaomi Home como entidade de sensor de texto ou entidade de sensor binário。\r\n### Exibir notificações de mudança de status do dispositivo\r\nExibir notificações detalhadas de mudança de status do dispositivo, mostrando apenas as notificações selecionadas.",
                 "data": {
                     "devices_filter": "Filtrar Dispositivos",
                     "ctrl_mode": "Modo de Controlo",
                     "action_debug": "Modo de Depuração de Ações",
                     "hide_non_standard_entities": "Ocultar Entidades Geradas Não Padrão",
+                    "display_binary_mode": "Modo de exibição do sensor binário",
                     "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo"
                 }
             },
@@ -90,6 +91,7 @@
             "unreachable_mqtt_broker": "Não é possível acessar o endereço do Broker MQTT da Xiaomi, verifique a configuração da rede."
         },
         "abort": {
+            "ha_uuid_get_failed": "Não foi possível obter o UUID do Home Assistant.",
             "network_connect_error": "A configuração falhou. A ligação de rede é anormal. Verifique a configuração de rede do equipamento.",
             "already_configured": "A configuração para este utilizador já foi concluída. Vá à página de integrações e clique em CONFIGURAR para efetuar alterações.",
             "invalid_auth_info": "A informação de autenticação expirou. Vá à página de integrações e clique em CONFIGURAR para reautenticar.",
@@ -118,6 +120,7 @@
                     "update_devices": "Atualizar lista de dispositivos",
                     "action_debug": "Modo de depuração de ação",
                     "hide_non_standard_entities": "Ocultar entidades não padrão",
+                    "display_binary_mode": "Modo de exibição do sensor binário",
                     "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo",
                     "update_trans_rules": "Atualizar regras de conversão de entidades",
                     "update_lan_ctrl_config": "Atualizar configuração de controlo LAN",

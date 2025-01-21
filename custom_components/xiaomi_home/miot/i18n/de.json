@@ -54,6 +54,10 @@
             "enable": "aktivieren",
             "disable": "deaktivieren"
         },
+        "binary_mode": {
+            "text": "Textsensor-Entität",
+            "bool": "Binärsensor-Entität"
+        },
         "device_state": {
             "add": "hinzufügen",
             "del": "nicht verfügbar",
@@ -62,6 +66,22 @@
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Hinweis]** Es wurden mehrere Netzwerkkarten erkannt, die möglicherweise mit demselben Netzwerk verbunden sind. Bitte achten Sie auf die Auswahl.",
             "net_unavailable": "Schnittstelle nicht verfügbar"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Authentifizierung erfolgreich",
+            "content": "Bitte schließen Sie diese Seite und kehren Sie zur Kontoauthentifizierungsseite zurück, um auf „Weiter“ zu klicken.",
+            "button": "Schließen"
+        },
+        "fail": {
+            "title": "Authentifizierung fehlgeschlagen",
+            "content": "{error_msg}, bitte schließen Sie diese Seite und kehren Sie zur Kontoauthentifizierungsseite zurück, um den Authentifizierungslink erneut zu klicken.",
+            "button": "Schließen"
+        },
+        "error_msg": {
+            "-10100": "Ungültige Antwortparameter ('code' oder 'state' Feld ist leer)",
+            "-10101": "Übergebenes 'state' Feld stimmt nicht überein"
         }
     },
     "miot": {

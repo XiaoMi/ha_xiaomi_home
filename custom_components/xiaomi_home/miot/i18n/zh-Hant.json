@@ -54,6 +54,10 @@
             "enable": "啟用",
             "disable": "禁用"
         },
+        "binary_mode": {
+            "text": "文本傳感器實體",
+            "bool": "二進制傳感器實體"
+        },
         "device_state": {
             "add": "新增",
             "del": "不可用",
@@ -62,6 +66,22 @@
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[提示]** 檢測到多個網卡可能連接同一個網絡，請注意選擇。",
             "net_unavailable": "接口不可用"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "認證成功",
+            "content": "請關閉此頁面，返回帳號認證頁面點擊“下一步”",
+            "button": "關閉"
+        },
+        "fail": {
+            "title": "認證失敗",
+            "content": "{error_msg}，請關閉此頁面，返回帳號認證頁面重新點擊認鏈接進行認證。",
+            "button": "關閉"
+        },
+        "error_msg": {
+            "-10100": "無效的響應參數（“code”或者“state”字段為空）",
+            "-10101": "傳入的“state”字段不一致"
         }
     },
     "miot": {

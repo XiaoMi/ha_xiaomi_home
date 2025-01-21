@@ -85,6 +85,8 @@ class Event(MIoTEventEntity, EventEntity):
         # Set device_class
         self._attr_device_class = spec.device_class
 
-    def on_event_occurred(self, name: str, arguments: list[dict[int, Any]]):
+    def on_event_occurred(
+        self, name: str, arguments: dict[str, Any] | None = None
+    ) -> None:
         """An event is occurred."""
         self._trigger_event(event_type=name, event_attributes=arguments)

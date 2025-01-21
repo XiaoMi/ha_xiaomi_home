@@ -42,12 +42,13 @@
             },
             "advanced_options": {
                 "title": "Opciones Avanzadas",
-                "description": "## Introducción\r\n### A menos que entienda claramente el significado de las siguientes opciones, manténgalas en su configuración predeterminada.\r\n### Filtrar dispositivos\r\nAdmite la filtración de dispositivos por nombre de habitación y tipo de dispositivo, y también admite la filtración por familia.\r\n### Modo de Control\r\n- Automático: Cuando hay una puerta de enlace central de Xiaomi disponible en la red local, Home Assistant enviará comandos de control de dispositivos a través de la puerta de enlace central para lograr la función de control local. Cuando no hay una puerta de enlace central en la red local, intentará enviar comandos de control a través del protocolo OT de Xiaomi para lograr la función de control local. Solo cuando no se cumplan las condiciones de control local anteriores, los comandos de control de dispositivos se enviarán a través de la nube.\r\n- Nube: Los comandos de control solo se envían a través de la nube.\r\n### Modo de Depuración de Acciones\r\nPara los métodos definidos por el dispositivo MIoT-Spec-V2, además de generar una entidad de notificación, también se generará una entidad de cuadro de texto que se puede utilizar para enviar comandos de control al dispositivo durante la depuración.\r\n### Ocultar Entidades Generadas No Estándar\r\nOcultar entidades generadas por instancias MIoT-Spec-V2 no estándar que comienzan con \"*\".\r\n### Mostrar notificaciones de cambio de estado del dispositivo\r\nMostrar notificaciones detalladas de cambio de estado del dispositivo, mostrando solo las notificaciones seleccionadas.",
+                "description": "## Introducción\r\n### A menos que entienda claramente el significado de las siguientes opciones, manténgalas en su configuración predeterminada.\r\n### Filtrar dispositivos\r\nAdmite la filtración de dispositivos por nombre de habitación y tipo de dispositivo, y también admite la filtración por familia.\r\n### Modo de Control\r\n- Automático: Cuando hay una puerta de enlace central de Xiaomi disponible en la red local, Home Assistant enviará comandos de control de dispositivos a través de la puerta de enlace central para lograr la función de control local. Cuando no hay una puerta de enlace central en la red local, intentará enviar comandos de control a través del protocolo OT de Xiaomi para lograr la función de control local. Solo cuando no se cumplan las condiciones de control local anteriores, los comandos de control de dispositivos se enviarán a través de la nube.\r\n- Nube: Los comandos de control solo se envían a través de la nube.\r\n### Modo de Depuración de Acciones\r\nPara los métodos definidos por el dispositivo MIoT-Spec-V2, además de generar una entidad de notificación, también se generará una entidad de cuadro de texto que se puede utilizar para enviar comandos de control al dispositivo durante la depuración.\r\n### Ocultar Entidades Generadas No Estándar\r\nOcultar entidades generadas por instancias MIoT-Spec-V2 no estándar que comienzan con \"*\".\r\n### Modo de visualización del sensor binario\r\nMuestra los sensores binarios en Xiaomi Home como entidad de sensor de texto o entidad de sensor binario。\r\n### Mostrar notificaciones de cambio de estado del dispositivo\r\nMostrar notificaciones detalladas de cambio de estado del dispositivo, mostrando solo las notificaciones seleccionadas.",
                 "data": {
                     "devices_filter": "Filtrar Dispositivos",
                     "ctrl_mode": "Modo de Control",
                     "action_debug": "Modo de Depuración de Acciones",
                     "hide_non_standard_entities": "Ocultar Entidades Generadas No Estándar",
+                    "display_binary_mode": "Modo de visualización del sensor binario",
                     "display_devices_changed_notify": "Mostrar notificaciones de cambio de estado del dispositivo"
                 }
             },
@@ -90,6 +91,7 @@
             "unreachable_mqtt_broker": "No se puede acceder a la dirección del Broker MQTT de Xiaomi, por favor verifique la configuración de la red."
         },
         "abort": {
+            "ha_uuid_get_failed": "Error al obtener el UUID de Home Assistant.",
             "network_connect_error": "La configuración ha fallado. Existe un problema con la conexión de red, verifique la configuración de red del dispositivo.",
             "already_configured": "Esta cuenta ya ha finalizado la configuración. Ingrese a la página de integración y haga clic en el botón \"Configurar\" para modificar la configuración.",
             "invalid_auth_info": "La información de autorización ha caducado. Ingrese a la página de integración y haga clic en el botón \"Configurar\" para volver a autenticarse.",
@@ -118,6 +120,7 @@
                     "update_devices": "Actualizar lista de dispositivos",
                     "action_debug": "Modo de depuración de Action",
                     "hide_non_standard_entities": "Ocultar entidades generadas no estándar",
+                    "display_binary_mode": "Modo de visualización del sensor binario",
                     "display_devices_changed_notify": "Mostrar notificaciones de cambio de estado del dispositivo",
                     "update_trans_rules": "Actualizar reglas de conversión de entidad",
                     "update_lan_ctrl_config": "Actualizar configuración de control LAN",
