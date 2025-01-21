@@ -57,7 +57,8 @@ def load_yaml_file(file_path: str) -> Optional[dict]:
 def save_yaml_file(file_path: str, data: dict) -> None:
     with open(file_path, 'w', encoding='utf-8') as file:
         yaml.safe_dump(
-            data, file, default_flow_style=False, allow_unicode=True, indent=2)
+            data, file, default_flow_style=False,
+            allow_unicode=True, indent=2, sort_keys=False)
 
 
 def dict_str_str(d: dict) -> bool:
@@ -202,12 +203,7 @@ def sort_spec_filter(file_path: str):
 def sort_spec_modify(file_path: str):
     filter_data = load_yaml_file(file_path=file_path)
     assert isinstance(filter_data, dict), f'{file_path} format error'
-    filter_data = dict(sorted(filter_data.items()))
-    for urn, content in filter_data.items():
-        if isinstance(content, str):
-            continue
-        filter_data[urn] = dict(sorted(content.items()))
-    return filter_data
+    return dict(sorted(filter_data.items()))
 
 
 @pytest.mark.github

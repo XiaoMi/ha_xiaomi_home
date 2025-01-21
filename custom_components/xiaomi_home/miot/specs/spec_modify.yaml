@@ -1,35 +1,35 @@
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
   prop.2.1:
-    access:
-    - read
-    - notify
     name: access-mode
-  prop.2.2:
-    icon: mdi:ip
-    name: ip-address
-  prop.2.3:
     access:
     - read
     - notify
+  prop.2.2:
+    name: ip-address
+    icon: mdi:ip
+  prop.2.3:
     name: wifi-ssid
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
   prop.5.6:
-    expr: round(src_value/100, 2)
     name: electric-power
+    expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
-    expr: round(src_value/100, 2)
     name: electric-power
+    expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
   prop.2.1:
-    icon: mdi:download
     name: download-speed
+    icon: mdi:download
     unit: B/s
   prop.2.2:
-    icon: mdi:upload
     name: upload-speed
+    icon: mdi:upload
     unit: B/s
