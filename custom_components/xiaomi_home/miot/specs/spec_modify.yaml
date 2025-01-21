@@ -2,22 +2,9 @@ urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
     name: "electric-power"
     expr: "round(src_value/100, 2)"
-  prop.3.2:
-    name: "power-consumption"
-    unit: "kWh"
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2:
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
   prop.5.6:
     name: "electric-power"
     expr: "round(src_value/100, 2)"
-  prop.5.7:
-    name: "surge-power"
-    unit: "W"
-urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-va1:1:
-  prop.3.6:
-    name: "pm2.5-density"
-    unit: "ug/m3"
-  prop.3.8:
-    name: "temperature"
-    unit: "celsius"
