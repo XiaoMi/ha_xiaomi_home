@@ -20,6 +20,10 @@ urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
     expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
+  prop.2.2:
+    name: power-consumption
+    expr: round(src_value/1000, 3)
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
     name: electric-power
