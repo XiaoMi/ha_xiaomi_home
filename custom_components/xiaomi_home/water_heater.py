@@ -100,7 +100,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     ) -> None:
         """Initialize the Water heater."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._attr_temperature_unit = None
+        self._attr_temperature_unit = None  # type: ignore
         self._attr_supported_features = WaterHeaterEntityFeature(0)
         self._prop_on = None
         self._prop_temp = None
@@ -112,20 +112,20 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         for prop in entity_data.props:
             # on
             if prop.name == 'on':
+                self._attr_supported_features |= WaterHeaterEntityFeature.ON_OFF
                 self._prop_on = prop
             # temperature
             if prop.name == 'temperature':
-                if prop.value_range:
-                    if (
-                        self._attr_temperature_unit is None
-                        and prop.external_unit
-                    ):
-                        self._attr_temperature_unit = prop.external_unit
-                    self._prop_temp = prop
-                else:
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid temperature value_range format, %s',
                         self.entity_id)
+                    continue
+                if prop.external_unit:
+                    self._attr_temperature_unit = prop.external_unit
+                self._attr_min_temp = prop.value_range.min_
+                self._attr_max_temp = prop.value_range.max_
+                self._prop_temp = prop
             # target-temperature
             if prop.name == 'target-temperature':
                 if not prop.value_range:
@@ -133,8 +133,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                         'invalid target-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_temp = prop.value_range.min_
-                self._attr_max_temp = prop.value_range.max_
+                self._attr_target_temperature_low = prop.value_range.min_
+                self._attr_target_temperature_high = prop.value_range.max_
                 self._attr_precision = prop.value_range.step
                 if self._attr_temperature_unit is None and prop.external_unit:
                     self._attr_temperature_unit = prop.external_unit
@@ -166,6 +166,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the temperature the water heater should heat water to."""
+        if not self._prop_target_temp:
+            return
         await self.set_property_async(
             prop=self._prop_target_temp, value=kwargs[ATTR_TEMPERATURE])
 
@@ -185,12 +187,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         await self.set_property_async(
             prop=self._prop_mode,
             value=self.get_map_key(
-                map_=self._mode_map,
-                value=operation_mode))
-
-    async def async_turn_away_mode_on(self) -> None:
-        """Set the water heater to away mode."""
-        await self.hass.async_add_executor_job(self.turn_away_mode_on)
+                map_=self._mode_map, value=operation_mode))
 
     @property
     def current_temperature(self) -> Optional[float]:
