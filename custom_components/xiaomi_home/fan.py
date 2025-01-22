@@ -55,6 +55,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.fan import (
     FanEntity,
     FanEntityFeature,
+    DIRECTION_FORWARD,
     DIRECTION_REVERSE
 )
 from homeassistant.util.percentage import (
@@ -269,7 +270,7 @@ class Fan(MIoTServiceEntity, FanEntity):
             prop=self._prop_wind_reverse,
             value=(
                 self._prop_wind_reverse_reverse
-                if self.current_direction == DIRECTION_REVERSE
+                if direction == DIRECTION_REVERSE
                 else self._prop_wind_reverse_forward))
 
     async def async_oscillate(self, oscillating: bool) -> None:
@@ -298,9 +299,9 @@ class Fan(MIoTServiceEntity, FanEntity):
         """Return the current direction of the fan."""
         if not self._prop_wind_reverse:
             return None
-        return 'reverse' if self.get_prop_value(
+        return DIRECTION_REVERSE if self.get_prop_value(
             prop=self._prop_wind_reverse
-        ) == self._prop_wind_reverse_reverse else 'forward'
+        ) == self._prop_wind_reverse_reverse else DIRECTION_FORWARD
 
     @property
     def percentage(self) -> Optional[int]:
