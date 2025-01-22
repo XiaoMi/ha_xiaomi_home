@@ -172,7 +172,7 @@ class Fan(MIoTServiceEntity, FanEntity):
                     self._prop_wind_reverse_reverse = True
                 elif prop.value_list:
                     for item in prop.value_list.items:
-                        if item.name in {'foreward'}:
+                        if item.name in {'forward'}:
                             self._prop_wind_reverse_forward = item.value
                             self._prop_wind_reverse_reverse = item.value
                 if (
@@ -202,9 +202,9 @@ class Fan(MIoTServiceEntity, FanEntity):
             if self._speed_names:
                 await self.set_property_async(
                     prop=self._prop_fan_level,
-                    value=self.get_map_value(
+                    value=self.get_map_key(
                         map_=self._speed_name_map,
-                        key=percentage_to_ordered_list_item(
+                        value=percentage_to_ordered_list_item(
                             self._speed_names, percentage)))
             else:
                 await self.set_property_async(
@@ -233,9 +233,9 @@ class Fan(MIoTServiceEntity, FanEntity):
             if self._speed_names:
                 await self.set_property_async(
                     prop=self._prop_fan_level,
-                    value=self.get_map_value(
+                    value=self.get_map_key(
                         map_=self._speed_name_map,
-                        key=percentage_to_ordered_list_item(
+                        value=percentage_to_ordered_list_item(
                             self._speed_names, percentage)))
             else:
                 await self.set_property_async(
