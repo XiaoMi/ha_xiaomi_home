@@ -48,6 +48,11 @@ urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
     name: electric-power
     expr: round(src_value/100, 2)
+urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:  # 小米智能插线板2
+  prop.3.3:  # voltage
+    unit: mV
+  prop.3.4:  # electric-current
+    unit: mA
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
   prop.2.1:
     name: download-speed
