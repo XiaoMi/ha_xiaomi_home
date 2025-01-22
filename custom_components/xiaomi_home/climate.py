@@ -62,7 +62,7 @@ from homeassistant.components.climate import (
     ATTR_TEMPERATURE,
     HVACMode,
     ClimateEntity,
-    ClimateEntityFeature,
+    ClimateEntityFeature
 )
 
 from .miot.const import DOMAIN
@@ -75,7 +75,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up a config entry."""
     device_list: list[MIoTDevice] = hass.data[DOMAIN]['devices'][
@@ -211,14 +211,14 @@ class FeaturePresetMode(MIoTServiceEntity, ClimateEntity):
         """Set the preset mode."""
         await self.set_property_async(
             self._prop_mode,
-            value=self.get_map_value(map_=self._mode_map, key=preset_mode))
+            value=self.get_map_key(map_=self._mode_map, value=preset_mode))
 
     @property
     def preset_mode(self) -> Optional[str]:
         return (
-            self.get_map_key(
+            self.get_map_value(
                 map_=self._mode_map,
-                value=self.get_prop_value(prop=self._prop_mode))
+                key=self.get_prop_value(prop=self._prop_mode))
             if self._prop_mode else None)
 
 
@@ -265,8 +265,8 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
         if fan_mode == FAN_ON:
             await self.set_property_async(prop=self._prop_fan_on, value=True)
             return
-        mode_value = self.get_map_value(
-            map_=self._fan_mode_map, key=fan_mode)
+        mode_value = self.get_map_key(
+            map_=self._fan_mode_map, value=fan_mode)
         if mode_value is None or not await self.set_property_async(
             prop=self._prop_fan_level, value=mode_value
         ):
@@ -283,9 +283,9 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
             return (
                 FAN_ON if self.get_prop_value(prop=self._prop_fan_on)
                 else FAN_OFF)
-        return self.get_map_key(
+        return self.get_map_value(
             map_=self._fan_mode_map,
-            value=self.get_prop_value(prop=self._prop_fan_level))
+            key=self.get_prop_value(prop=self._prop_fan_level))
 
 
 class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
@@ -457,7 +457,7 @@ class Heater(
     FeatureTargetTemperature,
     FeatureTemperature,
     FeatureHumidity,
-    FeaturePresetMode,
+    FeaturePresetMode
 ):
     """Heater"""
 
@@ -492,7 +492,7 @@ class AirConditioner(
     FeatureTemperature,
     FeatureHumidity,
     FeatureFanMode,
-    FeatureSwingMode,
+    FeatureSwingMode
 ):
     """Air conditioner"""
     _prop_mode: Optional[MIoTSpecProperty]
@@ -562,8 +562,8 @@ class AirConditioner(
         # set mode
         if self._prop_mode is None:
             return
-        mode_value = self.get_map_value(
-            map_=self._hvac_mode_map, key=hvac_mode)
+        mode_value = self.get_map_key(
+            map_=self._hvac_mode_map, value=hvac_mode)
         if mode_value is None or not await self.set_property_async(
             prop=self._prop_mode, value=mode_value
         ):
@@ -576,9 +576,9 @@ class AirConditioner(
         if self.get_prop_value(prop=self._prop_on) is False:
             return HVACMode.OFF
         return (
-            self.get_map_key(
+            self.get_map_value(
                 map_=self._hvac_mode_map,
-                value=self.get_prop_value(prop=self._prop_mode))
+                key=self.get_prop_value(prop=self._prop_mode))
             if self._prop_mode else None)
 
     def __ac_state_changed(self, prop: MIoTSpecProperty, value: Any) -> None:
@@ -611,8 +611,8 @@ class AirConditioner(
             if mode:
                 self.set_prop_value(
                     prop=self._prop_mode,
-                    value=self.get_map_value(
-                        map_=self._hvac_mode_map, key=mode))
+                    value=self.get_map_key(
+                        map_=self._hvac_mode_map, value=mode))
         # T: target temperature
         if 'T' in v_ac_state and self._prop_target_temp:
             self.set_prop_value(
@@ -645,7 +645,7 @@ class PtcBathHeater(
     FeatureTargetTemperature,
     FeatureTemperature,
     FeatureFanMode,
-    FeatureSwingMode,
+    FeatureSwingMode
 ):
     """Ptc bath heater"""
     _prop_mode: Optional[MIoTSpecProperty]
@@ -688,8 +688,8 @@ class PtcBathHeater(
         """Set the target hvac mode."""
         if self._prop_mode is None:
             return
-        mode_value = self.get_map_value(
-            map_=self._hvac_mode_map, key=hvac_mode)
+        mode_value = self.get_map_key(
+            map_=self._hvac_mode_map, value=hvac_mode)
         if mode_value is None or not await self.set_property_async(
             prop=self._prop_mode, value=mode_value
         ):
@@ -711,7 +711,7 @@ class Thermostat(
     FeatureTargetTemperature,
     FeatureTemperature,
     FeatureHumidity,
-    FeatureFanMode,
+    FeatureFanMode
 ):
     """Thermostat"""
     _prop_mode: Optional[MIoTSpecProperty]
@@ -772,8 +772,8 @@ class Thermostat(
         # set mode
         if self._prop_mode is None:
             return
-        mode_value = self.get_map_value(
-            map_=self._hvac_mode_map, key=hvac_mode
+        mode_value = self.get_map_key(
+            map_=self._hvac_mode_map, value=hvac_mode
         )
         if mode_value is None or not await self.set_property_async(
             prop=self._prop_mode, value=mode_value
@@ -787,7 +787,7 @@ class Thermostat(
         if self.get_prop_value(prop=self._prop_on) is False:
             return HVACMode.OFF
         return (
-            self.get_map_key(
+            self.get_map_value(
                 map_=self._hvac_mode_map,
-                value=self.get_prop_value(prop=self._prop_mode))
+                key=self.get_prop_value(prop=self._prop_mode))
             if self._prop_mode else None)
