@@ -183,7 +183,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
             return
         if self.get_prop_value(prop=self._prop_on) is False:
             await self.set_property_async(
-                prop=self._prop_on, value=True, update=False)
+                prop=self._prop_on, value=True, write_ha_state=False)
         await self.set_property_async(
             prop=self._prop_mode,
             value=self.get_map_key(
@@ -197,6 +197,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     @property
     def target_temperature(self) -> Optional[float]:
         """Return the target temperature."""
+        if not self._prop_target_temp:
+            return None
         return self.get_prop_value(prop=self._prop_target_temp)
 
     @property

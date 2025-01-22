@@ -200,7 +200,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if pos is None:
             return None
         pos = round(pos*self._prop_position_value_range/100)
-        return await self.set_property_async(
+        await self.set_property_async(
             prop=self._prop_target_position, value=pos)
 
     @property
