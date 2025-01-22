@@ -82,6 +82,8 @@ async def async_setup_entry(
                 data.spec.device_class = CoverDeviceClass.CURTAIN
             elif data.spec.name == 'window-opener':
                 data.spec.device_class = CoverDeviceClass.WINDOW
+            elif data.spec.name == 'motor-controller':
+                data.spec.device_class = CoverDeviceClass.SHUTTER
             new_entities.append(
                 Cover(miot_device=miot_device, entity_data=data))
 
@@ -145,7 +147,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         self._attr_supported_features |= (
                             CoverEntityFeature.CLOSE)
                         self._prop_motor_value_close = item.value
-                    elif item.name in {'pause'}:
+                    elif item.name in {'pause', 'stop'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.STOP)
                         self._prop_motor_value_pause = item.value
