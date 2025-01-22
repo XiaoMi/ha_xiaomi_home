@@ -57,7 +57,7 @@ from homeassistant.components.water_heater import (
     STATE_OFF,
     ATTR_TEMPERATURE,
     WaterHeaterEntity,
-    WaterHeaterEntityFeature,
+    WaterHeaterEntityFeature
 )
 
 from .miot.const import DOMAIN
@@ -68,21 +68,19 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a config entry."""
     device_list: list[MIoTDevice] = hass.data[DOMAIN]['devices'][
-        config_entry.entry_id
-    ]
+        config_entry.entry_id]
 
     new_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get('water_heater', []):
-            new_entities.append(
-                WaterHeater(miot_device=miot_device, entity_data=data)
-            )
+            new_entities.append(WaterHeater(
+                miot_device=miot_device, entity_data=data))
 
     if new_entities:
         async_add_entities(new_entities)
