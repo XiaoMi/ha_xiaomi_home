@@ -84,6 +84,8 @@ async def async_setup_entry(
                 data.spec.device_class = CoverDeviceClass.WINDOW
             elif data.spec.name == 'motor-controller':
                 data.spec.device_class = CoverDeviceClass.SHUTTER
+            elif data.spec.name == 'airer':
+                data.spec.device_class = CoverDeviceClass.BLIND
             new_entities.append(
                 Cover(miot_device=miot_device, entity_data=data))
 
@@ -139,11 +141,11 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         'motor-control value_list is None, %s', self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {'open'}:
+                    if item.name in {'open', 'up'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.OPEN)
                         self._prop_motor_value_open = item.value
-                    elif item.name in {'close'}:
+                    elif item.name in {'close', 'down'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.CLOSE)
                         self._prop_motor_value_close = item.value
@@ -158,9 +160,9 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         'status value_list is None, %s', self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {'opening', 'open'}:
+                    if item.name in {'opening', 'open', 'up'}:
                         self._prop_status_opening = item.value
-                    elif item.name in {'closing', 'close'}:
+                    elif item.name in {'closing', 'close', 'down'}:
                         self._prop_status_closing = item.value
                     elif item.name in {'stop', 'pause'}:
                         self._prop_status_stop = item.value
@@ -211,8 +213,10 @@ class Cover(MIoTServiceEntity, CoverEntity):
 
         0: the cover is closed, 100: the cover is fully opened, None: unknown.
         """
+        if self._prop_current_position is None:
+            return None
         pos = self.get_prop_value(prop=self._prop_current_position)
-        if pos is None:
+        if pos is None or self._prop_position_value_range is None:
             return None
         return round(pos*100/self._prop_position_value_range)
 
@@ -235,4 +239,6 @@ class Cover(MIoTServiceEntity, CoverEntity):
     @property
     def is_closed(self) -> Optional[bool]:
         """Return if the cover is closed."""
+        if self._prop_current_position is None:
+            return None
         return self.get_prop_value(prop=self._prop_current_position) == 0

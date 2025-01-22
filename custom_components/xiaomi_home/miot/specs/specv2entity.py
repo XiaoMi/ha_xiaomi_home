@@ -320,7 +320,8 @@ SPEC_SERVICE_TRANS_MAP: dict[str, dict | str] = {
         'entity': 'cover'
     },
     'window-opener': 'curtain',
-    'motor-controller': 'curtain'
+    'motor-controller': 'curtain',
+    'airer': 'curtain'
 }
 
 """SPEC_PROP_TRANS_MAP
