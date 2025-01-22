@@ -94,7 +94,7 @@ class MIoTNetwork:
     _main_loop: asyncio.AbstractEventLoop
 
     _ip_addr_map: dict[str, float]
-    _url_addr_list: dict[str, float]
+    _http_addr_map: dict[str, float]
     _http_session: aiohttp.ClientSession
 
     _refresh_interval: int
@@ -283,8 +283,8 @@ class MIoTNetwork:
                     [
                         'ping', '-c', '1', '-w',
                         str(self._DETECT_TIMEOUT), address]),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
             await process.communicate()
             if process.returncode == 0:
