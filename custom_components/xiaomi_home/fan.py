@@ -303,7 +303,7 @@ class Fan(MIoTServiceEntity, FanEntity):
         fan_level = self.get_prop_value(prop=self._prop_fan_level)
         if fan_level is None:
             return None
-        if self._speed_names:
+        if self._speed_names and self._speed_name_map:
             return ordered_list_item_to_percentage(
                 self._speed_names, self._speed_name_map[fan_level])
         else:

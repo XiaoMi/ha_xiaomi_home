@@ -992,14 +992,14 @@ class MIoTServiceEntity(Entity):
                     siid=event.service.iid, eiid=event.iid, sub_id=sub_id)
 
     def get_map_value(
-        self, map_: dict[int, Any], key: int
+        self, map_: Optional[dict[int, Any]], key: int
     ) -> Any:
         if map_ is None:
             return None
         return map_.get(key, None)
 
     def get_map_key(
-        self, map_: dict[int, Any], value: Any
+        self, map_: Optional[dict[int, Any]], value: Any
     ) -> Optional[int]:
         if map_ is None:
             return None
@@ -1008,7 +1008,7 @@ class MIoTServiceEntity(Entity):
                 return key
         return None
 
-    def get_prop_value(self, prop: MIoTSpecProperty) -> Any:
+    def get_prop_value(self, prop: Optional[MIoTSpecProperty]) -> Any:
         if not prop:
             _LOGGER.error(
                 'get_prop_value error, property is None, %s, %s',
@@ -1016,7 +1016,9 @@ class MIoTServiceEntity(Entity):
             return None
         return self._prop_value_map.get(prop, None)
 
-    def set_prop_value(self, prop: MIoTSpecProperty, value: Any) -> None:
+    def set_prop_value(
+        self, prop: Optional[MIoTSpecProperty], value: Any
+    ) -> None:
         if not prop:
             _LOGGER.error(
                 'set_prop_value error, property is None, %s, %s',
@@ -1025,13 +1027,14 @@ class MIoTServiceEntity(Entity):
         self._prop_value_map[prop] = value
 
     async def set_property_async(
-        self, prop: MIoTSpecProperty, value: Any, update: bool = True
+        self, prop: Optional[MIoTSpecProperty], value: Any,
+        update_value: bool = True, write_ha_state: bool = True
     ) -> bool:
-        value = prop.value_format(value)
         if not prop:
             raise RuntimeError(
                 f'set property failed, property is None, '
                 f'{self.entity_id}, {self.name}')
+        value = prop.value_format(value)
         if prop not in self.entity_data.props:
             raise RuntimeError(
                 f'set property failed, unknown property, '
@@ -1047,8 +1050,9 @@ class MIoTServiceEntity(Entity):
         except MIoTClientError as e:
             raise RuntimeError(
                 f'{e}, {self.entity_id}, {self.name}, {prop.name}') from e
-        if update:
+        if update_value:
             self._prop_value_map[prop] = value
+        if write_ha_state:
             self.async_write_ha_state()
         return True
 

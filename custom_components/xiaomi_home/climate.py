@@ -566,8 +566,9 @@ class AirConditioner(
                     f'{self.entity_id}')
             return
         # set the device on
-        elif self.get_prop_value(prop=self._prop_on) is False:
-            await self.set_property_async(prop=self._prop_on, value=True)
+        if self.get_prop_value(prop=self._prop_on) is False:
+            await self.set_property_async(prop=self._prop_on, value=True, 
+                                          write_ha_state=False)
         # set mode
         if self._prop_mode is None:
             return
@@ -631,7 +632,11 @@ class AirConditioner(
             self.set_prop_value(
                 prop=self._prop_fan_level, value=v_ac_state['S'])
         # D: swing mode. 0: on, 1: off
-        if 'D' in v_ac_state and len(self._attr_swing_modes) == 2:
+        if (
+            'D' in v_ac_state
+            and self._attr_swing_modes
+            and len(self._attr_swing_modes) == 2
+        ):
             if (
                 SWING_HORIZONTAL in self._attr_swing_modes
                 and self._prop_horizontal_swing
