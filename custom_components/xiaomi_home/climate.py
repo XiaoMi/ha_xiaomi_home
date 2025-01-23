@@ -107,6 +107,7 @@ class FeatureOnOff(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_on = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
@@ -142,6 +143,7 @@ class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_target_temp = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
@@ -162,7 +164,7 @@ class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
                 self._prop_target_temp = prop
 
     async def async_set_temperature(self, **kwargs):
-        """Set new target temperature."""
+        """Set the target temperature."""
         if ATTR_TEMPERATURE in kwargs:
             temp = kwargs[ATTR_TEMPERATURE]
             if temp > self._attr_max_temp:
@@ -175,7 +177,7 @@ class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
 
     @property
     def target_temperature(self) -> Optional[float]:
-        """Return the target temperature."""
+        """The current target temperature."""
         return (
             self.get_prop_value(prop=self._prop_target_temp)
             if self._prop_target_temp else None)
@@ -189,6 +191,7 @@ class FeaturePresetMode(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_mode = None
         self._mode_map = None
 
@@ -215,6 +218,7 @@ class FeaturePresetMode(MIoTServiceEntity, ClimateEntity):
 
     @property
     def preset_mode(self) -> Optional[str]:
+        """The current preset mode."""
         return (
             self.get_map_value(
                 map_=self._mode_map,
@@ -231,6 +235,7 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_fan_on = None
         self._prop_fan_level = None
         self._fan_mode_map = None
@@ -296,6 +301,7 @@ class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_horizontal_swing = None
         self._prop_vertical_swing = None
 
@@ -372,6 +378,7 @@ class FeatureTemperature(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_env_temperature = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
@@ -395,6 +402,7 @@ class FeatureHumidity(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_env_humidity = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
@@ -418,6 +426,7 @@ class FeatureTargetHumidity(MIoTServiceEntity, ClimateEntity):
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
+        """Initialize the feature class."""
         self._prop_target_humidity = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
@@ -464,7 +473,7 @@ class Heater(
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
-        """Initialize the Heater."""
+        """Initialize the heater."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
 
         self._attr_icon = 'mdi:radiator'
@@ -503,7 +512,7 @@ class AirConditioner(
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
-        """Initialize the Heater."""
+        """Initialize the air conditioner."""
         self._prop_mode = None
         self._hvac_mode_map = None
         self._prop_ac_state = None
@@ -756,7 +765,7 @@ class Thermostat(
             self._attr_hvac_modes.insert(0, HVACMode.OFF)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        """Set new target hvac mode."""
+        """Set the target hvac mode."""
         # set the device off
         if hvac_mode == HVACMode.OFF:
             if not await self.set_property_async(
