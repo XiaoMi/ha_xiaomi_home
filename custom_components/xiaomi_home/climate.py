@@ -473,6 +473,7 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         self._attr_icon = 'mdi:air-conditioner'
         # hvac modes
+        self._attr_hvac_modes = None
         for prop in entity_data.props:
             if prop.name == 'mode':
                 if not prop.value_list:
@@ -664,6 +665,7 @@ class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         self._attr_icon = 'mdi:thermostat'
         # hvac modes
+        self._attr_hvac_modes = None
         for prop in entity_data.props:
             if prop.name == 'mode':
                 if not prop.value_list:
