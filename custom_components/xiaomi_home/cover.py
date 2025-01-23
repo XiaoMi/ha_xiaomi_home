@@ -60,16 +60,16 @@ from homeassistant.components.cover import (
 )
 
 from .miot.miot_spec import MIoTSpecProperty
-from .miot.miot_device import MIoTDevice, MIoTEntityData,  MIoTServiceEntity
+from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
 from .miot.const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up a config entry."""
     device_list: list[MIoTDevice] = hass.data[DOMAIN]['devices'][
@@ -104,6 +104,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
     _prop_status_opening: Optional[int]
     _prop_status_closing: Optional[int]
     _prop_status_stop: Optional[int]
+    _prop_status_closed: Optional[int]
     _prop_current_position: Optional[MIoTSpecProperty]
     _prop_target_position: Optional[MIoTSpecProperty]
     _prop_position_value_min: Optional[int]
@@ -127,6 +128,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
         self._prop_status_opening = None
         self._prop_status_closing = None
         self._prop_status_stop = None
+        self._prop_status_closed = None
         self._prop_current_position = None
         self._prop_target_position = None
         self._prop_position_value_min = None
@@ -166,6 +168,8 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         self._prop_status_closing = item.value
                     elif item.name in {'stop', 'pause'}:
                         self._prop_status_stop = item.value
+                    elif item.name in {'closed'}:
+                        self._prop_status_closed = item.value
                 self._prop_status = prop
             elif prop.name == 'current-position':
                 self._prop_current_position = prop
@@ -239,6 +243,11 @@ class Cover(MIoTServiceEntity, CoverEntity):
     @property
     def is_closed(self) -> Optional[bool]:
         """Return if the cover is closed."""
-        if self._prop_current_position is None:
-            return None
-        return self.get_prop_value(prop=self._prop_current_position) == 0
+        if self._prop_current_position:
+            return self.get_prop_value(prop=self._prop_current_position) == 0
+        # The current position is prior to the status when determining
+        # whether the cover is closed.
+        return (self.get_prop_value(
+            prop=self._prop_status) == self._prop_status_closed) if (
+                self._prop_status
+                and self._prop_status_closed is not None) else None
