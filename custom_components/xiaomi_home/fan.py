@@ -221,7 +221,7 @@ class Fan(MIoTServiceEntity, FanEntity):
         # preset_mode
         if preset_mode:
             await self.set_property_async(
-                self._prop_mode,
+                prop=self._prop_mode,
                 value=self.get_map_key(
                     map_=self._mode_map, value=preset_mode))
 
@@ -258,7 +258,7 @@ class Fan(MIoTServiceEntity, FanEntity):
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode."""
         await self.set_property_async(
-            self._prop_mode,
+            prop=self._prop_mode,
             value=self.get_map_key(
                 map_=self._mode_map, value=preset_mode))
 

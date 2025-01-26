@@ -75,6 +75,7 @@ SUPPORTED_PLATFORMS: list = [
     'fan',
     'humidifier',
     'light',
+    'media_player',
     'notify',
     'number',
     'select',
