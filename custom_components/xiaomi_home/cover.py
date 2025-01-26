@@ -232,27 +232,41 @@ class Cover(MIoTServiceEntity, CoverEntity):
     @property
     def is_opening(self) -> Optional[bool]:
         """Return if the cover is opening."""
-        if self._prop_status is None:
-            return None
-        return self.get_prop_value(
-            prop=self._prop_status) == self._prop_status_opening
+        if self._prop_status and self._prop_status_opening is not None:
+            return self.get_prop_value(
+                prop=self._prop_status) == self._prop_status_opening
+        # The status is prior to the numerical relationship of the current
+        # position and the target position when determining whether the cover
+        # is opening.
+        if (self._prop_target_position and
+                self.current_cover_position is not None):
+            return (self.current_cover_position
+                    < self.get_prop_value(prop=self._prop_target_position))
+        return None
 
     @property
     def is_closing(self) -> Optional[bool]:
         """Return if the cover is closing."""
-        if self._prop_status is None:
-            return None
-        return self.get_prop_value(
-            prop=self._prop_status) == self._prop_status_closing
+        if self._prop_status and self._prop_status_closing is not None:
+            return self.get_prop_value(
+                prop=self._prop_status) == self._prop_status_closing
+        # The status is prior to the numerical relationship of the current
+        # position and the target position when determining whether the cover
+        # is closing.
+        if (self._prop_target_position and
+                self.current_cover_position is not None):
+            return (self.current_cover_position
+                    > self.get_prop_value(prop=self._prop_target_position))
+        return None
 
     @property
     def is_closed(self) -> Optional[bool]:
         """Return if the cover is closed."""
-        if self._prop_current_position:
-            return self.get_prop_value(prop=self._prop_current_position) == 0
+        if self.current_cover_position is not None:
+            return self.current_cover_position == 0
         # The current position is prior to the status when determining
         # whether the cover is closed.
-        return (self.get_prop_value(
-            prop=self._prop_status) == self._prop_status_closed) if (
-                self._prop_status
-                and self._prop_status_closed is not None) else None
+        if self._prop_status and self._prop_status_closed is not None:
+            return (self.get_prop_value(
+                prop=self._prop_status) == self._prop_status_closed)
+        return None
