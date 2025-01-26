@@ -255,6 +255,7 @@ SPEC_DEVICE_TRANS_MAP: dict[str, dict | str] = {
                 },
             }
         },
+        'optional': {},
         'entity': 'heater'
     }
 }
