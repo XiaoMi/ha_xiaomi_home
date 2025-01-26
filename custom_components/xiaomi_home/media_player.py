@@ -438,7 +438,7 @@ class FeatureState(MIoTServiceEntity, MediaPlayerEntity):
         return (self.get_map_value(map_=self._playing_state_map,
                                    key=self.get_prop_value(
                                        prop=self._prop_playing_state))
-                if self._prop_playing_state else None)
+                if self._prop_playing_state else MediaPlayerState.ON)
 
 
 class WifiSpeaker(FeatureVolumeSet, FeatureVolumeMute, FeaturePlay,
