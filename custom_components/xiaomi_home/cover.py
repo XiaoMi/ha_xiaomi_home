@@ -218,7 +218,12 @@ class Cover(MIoTServiceEntity, CoverEntity):
         0: the cover is closed, 100: the cover is fully opened, None: unknown.
         """
         if self._prop_current_position is None:
-            return None
+            # Assume that the current position is the same as the target
+            # position when the current position is not defined in the device's
+            # MIoT-Spec-V2.
+            return None if (self._prop_target_position
+                            is None) else self.get_prop_value(
+                                prop=self._prop_target_position)
         pos = self.get_prop_value(prop=self._prop_current_position)
         if pos is None or self._prop_position_value_range is None:
             return None
