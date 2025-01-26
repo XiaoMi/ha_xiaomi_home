@@ -59,43 +59,6 @@ data:
   urn:miot-spec-v2:property:wifi-ssid-hidden:000000E3: yes_no
   urn:miot-spec-v2:property:wind-reverse:00000117: yes_no
 translate:
-  contact_state:
-    de:
-      'false': Kein Kontakt
-      'true': Kontakt
-    en:
-      'false': No Contact
-      'true': Contact
-    es:
-      'false': Sin contacto
-      'true': Contacto
-    fr:
-      'false': Pas de contact
-      'true': Contact
-    it:
-      'false': Nessun contatto
-      'true': Contatto
-    ja:
-      'false': 非接触
-      'true': 接触
-    nl:
-      'false': Geen contact
-      'true': Contact
-    pt:
-      'false': Sem contato
-      'true': Contato
-    pt-BR:
-      'false': Sem contato
-      'true': Contato
-    ru:
-      'false': Нет контакта
-      'true': Контакт
-    zh-Hans:
-      'false': 分离
-      'true': 接触
-    zh-Hant:
-      'false': 分離
-      'true': 接觸
   default:
     de:
       'false': Falsch
@@ -133,6 +96,43 @@ translate:
     zh-Hant:
       'false': 假
       'true': 真
+  contact_state:
+    de:
+      'false': Kein Kontakt
+      'true': Kontakt
+    en:
+      'false': No Contact
+      'true': Contact
+    es:
+      'false': Sin contacto
+      'true': Contacto
+    fr:
+      'false': Pas de contact
+      'true': Contact
+    it:
+      'false': Nessun contatto
+      'true': Contatto
+    ja:
+      'false': 非接触
+      'true': 接触
+    nl:
+      'false': Geen contact
+      'true': Contact
+    pt:
+      'false': Sem contato
+      'true': Contato
+    pt-BR:
+      'false': Sem contato
+      'true': Contato
+    ru:
+      'false': Нет контакта
+      'true': Контакт
+    zh-Hans:
+      'false': 分离
+      'true': 接触
+    zh-Hant:
+      'false': 分離
+      'true': 接觸
   motion_state:
     de:
       'false': Keine Bewegung erkannt

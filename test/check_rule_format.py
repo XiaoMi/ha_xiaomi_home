@@ -20,6 +20,9 @@ SPEC_BOOL_TRANS_FILE = path.join(
 SPEC_FILTER_FILE = path.join(
     ROOT_PATH,
     '../custom_components/xiaomi_home/miot/specs/spec_filter.yaml')
+SPEC_MODIFY_FILE = path.join(
+    ROOT_PATH,
+    '../custom_components/xiaomi_home/miot/specs/spec_modify.yaml')
 
 
 def load_json_file(file_path: str) -> Optional[dict]:
@@ -54,7 +57,8 @@ def load_yaml_file(file_path: str) -> Optional[dict]:
 def save_yaml_file(file_path: str, data: dict) -> None:
     with open(file_path, 'w', encoding='utf-8') as file:
         yaml.safe_dump(
-            data, file, default_flow_style=False, allow_unicode=True, indent=2)
+            data, file, default_flow_style=False,
+            allow_unicode=True, indent=2, sort_keys=False)
 
 
 def dict_str_str(d: dict) -> bool:
@@ -135,6 +139,21 @@ def bool_trans(d: dict) -> bool:
     return True
 
 
+def spec_modify(data: dict) -> bool:
+    """dict[str, str | dict[str, dict]]"""
+    if not isinstance(data, dict):
+        return False
+    for urn, content in data.items():
+        if not isinstance(urn, str) or not isinstance(content, (dict, str)):
+            return False
+        if isinstance(content, str):
+            continue
+        for key, value in content.items():
+            if not isinstance(key, str) or not isinstance(value, dict):
+                return False
+    return True
+
+
 def compare_dict_structure(dict1: dict, dict2: dict) -> bool:
     if not isinstance(dict1, dict) or not isinstance(dict2, dict):
         _LOGGER.info('invalid type')
@@ -181,6 +200,12 @@ def sort_spec_filter(file_path: str):
     return filter_data
 
 
+def sort_spec_modify(file_path: str):
+    filter_data = load_yaml_file(file_path=file_path)
+    assert isinstance(filter_data, dict), f'{file_path} format error'
+    return dict(sorted(filter_data.items()))
+
+
 @pytest.mark.github
 def test_bool_trans():
     data = load_yaml_file(SPEC_BOOL_TRANS_FILE)
@@ -195,6 +220,14 @@ def test_spec_filter():
     assert isinstance(data, dict)
     assert data, f'load {SPEC_FILTER_FILE} failed'
     assert spec_filter(data), f'{SPEC_FILTER_FILE} format error'
+
+
+@pytest.mark.github
+def test_spec_modify():
+    data = load_yaml_file(SPEC_MODIFY_FILE)
+    assert isinstance(data, dict)
+    assert data, f'load {SPEC_MODIFY_FILE} failed'
+    assert spec_modify(data), f'{SPEC_MODIFY_FILE} format error'
 
 
 @pytest.mark.github
@@ -286,3 +319,6 @@ def test_sort_spec_data():
     sort_data = sort_spec_filter(file_path=SPEC_FILTER_FILE)
     save_yaml_file(file_path=SPEC_FILTER_FILE, data=sort_data)
     _LOGGER.info('%s formatted.', SPEC_FILTER_FILE)
+    sort_data = sort_spec_modify(file_path=SPEC_MODIFY_FILE)
+    save_yaml_file(file_path=SPEC_MODIFY_FILE, data=sort_data)
+    _LOGGER.info('%s formatted.', SPEC_MODIFY_FILE)

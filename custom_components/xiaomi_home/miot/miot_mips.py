@@ -1414,7 +1414,7 @@ class MipsLocalClient(_MipsClient):
     @final
     @on_dev_list_changed.setter
     def on_dev_list_changed(
-        self, func: Callable[[Any, list[str]], Coroutine]
+        self, func: Optional[Callable[[Any, list[str]], Coroutine]]
     ) -> None:
         """run in main loop."""
         self._on_dev_list_changed = func

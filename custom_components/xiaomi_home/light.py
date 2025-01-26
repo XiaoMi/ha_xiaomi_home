@@ -96,7 +96,7 @@ class Light(MIoTServiceEntity, LightEntity):
     """Light entities for Xiaomi Home."""
     # pylint: disable=unused-argument
     _VALUE_RANGE_MODE_COUNT_MAX = 30
-    _prop_on: MIoTSpecProperty
+    _prop_on: Optional[MIoTSpecProperty]
     _prop_brightness: Optional[MIoTSpecProperty]
     _prop_color_temp: Optional[MIoTSpecProperty]
     _prop_color: Optional[MIoTSpecProperty]
@@ -250,23 +250,25 @@ class Light(MIoTServiceEntity, LightEntity):
 
         Shall set attributes in kwargs if applicable.
         """
-        result: bool = False
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        value_on = True if self._prop_on.format_ == bool else 1
-        result = await self.set_property_async(
-            prop=self._prop_on, value=value_on)
+        if self._prop_on:
+            value_on = True if self._prop_on.format_ == bool else 1
+            await self.set_property_async(
+                prop=self._prop_on, value=value_on)
         # brightness
         if ATTR_BRIGHTNESS in kwargs:
             brightness = brightness_to_value(
                 self._brightness_scale, kwargs[ATTR_BRIGHTNESS])
-            result = await self.set_property_async(
-                prop=self._prop_brightness, value=brightness)
+            await self.set_property_async(
+                prop=self._prop_brightness, value=brightness,
+                write_ha_state=False)
         # color-temperature
         if ATTR_COLOR_TEMP_KELVIN in kwargs:
-            result = await self.set_property_async(
+            await self.set_property_async(
                 prop=self._prop_color_temp,
-                value=kwargs[ATTR_COLOR_TEMP_KELVIN])
+                value=kwargs[ATTR_COLOR_TEMP_KELVIN],
+                write_ha_state=False)
             self._attr_color_mode = ColorMode.COLOR_TEMP
         # rgb color
         if ATTR_RGB_COLOR in kwargs:
@@ -274,19 +276,23 @@ class Light(MIoTServiceEntity, LightEntity):
             g = kwargs[ATTR_RGB_COLOR][1]
             b = kwargs[ATTR_RGB_COLOR][2]
             rgb = (r << 16) | (g << 8) | b
-            result = await self.set_property_async(
-                prop=self._prop_color, value=rgb)
+            await self.set_property_async(
+                prop=self._prop_color, value=rgb,
+                write_ha_state=False)
             self._attr_color_mode = ColorMode.RGB
         # mode
         if ATTR_EFFECT in kwargs:
-            result = await self.set_property_async(
+            await self.set_property_async(
                 prop=self._prop_mode,
                 value=self.get_map_key(
-                    map_=self._mode_map, value=kwargs[ATTR_EFFECT]))
-        return result
+                    map_=self._mode_map, value=kwargs[ATTR_EFFECT]),
+                write_ha_state=False)
+        self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the light off."""
+        if not self._prop_on:
+            return
         # Dirty logic for lumi.gateway.mgl03 indicator light
         value_on = False if self._prop_on.format_ == bool else 0
-        return await self.set_property_async(prop=self._prop_on, value=value_on)
+        await self.set_property_async(prop=self._prop_on, value=value_on)

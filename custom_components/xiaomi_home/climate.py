@@ -258,13 +258,14 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                     f'{self.entity_id}')
             return
         # set air-conditioner on
-        elif self.get_prop_value(prop=self._prop_on) is False:
-            await self.set_property_async(prop=self._prop_on, value=True)
+        if self.get_prop_value(prop=self._prop_on) is False:
+            await self.set_property_async(
+                prop=self._prop_on, value=True, write_ha_state=False)
         # set mode
         mode_value = self.get_map_key(
             map_=self._hvac_mode_map, value=hvac_mode)
         if (
-            mode_value is None or
+            not mode_value or
             not await self.set_property_async(
                 prop=self._prop_mode, value=mode_value)
         ):
@@ -295,39 +296,37 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
     async def async_set_swing_mode(self, swing_mode):
         """Set new target swing operation."""
         if swing_mode == SWING_BOTH:
-            if await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=True, update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=True)
-            if await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=True, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=True)
+            await self.set_property_async(
+                prop=self._prop_horizontal_swing, value=True,
+                write_ha_state=False)
+            await self.set_property_async(
+                prop=self._prop_vertical_swing, value=True)
         elif swing_mode == SWING_HORIZONTAL:
-            if await self.set_property_async(
-                    prop=self._prop_horizontal_swing, value=True, update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=True)
+            await self.set_property_async(
+                prop=self._prop_horizontal_swing, value=True)
         elif swing_mode == SWING_VERTICAL:
-            if await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=True, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=True)
+            await self.set_property_async(
+                prop=self._prop_vertical_swing, value=True)
         elif swing_mode == SWING_ON:
-            if await self.set_property_async(
-                    prop=self._prop_fan_on, value=True, update=False):
-                self.set_prop_value(self._prop_fan_on, value=True)
+            await self.set_property_async(
+                prop=self._prop_fan_on, value=True)
         elif swing_mode == SWING_OFF:
-            if self._prop_fan_on and await self.set_property_async(
-                    prop=self._prop_fan_on, value=False, update=False):
-                self.set_prop_value(self._prop_fan_on, value=False)
-            if self._prop_horizontal_swing and await self.set_property_async(
+            if self._prop_fan_on:
+                await self.set_property_async(
+                    prop=self._prop_fan_on, value=False,
+                    write_ha_state=False)
+            if self._prop_horizontal_swing:
+                await self.set_property_async(
                     prop=self._prop_horizontal_swing, value=False,
-                    update=False):
-                self.set_prop_value(self._prop_horizontal_swing, value=False)
-            if self._prop_vertical_swing and await self.set_property_async(
-                    prop=self._prop_vertical_swing, value=False, update=False):
-                self.set_prop_value(self._prop_vertical_swing, value=False)
+                    write_ha_state=False)
+            if self._prop_vertical_swing:
+                await self.set_property_async(
+                    prop=self._prop_vertical_swing, value=False,
+                    write_ha_state=False)
+            self.async_write_ha_state()
         else:
             raise RuntimeError(
                 f'unknown swing_mode, {swing_mode}, {self.entity_id}')
-        self.async_write_ha_state()
 
     async def async_set_fan_mode(self, fan_mode):
         """Set new target fan mode."""
@@ -368,9 +367,9 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
         """Return the hvac mode. e.g., heat, cool mode."""
         if self.get_prop_value(prop=self._prop_on) is False:
             return HVACMode.OFF
-        return self.get_map_key(
+        return self.get_map_value(
             map_=self._hvac_mode_map,
-            value=self.get_prop_value(prop=self._prop_mode))
+            key=self.get_prop_value(prop=self._prop_mode))
 
     @property
     def fan_mode(self) -> Optional[str]:
@@ -388,12 +387,10 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
 
         Requires ClimateEntityFeature.SWING_MODE.
         """
-        horizontal: bool = (
-            self.get_prop_value(prop=self._prop_horizontal_swing)
-            if self._prop_horizontal_swing else None)
-        vertical: bool = (
-            self.get_prop_value(prop=self._prop_vertical_swing)
-            if self._prop_vertical_swing else None)
+        horizontal = (
+            self.get_prop_value(prop=self._prop_horizontal_swing))
+        vertical = (
+            self.get_prop_value(prop=self._prop_vertical_swing))
         if horizontal and vertical:
             return SWING_BOTH
         if horizontal:
@@ -449,7 +446,11 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
             self.set_prop_value(prop=self._prop_fan_level,
                                 value=v_ac_state['S'])
         # D: swing mode. 0: on, 1: off
-        if 'D' in v_ac_state and len(self._attr_swing_modes) == 2:
+        if (
+            'D' in v_ac_state
+            and self._attr_swing_modes
+            and len(self._attr_swing_modes) == 2
+        ):
             if (
                 SWING_HORIZONTAL in self._attr_swing_modes
                 and self._prop_horizontal_swing
@@ -464,10 +465,10 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
                 self.set_prop_value(
                     prop=self._prop_vertical_swing,
                     value=v_ac_state['D'] == 0)
-
-        self._value_ac_state.update(v_ac_state)
-        _LOGGER.debug(
-            'ac_state update, %s', self._value_ac_state)
+        if self._value_ac_state:
+            self._value_ac_state.update(v_ac_state)
+            _LOGGER.debug(
+                'ac_state update, %s', self._value_ac_state)
 
 
 class Heater(MIoTServiceEntity, ClimateEntity):

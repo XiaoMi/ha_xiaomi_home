@@ -469,14 +469,13 @@ class _MIoTSpecBase:
     proprietary: bool
     need_filter: bool
     name: str
+    icon: Optional[str]
 
     # External params
     platform: Optional[str]
     device_class: Any
     state_class: Any
-    icon: Optional[str]
     external_unit: Any
-    expression: Optional[str]
 
     spec_id: int
 
@@ -489,13 +488,12 @@ class _MIoTSpecBase:
         self.proprietary = spec.get('proprietary', False)
         self.need_filter = spec.get('need_filter', False)
         self.name = spec.get('name', 'xiaomi')
+        self.icon = spec.get('icon', None)
 
         self.platform = None
         self.device_class = None
         self.state_class = None
-        self.icon = None
         self.external_unit = None
-        self.expression = None
 
         self.spec_id = hash(f'{self.type_}.{self.iid}')
 
@@ -510,6 +508,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
     """MIoT SPEC property class."""
     unit: Optional[str]
     precision: int
+    expr: Optional[str]
 
     _format_: Type
     _value_range: Optional[MIoTSpecValueRange]
@@ -531,7 +530,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
             unit: Optional[str] = None,
             value_range: Optional[dict] = None,
             value_list: Optional[list[dict]] = None,
-            precision: Optional[int] = None
+            precision: Optional[int] = None,
+            expr: Optional[str] = None
     ) -> None:
         super().__init__(spec=spec)
         self.service = service
@@ -541,6 +541,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         self.value_range = value_range
         self.value_list = value_list
         self.precision = precision or 1
+        self.expr = expr
 
         self.spec_id = hash(
             f'p.{self.name}.{self.service.iid}.{self.iid}')
@@ -613,6 +614,18 @@ class MIoTSpecProperty(_MIoTSpecBase):
         elif isinstance(value, MIoTSpecValueList):
             self._value_list = value
 
+    def eval_expr(self, src_value: Any) -> Any:
+        if not self.expr:
+            return src_value
+        try:
+            # pylint: disable=eval-used
+            return eval(self.expr, {'src_value': src_value})
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error(
+                'eval expression error, %s, %s, %s, %s',
+                self.iid, src_value, self.expr, err)
+            return src_value
+
     def value_format(self, value: Any) -> Any:
         if value is None:
             return None
@@ -639,7 +652,9 @@ class MIoTSpecProperty(_MIoTSpecBase):
             'value_range': (
                 self._value_range.dump() if self._value_range else None),
             'value_list': self._value_list.dump() if self._value_list else None,
-            'precision': self.precision
+            'precision': self.precision,
+            'expr': self.expr,
+            'icon': self.icon
         }
 
 
@@ -732,7 +747,6 @@ class MIoTSpecService(_MIoTSpecBase):
         }
 
 
-# @dataclass
 class MIoTSpecInstance:
     """MIoT SPEC instance class."""
     urn: str
@@ -774,7 +788,8 @@ class MIoTSpecInstance:
                     unit=prop['unit'],
                     value_range=prop['value_range'],
                     value_list=prop['value_list'],
-                    precision=prop.get('precision', None))
+                    precision=prop.get('precision', None),
+                    expr=prop.get('expr', None))
                 spec_service.properties.append(spec_prop)
             for event in service['events']:
                 spec_event = MIoTSpecEvent(
@@ -1119,6 +1134,79 @@ class _SpecFilter:
         return False
 
 
+class _SpecModify:
+    """MIoT-Spec-V2 modify for entity conversion."""
+    _SPEC_MODIFY_FILE = 'specs/spec_modify.yaml'
+    _main_loop: asyncio.AbstractEventLoop
+    _data: Optional[dict]
+    _selected: Optional[dict]
+
+    def __init__(
+        self, loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> None:
+        self._main_loop = loop or asyncio.get_running_loop()
+        self._data = None
+
+    async def init_async(self) -> None:
+        if isinstance(self._data, dict):
+            return
+        modify_data = None
+        self._data = {}
+        self._selected = None
+        try:
+            modify_data = await self._main_loop.run_in_executor(
+                None, load_yaml_file,
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    self._SPEC_MODIFY_FILE))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('spec modify, load file error, %s', err)
+            return
+        if not isinstance(modify_data, dict):
+            _LOGGER.error('spec modify, invalid spec modify content')
+            return
+        for key, value in modify_data.items():
+            if not isinstance(key, str) or not isinstance(value, (dict, str)):
+                _LOGGER.error('spec modify, invalid spec modify data')
+                return
+
+        self._data = modify_data
+
+    async def deinit_async(self) -> None:
+        self._data = None
+        self._selected = None
+
+    async def set_spec_async(self, urn: str) -> None:
+        if not self._data:
+            return
+        self._selected = self._data.get(urn, None)
+        if isinstance(self._selected, str):
+            return await self.set_spec_async(urn=self._selected)
+
+    def get_prop_unit(self, siid: int, piid: int) -> Optional[str]:
+        return self.__get_prop_item(siid=siid, piid=piid, key='unit')
+
+    def get_prop_expr(self, siid: int, piid: int) -> Optional[str]:
+        return self.__get_prop_item(siid=siid, piid=piid, key='expr')
+
+    def get_prop_icon(self, siid: int, piid: int) -> Optional[str]:
+        return self.__get_prop_item(siid=siid, piid=piid, key='icon')
+
+    def get_prop_access(self, siid: int, piid: int) -> Optional[list]:
+        access = self.__get_prop_item(siid=siid, piid=piid, key='access')
+        if not isinstance(access, list):
+            return None
+        return access
+
+    def __get_prop_item(self, siid: int, piid: int, key: str) -> Optional[str]:
+        if not self._selected:
+            return None
+        prop = self._selected.get(f'prop.{siid}.{piid}', None)
+        if not prop:
+            return None
+        return prop.get(key, None)
+
+
 class MIoTSpecParser:
     """MIoT SPEC parser."""
     # pylint: disable=inconsistent-quotes
@@ -1132,6 +1220,7 @@ class MIoTSpecParser:
     _multi_lang: _MIoTSpecMultiLang
     _bool_trans: _SpecBoolTranslation
     _spec_filter: _SpecFilter
+    _spec_modify: _SpecModify
 
     _init_done: bool
 
@@ -1149,6 +1238,7 @@ class MIoTSpecParser:
         self._bool_trans = _SpecBoolTranslation(
             lang=self._lang, loop=self._main_loop)
         self._spec_filter = _SpecFilter(loop=self._main_loop)
+        self._spec_modify = _SpecModify(loop=self._main_loop)
 
         self._init_done = False
 
@@ -1157,6 +1247,7 @@ class MIoTSpecParser:
             return
         await self._bool_trans.init_async()
         await self._spec_filter.init_async()
+        await self._spec_modify.init_async()
         std_lib_cache = await self._storage.load_async(
             domain=self._DOMAIN, name='spec_std_lib', type_=dict)
         if (
@@ -1196,6 +1287,7 @@ class MIoTSpecParser:
         # self._std_lib.deinit()
         await self._bool_trans.deinit_async()
         await self._spec_filter.deinit_async()
+        await self._spec_modify.deinit_async()
 
     async def parse(
         self, urn: str, skip_cache: bool = False,
@@ -1275,6 +1367,8 @@ class MIoTSpecParser:
         await self._multi_lang.set_spec_async(urn=urn)
         # Set spec filter
         await self._spec_filter.set_spec_spec(urn_key=urn_key)
+        # Set spec modify
+        await self._spec_modify.set_spec_async(urn=urn)
         # Parse device type
         spec_instance: MIoTSpecInstance = MIoTSpecInstance(
             urn=urn, name=urn_strs[3],
@@ -1320,12 +1414,14 @@ class MIoTSpecParser:
                 ):
                     continue
                 p_type_strs: list[str] = property_['type'].split(':')
+                # Handle special property.unit
+                unit = property_.get('unit', None)
                 spec_prop: MIoTSpecProperty = MIoTSpecProperty(
                     spec=property_,
                     service=spec_service,
                     format_=property_['format'],
                     access=property_['access'],
-                    unit=property_.get('unit', None))
+                    unit=unit if unit != 'none' else None)
                 spec_prop.name = p_type_strs[3]
                 # Filter spec property
                 spec_prop.need_filter = (
@@ -1365,7 +1461,19 @@ class MIoTSpecParser:
                     if v_descriptions:
                         # bool without value-list.name
                         spec_prop.value_list = v_descriptions
+                # Prop modify
+                spec_prop.unit = self._spec_modify.get_prop_unit(
+                    siid=service['iid'], piid=property_['iid']
+                ) or spec_prop.unit
+                spec_prop.expr = self._spec_modify.get_prop_expr(
+                    siid=service['iid'], piid=property_['iid'])
+                spec_prop.icon = self._spec_modify.get_prop_icon(
+                    siid=service['iid'], piid=property_['iid'])
                 spec_service.properties.append(spec_prop)
+                custom_access = self._spec_modify.get_prop_access(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_access:
+                    spec_prop.access = custom_access
             # Parse service event
             for event in service.get('events', []):
                 if (
