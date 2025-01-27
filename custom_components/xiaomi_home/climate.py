@@ -368,9 +368,9 @@ class AirConditioner(MIoTServiceEntity, ClimateEntity):
         """Return the hvac mode. e.g., heat, cool mode."""
         if self.get_prop_value(prop=self._prop_on) is False:
             return HVACMode.OFF
-        return self.get_map_key(
+        return self.get_map_value(
             map_=self._hvac_mode_map,
-            value=self.get_prop_value(prop=self._prop_mode))
+            key=self.get_prop_value(prop=self._prop_mode))
 
     @property
     def fan_mode(self) -> Optional[str]:
