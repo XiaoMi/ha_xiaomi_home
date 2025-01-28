@@ -540,7 +540,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         self.unit = unit
         self.value_range = value_range
         self.value_list = value_list
-        self.precision = precision or 1
+        self.precision = precision if precision is not None else 1
         self.expr = expr
 
         self.spec_id = hash(
