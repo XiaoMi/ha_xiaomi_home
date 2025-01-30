@@ -1307,7 +1307,7 @@ class MIoTLan:
                     self._main_loop.call_soon_threadsafe(
                         sub.handler, param, sub.handler_ctx)
         elif (
-                msg['method'] == 'event_occured'
+                msg['method'] == 'event_occurred'
                 and 'siid' in msg['params']
                 and 'eiid' in msg['params']
         ):

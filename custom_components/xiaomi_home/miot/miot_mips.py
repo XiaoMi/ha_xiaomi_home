@@ -920,9 +920,8 @@ class MipsCloudClient(_MipsClient):
     ) -> bool:
         if not isinstance(did, str) or handler is None:
             raise MIoTMipsError('invalid params')
-        # Spelling error: event_occured
         topic: str = (
-            f'device/{did}/up/event_occured/'
+            f'device/{did}/up/event_occurred/'
             f'{"#" if siid is None or eiid is None else f"{siid}/{eiid}"}')
 
         def on_event_msg(topic: str, payload: str, ctx: Any) -> None:
@@ -957,9 +956,8 @@ class MipsCloudClient(_MipsClient):
     ) -> bool:
         if not isinstance(did, str):
             raise MIoTMipsError('invalid params')
-        # Spelling error: event_occured
         topic: str = (
-            f'device/{did}/up/event_occured/'
+            f'device/{did}/up/event_occurred/'
             f'{"#" if siid is None or eiid is None else f"{siid}/{eiid}"}')
         return self.__unreg_broadcast_external(topic=topic)
 
