@@ -14,6 +14,21 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
     - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
+urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:  # 小米智能多模网关2
+  prop.2.1:  # access-mode
+    access:
+    - read
+    - notify
+  prop.2.2:  # ip-address
+    icon: mdi:ip
+  prop.2.3:  # wifi-ssid
+    access:
+    - read
+    - notify
+  prop.2.5:  # access-mode
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
   prop.5.1:
     name: power-consumption
