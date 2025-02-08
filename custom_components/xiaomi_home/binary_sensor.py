@@ -88,5 +88,5 @@ class BinarySensor(MIoTPropertyEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        """On/Off state. True if the binary sensor is on, False otherwise."""
-        return self._value is True
+        """On/Off state. False if the binary sensor is on, False otherwise."""
+        return self._value is False
