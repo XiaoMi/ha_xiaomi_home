@@ -616,14 +616,20 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
                     continue
                 self._hvac_mode_map = {}
                 for item in prop.value_list.items:
-                    if item.name in {'off', 'idle'}:
+                    if item.name in {'off', 'idle'
+                                    } and (HVACMode.OFF not in list(
+                                        self._hvac_mode_map.values())):
                         self._hvac_mode_map[item.value] = HVACMode.OFF
                     elif item.name in {'auto'}:
                         self._hvac_mode_map[item.value] = HVACMode.AUTO
                     elif item.name in {'ventilate'}:
                         self._hvac_mode_map[item.value] = HVACMode.COOL
-                    elif item.name in {'heat'}:
+                    elif item.name in {'heat', 'quick_heat'
+                                      } and (HVACMode.HEAT not in list(
+                                          self._hvac_mode_map.values())):
                         self._hvac_mode_map[item.value] = HVACMode.HEAT
+                    elif item.name in {'defog'}:
+                        self._hvac_mode_map[item.value] = HVACMode.HEAT_COOL
                     elif item.name in {'dry'}:
                         self._hvac_mode_map[item.value] = HVACMode.DRY
                     elif item.name in {'fan'}:
