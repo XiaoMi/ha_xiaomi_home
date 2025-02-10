@@ -376,7 +376,7 @@ siid、piid、eiid、aiid、value 均为十进制三位整数。
 }
 ```
 
-> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/translations/` 路径下的 `specv2entity.py`、`spec_filter.json`、`multi_lang.json` 文件的内容，需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
+> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/miot/specs` 路径下的 `specv2entity.py`、`spec_filter.json`、`multi_lang.json` 文件的内容，需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
 
 ## 文档
 
