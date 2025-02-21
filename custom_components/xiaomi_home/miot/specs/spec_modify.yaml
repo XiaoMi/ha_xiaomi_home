@@ -42,3 +42,10 @@ urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
     name: upload-speed
     icon: mdi:upload
     unit: B/s
+urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
+  prop.2.3:
+    value-range:
+    - 0
+    - 1
+    - 1
+urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:2: urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1

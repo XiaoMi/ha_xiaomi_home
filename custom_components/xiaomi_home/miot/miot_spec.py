@@ -1198,6 +1198,13 @@ class _SpecModify:
             return None
         return access
 
+    def get_prop_value_range(self, siid: int, piid: int) -> Optional[list]:
+        value_range = self.__get_prop_item(siid=siid, piid=piid,
+                                           key='value-range')
+        if not isinstance(value_range, list):
+            return None
+        return value_range
+
     def __get_prop_item(self, siid: int, piid: int, key: str) -> Optional[str]:
         if not self._selected:
             return None
@@ -1474,6 +1481,10 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_access:
                     spec_prop.access = custom_access
+                custom_range = self._spec_modify.get_prop_value_range(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_range:
+                    spec_prop.value_range = custom_range
             # Parse service event
             for event in service.get('events', []):
                 if (
