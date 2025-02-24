@@ -745,7 +745,7 @@ class ElectricBlanket(FeatureOnOff, FeatureTargetTemperature,
 
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
-        """Initialize the heater."""
+        """Initialize the electric blanket."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
 
         self._attr_icon = 'mdi:rug'
