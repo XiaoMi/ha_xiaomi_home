@@ -302,12 +302,11 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'required': {
                     'properties': {
                         'on': {'read', 'write'},
-                        'target-temperature': {'read', 'write'},
-                        'temperature': {'read'},
+                        'target-temperature': {'read', 'write'}
                     }
                 },
                 'optional': {
-                    'properties': {'mode'}
+                    'properties': {'mode', 'temperature'}
                 },
             }
         },

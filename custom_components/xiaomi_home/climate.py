@@ -748,7 +748,7 @@ class ElectricBlanket(FeatureOnOff, FeatureTargetTemperature,
         """Initialize the heater."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
 
-        self._attr_icon = 'mdi:radiator'
+        self._attr_icon = 'mdi:rug'
         # hvac modes
         self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
         # preset modes
