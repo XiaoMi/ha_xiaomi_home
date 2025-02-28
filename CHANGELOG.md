@@ -18,6 +18,8 @@ This version has modified some default units of sensors. After updating, it may 
 - Fix variable name or comment errors & fix test_lan error. [#678](https://github.com/XiaoMi/ha_xiaomi_home/pull/678) [#690](https://github.com/XiaoMi/ha_xiaomi_home/pull/690)
 - Fix water heater error & some type error. [#684](https://github.com/XiaoMi/ha_xiaomi_home/pull/684)
 - Fix fan level with value-list & fan reverse [#689](https://github.com/XiaoMi/ha_xiaomi_home/pull/689)
+- Fix sensor display precision [#708](https://github.com/XiaoMi/ha_xiaomi_home/pull/708)
+- Fix event:motion-detected without arguments [#712](https://github.com/XiaoMi/ha_xiaomi_home/pull/712)
 
 ## v0.1.5b2
 ### Added
