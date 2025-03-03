@@ -1205,6 +1205,13 @@ class _SpecModify:
             return None
         return value_range
 
+    def get_prop_value_list(self, siid: int, piid: int) -> Optional[list]:
+        value_list = self.__get_prop_item(siid=siid, piid=piid,
+                                           key='value-list')
+        if not isinstance(value_list, list):
+            return None
+        return value_list
+
     def __get_prop_item(self, siid: int, piid: int, key: str) -> Optional[str]:
         if not self._selected:
             return None
@@ -1485,6 +1492,10 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_range:
                     spec_prop.value_range = custom_range
+                custom_list = self._spec_modify.get_prop_value_list(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_list:
+                    spec_prop.value_list = custom_list
             # Parse service event
             for event in service.get('events', []):
                 if (
