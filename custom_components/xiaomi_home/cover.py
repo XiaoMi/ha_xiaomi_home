@@ -180,11 +180,16 @@ class Cover(MIoTServiceEntity, CoverEntity):
                 self._attr_supported_features |= CoverEntityFeature.SET_POSITION
                 self._prop_target_position = prop
 
-        if self._prop_status is None and self._prop_current_position is not None:
+        if (
+            self._prop_status is None
+            and self._prop_current_position is not None
+        ):
             self.sub_prop_changed(prop=self._prop_current_position,
                                   handler=self.__current_position_changed)
 
-    def __current_position_changed(self, prop: MIoTSpecProperty, ctx: Any) -> None:
+    def __current_position_changed(
+        self, prop: MIoTSpecProperty, ctx: Any
+    ) -> None:
         if self._attr_is_opening or self._attr_is_closing:
             self._attr_is_opening = False
             self._attr_is_closing = False
