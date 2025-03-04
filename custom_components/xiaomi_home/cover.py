@@ -47,7 +47,7 @@ Cover entities for Xiaomi Home.
 """
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -180,18 +180,38 @@ class Cover(MIoTServiceEntity, CoverEntity):
                 self._attr_supported_features |= CoverEntityFeature.SET_POSITION
                 self._prop_target_position = prop
 
+        if self._prop_status is None and self._prop_current_position is not None:
+            self.sub_prop_changed(prop=self._prop_current_position,
+                                  handler=self.__current_position_changed)
+
+    def __current_position_changed(self, prop: MIoTSpecProperty, ctx: Any) -> None:
+        if self._attr_is_opening or self._attr_is_closing:
+            self._attr_is_opening = False
+            self._attr_is_closing = False
+            self.async_write_ha_state()
+
     async def async_open_cover(self, **kwargs) -> None:
         """Open the cover."""
+        current = self.get_prop_value(prop=self._prop_current_position)
+        if current is not None and current < 100:
+            self._attr_is_opening = True
+            self._attr_is_closing = False
         await self.set_property_async(self._prop_motor_control,
                                       self._prop_motor_value_open)
 
     async def async_close_cover(self, **kwargs) -> None:
         """Close the cover."""
+        current = self.get_prop_value(prop=self._prop_current_position)
+        if current is not None and current > 0:
+            self._attr_is_opening = False
+            self._attr_is_closing = True
         await self.set_property_async(self._prop_motor_control,
                                       self._prop_motor_value_close)
 
     async def async_stop_cover(self, **kwargs) -> None:
         """Stop the cover."""
+        self._attr_is_opening = False
+        self._attr_is_closing = False
         await self.set_property_async(self._prop_motor_control,
                                       self._prop_motor_value_pause)
 
@@ -201,6 +221,10 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if pos is None:
             return None
         pos = round(pos * self._prop_position_value_range / 100)
+        current = self.get_prop_value(prop=self._prop_current_position)
+        if current is not None:
+            self._attr_is_opening = pos > current
+            self._attr_is_closing = pos < current
         await self.set_property_async(prop=self._prop_target_position,
                                       value=pos)
 
@@ -227,14 +251,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if self._prop_status and self._prop_status_opening:
             return (self.get_prop_value(prop=self._prop_status)
                     in self._prop_status_opening)
-        # The status is prior to the numerical relationship of the current
-        # position and the target position when determining whether the cover
-        # is opening.
-        if (self._prop_target_position and
-                self.current_cover_position is not None):
-            return (self.current_cover_position
-                    < self.get_prop_value(prop=self._prop_target_position))
-        return None
+        return self._attr_is_opening
 
     @property
     def is_closing(self) -> Optional[bool]:
@@ -242,14 +259,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if self._prop_status and self._prop_status_closing:
             return (self.get_prop_value(prop=self._prop_status)
                     in self._prop_status_closing)
-        # The status is prior to the numerical relationship of the current
-        # position and the target position when determining whether the cover
-        # is closing.
-        if (self._prop_target_position and
-                self.current_cover_position is not None):
-            return (self.current_cover_position
-                    > self.get_prop_value(prop=self._prop_target_position))
-        return None
+        return self._attr_is_closing
 
     @property
     def is_closed(self) -> Optional[bool]:
