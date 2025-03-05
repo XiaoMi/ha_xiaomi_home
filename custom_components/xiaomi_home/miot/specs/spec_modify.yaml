@@ -58,3 +58,14 @@ urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
       description: medium
     - value: 255
       description: high
+urn:miot-spec-v2:device:thermostat:0000A031:cubee-1230t:1:
+  prop.2.4:
+    value-list:
+    - value: 0
+      description: cool
+    - value: 1
+      description: heat
+    - value: 2
+      description: fan
+    - value: 3
+      description: auto

@@ -1453,10 +1453,12 @@ class MIoTSpecParser:
                         key=':'.join(p_type_strs[:5]))
                     or property_['description']
                     or spec_prop.name)
-                if 'value-range' in property_:
-                    spec_prop.value_range = property_['value-range']
-                elif 'value-list' in property_:
-                    v_list: list[dict] = property_['value-list']
+                # Modify value-list before translation
+                v_list: list[dict] = self._spec_modify.get_prop_value_list(
+                    siid=service['iid'], piid=property_['iid'])
+                if (v_list is None) and ('value-list' in property_):
+                    v_list = property_['value-list']
+                if v_list is not None:
                     for index, v in enumerate(v_list):
                         if v['description'].strip() == '':
                             v['description'] = f'v_{v["value"]}'
@@ -1470,6 +1472,8 @@ class MIoTSpecParser:
                                 f'{v["description"]}')
                             or v['name'])
                     spec_prop.value_list = MIoTSpecValueList.from_spec(v_list)
+                if 'value-range' in property_:
+                    spec_prop.value_range = property_['value-range']
                 elif property_['format'] == 'bool':
                     v_tag = ':'.join(p_type_strs[:5])
                     v_descriptions = (
@@ -1494,10 +1498,6 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_range:
                     spec_prop.value_range = custom_range
-                custom_list = self._spec_modify.get_prop_value_list(
-                    siid=service['iid'], piid=property_['iid'])
-                if custom_list:
-                    spec_prop.value_list = custom_list
             # Parse service event
             for event in service.get('events', []):
                 if (
