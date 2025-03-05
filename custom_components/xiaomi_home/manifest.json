@@ -20,7 +20,7 @@
     ],
     "requirements": [
         "construct>=2.10.56",
-        "paho-mqtt<2.0.0",
+        "paho-mqtt",
         "numpy",
         "cryptography",
         "psutil"
