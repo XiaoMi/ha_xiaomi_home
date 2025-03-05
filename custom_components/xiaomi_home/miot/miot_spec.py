@@ -56,7 +56,7 @@ from slugify import slugify
 
 # pylint: disable=relative-beyond-top-level
 from .const import DEFAULT_INTEGRATION_LANGUAGE, SPEC_STD_LIB_EFFECTIVE_TIME
-from .common import MIoTHttp, load_yaml_file
+from .common import MIoTHttp, load_yaml_file, load_json_file
 from .miot_error import MIoTSpecError
 from .miot_storage import MIoTStorage
 
@@ -837,6 +837,7 @@ class _MIoTSpecMultiLang:
     """MIoT SPEC multi lang class."""
     # pylint: disable=broad-exception-caught
     _DOMAIN: str = 'miot_specs_multi_lang'
+    _MULTI_LANG_FILE = 'specs/multi_lang.json'
     _lang: str
     _storage: MIoTStorage
     _main_loop: asyncio.AbstractEventLoop
@@ -892,6 +893,25 @@ class _MIoTSpecMultiLang:
         except Exception as err:
             trans_local = {}
             _LOGGER.info('get multi lang from local failed, %s, %s', urn, err)
+        # Revert: load multi_lang.json
+        try:
+            trans_local_json = await self._main_loop.run_in_executor(
+                None, load_json_file,
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    self._MULTI_LANG_FILE))
+            urn_strs: list[str] = urn.split(':')
+            urn_key: str = ':'.join(urn_strs[:6])
+            if (
+                isinstance(trans_local_json, dict)
+                and urn_key in trans_local_json
+                and self._lang in trans_local_json[urn_key]
+            ):
+                trans_cache.update(trans_local_json[urn_key][self._lang])
+                trans_local = trans_local_json[urn_key]
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('multi lang, load json file error, %s', err)
+        # Revert end
         # Default language
         if not trans_cache:
             if trans_cloud and DEFAULT_INTEGRATION_LANGUAGE in trans_cloud:
