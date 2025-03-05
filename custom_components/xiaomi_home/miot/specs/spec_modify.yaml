@@ -49,3 +49,12 @@ urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
     - 1
     - 1
 urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:2: urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1
+urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
+  prop.5.2:
+    value-list:
+    - value: 1
+      description: low
+    - value: 128
+      description: medium
+    - value: 255
+      description: high

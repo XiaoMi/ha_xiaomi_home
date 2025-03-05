@@ -51,6 +51,7 @@ from homeassistant.components.event import EventDeviceClass
 
 from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    EntityCategory,
     LIGHT_LUX,
     UnitOfEnergy,
     UnitOfPower,
@@ -330,7 +331,8 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             'events': set<event instance name: str>,
             'actions': set<action instance name: str>
         },
-        'entity': str
+        'entity': str,
+        'entity_category'?: str
     }
 }
 """
@@ -348,10 +350,23 @@ SPEC_SERVICE_TRANS_MAP: dict = {
         },
         'entity': 'light'
     },
-    'indicator-light': 'light',
     'ambient-light': 'light',
     'night-light': 'light',
     'white-light': 'light',
+    'indicator-light': {
+        'required': {
+            'properties': {
+                'on': {'read', 'write'}
+            }
+        },
+        'optional': {
+            'properties': {
+                'mode', 'brightness',
+            }
+        },
+        'entity': 'light',
+        'entity_category': EntityCategory.CONFIG
+    },
     'fan': {
         'required': {
             'properties': {
