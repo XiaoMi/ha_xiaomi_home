@@ -550,8 +550,9 @@ class MIoTDevice:
         # Optional actions
         # Optional events
         miot_service.platform = platform
-        # entity_category:
-        if entity_category := SPEC_SERVICE_TRANS_MAP[service_name].get('entity_category'):
+        # entity_category
+        if entity_category := SPEC_SERVICE_TRANS_MAP[service_name].get(
+            'entity_category', None):
             miot_service.entity_category = entity_category
         return entity_data
 

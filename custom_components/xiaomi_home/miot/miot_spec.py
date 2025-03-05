@@ -465,7 +465,7 @@ class _MIoTSpecBase:
     iid: int
     type_: str
     description: str
-    description_trans: str
+    description_trans: Optional[str]
     proprietary: bool
     need_filter: bool
     name: str
@@ -476,7 +476,7 @@ class _MIoTSpecBase:
     device_class: Any
     state_class: Any
     external_unit: Any
-    entity_category: str | None
+    entity_category: Optional[str]
 
     spec_id: int
 

@@ -332,7 +332,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             'actions': set<action instance name: str>
         },
         'entity': str,
-        'entity_category'?: str,
+        'entity_category'?: str
     }
 }
 """
@@ -365,7 +365,7 @@ SPEC_SERVICE_TRANS_MAP: dict = {
             }
         },
         'entity': 'light',
-        'entity_category': EntityCategory.CONFIG,
+        'entity_category': EntityCategory.CONFIG
     },
     'fan': {
         'required': {
