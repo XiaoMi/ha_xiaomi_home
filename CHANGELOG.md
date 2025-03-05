@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## v0.2.0
+This version has modified some default units of sensors. After updating, it may cause Home Assistant to pop up some compatibility warnings. You can re-add the integration to resolve it.
+
+这个版本修改了一些传感器默认单位，更新后会导致 Home Assistant 弹出一些兼容性提示，您可以重新添加集成解决。
+
+### Added
+- Add prop trans rule for surge-power. [#595](https://github.com/XiaoMi/ha_xiaomi_home/pull/595)
+- Support modify spec and value conversion. [#663](https://github.com/XiaoMi/ha_xiaomi_home/pull/663)
+- Support the electric blanket. [#781](https://github.com/XiaoMi/ha_xiaomi_home/pull/781)
+- Add device with motor-control service as cover entity. [#688](https://github.com/XiaoMi/ha_xiaomi_home/pull/688)
+### Changed
+- Update README file. [#681](https://github.com/XiaoMi/ha_xiaomi_home/pull/681) [#747](https://github.com/XiaoMi/ha_xiaomi_home/pull/747)
+- Update CONTRIBUTING.md. [#681](https://github.com/XiaoMi/ha_xiaomi_home/pull/681)
+- Refactor climate.py. [#614](https://github.com/XiaoMi/ha_xiaomi_home/pull/614)
+### Fixed
+- Fix variable name or comment errors & fix test_lan error. [#678](https://github.com/XiaoMi/ha_xiaomi_home/pull/678) [#690](https://github.com/XiaoMi/ha_xiaomi_home/pull/690)
+- Fix water heater error & some type error. [#684](https://github.com/XiaoMi/ha_xiaomi_home/pull/684)
+- Fix fan level with value-list & fan reverse [#689](https://github.com/XiaoMi/ha_xiaomi_home/pull/689)
+- Fix sensor display precision [#708](https://github.com/XiaoMi/ha_xiaomi_home/pull/708)
+- Fix event:motion-detected without arguments [#712](https://github.com/XiaoMi/ha_xiaomi_home/pull/712)
+
 ## v0.1.5b2
 ### Added
 - Support binary sensors to be displayed as text sensor entities and binary sensor entities. [#592](https://github.com/XiaoMi/ha_xiaomi_home/pull/592)
@@ -91,10 +112,10 @@ This version will cause some Xiaomi routers that do not support access (#564) to
 ### Changed
 ### Fixed
 - Fix humidifier trans rule. https://github.com/XiaoMi/ha_xiaomi_home/issues/59
-- Fix get homeinfo error.  https://github.com/XiaoMi/ha_xiaomi_home/issues/22 
+- Fix get homeinfo error.  https://github.com/XiaoMi/ha_xiaomi_home/issues/22
 - Fix air-conditioner switch on. https://github.com/XiaoMi/ha_xiaomi_home/issues/37 https://github.com/XiaoMi/ha_xiaomi_home/issues/16
-- Fix invalid cover status. https://github.com/XiaoMi/ha_xiaomi_home/issues/11  https://github.com/XiaoMi/ha_xiaomi_home/issues/85 
-- Water heater entity add STATE_OFF. https://github.com/XiaoMi/ha_xiaomi_home/issues/105 https://github.com/XiaoMi/ha_xiaomi_home/issues/17 
+- Fix invalid cover status. https://github.com/XiaoMi/ha_xiaomi_home/issues/11  https://github.com/XiaoMi/ha_xiaomi_home/issues/85
+- Water heater entity add STATE_OFF. https://github.com/XiaoMi/ha_xiaomi_home/issues/105 https://github.com/XiaoMi/ha_xiaomi_home/issues/17
 
 ## v0.1.0
 ### Added

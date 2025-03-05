@@ -542,7 +542,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         self.unit = unit
         self.value_range = value_range
         self.value_list = value_list
-        self.precision = precision or 1
+        self.precision = precision if precision is not None else 1
         self.expr = expr
 
         self.spec_id = hash(
@@ -1200,6 +1200,20 @@ class _SpecModify:
             return None
         return access
 
+    def get_prop_value_range(self, siid: int, piid: int) -> Optional[list]:
+        value_range = self.__get_prop_item(siid=siid, piid=piid,
+                                           key='value-range')
+        if not isinstance(value_range, list):
+            return None
+        return value_range
+
+    def get_prop_value_list(self, siid: int, piid: int) -> Optional[list]:
+        value_list = self.__get_prop_item(siid=siid, piid=piid,
+                                           key='value-list')
+        if not isinstance(value_list, list):
+            return None
+        return value_list
+
     def __get_prop_item(self, siid: int, piid: int, key: str) -> Optional[str]:
         if not self._selected:
             return None
@@ -1476,6 +1490,14 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_access:
                     spec_prop.access = custom_access
+                custom_range = self._spec_modify.get_prop_value_range(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_range:
+                    spec_prop.value_range = custom_range
+                custom_list = self._spec_modify.get_prop_value_list(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_list:
+                    spec_prop.value_list = custom_list
             # Parse service event
             for event in service.get('events', []):
                 if (

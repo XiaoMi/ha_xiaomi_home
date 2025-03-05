@@ -225,6 +225,31 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         'entity': 'air-conditioner'
     },
     'air-condition-outlet': 'air-conditioner',
+    'thermostat': {
+        'required': {
+            'thermostat': {
+                'required': {
+                    'properties': {
+                        'on': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {
+                        'target-temperature', 'mode', 'fan-level',
+                        'temperature'}
+                },
+            }
+        },
+        'optional': {
+            'environment': {
+                'required': {},
+                'optional': {
+                    'properties': {'temperature', 'relative-humidity'}
+                }
+            },
+        },
+        'entity': 'thermostat'
+    },
     'heater': {
         'required': {
             'heater': {
@@ -247,7 +272,48 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             },
         },
         'entity': 'heater'
-    }
+    },
+    'bath-heater': {
+        'required': {
+            'ptc-bath-heater': {
+                'required': {},
+                'optional': {
+                    'properties': {
+                        'target-temperature', 'heat-level',
+                        'temperature', 'mode'
+                    }
+                },
+            }
+        },
+        'optional': {
+            'fan-control': {
+                'required': {},
+                'optional': {
+                    'properties': {
+                        'on', 'fan-level', 'horizontal-swing', 'vertical-swing'
+                    }
+                },
+            }
+        },
+        'entity': 'bath-heater',
+    },
+    'electric-blanket': {
+        'required': {
+            'electric-blanket': {
+                'required': {
+                    'properties': {
+                        'on': {'read', 'write'},
+                        'target-temperature': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'mode', 'temperature'}
+                },
+            }
+        },
+        'optional': {},
+        'entity': 'electric-blanket'
+    },
 }
 
 """SPEC_SERVICE_TRANS_MAP
@@ -339,7 +405,9 @@ SPEC_SERVICE_TRANS_MAP: dict = {
         },
         'entity': 'cover'
     },
-    'window-opener': 'curtain'
+    'window-opener': 'curtain',
+    'motor-controller': 'curtain',
+    'airer': 'curtain'
 }
 
 """SPEC_PROP_TRANS_MAP
