@@ -189,7 +189,7 @@ class FeaturePresetMode(MIoTServiceEntity, ClimateEntity):
         for prop in self.entity_data.props:
             if prop.name == prop_name and prop.service.name == service_name:
                 if not prop.value_list:
-                    _LOGGER.error('invalid %s %s value_list, %s',service_name,
+                    _LOGGER.error('invalid %s %s value_list, %s', service_name,
                                   prop_name, self.entity_id)
                     continue
                 self._mode_map = prop.value_list.to_map()
@@ -229,7 +229,9 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         # properties
         for prop in entity_data.props:
-            if prop.name == 'fan-level' and prop.service.name == 'fan-control':
+            if (prop.name == 'fan-level' and
+                (prop.service.name == 'fan-control' or
+                 prop.service.name == 'thermostat')):
                 if not prop.value_list:
                     _LOGGER.error('invalid fan-level value_list, %s',
                                   self.entity_id)
