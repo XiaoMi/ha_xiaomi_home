@@ -465,7 +465,7 @@ class _MIoTSpecBase:
     iid: int
     type_: str
     description: str
-    description_trans: str
+    description_trans: Optional[str]
     proprietary: bool
     need_filter: bool
     name: str
@@ -476,6 +476,7 @@ class _MIoTSpecBase:
     device_class: Any
     state_class: Any
     external_unit: Any
+    entity_category: Optional[str]
 
     spec_id: int
 
@@ -494,6 +495,7 @@ class _MIoTSpecBase:
         self.device_class = None
         self.state_class = None
         self.external_unit = None
+        self.entity_category = None
 
         self.spec_id = hash(f'{self.type_}.{self.iid}')
 
@@ -1205,6 +1207,13 @@ class _SpecModify:
             return None
         return value_range
 
+    def get_prop_value_list(self, siid: int, piid: int) -> Optional[list]:
+        value_list = self.__get_prop_item(siid=siid, piid=piid,
+                                           key='value-list')
+        if not isinstance(value_list, list):
+            return None
+        return value_list
+
     def __get_prop_item(self, siid: int, piid: int, key: str) -> Optional[str]:
         if not self._selected:
             return None
@@ -1485,6 +1494,10 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_range:
                     spec_prop.value_range = custom_range
+                custom_list = self._spec_modify.get_prop_value_list(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_list:
+                    spec_prop.value_list = custom_list
             # Parse service event
             for event in service.get('events', []):
                 if (
