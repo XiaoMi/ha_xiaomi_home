@@ -667,78 +667,31 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
 
 
 class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
-                 FeatureHumidity, FeatureFanMode):
+                 FeatureHumidity, FeatureFanMode, FeaturePresetMode):
     """Thermostat"""
-    _prop_mode: Optional[MIoTSpecProperty]
-    _hvac_mode_map: Optional[dict[int, HVACMode]]
 
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
         """Initialize the thermostat."""
-        self._prop_mode = None
-        self._hvac_mode_map = None
-
         super().__init__(miot_device=miot_device, entity_data=entity_data)
+
         self._attr_icon = 'mdi:thermostat'
         # hvac modes
-        self._attr_hvac_modes = None
-        for prop in entity_data.props:
-            if prop.name == 'mode':
-                if not prop.value_list:
-                    _LOGGER.error('invalid mode value_list, %s', self.entity_id)
-                    continue
-                self._hvac_mode_map = {}
-                for item in prop.value_list.items:
-                    if item.name in {'off', 'idle'}:
-                        self._hvac_mode_map[item.value] = HVACMode.OFF
-                    elif item.name in {'auto'}:
-                        self._hvac_mode_map[item.value] = HVACMode.AUTO
-                    elif item.name in {'cool'}:
-                        self._hvac_mode_map[item.value] = HVACMode.COOL
-                    elif item.name in {'heat'}:
-                        self._hvac_mode_map[item.value] = HVACMode.HEAT
-                    elif item.name in {'dry'}:
-                        self._hvac_mode_map[item.value] = HVACMode.DRY
-                    elif item.name in {'fan'}:
-                        self._hvac_mode_map[item.value] = HVACMode.FAN_ONLY
-                self._attr_hvac_modes = list(self._hvac_mode_map.values())
-                self._prop_mode = prop
-
-        if self._attr_hvac_modes is None:
-            self._attr_hvac_modes = [HVACMode.OFF, HVACMode.AUTO]
-        elif HVACMode.OFF not in self._attr_hvac_modes:
-            self._attr_hvac_modes.insert(0, HVACMode.OFF)
+        self._attr_hvac_modes = [HVACMode.AUTO, HVACMode.OFF]
+        # preset modes
+        self._init_preset_modes('thermostat', 'mode')
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the target hvac mode."""
-        # set the device off
-        if hvac_mode == HVACMode.OFF:
-            if not await self.set_property_async(prop=self._prop_on,
-                                                 value=False):
-                raise RuntimeError(f'set climate prop.on failed, {hvac_mode}, '
-                                   f'{self.entity_id}')
-            return
-        # set the device on
-        elif self.get_prop_value(prop=self._prop_on) is False:
-            await self.set_property_async(prop=self._prop_on, value=True)
-        # set mode
-        if self._prop_mode is None:
-            return
-        mode_value = self.get_map_key(map_=self._hvac_mode_map, value=hvac_mode)
-        if mode_value is None or not await self.set_property_async(
-                prop=self._prop_mode, value=mode_value):
-            raise RuntimeError(
-                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}')
+        await self.set_property_async(
+            prop=self._prop_on,
+            value=False if hvac_mode == HVACMode.OFF else True)
 
     @property
     def hvac_mode(self) -> Optional[HVACMode]:
         """The current hvac mode."""
-        if self.get_prop_value(prop=self._prop_on) is False:
-            return HVACMode.OFF
-        return (self.get_map_value(map_=self._hvac_mode_map,
-                                   key=self.get_prop_value(
-                                       prop=self._prop_mode))
-                if self._prop_mode else None)
+        return (HVACMode.AUTO if self.get_prop_value(
+            prop=self._prop_on) else HVACMode.OFF)
 
 
 class ElectricBlanket(FeatureOnOff, FeatureTargetTemperature,
