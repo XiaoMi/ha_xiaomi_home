@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## v0.2.1
+### Added
+- Add the preset mode for the thermostat. [#833](https://github.com/XiaoMi/ha_xiaomi_home/pull/833)
+
+### Changed
+- Change paho-mqtt version to adapt Home Assistant 2025.03. [#839](https://github.com/XiaoMi/ha_xiaomi_home/pull/839)
+- Revert to use multi_lang.json. [#834](https://github.com/XiaoMi/ha_xiaomi_home/pull/834)
+
+### Fixed
+- Fix the opening and the closing status of linp.wopener.wd1lb. [#826](https://github.com/XiaoMi/ha_xiaomi_home/pull/826)
+- Fix the format type of the wind-reverse property. [#810](https://github.com/XiaoMi/ha_xiaomi_home/pull/810)
+- Fix the fan-level property without value-list but with value-range. [#808](https://github.com/XiaoMi/ha_xiaomi_home/pull/808)
+
 ## v0.2.0
 This version has modified some default units of sensors. After updating, it may cause Home Assistant to pop up some compatibility warnings. You can re-add the integration to resolve it.
 
