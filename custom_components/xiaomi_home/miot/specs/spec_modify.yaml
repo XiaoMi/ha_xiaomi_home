@@ -53,6 +53,12 @@ urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:  # 小米智能插�
     unit: mV
   prop.3.4:  # electric-current
     unit: mA
+urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:  # Aqara 人体传感器 E1
+  prop.3.2:  # voltage
+    access:
+    - read
+    - notify
+    unit: mV
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
   prop.2.1:
     name: download-speed
