@@ -88,7 +88,7 @@ class Number(MIoTPropertyEntity, NumberEntity):
         if self.spec.external_unit:
             self._attr_native_unit_of_measurement = self.spec.external_unit
         # Set icon
-        if self.spec.icon:
+        if self.spec.icon and not self.device_class:
             self._attr_icon = self.spec.icon
         # Set value range
         if self._value_range:
