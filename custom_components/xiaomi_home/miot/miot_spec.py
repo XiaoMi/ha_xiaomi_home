@@ -1205,6 +1205,9 @@ class _SpecModify:
         if isinstance(self._selected, str):
             return await self.set_spec_async(urn=self._selected)
 
+    def get_prop_name(self, siid: int, piid: int) -> Optional[str]:
+        return self.__get_prop_item(siid=siid, piid=piid, key='name')
+
     def get_prop_unit(self, siid: int, piid: int) -> Optional[str]:
         return self.__get_prop_item(siid=siid, piid=piid, key='unit')
 
@@ -1518,6 +1521,10 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_range:
                     spec_prop.value_range = custom_range
+                custom_name = self._spec_modify.get_prop_name(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_name:
+                    spec_prop.name = custom_name
             # Parse service event
             for event in service.get('events', []):
                 if (

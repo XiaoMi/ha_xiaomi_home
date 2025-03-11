@@ -58,3 +58,13 @@ urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
       description: medium
     - value: 255
       description: high
+urn:miot-spec-v2:device:bath-heater:0000A028:mike-2:1:
+  prop.3.1:
+    name: mode-a
+  prop.3.11:
+    name: mode-b
+  prop.3.12:
+    name: mode-c
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
+  prop.2.2:
+    name: fan-level-a
