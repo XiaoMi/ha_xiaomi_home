@@ -591,13 +591,8 @@ class MIoTDevice:
             # Priority: spec_modify.unit > unit_convert > specv2entity.unit
             miot_prop.external_unit = SPEC_PROP_TRANS_MAP['properties'][
                 prop_name]['unit_of_measurement']
-        if (
-            not miot_prop.icon
-            and 'icon' in SPEC_PROP_TRANS_MAP['properties'][prop_name]
-        ):
-            # Priority: spec_modify.icon > icon_convert > specv2entity.icon
-            miot_prop.icon = SPEC_PROP_TRANS_MAP['properties'][prop_name][
-                'icon']
+        # Priority: default.icon when device_class is set > spec_modify.icon
+        #           > icon_convert
         miot_prop.platform = platform
         return True
 
