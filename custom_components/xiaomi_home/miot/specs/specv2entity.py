@@ -138,7 +138,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'optional': {
                     'properties': {'mode', 'target-humidity'}
                 }
-            },
+            }
         },
         'optional': {
             'environment': {
@@ -164,8 +164,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                         'continue-sweep',
                         'stop-and-gocharge'
                     }
-                },
-
+                }
             }
         },
         'optional': {
@@ -178,9 +177,9 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'required': {
                     'properties': {
                         'battery-level': {'read'}
-                    },
+                    }
                 }
-            },
+            }
         },
         'entity': 'vacuum'
     },
@@ -196,7 +195,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 },
                 'optional': {
                     'properties': {'target-humidity'}
-                },
+                }
             }
         },
         'optional': {
@@ -237,7 +236,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     'properties': {
                         'target-temperature', 'mode', 'fan-level',
                         'temperature'}
-                },
+                }
             }
         },
         'optional': {
@@ -246,7 +245,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'optional': {
                     'properties': {'temperature', 'relative-humidity'}
                 }
-            },
+            }
         },
         'entity': 'thermostat'
     },
@@ -260,7 +259,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 },
                 'optional': {
                     'properties': {'target-temperature', 'heat-level'}
-                },
+                }
             }
         },
         'optional': {
@@ -269,7 +268,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'optional': {
                     'properties': {'temperature', 'relative-humidity'}
                 }
-            },
+            }
         },
         'entity': 'heater'
     },
@@ -293,7 +292,13 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     'properties': {
                         'on', 'fan-level', 'horizontal-swing', 'vertical-swing'
                     }
-                },
+                }
+            },
+            'environment': {
+                'required': {},
+                'optional': {
+                    'properties': {'temperature'}
+                }
             }
         },
         'entity': 'bath-heater',
@@ -309,7 +314,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 },
                 'optional': {
                     'properties': {'mode', 'temperature'}
-                },
+                }
             }
         },
         'optional': {},
