@@ -276,13 +276,14 @@ SPEC_DEVICE_TRANS_MAP: dict = {
     'bath-heater': {
         'required': {
             'ptc-bath-heater': {
-                'required': {},
-                'optional': {
+                'required': {
                     'properties': {
-                        'target-temperature', 'heat-level',
-                        'temperature', 'mode'
+                        'mode':{'read', 'write'}
                     }
                 },
+                'optional': {
+                    'properties': {'target-temperature', 'temperature'}
+                }
             }
         },
         'optional': {
@@ -400,7 +401,7 @@ SPEC_SERVICE_TRANS_MAP: dict = {
         },
         'optional': {
             'properties': {
-                'motor-control', 'status', 'current-position', 'target-position'
+                'status', 'current-position', 'target-position'
             }
         },
         'entity': 'cover'

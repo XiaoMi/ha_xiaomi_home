@@ -605,7 +605,7 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
 
 
 class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
-                    FeatureFanMode, FeatureSwingMode):
+                    FeatureFanMode, FeatureSwingMode, FeaturePresetMode):
     """Ptc bath heater"""
     _prop_mode: Optional[MIoTSpecProperty]
     _hvac_mode_map: Optional[dict[int, HVACMode]]
@@ -626,26 +626,20 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
                     continue
                 self._hvac_mode_map = {}
                 for item in prop.value_list.items:
-                    if item.name in {'off', 'idle'
-                                    } and (HVACMode.OFF not in list(
-                                        self._hvac_mode_map.values())):
-                        self._hvac_mode_map[item.value] = HVACMode.OFF
-                    elif item.name in {'auto'}:
+                    if item.name in {'off', 'idle'}:
+                        if (HVACMode.OFF
+                                not in list(self._hvac_mode_map.values())):
+                            self._hvac_mode_map[item.value] = HVACMode.OFF
+                    elif (HVACMode.AUTO
+                          not in list(self._hvac_mode_map.values())):
                         self._hvac_mode_map[item.value] = HVACMode.AUTO
-                    elif item.name in {'ventilate'}:
-                        self._hvac_mode_map[item.value] = HVACMode.COOL
-                    elif item.name in {'heat', 'quick_heat'
-                                      } and (HVACMode.HEAT not in list(
-                                          self._hvac_mode_map.values())):
-                        self._hvac_mode_map[item.value] = HVACMode.HEAT
-                    elif item.name in {'defog'}:
-                        self._hvac_mode_map[item.value] = HVACMode.HEAT_COOL
-                    elif item.name in {'dry'}:
-                        self._hvac_mode_map[item.value] = HVACMode.DRY
-                    elif item.name in {'fan'}:
-                        self._hvac_mode_map[item.value] = HVACMode.FAN_ONLY
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
-                self._prop_mode = prop
+                if HVACMode.OFF in self._attr_hvac_modes:
+                    self._prop_mode = prop
+                else:
+                    _LOGGER.error('no idle mode, %s', self.entity_id)
+        # preset modes
+        self._init_preset_modes('ptc-bath-heater', 'mode')
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the target hvac mode."""
@@ -655,15 +649,20 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
         if mode_value is None or not await self.set_property_async(
                 prop=self._prop_mode, value=mode_value):
             raise RuntimeError(
-                f'set climate prop.mode failed, {hvac_mode}, {self.entity_id}')
+                f'set ptc-bath-heater {hvac_mode} failed, {self.entity_id}')
 
     @property
     def hvac_mode(self) -> Optional[HVACMode]:
         """The current hvac mode."""
-        return (self.get_map_value(map_=self._hvac_mode_map,
-                                   key=self.get_prop_value(
-                                       prop=self._prop_mode))
-                if self._prop_mode else None)
+        if self._prop_mode is None:
+            return None
+        mode_value = self.get_map_value(
+            map_=self._hvac_mode_map,
+            key=self.get_prop_value(prop=self._prop_mode))
+        if mode_value == HVACMode.OFF:
+            return HVACMode.OFF
+        return HVACMode.AUTO if (HVACMode.AUTO
+                                 in self._attr_hvac_modes) else None
 
 
 class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
