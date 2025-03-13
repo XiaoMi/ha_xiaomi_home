@@ -659,8 +659,8 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
         mode_value = self.get_map_value(
             map_=self._hvac_mode_map,
             key=self.get_prop_value(prop=self._prop_mode))
-        if mode_value == HVACMode.OFF:
-            return HVACMode.OFF
+        if mode_value == HVACMode.OFF or mode_value is None:
+            return mode_value
         return HVACMode.AUTO if (HVACMode.AUTO
                                  in self._attr_hvac_modes) else None
 
