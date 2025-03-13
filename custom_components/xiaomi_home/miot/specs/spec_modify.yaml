@@ -68,3 +68,11 @@ urn:miot-spec-v2:device:bath-heater:0000A028:mike-2:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
     name: fan-level-a
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:5: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
