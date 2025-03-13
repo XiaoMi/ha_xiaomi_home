@@ -387,6 +387,7 @@ SPEC_SERVICE_TRANS_MAP: dict = {
     },
     'fan-control': 'fan',
     'ceiling-fan': 'fan',
+    'air-fresh': 'fan',
     'water-heater': {
         'required': {
             'properties': {
@@ -413,7 +414,20 @@ SPEC_SERVICE_TRANS_MAP: dict = {
     },
     'window-opener': 'curtain',
     'motor-controller': 'curtain',
-    'airer': 'curtain'
+    'airer': 'curtain',
+    'air-conditioner': {
+        'required': {
+            'properties': {
+                'on': {'read', 'write'},
+                'mode': {'read', 'write'},
+                'target-temperature': {'read', 'write'}
+            }
+        },
+        'optional': {
+            'properties': {'target-humidity'}
+        },
+        'entity': 'air-conditioner'
+    }
 }
 
 """SPEC_PROP_TRANS_MAP
