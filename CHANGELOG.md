@@ -1,13 +1,25 @@
 # CHANGELOG
 
+## v0.2.2
+This version has modified the conversion rules of the climate entity, which will have effect on the devices with the ptc-bath-heater, the air-conditioner and the air-fresh service. After updating, you need to restart Home Assistant and check `xiaomi_home > CONFIGURE >
+Update entity conversion rules > NEXT` to reload the integration.
+
+这个版本修改了浴霸、空调、新风机的实体转换规则，更新之后需要重启 Home Assistant，并且勾选 `xiaomi_home > 配置 > 更新实体转换规则 > 下一步` 重新加载集成。
+### Added
+- Add conversion rules for the air-conditioner service and the air-fresh service. [#879](https://github.com/XiaoMi/ha_xiaomi_home/pull/879)
+### Changed
+- Convert the mode of the ptc bath heater to the preset mode of the climate entity. [#874](https://github.com/XiaoMi/ha_xiaomi_home/pull/874)
+- Use Home Assistant default icon when device_class is set. [#855](https://github.com/XiaoMi/ha_xiaomi_home/pull/855)
+### Fixed
+- Fix xiaomi.aircondition.m9 humidity-range unit. [#878](https://github.com/XiaoMi/ha_xiaomi_home/pull/878)
+- Fix MIoT-Spec-V2 conflicts of xiaomi.fan.p5 and mike.bhf_light.2. [#866](https://github.com/XiaoMi/ha_xiaomi_home/pull/866)
+
 ## v0.2.1
 ### Added
 - Add the preset mode for the thermostat. [#833](https://github.com/XiaoMi/ha_xiaomi_home/pull/833)
-
 ### Changed
 - Change paho-mqtt version to adapt Home Assistant 2025.03. [#839](https://github.com/XiaoMi/ha_xiaomi_home/pull/839)
 - Revert to use multi_lang.json. [#834](https://github.com/XiaoMi/ha_xiaomi_home/pull/834)
-
 ### Fixed
 - Fix the opening and the closing status of linp.wopener.wd1lb. [#826](https://github.com/XiaoMi/ha_xiaomi_home/pull/826)
 - Fix the format type of the wind-reverse property. [#810](https://github.com/XiaoMi/ha_xiaomi_home/pull/810)
