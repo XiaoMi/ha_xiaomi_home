@@ -488,7 +488,7 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
         # hvac modes
         self._attr_hvac_modes = None
         for prop in entity_data.props:
-            if prop.name == 'mode':
+            if prop.name == 'mode' and prop.service.name == 'air-conditioner':
                 if not prop.value_list:
                     _LOGGER.error('invalid mode value_list, %s', self.entity_id)
                     continue
@@ -623,7 +623,7 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
         self._attr_icon = 'mdi:hvac'
         # hvac modes
         for prop in entity_data.props:
-            if prop.name == 'mode':
+            if prop.name == 'mode' and prop.service.name == 'ptc-bath-heater':
                 if not prop.value_list:
                     _LOGGER.error('invalid mode value_list, %s', self.entity_id)
                     continue
