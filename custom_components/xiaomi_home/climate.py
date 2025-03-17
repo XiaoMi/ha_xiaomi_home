@@ -101,21 +101,20 @@ class FeatureOnOff(MIoTServiceEntity, ClimateEntity):
         self._prop_on = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
-        # properties
-        for prop in entity_data.props:
-            if prop.name == 'on':
-                if (
-                        # The "on" property of the "fan-control" service is not
-                        # the on/off feature of the entity.
-                        prop.service.name == 'air-conditioner' or
-                        prop.service.name == 'heater' or
-                        prop.service.name == 'thermostat' or
-                        prop.service.name == 'electric-blanket'):
-                    self._attr_supported_features |= (
-                        ClimateEntityFeature.TURN_ON)
-                    self._attr_supported_features |= (
-                        ClimateEntityFeature.TURN_OFF)
-                    self._prop_on = prop
+
+    def _init_on_off(self, service_name: str, prop_name: str) -> None:
+        """Initialize the on_off feature."""
+        for prop in self.entity_data.props:
+            if prop.name == prop_name and prop.service.name == service_name:
+                if prop.format_ != bool:
+                    _LOGGER.error('wrong format %s %s, %s', service_name,
+                                  prop_name, self.entity_id)
+                    continue
+                self._attr_supported_features |= (
+                    ClimateEntityFeature.TURN_ON)
+                self._attr_supported_features |= (
+                    ClimateEntityFeature.TURN_OFF)
+                self._prop_on = prop
 
     async def async_turn_on(self) -> None:
         """Turn on."""
@@ -447,6 +446,8 @@ class Heater(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
         self._attr_icon = 'mdi:radiator'
         # hvac modes
         self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
+        # on/off
+        self._init_on_off('heater', 'on')
         # preset modes
         self._init_preset_modes('heater', 'heat-level')
 
@@ -482,6 +483,8 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         self._attr_icon = 'mdi:air-conditioner'
+        # on/off
+        self._init_on_off('air-conditioner', 'on')
         # hvac modes
         self._attr_hvac_modes = None
         for prop in entity_data.props:
@@ -677,6 +680,8 @@ class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
         self._attr_icon = 'mdi:thermostat'
         # hvac modes
         self._attr_hvac_modes = [HVACMode.AUTO, HVACMode.OFF]
+        # on/off
+        self._init_on_off('thermostat', 'on')
         # preset modes
         self._init_preset_modes('thermostat', 'mode')
 
@@ -705,6 +710,8 @@ class ElectricBlanket(FeatureOnOff, FeatureTargetTemperature,
         self._attr_icon = 'mdi:rug'
         # hvac modes
         self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
+        # on/off
+        self._init_on_off('electric-blanket', 'on')
         # preset modes
         self._init_preset_modes('electric-blanket', 'mode')
 
