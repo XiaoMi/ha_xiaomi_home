@@ -114,6 +114,7 @@ class FeatureOnOff(MIoTServiceEntity, ClimateEntity):
                 self._attr_supported_features |= ClimateEntityFeature.TURN_ON
                 self._attr_supported_features |= ClimateEntityFeature.TURN_OFF
                 self._prop_on = prop
+                break
 
     async def async_turn_on(self) -> None:
         """Turn on."""
@@ -150,6 +151,7 @@ class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_TEMPERATURE)
                 self._prop_target_temp = prop
+                break
         # temperature_unit is required by the climate entity
         if not self._attr_temperature_unit:
             self._attr_temperature_unit = UnitOfTemperature.CELSIUS
@@ -199,6 +201,7 @@ class FeaturePresetMode(MIoTServiceEntity, ClimateEntity):
                 self._attr_supported_features |= (
                     ClimateEntityFeature.PRESET_MODE)
                 self._prop_mode = prop
+                break
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode."""
@@ -367,6 +370,7 @@ class FeatureTemperature(MIoTServiceEntity, ClimateEntity):
         for prop in entity_data.props:
             if prop.name == 'temperature':
                 self._prop_env_temperature = prop
+                break
 
     @property
     def current_temperature(self) -> Optional[float]:
@@ -389,6 +393,7 @@ class FeatureHumidity(MIoTServiceEntity, ClimateEntity):
         for prop in entity_data.props:
             if prop.name == 'relative-humidity':
                 self._prop_env_humidity = prop
+                break
 
     @property
     def current_humidity(self) -> Optional[float]:
@@ -420,6 +425,7 @@ class FeatureTargetHumidity(MIoTServiceEntity, ClimateEntity):
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_HUMIDITY)
                 self._prop_target_humidity = prop
+                break
 
     async def async_set_humidity(self, humidity):
         """Set the target humidity."""
