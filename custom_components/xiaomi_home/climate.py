@@ -111,10 +111,8 @@ class FeatureOnOff(MIoTServiceEntity, ClimateEntity):
                     _LOGGER.error('wrong format %s %s, %s', service_name,
                                   prop_name, self.entity_id)
                     continue
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TURN_ON)
-                self._attr_supported_features |= (
-                    ClimateEntityFeature.TURN_OFF)
+                self._attr_supported_features |= ClimateEntityFeature.TURN_ON
+                self._attr_supported_features |= ClimateEntityFeature.TURN_OFF
                 self._prop_on = prop
 
     async def async_turn_on(self) -> None:
@@ -635,15 +633,10 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
                 self._hvac_mode_map = {}
                 for item in prop.value_list.items:
                     if item.name in {'off', 'idle'}:
-                        if (HVACMode.OFF
-                                not in list(self._hvac_mode_map.values())):
-                            self._hvac_mode_map[item.value] = HVACMode.OFF
-                    elif (HVACMode.AUTO
-                          not in list(self._hvac_mode_map.values())):
-                        self._hvac_mode_map[item.value] = HVACMode.AUTO
-                self._attr_hvac_modes = list(self._hvac_mode_map.values())
-                if HVACMode.OFF in self._attr_hvac_modes:
-                    self._prop_mode = prop
+                        self._hvac_mode_map[item.value] = HVACMode.OFF
+                        break
+                if self._hvac_mode_map:
+                    self._attr_hvac_modes = [HVACMode.AUTO, HVACMode.OFF]
                 else:
                     _LOGGER.error('no idle mode, %s', self.entity_id)
         # preset modes
@@ -651,7 +644,7 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the target hvac mode."""
-        if self._prop_mode is None:
+        if self._prop_mode is None or hvac_mode != HVACMode.OFF:
             return
         mode_value = self.get_map_key(map_=self._hvac_mode_map, value=hvac_mode)
         if mode_value is None or not await self.set_property_async(
@@ -664,13 +657,12 @@ class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
         """The current hvac mode."""
         if self._prop_mode is None:
             return None
-        mode_value = self.get_map_value(
-            map_=self._hvac_mode_map,
-            key=self.get_prop_value(prop=self._prop_mode))
-        if mode_value == HVACMode.OFF or mode_value is None:
-            return mode_value
-        return HVACMode.AUTO if (HVACMode.AUTO
-                                 in self._attr_hvac_modes) else None
+        current_mode = self.get_prop_value(prop=self._prop_mode)
+        if current_mode is None:
+            return None
+        mode_value = self.get_map_value(map_=self._hvac_mode_map,
+                                        key=current_mode)
+        return HVACMode.OFF if mode_value == HVACMode.OFF else HVACMode.AUTO
 
 
 class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
