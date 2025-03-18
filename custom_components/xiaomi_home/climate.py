@@ -51,6 +51,7 @@ from typing import Any, Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.const import UnitOfTemperature
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.climate import (
     FAN_ON, FAN_OFF, SWING_OFF, SWING_BOTH, SWING_VERTICAL, SWING_HORIZONTAL,
@@ -133,6 +134,7 @@ class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
                  entity_data: MIoTEntityData) -> None:
         """Initialize the feature class."""
         self._prop_target_temp = None
+        self._attr_temperature_unit = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         # properties
@@ -150,6 +152,9 @@ class FeatureTargetTemperature(MIoTServiceEntity, ClimateEntity):
                 self._attr_supported_features |= (
                     ClimateEntityFeature.TARGET_TEMPERATURE)
                 self._prop_target_temp = prop
+        # temperature_unit is required by the climate entity
+        if not self._attr_temperature_unit:
+            self._attr_temperature_unit = UnitOfTemperature.CELSIUS
 
     async def async_set_temperature(self, **kwargs):
         """Set the target temperature."""
