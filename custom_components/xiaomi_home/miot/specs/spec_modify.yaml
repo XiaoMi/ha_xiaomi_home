@@ -81,3 +81,38 @@ urn:miot-spec-v2:device:airer:0000A00D:mrbond-m33a:1:
     name: current-position-a
   prop.2.11:
     name: current-position-b
+urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
+  prop.2.3:
+    value-list:
+    - value: 1
+      description: one
+    - value: 2
+      description: two
+    - value: 3
+      description: three
+    - value: 4
+      description: four
+    - value: 5
+      description: five
+    - value: 6
+      description: six
+    - value: 7
+      description: seven
+    - value: 8
+      description: eight
+    - value: 9
+      description: nine
+    - value: 10
+      description: ten
+    - value: 11
+      description: eleven
+    - value: 12
+      description: twelve
+    - value: 13
+      description: thirteen
+    - value: 14
+      description: fourteen
+    - value: 15
+      description: fifteen
+    - value: 16
+      description: sixteen
