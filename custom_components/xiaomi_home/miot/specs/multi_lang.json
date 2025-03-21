@@ -168,5 +168,11 @@
             "service:016:action:001": "中键确认",
             "service:017:action:001": "右键确认"
         }
+    },
+    "urn:miot-spec-v2:device:bath-heater:0000A028:yeelink-v10": {
+        "en": {
+            "service:003:property:001:valuelist:000": "Idle",
+            "service:003:property:001:valuelist:001": "Dry"
+        }
     }
 }
