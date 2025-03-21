@@ -1,4 +1,12 @@
 # CHANGELOG
+## v0.2.3
+### Changed
+- Specify the service name and the property name during the climate entity's on/off feature initialization. [#899](https://github.com/XiaoMi/ha_xiaomi_home/pull/899)
+- Remove the useless total-battery property from `SPEC_PROP_TRANS_MAP`.
+### Fixed
+- Fix the hvac mode setting error when changing the preset mode of the ptc-bath-heater.
+- Fix the ambiguous descriptions of yeelink.bhf_light.v10 ptc-bath-heater mode value-list.
+- Fix the power consumption value of chuangmi.plug.212a01. [#910](https://github.com/XiaoMi/ha_xiaomi_home/pull/910)
 
 ## v0.2.2
 This version has modified the conversion rules of the climate entity, which will have effect on the devices with the ptc-bath-heater, the air-conditioner and the air-fresh service. After updating, you need to restart Home Assistant and check `xiaomi_home > CONFIGURE >
