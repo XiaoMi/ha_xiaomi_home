@@ -116,3 +116,8 @@ urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
       description: fifteen
     - value: 16
       description: sixteen
+urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
+  prop.5.1:
+    expr: round(src_value*6/1000000, 3)
+urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
+urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3

@@ -560,12 +560,6 @@ SPEC_PROP_TRANS_MAP: dict = {
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT,
             'unit_of_measurement': UnitOfPower.WATT
-        },
-        'total-battery': {
-            'device_class': SensorDeviceClass.ENERGY,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.TOTAL_INCREASING,
-            'unit_of_measurement': UnitOfEnergy.KILO_WATT_HOUR
         }
     }
 }
