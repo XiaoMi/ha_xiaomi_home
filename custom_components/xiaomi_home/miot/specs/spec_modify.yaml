@@ -123,6 +123,7 @@ urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:devi
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
 urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
     prop.2.1:
+      name: moisture
       icon: mdi:watering-can
     prop.2.2:
       name: soil-ec
