@@ -85,37 +85,37 @@ urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
   prop.2.3:
     value-list:
     - value: 1
-      description: one
+      description: '1'
     - value: 2
-      description: two
+      description: '2'
     - value: 3
-      description: three
+      description: '3'
     - value: 4
-      description: four
+      description: '4'
     - value: 5
-      description: five
+      description: '5'
     - value: 6
-      description: six
+      description: '6'
     - value: 7
-      description: seven
+      description: '7'
     - value: 8
-      description: eight
+      description: '8'
     - value: 9
-      description: nine
+      description: '9'
     - value: 10
-      description: ten
+      description: '10'
     - value: 11
-      description: eleven
+      description: '11'
     - value: 12
-      description: twelve
+      description: '12'
     - value: 13
-      description: thirteen
+      description: '13'
     - value: 14
-      description: fourteen
+      description: '14'
     - value: 15
-      description: fifteen
+      description: '15'
     - value: 16
-      description: sixteen
+      description: '16'
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
   prop.5.1:
     expr: round(src_value*6/1000000, 3)
