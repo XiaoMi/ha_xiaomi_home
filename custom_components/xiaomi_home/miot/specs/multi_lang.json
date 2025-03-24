@@ -174,5 +174,14 @@
             "service:003:property:001:valuelist:000": "Idle",
             "service:003:property:001:valuelist:001": "Dry"
         }
+    },
+    "urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1": {
+        "en": {
+            "service:002:property:001": "Soil Moisture"
+        },
+        "zh-Hans": {
+            "service:002:property:001": "土壤湿度",
+            "service:002:property:003": "光照强度"
+        }
     }
 }
