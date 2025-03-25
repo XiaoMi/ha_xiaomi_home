@@ -110,7 +110,7 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
                 self._attr_native_unit_of_measurement = list(
                     unit_sets)[0] if unit_sets else None
             # Set suggested precision
-            if spec.format_ in {int, float}:
+            if spec.format_ in {int, float} and spec.expr is None:
                 self._attr_suggested_display_precision = spec.precision
             # Set state_class
             if spec.state_class:
