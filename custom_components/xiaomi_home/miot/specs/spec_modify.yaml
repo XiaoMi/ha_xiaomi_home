@@ -140,3 +140,8 @@ urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
+urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
+  prop.4.1:
+    unit: ppm
+  prop.4.2:
+    unit: ppm
