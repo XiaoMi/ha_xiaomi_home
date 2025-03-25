@@ -506,7 +506,11 @@ SPEC_PROP_TRANS_MAP: dict = {
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT
         },
-        'voc-density': 'tvoc-density',
+        'voc-density': {
+            'device_class': SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT
+        },
         'battery-level': {
             'device_class': SensorDeviceClass.BATTERY,
             'entity': 'sensor',

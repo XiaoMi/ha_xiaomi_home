@@ -130,10 +130,13 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
     expr: round(src_value/10, 1)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:1: urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2
 urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
-    prop.2.1:
-      name: soil-moisture
-      icon: mdi:watering-can
-    prop.2.2:
-      name: soil-ec
-      icon: mdi:sprout-outline
-      unit: μS/cm
+  prop.2.1:
+    name: soil-moisture
+    icon: mdi:watering-can
+  prop.2.2:
+    name: soil-ec
+    icon: mdi:sprout-outline
+    unit: μS/cm
+urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
+  prop.2.5:
+    name: voc-density
