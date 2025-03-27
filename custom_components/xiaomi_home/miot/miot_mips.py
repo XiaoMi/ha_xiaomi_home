@@ -1215,7 +1215,7 @@ class MipsLocalClient(_MipsClient):
                 or 'eiid' not in msg
                 # or 'arguments' not in msg
             ):
-                self.log_error('unknown event msg, %s', payload)
+                self.log_info('unknown event msg, %s', payload)
                 return
             if 'arguments' not in msg:
                 self.log_info('wrong event msg, %s', payload)
