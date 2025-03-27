@@ -148,3 +148,6 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
 urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
   prop.4.1:
     unit: kWh
+urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
+  prop.4.4:
+    name: fan-level-ventilation
