@@ -145,3 +145,6 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
+  prop.4.1:
+    unit: kWh
