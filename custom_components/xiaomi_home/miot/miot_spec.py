@@ -1156,6 +1156,59 @@ class _SpecFilter:
         return False
 
 
+class _SpecAdd:
+    """MIoT-Spec-V2 add for entity conversion."""
+    _SPEC_ADD_FILE = 'specs/spec_add.yaml'
+    _main_loop: asyncio.AbstractEventLoop
+    _data: Optional[dict]
+    _selected: Optional[dict]
+
+    def __init__(
+        self, loop: Optional[asyncio.AbstractEventLoop] = None
+    ) -> None:
+        self._main_loop = loop or asyncio.get_running_loop()
+        self._data = None
+
+    async def init_async(self) -> None:
+        if isinstance(self._data, dict):
+            return
+        add_data = None
+        self._data = {}
+        self._selected = None
+        try:
+            add_data = await self._main_loop.run_in_executor(
+                None, load_yaml_file,
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    self._SPEC_ADD_FILE))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('spec add, load file error, %s', err)
+            return
+        if not isinstance(add_data, dict):
+            _LOGGER.error('spec add, invalid spec add content')
+            return
+        for key, value in add_data.items():
+            if not isinstance(key, str) or not isinstance(value, (dict, str)):
+                _LOGGER.error('spec add, invalid spec modify data')
+                return
+
+        self._data = add_data
+
+    async def deinit_async(self) -> None:
+        self._data = None
+        self._selected = None
+
+    async def set_spec_async(self, urn: str) -> None:
+        if not self._data:
+            return
+        self._selected = self._data.get(urn, None)
+        if isinstance(self._selected, str):
+            return await self.set_spec_async(urn=self._selected)
+
+    def get_spec_add(self) -> Optional[dict]:
+        return self._selected
+
+
 class _SpecModify:
     """MIoT-Spec-V2 modify for entity conversion."""
     _SPEC_MODIFY_FILE = 'specs/spec_modify.yaml'
@@ -1259,6 +1312,7 @@ class MIoTSpecParser:
     _multi_lang: _MIoTSpecMultiLang
     _bool_trans: _SpecBoolTranslation
     _spec_filter: _SpecFilter
+    _spec_add: _SpecAdd
     _spec_modify: _SpecModify
 
     _init_done: bool
@@ -1434,6 +1488,8 @@ class MIoTSpecParser:
             # Filter spec service
             spec_service.need_filter = self._spec_filter.filter_service(
                 siid=service['iid'])
+            if spec_service.need_filter:
+                continue
             if type_strs[1] != 'miot-spec-v2':
                 spec_service.proprietary = True
             spec_service.description_trans = (
@@ -1467,6 +1523,8 @@ class MIoTSpecParser:
                     spec_service.need_filter
                     or self._spec_filter.filter_property(
                         siid=service['iid'], piid=property_['iid']))
+                if spec_prop.need_filter:
+                    continue
                 if p_type_strs[1] != 'miot-spec-v2':
                     spec_prop.proprietary = spec_service.proprietary or True
                 spec_prop.description_trans = (
@@ -1543,6 +1601,8 @@ class MIoTSpecParser:
                     spec_service.need_filter
                     or self._spec_filter.filter_event(
                         siid=service['iid'], eiid=event['iid']))
+                if spec_event.need_filter:
+                    continue
                 if e_type_strs[1] != 'miot-spec-v2':
                     spec_event.proprietary = spec_service.proprietary or True
                 spec_event.description_trans = (
@@ -1579,6 +1639,8 @@ class MIoTSpecParser:
                     spec_service.need_filter
                     or self._spec_filter.filter_action(
                         siid=service['iid'], aiid=action['iid']))
+                if spec_action.need_filter:
+                    continue
                 if a_type_strs[1] != 'miot-spec-v2':
                     spec_action.proprietary = spec_service.proprietary or True
                 spec_action.description_trans = (
