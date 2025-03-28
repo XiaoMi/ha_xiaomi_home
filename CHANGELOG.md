@@ -1,4 +1,20 @@
 # CHANGELOG
+## v0.2.4
+### Added
+- Convert the submersion-state, the contact-state and the occupancy-status property to the binary_sensor entity. [#905](https://github.com/XiaoMi/ha_xiaomi_home/pull/905)
+
+### Changed
+- suittc.airrtc.wk168 mode descriptions are set to strings of numbers from 1 to 16. [#921](https://github.com/XiaoMi/ha_xiaomi_home/pull/921)
+- Do not set _attr_suggested_display_precision when the spec.expr is set in spec_modify.yaml [#929](https://github.com/XiaoMi/ha_xiaomi_home/pull/929)
+- Set "unknown event msg" log to info level.
+### Fixed
+- hhcc.plantmonitor.v1 soil moisture and soil ec icon and unit. [#927](https://github.com/XiaoMi/ha_xiaomi_home/pull/27)
+- cuco.plug.cp2 voltage and power value ratio.
+- cgllc.airmonitor.s1 unit ppb.
+- roswan.waterpuri.lte01 tds unit.
+- lumi.relay.c2acn01 power consumption unit
+- xiaomi.bhf_light.s1 fan level of ventilation.
+
 ## v0.2.3
 ### Changed
 - Specify the service name and the property name during the climate entity's on/off feature initialization. [#899](https://github.com/XiaoMi/ha_xiaomi_home/pull/899)
