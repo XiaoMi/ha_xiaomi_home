@@ -121,11 +121,33 @@ urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
     expr: round(src_value*6/1000000, 3)
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
+  prop.2.3:
+    expr: round(src_value/10, 1)
+  prop.2.4:
+    unit: mA
+  prop.3.2:
+    expr: round(src_value/10, 1)
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:1: urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2
 urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
-    prop.2.1:
-      name: soil-moisture
-      icon: mdi:watering-can
-    prop.2.2:
-      name: soil-ec
-      icon: mdi:sprout-outline
-      unit: μS/cm
+  prop.2.1:
+    name: soil-moisture
+    icon: mdi:watering-can
+  prop.2.2:
+    name: soil-ec
+    icon: mdi:sprout-outline
+    unit: μS/cm
+urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
+  prop.2.5:
+    name: voc-density
+urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
+  prop.4.1:
+    unit: ppm
+  prop.4.2:
+    unit: ppm
+urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
+  prop.4.1:
+    unit: kWh
+urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
+  prop.4.4:
+    name: fan-level-ventilation

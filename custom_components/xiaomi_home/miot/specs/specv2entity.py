@@ -48,6 +48,7 @@ Conversion rules of MIoT-Spec-V2 instance to Home Assistant entity.
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.components.event import EventDeviceClass
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
 from homeassistant.const import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
@@ -454,12 +455,28 @@ SPEC_PROP_TRANS_MAP: dict = {
             'format': {'int', 'float'},
             'access': {'read'}
         },
+        'binary_sensor': {
+            'format': {'bool', 'int'},
+            'access': {'read'}
+        },
         'switch': {
             'format': {'bool'},
             'access': {'read', 'write'}
         }
     },
     'properties': {
+        'submersion-state': {
+            'device_class': BinarySensorDeviceClass.MOISTURE,
+            'entity': 'binary_sensor'
+        },
+        'contact-state': {
+            'device_class': BinarySensorDeviceClass.DOOR,
+            'entity': 'binary_sensor'
+        },
+        'occupancy-status': {
+            'device_class': BinarySensorDeviceClass.OCCUPANCY,
+            'entity': 'binary_sensor',
+        },
         'temperature': {
             'device_class': SensorDeviceClass.TEMPERATURE,
             'entity': 'sensor',
@@ -506,7 +523,11 @@ SPEC_PROP_TRANS_MAP: dict = {
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT
         },
-        'voc-density': 'tvoc-density',
+        'voc-density': {
+            'device_class': SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT
+        },
         'battery-level': {
             'device_class': SensorDeviceClass.BATTERY,
             'entity': 'sensor',
