@@ -84,6 +84,10 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:
 urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
   prop.8.11:
     name: on-a
+urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:  # linp.magnet.m1
+  prop.2.1004:
+    name: contact-state
+    expr: src_value!=1
 urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
   prop.3.2:
     access:
@@ -147,6 +151,10 @@ urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
     name: upload-speed
     icon: mdi:upload
     unit: B/s
+urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:  # loock.safe.v1
+  prop.5.1:
+    name: contact-state
+    expr: src_value!=0
 urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
   prop.2.3:
     value-list:
