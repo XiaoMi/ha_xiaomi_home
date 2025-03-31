@@ -1,3 +1,48 @@
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:5: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
+  prop.2.5:
+    name: voc-density
+urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
+  prop.2.3:
+    value-range:
+    - 0
+    - 1
+    - 1
+urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:2: urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1
+urn:miot-spec-v2:device:airer:0000A00D:mrbond-m33a:1:
+  prop.2.3:
+    name: current-position-a
+  prop.2.11:
+    name: current-position-b
+urn:miot-spec-v2:device:bath-heater:0000A028:mike-2:1:
+  prop.3.1:
+    name: mode-a
+  prop.3.11:
+    name: mode-b
+  prop.3.12:
+    name: mode-c
+urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
+  prop.5.2:
+    value-list:
+    - value: 1
+      description: low
+    - value: 128
+      description: medium
+    - value: 255
+      description: high
+urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
+  prop.4.4:
+    name: fan-level-ventilation
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
+  prop.2.2:
+    name: fan-level-a
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
   prop.2.1:
     name: access-mode
@@ -14,16 +59,23 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
     - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
+urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
+urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
+urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
   prop.5.1:
-    name: power-consumption
-    expr: round(src_value/1000, 3)
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
+    expr: round(src_value*6/1000000, 3)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
   prop.2.2:
     name: power-consumption
     expr: round(src_value/1000, 3)
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:1: urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
+  prop.2.3:
+    expr: round(src_value/10, 1)
+  prop.2.4:
+    unit: mA
+  prop.3.2:
+    expr: round(src_value/10, 1)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
   prop.11.1:
     name: power-consumption
@@ -33,6 +85,17 @@ urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
     name: electric-power
     expr: round(src_value/100, 2)
+urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
+  prop.2.1:
+    name: soil-moisture
+    icon: mdi:watering-can
+  prop.2.2:
+    name: soil-ec
+    icon: mdi:sprout-outline
+    unit: μS/cm
+urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
+  prop.4.1:
+    unit: kWh
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
   prop.2.1:
     name: download-speed
@@ -42,45 +105,6 @@ urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
     name: upload-speed
     icon: mdi:upload
     unit: B/s
-urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
-  prop.2.3:
-    value-range:
-    - 0
-    - 1
-    - 1
-urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:2: urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1
-urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
-  prop.5.2:
-    value-list:
-    - value: 1
-      description: low
-    - value: 128
-      description: medium
-    - value: 255
-      description: high
-urn:miot-spec-v2:device:bath-heater:0000A028:mike-2:1:
-  prop.3.1:
-    name: mode-a
-  prop.3.11:
-    name: mode-b
-  prop.3.12:
-    name: mode-c
-urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
-  prop.2.2:
-    name: fan-level-a
-urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
-  prop.10.6:
-    unit: none
-urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
-urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
-urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
-urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
-urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:5: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
-urn:miot-spec-v2:device:airer:0000A00D:mrbond-m33a:1:
-  prop.2.3:
-    name: current-position-a
-  prop.2.11:
-    name: current-position-b
 urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
   prop.2.3:
     value-list:
@@ -116,38 +140,8 @@ urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
       description: '15'
     - value: 16
       description: '16'
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
-  prop.5.1:
-    expr: round(src_value*6/1000000, 3)
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
-urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
-  prop.2.3:
-    expr: round(src_value/10, 1)
-  prop.2.4:
-    unit: mA
-  prop.3.2:
-    expr: round(src_value/10, 1)
-urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:1: urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2
-urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
-  prop.2.1:
-    name: soil-moisture
-    icon: mdi:watering-can
-  prop.2.2:
-    name: soil-ec
-    icon: mdi:sprout-outline
-    unit: μS/cm
-urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
-  prop.2.5:
-    name: voc-density
 urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
   prop.4.1:
     unit: ppm
   prop.4.2:
     unit: ppm
-urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
-  prop.4.1:
-    unit: kWh
-urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
-  prop.4.4:
-    name: fan-level-ventilation

@@ -1,0 +1,22 @@
+{
+  "urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1": [
+    {
+      "iid": 3,
+      "type": "urn:miot-spec-v2:service:light:00007802:hyd-lyjpro:1",
+      "description": "Moon Light",
+      "properties": [
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:on:00000006:hyd-lyjpro:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        }
+      ]
+    }
+  ]
+}
