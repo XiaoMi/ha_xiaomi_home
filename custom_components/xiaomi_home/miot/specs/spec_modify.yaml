@@ -152,3 +152,6 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
+  prop.8.11:
+    name: on-a
