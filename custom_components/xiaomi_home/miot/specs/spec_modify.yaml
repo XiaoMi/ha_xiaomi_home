@@ -29,12 +29,6 @@ urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:  # lumi.gateway.mcn001
     access:
     - read
     - notify
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1:
-  prop.5.1:
-    name: power-consumption
-    expr: round(src_value/1000, 3)
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
-urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
   prop.2.2:
     name: power-consumption
