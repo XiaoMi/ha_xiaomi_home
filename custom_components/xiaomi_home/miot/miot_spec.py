@@ -1093,7 +1093,7 @@ class _SpecFilter:
 
 class _SpecAdd:
     """MIoT-Spec-V2 add for entity conversion."""
-    _SPEC_ADD_FILE = 'specs/spec_add.yaml'
+    _SPEC_ADD_FILE = 'specs/spec_add.json'
     _main_loop: asyncio.AbstractEventLoop
     _data: Optional[dict]
     _selected: Optional[dict]
@@ -1121,7 +1121,7 @@ class _SpecAdd:
             _LOGGER.error('spec add, invalid spec add content')
             return
         for key, value in add_data.items():
-            if not isinstance(key, str) or not isinstance(value, (dict, str)):
+            if not isinstance(key, str) or not isinstance(value, (list, str)):
                 _LOGGER.error('spec add, invalid spec modify data')
                 return
 

@@ -145,3 +145,10 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
+  prop.2.3:
+    name: current-position-a
+  prop.2.8:
+    name: target-position-a
+  prop.2.9:
+    name: target-position-b
