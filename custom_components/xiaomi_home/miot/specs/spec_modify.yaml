@@ -14,7 +14,7 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
     - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
-urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:  # 小米智能多模网关2
+urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:  # lumi.gateway.mcn001
   prop.2.1:  # access-mode
     access:
     - read
@@ -48,21 +48,21 @@ urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
     name: electric-power
     expr: round(src_value/100, 2)
-urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:  # 小米智能插线板2
+urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:  # qmi.plug.psv3
   prop.3.3:  # voltage
     unit: mV
   prop.3.4:  # electric-current
     unit: mA
-urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:  # Aqara 人体传感器 E1
+urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:  # lumi.motion.acn001
   prop.3.2:  # voltage
     access:
     - read
     - notify
     unit: mV
-urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:  # 子擎存在传感器 Lite
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:  # izq.sensor_occupy.24
   prop.2.6:  # distance
     unit: cm
-urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:linp-hb01:2:0000C824:  # 领普人体存在传感器ES1
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:linp-hb01:2:0000C824:  # linp.sensor_occupy.hb01
   prop.3.3:  # body-distance
     unit: m
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
@@ -177,7 +177,7 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
-urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:  ## 云米泉先AI净水器Super Pro 1200G
+urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:  # yunmi.waterpuri.s20
   prop.4.1:  # tds-in
     unit: ppm
   prop.4.2:  # tds-out
