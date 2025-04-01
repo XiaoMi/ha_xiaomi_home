@@ -1409,18 +1409,19 @@ class MIoTSpecParser:
         urn_service_instance = instance.get('services', [])
         # set spec instance in spec_add.json as not being filtered.
         custom_service_instance = self._spec_add.get_service_add()
-        for service in custom_service_instance:
-            service['need_filter'] = False
-            if 'properties' in service:
-                for prop in service['properties']:
-                    prop['need_filter'] = False
-            if 'actions' in service:
-                for action in service['actions']:
-                    action['need_filter'] = False
-            if 'events' in service:
-                for event in service['events']:
-                    event['need_filter'] = False
-            urn_service_instance.append(service)
+        if custom_service_instance:
+            for service in custom_service_instance:
+                service['need_filter'] = False
+                if 'properties' in service:
+                    for prop in service['properties']:
+                        prop['need_filter'] = False
+                if 'actions' in service:
+                    for action in service['actions']:
+                        action['need_filter'] = False
+                if 'events' in service:
+                    for event in service['events']:
+                        event['need_filter'] = False
+                urn_service_instance.append(service)
         # Parse services
         for service in urn_service_instance:
             if ('iid' not in service or 'type' not in service or
