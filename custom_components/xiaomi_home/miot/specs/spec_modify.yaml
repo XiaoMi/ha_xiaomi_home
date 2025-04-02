@@ -50,6 +50,21 @@ urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
     name: fan-level-a
+urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:
+  prop.2.1:
+    access:
+    - read
+    - notify
+  prop.2.2:
+    icon: mdi:ip
+  prop.2.3:
+    access:
+    - read
+    - notify
+  prop.2.5:
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
   prop.2.1:
     name: access-mode
@@ -66,26 +81,26 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
     - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
+urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
+  prop.8.11:
+    name: on-a
+urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
+  prop.3.2:
+    access:
+    - read
+    - notify
+    unit: mV
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:
+  prop.2.6:
+    unit: cm
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:linp-hb01:2:0000C824:
+  prop.3.3:
+    unit: m
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
   prop.5.1:
     expr: round(src_value*6/1000000, 3)
-urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:  # lumi.gateway.mcn001
-  prop.2.1:  # access-mode
-    access:
-    - read
-    - notify
-  prop.2.2:  # ip-address
-    icon: mdi:ip
-  prop.2.3:  # wifi-ssid
-    access:
-    - read
-    - notify
-  prop.2.5:  # access-mode
-    access:
-    - read
-    - notify
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
   prop.2.2:
     name: power-consumption
@@ -103,6 +118,11 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
     name: power-consumption
     expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2: urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1
+urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:
+  prop.3.3:
+    unit: mV
+  prop.3.4:
+    unit: mA
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
     name: electric-power
@@ -118,23 +138,6 @@ urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
 urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
   prop.4.1:
     unit: kWh
-urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:  # qmi.plug.psv3
-  prop.3.3:  # voltage
-    unit: mV
-  prop.3.4:  # electric-current
-    unit: mA
-urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:  # lumi.motion.acn001
-  prop.3.2:  # voltage
-    access:
-    - read
-    - notify
-    unit: mV
-urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:  # izq.sensor_occupy.24
-  prop.2.6:  # distance
-    unit: cm
-urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:linp-hb01:2:0000C824:  # linp.sensor_occupy.hb01
-  prop.3.3:  # body-distance
-    unit: m
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
   prop.2.1:
     name: download-speed
@@ -184,17 +187,8 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
-urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
-  prop.8.11:
-    name: on-a
-urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:  # yunmi.waterpuri.s20
-  prop.4.1:  # tds-in
-    unit: ppm
-  prop.4.2:  # tds-out
-    unit: ppm
-urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
+urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:
   prop.4.1:
-    unit: kWh
-urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
-  prop.4.4:
-    name: fan-level-ventilation
+    unit: ppm
+  prop.4.2:
+    unit: ppm
