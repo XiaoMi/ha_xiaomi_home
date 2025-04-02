@@ -230,6 +230,7 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
         self._prop_fan_on = None
         self._prop_fan_level = None
         self._fan_mode_map = None
+        self._attr_fan_modes = None
 
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         # properties
