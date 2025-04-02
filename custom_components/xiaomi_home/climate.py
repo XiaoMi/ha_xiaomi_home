@@ -55,7 +55,7 @@ from homeassistant.const import UnitOfTemperature
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.climate import (
     FAN_ON, FAN_OFF, SWING_OFF, SWING_BOTH, SWING_VERTICAL, SWING_HORIZONTAL,
-    ATTR_TEMPERATURE, HVACMode, ClimateEntity, ClimateEntityFeature)
+    ATTR_TEMPERATURE, HVACMode, HVACAction, ClimateEntity, ClimateEntityFeature)
 
 from .miot.const import DOMAIN
 from .miot.miot_device import MIoTDevice, MIoTServiceEntity, MIoTEntityData
@@ -473,6 +473,13 @@ class Heater(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
         return (HVACMode.HEAT if self.get_prop_value(
             prop=self._prop_on) else HVACMode.OFF)
 
+    @property
+    def hvac_action(self) -> Optional[HVACAction]:
+        """The current hvac action."""
+        if self.hvac_mode == HVACMode.HEAT:
+            return HVACAction.HEATING
+        return HVACAction.OFF
+
 
 class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
                      FeatureTargetHumidity, FeatureTemperature, FeatureHumidity,
@@ -561,6 +568,23 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
                                    key=self.get_prop_value(
                                        prop=self._prop_mode))
                 if self._prop_mode else None)
+
+    @property
+    def hvac_action(self) -> Optional[HVACAction]:
+        """The current hvac action."""
+        if self.hvac_mode is None:
+            return None
+        if self.hvac_mode == HVACMode.OFF:
+            return HVACAction.OFF
+        if self.hvac_mode == HVACMode.FAN_ONLY:
+            return HVACAction.FAN
+        if self.hvac_mode == HVACMode.COOL:
+            return HVACAction.COOLING
+        if self.hvac_mode == HVACMode.HEAT:
+            return HVACAction.HEATING
+        if self.hvac_mode == HVACMode.DRY:
+            return HVACAction.DRYING
+        return HVACAction.IDLE
 
     def __ac_state_changed(self, prop: MIoTSpecProperty, value: Any) -> None:
         del prop
@@ -730,3 +754,10 @@ class ElectricBlanket(FeatureOnOff, FeatureTargetTemperature,
         """The current hvac mode."""
         return (HVACMode.HEAT if self.get_prop_value(
             prop=self._prop_on) else HVACMode.OFF)
+
+    @property
+    def hvac_action(self) -> Optional[HVACAction]:
+        """The current hvac action."""
+        if self.hvac_mode == HVACMode.OFF:
+            return HVACAction.OFF
+        return HVACAction.HEATING
