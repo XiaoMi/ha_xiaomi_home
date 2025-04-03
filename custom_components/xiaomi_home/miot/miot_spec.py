@@ -213,6 +213,12 @@ class MIoTSpecValueList:
                 return item.description
         return None
 
+    def get_name_by_value(self, value: Any) -> Optional[str]:
+        for item in self.items:
+            if item.value == value:
+                return item.name
+        return None
+
     def dump(self) -> list:
         return [item.dump() for item in self.items]
 
