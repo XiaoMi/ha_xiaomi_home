@@ -263,7 +263,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
             self._prop_pos_closing = False
             return self.get_prop_value(prop=self._prop_target_position)
         pos = self.get_prop_value(prop=self._prop_current_position)
-        return None if pos is None else round(pos * 100 /
+        return None if pos is None else 100 - round(pos * 100 /
                                               self._prop_position_value_range)
 
     @property
