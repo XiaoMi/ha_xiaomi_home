@@ -54,7 +54,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.vacuum import (
     StateVacuumEntity,
-    VacuumEntityFeature
+    VacuumEntityFeature,
+    VacuumActivity
 )
 
 from .miot.const import DOMAIN
@@ -191,10 +192,47 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
 
     @property
     def state(self) -> Optional[str]:
-        """Return the current state of the vacuum cleaner."""
+        """Return the current state of the vacuum cleaner.
+
+        To fix the HA warning below:
+            Detected that custom integration 'xiaomi_home' is setting state
+            directly.Entity XXX(<class 'custom_components.xiaomi_home.vacuum
+            .Vacuum'>)should implement the 'activity' property and return
+            its state using the VacuumActivity enum.This will stop working in
+            Home Assistant 2026.1.
+
+        Refer to
+        https://developers.home-assistant.io/blog/2024/12/08/new-vacuum-state-property
+
+        There are only 6 states in VacuumActivity enum. To be compatible with
+        more constants, try get matching VacuumActivity enum first, return state
+        string as before if there is no match. In Home Assistant 2026.1, every
+        state should map to a VacuumActivity enum.
+        """
+        if (activity := self.activity) is not None:
+            return activity
         return self.get_map_value(
             map_=self._status_map,
-            key=self.get_prop_value(prop=self._prop_status))
+            key=self.get_prop_value(prop=self._prop_status)
+        )
+
+    @property
+    def activity(self) -> VacuumActivity | None:
+        """Return the current vacuum activity."""
+        state_trans_map = {
+            'Sleep': VacuumActivity.IDLE,
+            'Idle': VacuumActivity.IDLE,
+            'Paused': VacuumActivity.PAUSED,
+            'Go Charging': VacuumActivity.RETURNING,
+            'Charging': VacuumActivity.DOCKED,
+            'Sweeping': VacuumActivity.CLEANING,
+            'Sweeping and Mopping': VacuumActivity.CLEANING,
+            'Mopping': VacuumActivity.CLEANING,
+            'Error': VacuumActivity.ERROR,
+        }
+        prop_value = self.get_prop_value(prop=self._prop_status)
+        state_name = self._prop_status.value_list.get_name_by_value(prop_value)
+        return state_trans_map.get(state_name)
 
     @property
     def battery_level(self) -> Optional[int]:
