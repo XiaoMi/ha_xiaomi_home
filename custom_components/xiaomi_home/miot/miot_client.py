@@ -879,16 +879,7 @@ class MIoTClient:
         sub_from = self._sub_source_list.pop(did, None)
         # Unsub
         if sub_from:
-            if sub_from == 'cloud':
-                self._mips_cloud.unsub_prop(did=did)
-                self._mips_cloud.unsub_event(did=did)
-            elif sub_from == 'lan':
-                self._miot_lan.unsub_prop(did=did)
-                self._miot_lan.unsub_event(did=did)
-            elif sub_from in self._mips_local:
-                mips = self._mips_local[sub_from]
-                mips.unsub_prop(did=did)
-                mips.unsub_event(did=did)
+            self.__unsub_from(sub_from, did)
         # Storage
         await self._storage.save_async(
             domain='miot_devices',
@@ -937,6 +928,39 @@ class MIoTClient:
                 self.refresh_user_cert_async()))
 
     @final
+    def __unsub_from(self, sub_from: str, did: str) -> None:
+        mips: Any = None
+        if sub_from == 'cloud':
+            mips = self._mips_cloud
+        elif sub_from == 'lan':
+            mips = self._miot_lan
+        elif sub_from in self._mips_local:
+            mips = self._mips_local[sub_from]
+        if mips is not None:
+            try:
+                mips.unsub_prop(did=did)
+                mips.unsub_event(did=did)
+            except RuntimeError as e:
+                if 'Event loop is closed' in str(e):
+                    # Ignore unsub exception when loop is closed
+                    pass
+                else:
+                    raise
+
+    @final
+    def __sub_from(self, sub_from: str, did: str) -> None:
+        mips = None
+        if sub_from == 'cloud':
+            mips = self._mips_cloud
+        elif sub_from == 'lan':
+            mips = self._miot_lan
+        elif sub_from in self._mips_local:
+            mips = self._mips_local[sub_from]
+        if mips is not None:
+            mips.sub_prop(did=did, handler=self.__on_prop_msg)
+            mips.sub_event(did=did, handler=self.__on_event_msg)
+
+    @final
     def __update_device_msg_sub(self, did: str) -> None:
         if did not in self._device_list_cache:
             return
@@ -967,27 +991,9 @@ class MIoTClient:
             return
         # Unsub old
         if from_old:
-            if from_old == 'cloud':
-                self._mips_cloud.unsub_prop(did=did)
-                self._mips_cloud.unsub_event(did=did)
-            elif from_old == 'lan':
-                self._miot_lan.unsub_prop(did=did)
-                self._miot_lan.unsub_event(did=did)
-            elif from_old in self._mips_local:
-                mips = self._mips_local[from_old]
-                mips.unsub_prop(did=did)
-                mips.unsub_event(did=did)
+            self.__unsub_from(from_old, did)
         # Sub new
-        if from_new == 'cloud':
-            self._mips_cloud.sub_prop(did=did, handler=self.__on_prop_msg)
-            self._mips_cloud.sub_event(did=did, handler=self.__on_event_msg)
-        elif from_new == 'lan':
-            self._miot_lan.sub_prop(did=did, handler=self.__on_prop_msg)
-            self._miot_lan.sub_event(did=did, handler=self.__on_event_msg)
-        elif from_new in self._mips_local:
-            mips = self._mips_local[from_new]
-            mips.sub_prop(did=did, handler=self.__on_prop_msg)
-            mips.sub_event(did=did, handler=self.__on_event_msg)
+        self.__sub_from(from_new, did)
         self._sub_source_list[did] = from_new
         _LOGGER.info(
             'device sub changed, %s, from %s to %s', did, from_old, from_new)
