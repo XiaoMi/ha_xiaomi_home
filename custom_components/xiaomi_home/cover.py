@@ -140,15 +140,16 @@ class Cover(MIoTServiceEntity, CoverEntity):
                                   self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {'open', 'up'}:
+                    item_name = item.name.lower()
+                    if item_name in {'open', 'up'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.OPEN)
                         self._prop_motor_value_open = item.value
-                    elif item.name in {'close', 'down'}:
+                    elif item_name in {'close', 'down'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.CLOSE)
                         self._prop_motor_value_close = item.value
-                    elif item.name in {'pause', 'stop'}:
+                    elif item_name in {'pause', 'stop'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.STOP)
                         self._prop_motor_value_pause = item.value
@@ -159,13 +160,14 @@ class Cover(MIoTServiceEntity, CoverEntity):
                                   self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {'opening', 'open', 'up'}:
+                    item_name = item.name.lower()
+                    if item_name in {'opening', 'open', 'up'}:
                         self._prop_status_opening.append(item.value)
-                    elif item.name in {'closing', 'close', 'down'}:
+                    elif item_name in {'closing', 'close', 'down'}:
                         self._prop_status_closing.append(item.value)
-                    elif item.name in {'stop', 'stopped', 'pause'}:
+                    elif item_name in {'stop', 'stopped', 'pause'}:
                         self._prop_status_stop.append(item.value)
-                    elif item.name in {'closed'}:
+                    elif item_name in {'closed'}:
                         self._prop_status_closed.append(item.value)
                 self._prop_status = prop
             elif prop.name == 'current-position':
