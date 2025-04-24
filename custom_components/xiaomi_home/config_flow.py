@@ -565,7 +565,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         home_list = {}
         tip_devices = self._miot_i18n.translate(key='config.other.devices')
         # home list
-        for device_source in ['home_list','share_home_list']:
+        for device_source in ['home_list','share_home_list',
+                              'separated_shared_list']:
             for home_id, home_info in self._cc_home_info[
                     'homes'][device_source].items():
                 # i18n
@@ -661,7 +662,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not home_selected:
                 return await self.__show_homes_select_form(
                     'no_family_selected')
-            for device_source in ['home_list','share_home_list']:
+            for device_source in ['home_list','share_home_list',
+                                  'separated_shared_list']:
                 for home_id, home_info in self._cc_home_info[
                         'homes'][device_source].items():
                     if home_id in home_selected:
@@ -1422,7 +1424,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             home_list = {}
             tip_devices = self._miot_i18n.translate(key='config.other.devices')
             # home list
-            for device_source in ['home_list','share_home_list']:
+            for device_source in ['home_list','share_home_list',
+                                  'separated_shared_list']:
                 for home_id, home_info in self._cc_home_info[
                         'homes'][device_source].items():
                     # i18n
@@ -1463,7 +1466,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return await self.__show_homes_select_form('no_family_selected')
         self._ctrl_mode = user_input.get('ctrl_mode', self._ctrl_mode)
         self._home_selected = {}
-        for device_source in ['home_list','share_home_list']:
+        for device_source in ['home_list','share_home_list',
+                              'separated_shared_list']:
             for home_id, home_info in self._cc_home_info[
                     'homes'][device_source].items():
                 if home_id in self._home_selected_list:

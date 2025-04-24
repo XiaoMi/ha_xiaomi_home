@@ -444,6 +444,17 @@ class MIoTHttpClient:
 
         return home_list
 
+    async def get_separated_shared_devices_async(self) -> dict[str, dict]:
+        separated_shared_devices: dict = {}
+        device_list: dict[str, dict] = await self.__get_device_list_page_async(
+            dids=[], start_did=None)
+        for did, value in device_list.items():
+            if value['owner'] is not None and ('userid' in value['owner']) and (
+                'nickname' in value['owner']
+            ):
+                separated_shared_devices.setdefault(did, value['owner'])
+        return separated_shared_devices
+
     async def get_homeinfos_async(self) -> dict:
         res_obj = await self.__mihome_api_post_async(
             url_path='/app/v2/homeroom/gethome',
@@ -654,6 +665,25 @@ class MIoTHttpClient:
                             'room_name': room_name,
                             'group_id': group_id
                         } for did in room_info.get('dids', [])})
+        separated_shared_devices: dict = (
+            await self.get_separated_shared_devices_async())
+        if separated_shared_devices:
+            homes.setdefault('separated_shared_list', {})
+            for did, owner in separated_shared_devices.items():
+                owner_id = str(owner['userid'])
+                homes['separated_shared_list'].setdefault(owner_id,{
+                    'home_name': owner['nickname'],
+                    'uid': owner_id,
+                    'group_id': 'NotSupport',
+                    'room_info': {'shared_device': 'shared_device'}
+                })
+                devices.update({did: {
+                    'home_id': owner_id,
+                    'home_name': owner['nickname'],
+                    'room_id': 'shared_device',
+                    'room_name': 'shared_device',
+                    'group_id': 'NotSupport'
+                }})
         dids = sorted(list(devices.keys()))
         results = await self.get_devices_with_dids_async(dids=dids)
         if results is None:
