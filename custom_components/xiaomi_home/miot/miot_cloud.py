@@ -499,19 +499,22 @@ class MIoTHttpClient:
         ):
             more_list = await self.__get_dev_room_page_async(
                 max_id=res_obj['result']['max_id'])
-            for home_id, info in more_list.items():
-                if home_id not in home_infos['homelist']:
-                    _LOGGER.info('unknown home, %s, %s', home_id, info)
-                    continue
-                home_infos['homelist'][home_id]['dids'].extend(info['dids'])
-                for room_id, info in info['room_info'].items():
-                    home_infos['homelist'][home_id]['room_info'].setdefault(
-                        room_id, {
-                            'room_id': room_id,
-                            'room_name': '',
-                            'dids': []})
-                    home_infos['homelist'][home_id]['room_info'][
-                        room_id]['dids'].extend(info['dids'])
+            for device_source in ['homelist', 'share_home_list']:
+                for home_id, info in more_list.items():
+                    if home_id not in home_infos[device_source]:
+                        _LOGGER.info('unknown home, %s, %s', home_id, info)
+                        continue
+                    home_infos[device_source][home_id]['dids'].extend(
+                        info['dids'])
+                    for room_id, info in info['room_info'].items():
+                        home_infos[device_source][home_id][
+                            'room_info'].setdefault(
+                            room_id, {
+                                'room_id': room_id,
+                                'room_name': '',
+                                'dids': []})
+                        home_infos[device_source][home_id]['room_info'][
+                            room_id]['dids'].extend(info['dids'])
 
         return {
             'uid': uid,
