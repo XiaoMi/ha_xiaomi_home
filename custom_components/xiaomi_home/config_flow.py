@@ -584,7 +584,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     # i18n
                     tip_central = self._miot_i18n.translate(
                         key='config.other.found_central_gateway')
-                    home_info['central_did'] = mips_list[group_id].get('did', None)
+                    home_info['central_did'] = mips_list[group_id].get(
+                        'did', None)
                 home_list[home_id] = (
                     f'{home_info["home_name"]} '
                     f'[ {len(dev_list)} {tip_devices} {tip_central} ]')
