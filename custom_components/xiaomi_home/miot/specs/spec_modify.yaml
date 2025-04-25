@@ -200,3 +200,8 @@ urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
+  prop.2.3:
+    expr: round(src_value/10, 1)
+  prop.2.4:
+    unit: mA
