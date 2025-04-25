@@ -567,6 +567,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # home list
         for device_source in ['home_list','share_home_list',
                               'separated_shared_list']:
+            if device_source not in self._cc_home_info['homes']:
+                continue
             for home_id, home_info in self._cc_home_info[
                     'homes'][device_source].items():
                 # i18n
@@ -665,6 +667,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     'no_family_selected')
             for device_source in ['home_list','share_home_list',
                                   'separated_shared_list']:
+                if device_source not in self._cc_home_info['homes']:
+                    continue
                 for home_id, home_info in self._cc_home_info[
                         'homes'][device_source].items():
                     if home_id in home_selected:
@@ -1427,6 +1431,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # home list
             for device_source in ['home_list','share_home_list',
                                   'separated_shared_list']:
+                if device_source not in self._cc_home_info['homes']:
+                    continue
                 for home_id, home_info in self._cc_home_info[
                         'homes'][device_source].items():
                     # i18n
@@ -1469,6 +1475,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._home_selected = {}
         for device_source in ['home_list','share_home_list',
                               'separated_shared_list']:
+            if device_source not in self._cc_home_info['homes']:
+                continue
             for home_id, home_info in self._cc_home_info[
                     'homes'][device_source].items():
                 if home_id in self._home_selected_list:
