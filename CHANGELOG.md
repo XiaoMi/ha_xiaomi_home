@@ -1,8 +1,22 @@
 # CHANGELOG
+## v0.3.0
+注意：v0.3.0 变更了部分实体 unique_id 的生成规则，如果勾选 xiaomi_home > 配置 > 更新实体转换规则，会导致部分实体已配置的自动化失效。如果想要避免重新配置大量自动化，可使用这个[补丁](https://github.com/XiaoMi/ha_xiaomi_home/pull/972)。
+
+CAUTION: v0.3.0 changes the unique_id of some entities. If you check the option `xiaomi_home > CONFIGURE > Update entity conversion rules`, it may cause the automation settings for these entities to fail. To avoid having to reconfigure a large number of automation settings, you can use this [patch](https://github.com/XiaoMi/ha_xiaomi_home/pull/972).
+### Added
+- Import the devices in the shared homes and the separated shared devices. [#1021](https://github.com/XiaoMi/ha_xiaomi_home/pull/1021)
+- Support _attr_hvac_action of the climate entity. [#956](https://github.com/XiaoMi/ha_xiaomi_home/pull/956)
+- Add custom defined MIoT-Spec-V2 instance via spec_add.json. [#953](https://github.com/XiaoMi/ha_xiaomi_home/pull/953)
+
+### Fixed
+- Ignore 'Event loop is closed' when unsub a closed event loop. [#991](https://github.com/XiaoMi/ha_xiaomi_home/pull/991)
+- Fix contact-state for linp.magnet.m1 and loock.safe.v1. [#977](https://github.com/XiaoMi/ha_xiaomi_home/pull/977)
+- Fix the mode initialization error of aupu.bhf_light.s368m. [#955](https://github.com/XiaoMi/ha_xiaomi_home/pull/955)
+- Fix the MIoT-Spec-V2 of lumi.gateway.mcn001, qmi.plug.psv3, lumi.motion.acn001, izq.sensor_occupy.24, linp.sensor_occupy.hb01 and yunmi.waterpuri.s20. [#949](https://github.com/XiaoMi/ha_xiaomi_home/pull/949)
+
 ## v0.2.4
 ### Added
 - Convert the submersion-state, the contact-state and the occupancy-status property to the binary_sensor entity. [#905](https://github.com/XiaoMi/ha_xiaomi_home/pull/905)
-
 ### Changed
 - suittc.airrtc.wk168 mode descriptions are set to strings of numbers from 1 to 16. [#921](https://github.com/XiaoMi/ha_xiaomi_home/pull/921)
 - Do not set _attr_suggested_display_precision when the spec.expr is set in spec_modify.yaml [#929](https://github.com/XiaoMi/ha_xiaomi_home/pull/929)
