@@ -38,7 +38,7 @@ def load_json_file(file_path: str) -> Optional[dict]:
 
 def save_json_file(file_path: str, data: dict) -> None:
     with open(file_path, 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False, indent=4)
+        json.dump(data, file, ensure_ascii=False, indent=2)
 
 
 def load_yaml_file(file_path: str) -> Optional[dict]:
