@@ -779,8 +779,10 @@ class MIoTDevice:
             # pylint: disable=import-outside-toplevel
             from homeassistant.const import UnitOfConductivity  # type: ignore
             unit_map['μS/cm'] = UnitOfConductivity.MICROSIEMENS_PER_CM
+            unit_map['mWh'] = UnitOfEnergy.MILLIWATT_HOUR
         except Exception:  # pylint: disable=broad-except
             unit_map['μS/cm'] = 'μS/cm'
+            unit_map['mWh'] = 'mWh'
 
         return unit_map.get(spec_unit, None)
 

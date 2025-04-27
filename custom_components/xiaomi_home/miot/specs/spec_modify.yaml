@@ -129,6 +129,9 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
     name: power-consumption
     expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2: urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1
+urn:miot-spec-v2:device:outlet:0000A002:giot-v8icm:1:0000C816:
+  prop.4.1:
+    unit: mWh
 urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:
   prop.3.3:
     unit: mV
