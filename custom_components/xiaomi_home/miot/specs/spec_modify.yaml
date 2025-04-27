@@ -205,3 +205,7 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
     expr: round(src_value/10, 1)
   prop.2.4:
     unit: mA
+urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
+  prop.3.1:
+    expr: round(src_value/100, 1)
+urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:1:0000C816: urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816
