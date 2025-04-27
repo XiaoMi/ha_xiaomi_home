@@ -236,6 +236,9 @@ class Fan(MIoTServiceEntity, FanEntity):
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the percentage of the fan speed."""
         if percentage > 0:
+            if not self.is_on:
+                # If the fan is off, turn it on.
+                await self.set_property_async(prop=self._prop_on, value=True)
             if self._speed_names:
                 await self.set_property_async(
                     prop=self._prop_fan_level,
@@ -249,9 +252,6 @@ class Fan(MIoTServiceEntity, FanEntity):
                     value=int(percentage_to_ranged_value(
                         low_high_range=(self._speed_min, self._speed_max),
                         percentage=percentage)))
-            if not self.is_on:
-                # If the fan is off, turn it on.
-                await self.set_property_async(prop=self._prop_on, value=True)
         else:
             await self.set_property_async(prop=self._prop_on, value=False)
 
