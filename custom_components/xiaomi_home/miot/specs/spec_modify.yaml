@@ -50,6 +50,9 @@ urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:zhimi-v3:3:
+  prop.2.6:
+    name: fan-level-a
 urn:miot-spec-v2:device:gateway:0000A019:lumi-mcn001:1:
   prop.2.1:
     access:
