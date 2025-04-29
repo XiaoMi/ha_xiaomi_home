@@ -1,4 +1,12 @@
 # CHANGELOG
+## v0.3.1
+### Changed
+- Setting the fan speed level when the fan is off will turning the fan on first. [#1031](https://github.com/XiaoMi/ha_xiaomi_home/pull/1031)
+### Fixed
+- Fix update device list error when there is no shared devices. [#1024](https://github.com/XiaoMi/ha_xiaomi_home/pull/1024)
+- Fix the humidifier get_prop_value error when the property is None. [#1035](https://github.com/XiaoMi/ha_xiaomi_home/pull/1035)
+- Fix the MIoT-Spec-V2 of zhimi.fan.v3 fan-level, cuco.plug.cp1md voltage and current, zimi.plug.zncz01 electric-power, giot.plug.v8icm power-consumption unit, yunmi.kettle.r3 tds unit, and dmaker.fan.p5 fan-level. [#1037](https://github.com/XiaoMi/ha_xiaomi_home/pull/1037)
+
 ## v0.3.0
 注意：v0.3.0 变更了部分实体 unique_id 的生成规则，如果勾选 xiaomi_home > 配置 > 更新实体转换规则，会导致部分实体已配置的自动化失效。如果想要避免重新配置大量自动化，可使用这个[补丁](https://github.com/XiaoMi/ha_xiaomi_home/pull/972)。
 
@@ -7,7 +15,6 @@ CAUTION: v0.3.0 changes the unique_id of some entities. If you check the option 
 - Import the devices in the shared homes and the separated shared devices. [#1021](https://github.com/XiaoMi/ha_xiaomi_home/pull/1021)
 - Support _attr_hvac_action of the climate entity. [#956](https://github.com/XiaoMi/ha_xiaomi_home/pull/956)
 - Add custom defined MIoT-Spec-V2 instance via spec_add.json. [#953](https://github.com/XiaoMi/ha_xiaomi_home/pull/953)
-
 ### Fixed
 - Ignore 'Event loop is closed' when unsub a closed event loop. [#991](https://github.com/XiaoMi/ha_xiaomi_home/pull/991)
 - Fix contact-state for linp.magnet.m1 and loock.safe.v1. [#977](https://github.com/XiaoMi/ha_xiaomi_home/pull/977)
