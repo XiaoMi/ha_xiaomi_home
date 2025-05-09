@@ -33,9 +33,7 @@ git checkout v1.0.0
 
 ### 方法 2: [HACS](https://hacs.xyz/)
 
-HACS > 右上角三个点 > Custom repositories > Repository: https://github.com/XiaoMi/ha_xiaomi_home.git & Category or Type: Integration > ADD > 点击 HACS 的 New 或 Available for download 分类下的 Xiaomi Home ，进入集成详情页  > DOWNLOAD
-
-> 米家集成暂未添加到 HACS 商店，敬请期待。
+HACS > 在搜索框中输入 **Xiaomi Home** > 点击 **Xiaomi Home** ，进入集成详情页  > DOWNLOAD
 
 ### 方法 3：通过 [Samba](https://github.com/home-assistant/addons/tree/master/samba) 或 [FTPS](https://github.com/hassio-addons/addon-ftp) 手动安装
 
