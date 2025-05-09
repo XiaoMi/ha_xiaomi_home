@@ -33,9 +33,7 @@ git checkout v1.0.0
 
 ### Method 2: [HACS](https://hacs.xyz/)
 
-HACS > Overflow Menu > Custom repositories > Repository: https://github.com/XiaoMi/ha_xiaomi_home.git & Category or Type: Integration > ADD > Xiaomi Home in New or Available for download section of HACS > DOWNLOAD
-
-> Xiaomi Home has not been added to the HACS store as a default yet. It's coming soon.
+HACS > In the search box, type **Xiaomi Home** > Click **Xiaomi Home** > DOWNLOAD
 
 ### Method 3: Manually installation via [Samba](https://github.com/home-assistant/addons/tree/master/samba) / [FTPS](https://github.com/hassio-addons/addon-ftp)
 
