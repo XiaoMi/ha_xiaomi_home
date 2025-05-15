@@ -172,6 +172,13 @@ urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
     expr: src_value!=1
+urn:miot-spec-v2:device:switch:0000A003:lxzn-cbcsmj:1:0000D00D:
+  prop.3.1:
+    expr: round(src_value/100, 2)
+  prop.3.2:
+    expr: round(src_value/1000, 2)
+  prop.3.3:
+    expr: round(src_value/10, 1)
 urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
   prop.2.3:
     value-list:
