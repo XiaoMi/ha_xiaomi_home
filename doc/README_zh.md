@@ -353,7 +353,7 @@ instance code 为 MIoT-Spec-V2 实例代码，格式如下：
 ```
 service:<siid>                  # 服务
 service:<siid>:property:<piid>  # 属性
-service:<siid>:property:<piid>:valuelist:<value> # 属性取值列表的值
+service:<siid>:property:<piid>:valuelist:<value> # 属性取值列表的索引值
 service:<siid>:event:<eiid>     # 事件
 service:<siid>:action:<aiid>    # 方法
 ```
