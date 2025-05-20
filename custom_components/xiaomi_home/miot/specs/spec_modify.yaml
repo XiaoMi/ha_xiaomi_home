@@ -90,6 +90,9 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:
 urn:miot-spec-v2:device:kettle:0000A009:yunmi-r3:1:
   prop.3.1:
     unit: ppm
+urn:miot-spec-v2:device:light:0000A001:shhf-sfla10:1:
+  prop.8.9:
+    name: wind-reverse
 urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
   prop.8.11:
     name: on-a
