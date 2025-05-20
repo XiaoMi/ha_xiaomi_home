@@ -440,11 +440,12 @@ def test_miot_data_sort():
             f'{SPEC_FILTER_FILE} not sorted, goto project root path'
             ' and run the following command sorting, ',
             'pytest -s -v -m update ./test/check_rule_format.py')
-    assert json.dumps(load_json_file(file_path=SPEC_MULTI_LANG_FILE)) == json.dumps(
-        sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)), (
-            f'{SPEC_MULTI_LANG_FILE} not sorted, goto project root path'
-            ' and run the following command sorting, ',
-            'pytest -s -v -m update ./test/check_rule_format.py')
+    assert json.dumps(
+        load_json_file(file_path=SPEC_MULTI_LANG_FILE)) == json.dumps(
+            sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)), (
+                f'{SPEC_MULTI_LANG_FILE} not sorted, goto project root path'
+                ' and run the following command sorting, ',
+                'pytest -s -v -m update ./test/check_rule_format.py')
     assert json.dumps(load_json_file(file_path=SPEC_ADD_FILE)) == json.dumps(
         sort_spec_add(file_path=SPEC_ADD_FILE)), (
             f'{SPEC_ADD_FILE} not sorted, goto project root path'
