@@ -646,7 +646,8 @@ class MIoTClient:
                 result = await self._miot_lan.set_prop_async(
                     did=did, siid=siid, piid=piid, value=value)
                 _LOGGER.debug(
-                    'lan set prop, %s, %s, %s -> %s', did, siid, piid, result)
+                    'lan set prop, %s.%d.%d, %s -> %s',
+                    did, siid, piid, value, result)
                 rc = (result or {}).get(
                     'code', MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
                 if rc in [0, 1]:
