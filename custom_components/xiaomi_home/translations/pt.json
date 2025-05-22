@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "Configuração Básica",
-                "description": "### Região de Login\r\nSelecione a região da sua conta Xiaomi. Pode encontrá-la na aplicação Xiaomi Home > Perfil (menu inferior) > Configurações adicionais > Sobre o Xiaomi Home.\r\n### Idioma\r\nSelecione o idioma para os nomes de dispositivos e entidades. Algumas frases sem tradução serão apresentadas em inglês.\r\n### URL de Redirecionamento OAuth2\r\nO endereço de redirecionamento para a autenticação OAuth2 é **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. O Home Assistant deve estar na mesma rede local que o terminal atual (por exemplo, o computador pessoal) e esse terminal deve conseguir aceder à página inicial do Home Assistant através deste endereço. Caso contrário, a autenticação de login pode falhar.\r\n### Notas\r\n- Para utilizadores com centenas (ou mais) de dispositivos Mi Home, a adição inicial da integração demorará algum tempo. Seja paciente.\r\n- Se o Home Assistant estiver a ser executado num ambiente Docker, assegure-se de que o modo de rede do Docker está configurado como host; caso contrário, a funcionalidade de controlo local pode não funcionar corretamente.\r\n- A funcionalidade de controlo local da integração tem algumas dependências. Leia cuidadosamente o README.",
+                "description": "### Região de Login\r\nSelecione a região da sua conta Xiaomi. Pode encontrá-la na aplicação Xiaomi Home > Perfil (menu inferior) > Configurações adicionais > Sobre o Xiaomi Home.\r\n### Idioma\r\nSelecione o idioma para os nomes de dispositivos e entidades. Algumas frases sem tradução serão apresentadas em inglês.\r\n### URL de Redirecionamento OAuth2\r\nO endereço de redirecionamento para a autenticação OAuth2 é **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. O Home Assistant deve estar na mesma rede local que o terminal atual (por exemplo, o computador pessoal) e esse terminal deve conseguir aceder à página inicial do Home Assistant através deste endereço. Caso contrário, a autenticação de login pode falhar.\r\n### Configuração de Rede Integrada\r\nVerifique se a rede local está funcionando corretamente e se os recursos de rede relacionados estão acessíveis. **Recomenda-se selecionar isso ao adicionar pela primeira vez.**\r\n### Notas\r\n- Para utilizadores com centenas (ou mais) de dispositivos Mi Home, a adição inicial da integração demorará algum tempo. Seja paciente.\r\n- Se o Home Assistant estiver a ser executado num ambiente Docker, assegure-se de que o modo de rede do Docker está configurado como host; caso contrário, a funcionalidade de controlo local pode não funcionar corretamente.\r\n- A funcionalidade de controlo local da integração tem algumas dependências. Leia cuidadosamente o README.",
                 "data": {
                     "cloud_server": "Região de Login",
                     "integration_language": "Idioma",
-                    "oauth_redirect_url": "URL de Redirecionamento OAuth2"
+                    "oauth_redirect_url": "URL de Redirecionamento OAuth2",
+                    "network_detect_config": "Configuração de Rede Integrada"
+                }
+            },
+            "network_detect_config": {
+                "title": "Configuração de Rede Integrada",
+                "description": "## Introdução ao Uso\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- Se você deseja restaurar o endereço de detecção padrão do sistema, insira uma vírgula `,` e clique em 'Próximo'.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**\r\n### Verificar Dependências de Rede\r\nVerifique uma por uma as seguintes dependências de rede para ver se são acessíveis. Se os endereços relacionados não forem acessíveis, isso causará problemas de integração.\r\n- Endereço de Autenticação OAuth2: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Endereço da API HTTP da Xiaomi: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Endereço da API SPEC da Xiaomi: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Endereço do Broker MQTT da Xiaomi: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Endereço de Detecção de Rede",
+                    "check_network_deps": "Verificar Dependências de Rede"
                 }
             },
             "oauth_error": {
@@ -23,14 +32,39 @@
                 "description": "Clique em SEGUINTE para tentar novamente."
             },
             "homes_select": {
-                "title": "Selecione a Casa e os Dispositivos",
-                "description": "## Instruções de Utilização\r\n### Modo de Controlo\r\n- Automático: Quando existir um gateway central Xiaomi disponível na rede local, o Home Assistant dará prioridade ao envio de comandos de controlo através do gateway central, permitindo um controlo local. Caso não exista um gateway central na rede local, tentará enviar comandos através da funcionalidade de controlo LAN. Apenas se estas condições não forem cumpridas, os comandos serão enviados pela nuvem.\r\n- Nuvem: Todos os comandos de controlo são enviados através da nuvem.\r\n### Importar dispositivos da casa\r\nA integração adicionará dispositivos das casas selecionadas.\n### Modo de sincronização do nome da divisão\r\nAo importar dispositivos da aplicação Xiaomi Home para o Home Assistant, a nomeação da área onde o dispositivo é adicionado segue as regras abaixo. Note que o processo de sincronização dos dispositivos não altera as definições de casa ou divisão na aplicação Xiaomi Home.\r\n- Não sincronizar: O dispositivo não será atribuído a qualquer área.\r\n- Outras opções: O dispositivo será adicionado a uma área cujo nome corresponde ao da casa e/ou divisão definida na aplicação Xiaomi Home.\r\n### Modo de depuração de ação\r\nPara as ações definidas no MIoT-Spec-V2 do dispositivo, será criada uma entidade do tipo texto juntamente com uma entidade de notificação, nas quais poderá enviar comandos de controlo ao dispositivo para fins de depuração.\r\n### Ocultar entidades não padrão\r\nOculta as entidades geradas a partir de instâncias não padrão do MIoT-Spec-V2, cujos nomes começam por \"*\".\r\n\r\n&emsp;\r\n### Olá {nick_name}, selecione o modo de controlo da integração e a casa na qual deseja importar os dispositivos.",
+                "title": "Selecionar Família e Dispositivo",
+                "description": "## Introdução\r\n### Importar a Família do Dispositivo\r\nA integração adicionará dispositivos da família selecionada.\r\n### Modo de Sincronização do Nome da Sala\r\nAo sincronizar dispositivos do APP Mi Home para o Home Assistant, a nomeação da área no Home Assistant seguirá as regras abaixo. Observe que o processo de sincronização não alterará as configurações de família e sala no APP Mi Home.\r\n- Não sincronizar: O dispositivo não será adicionado a nenhuma área.\r\n- Outras opções: A área à qual o dispositivo é adicionado será nomeada de acordo com o nome da família ou da sala no APP Mi Home.\r\n### Configurações Avançadas\r\nMostrar configurações avançadas para modificar as opções de configuração profissional da integração.\r\n\r\n&emsp;\r\n### {nick_name} Olá! Por favor, selecione a família à qual você deseja adicionar o dispositivo.",
                 "data": {
+                    "home_infos": "Importar a Família do Dispositivo",
+                    "area_name_rule": "Modo de Sincronização do Nome da Sala",
+                    "advanced_options": "Configurações Avançadas"
+                }
+            },
+            "advanced_options": {
+                "title": "Opções Avançadas",
+                "description": "## Introdução\r\n### A menos que você entenda claramente o significado das opções abaixo, mantenha as configurações padrão.\r\n### Filtrar Dispositivos\r\nSuporte para filtrar dispositivos por nome da sala e tipo de dispositivo, bem como filtragem por família.\r\n### Modo de Controle\r\n- Automático: Quando um gateway central Xiaomi está disponível na rede local, o Home Assistant enviará comandos de controlo de dispositivos através do gateway central para realizar o controlo local. Quando não há gateway central na rede local, tentará enviar comandos de controlo através do protocolo Xiaomi OT para realizar o controlo local. Apenas quando as condições de controlo local acima não são atendidas, os comandos de controlo de dispositivos serão enviados através da nuvem.\r\n- Nuvem: Os comandos de controlo são enviados apenas através da nuvem.\r\n### Modo de Depuração de Ações\r\nPara métodos definidos pelo MIoT-Spec-V2, além de gerar uma entidade de notificação, também será gerada uma entidade de caixa de texto para depuração de controlo de dispositivos.\r\n### Ocultar Entidades Geradas Não Padrão\r\nOcultar entidades geradas por instâncias MIoT-Spec-V2 não padrão, cujos nomes começam com \"*\".\r\n### Modo de exibição do sensor binário\r\nExibe sensores binários no Xiaomi Home como entidade de sensor de texto ou entidade de sensor binário。\r\n### Exibir notificações de mudança de status do dispositivo\r\nExibir notificações detalhadas de mudança de status do dispositivo, mostrando apenas as notificações selecionadas.",
+                "data": {
+                    "devices_filter": "Filtrar Dispositivos",
                     "ctrl_mode": "Modo de Controlo",
-                    "home_infos": "Importar dispositivos da casa",
-                    "area_name_rule": "Modo de sincronização do nome da divisão",
-                    "action_debug": "Modo de depuração de ação",
-                    "hide_non_standard_entities": "Ocultar entidades não padrão"
+                    "action_debug": "Modo de Depuração de Ações",
+                    "hide_non_standard_entities": "Ocultar Entidades Geradas Não Padrão",
+                    "display_binary_mode": "Modo de exibição do sensor binário",
+                    "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo"
+                }
+            },
+            "devices_filter": {
+                "title": "Filtrar Dispositivos",
+                "description": "## Instruções de Utilização\r\nSuporta a filtragem de dispositivos por nome da sala, tipo de acesso do dispositivo e modelo do dispositivo, e também suporta a filtragem por dimensão do dispositivo. A lógica de filtragem é a seguinte:\r\n- Primeiro, de acordo com a lógica estatística, obtenha a união ou interseção de todos os itens incluídos, depois obtenha a interseção ou união dos itens excluídos, e finalmente subtraia o [resultado do resumo incluído] do [resultado do resumo excluído] para obter o [resultado do filtro].\r\n- Se nenhum item incluído for selecionado, significa que todos estão incluídos.\r\n### Modo de Filtragem\r\n- Excluir: Remover itens indesejados.\r\n- Incluir: Incluir itens desejados.\r\n### Lógica Estatística\r\n- Lógica E: Pegue a interseção de todos os itens no mesmo modo.\r\n- Lógica OU: Pegue a união de todos os itens no mesmo modo.\r\n\r\nVocê também pode ir para a página [Configuração > Atualizar Lista de Dispositivos] do item de integração, marcar [Filtrar Dispositivos] para refiltrar.",
+                "data": {
+                    "room_filter_mode": "Filtrar por Sala",
+                    "room_list": "Salas",
+                    "type_filter_mode": "Filtrar por Tipo de Dispositivo",
+                    "type_list": "Tipos de Dispositivo",
+                    "model_filter_mode": "Filtrar por Modelo de Dispositivo",
+                    "model_list": "Modelos de Dispositivo",
+                    "devices_filter_mode": "Filtrar Dispositivos",
+                    "device_list": "Lista de Dispositivos",
+                    "statistics_logic": "Lógica de Estatísticas"
                 }
             }
         },
@@ -44,10 +78,20 @@
             "mdns_discovery_error": "Exceção no serviço de descoberta de dispositivos locais.",
             "get_cert_error": "Não foi possível obter o certificado do gateway central.",
             "no_family_selected": "Nenhuma casa selecionada.",
-            "no_devices": "A casa selecionada não possui quaisquer dispositivos. Por favor, selecione uma casa que contenha dispositivos e continue.",
-            "no_central_device": "O [Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada cumpre este requisito."
+            "no_devices": "Não há dispositivos na casa selecionada. Por favor, selecione uma casa com dispositivos e continue.",
+            "no_filter_devices": "Os dispositivos filtrados estão vazios. Por favor, selecione critérios de filtro válidos e continue.",
+            "no_central_device": "O [Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada cumpre este requisito.",
+            "invalid_network_addr": "Endereço IP ou HTTP inválido detectado, por favor insira um endereço válido.",
+            "invalid_ip_addr": "Endereço IP inacessível detectado, por favor insira um endereço IP válido.",
+            "invalid_http_addr": "Endereço HTTP inacessível detectado, por favor insira um endereço HTTP válido.",
+            "invalid_default_addr": "O endereço de detecção de rede padrão está inacessível, por favor verifique a configuração da rede ou use um endereço de detecção de rede personalizado.",
+            "unreachable_oauth2_host": "Não é possível acessar o endereço de autenticação OAuth2, verifique a configuração da rede.",
+            "unreachable_http_host": "Não é possível acessar o endereço da API HTTP da Xiaomi, verifique a configuração da rede.",
+            "unreachable_spec_host": "Não é possível acessar o endereço da API SPEC da Xiaomi, verifique a configuração da rede.",
+            "unreachable_mqtt_broker": "Não é possível acessar o endereço do Broker MQTT da Xiaomi, verifique a configuração da rede."
         },
         "abort": {
+            "ha_uuid_get_failed": "Não foi possível obter o UUID do Home Assistant.",
             "network_connect_error": "A configuração falhou. A ligação de rede é anormal. Verifique a configuração de rede do equipamento.",
             "already_configured": "A configuração para este utilizador já foi concluída. Vá à página de integrações e clique em CONFIGURAR para efetuar alterações.",
             "invalid_auth_info": "A informação de autenticação expirou. Vá à página de integrações e clique em CONFIGURAR para reautenticar.",
@@ -69,15 +113,18 @@
             },
             "config_options": {
                 "title": "Opções de Configuração",
-                "description": "### Olá, {nick_name}\r\n\r\nID Xiaomi: {uid}\r\nRegião de Login Atual: {cloud_server}\r\n\r\nSelecione as opções que pretende configurar e depois clique em SEGUINTE.",
+                "description": "### Olá, {nick_name}\r\n\r\nID Xiaomi: {uid}\r\nRegião de Login Atual: {cloud_server}\r\nID da Instância de Integração: {instance_id}\r\n\r\nSelecione as opções que pretende configurar e depois clique em SEGUINTE.",
                 "data": {
                     "integration_language": "Idioma da Integração",
                     "update_user_info": "Atualizar informação do utilizador",
                     "update_devices": "Atualizar lista de dispositivos",
                     "action_debug": "Modo de depuração de ação",
                     "hide_non_standard_entities": "Ocultar entidades não padrão",
+                    "display_binary_mode": "Modo de exibição do sensor binário",
+                    "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo",
                     "update_trans_rules": "Atualizar regras de conversão de entidades",
-                    "update_lan_ctrl_config": "Atualizar configuração de controlo LAN"
+                    "update_lan_ctrl_config": "Atualizar configuração de controlo LAN",
+                    "network_detect_config": "Configuração de Rede Integrada"
                 }
             },
             "update_user_info": {
@@ -89,10 +136,26 @@
             },
             "homes_select": {
                 "title": "Selecionar novamente a Casa e os Dispositivos",
-                "description": "## Instruções de Utilização\r\n### Modo de Controlo\r\n- Automático: Quando houver um gateway central Xiaomi disponível na rede local, o Home Assistant priorizará o envio de comandos através dele para obter controlo local. Se não existir um gateway central, tentará enviar comandos através da função de controlo LAN da Xiaomi. Apenas se estas condições não forem satisfeitas, os comandos serão enviados pela nuvem.\r\n- Nuvem: Todos os comandos de controlo são enviados através da nuvem.\r\n### Importar dispositivos da casa\r\nA integração adicionará dispositivos das casas selecionadas.\r\n&emsp;\r\n### Olá {nick_name}, selecione o modo de controlo da integração e a casa da qual pretende importar dispositivos.",
+                "description": "## Instruções de Utilização\r\n### Importar dispositivos da casa\r\nA integração adicionará dispositivos das casas selecionadas.\r\n### Filtrar Dispositivos\r\nSuporta a filtragem de dispositivos por nome da sala, tipo de acesso do dispositivo e modelo do dispositivo, e também suporta a filtragem por dimensão do dispositivo. **{local_count}** dispositivos foram filtrados.\r\n### Modo de Controlo\r\n- Automático: Quando houver um gateway central Xiaomi disponível na rede local, o Home Assistant priorizará o envio de comandos através dele para obter controlo local. Se não existir um gateway central, tentará enviar comandos através da função de controlo LAN da Xiaomi. Apenas se estas condições não forem satisfeitas, os comandos serão enviados pela nuvem.\r\n- Nuvem: Todos os comandos de controlo são enviados através da nuvem.",
                 "data": {
-                    "ctrl_mode": "Modo de Controlo",
-                    "home_infos": "Importar dispositivos da casa"
+                    "home_infos": "Importar dispositivos da casa",
+                    "devices_filter": "Filtrar Dispositivos",
+                    "ctrl_mode": "Modo de Controlo"
+                }
+            },
+            "devices_filter": {
+                "title": "Filtrar Dispositivos",
+                "description": "## Instruções de Utilização\r\nSuporta a filtragem de dispositivos por nome da sala, tipo de acesso do dispositivo e modelo do dispositivo, e também suporta a filtragem por dimensão do dispositivo. A lógica de filtragem é a seguinte:\r\n- Primeiro, de acordo com a lógica estatística, obtenha a união ou interseção de todos os itens incluídos, depois obtenha a interseção ou união dos itens excluídos, e finalmente subtraia o [resultado do resumo incluído] do [resultado do resumo excluído] para obter o [resultado do filtro].\r\n- Se nenhum item incluído for selecionado, significa que todos estão incluídos.\r\n### Modo de Filtragem\r\n- Excluir: Remover itens indesejados.\r\n- Incluir: Incluir itens desejados.\r\n### Lógica Estatística\r\n- Lógica E: Pegue a interseção de todos os itens no mesmo modo.\r\n- Lógica OU: Pegue a união de todos os itens no mesmo modo.\r\n\r\nVocê também pode ir para a página [Configuração > Atualizar Lista de Dispositivos] do item de integração, marcar [Filtrar Dispositivos] para refiltrar.",
+                "data": {
+                    "room_filter_mode": "Filtrar por Sala",
+                    "room_list": "Salas",
+                    "type_filter_mode": "Filtrar por Tipo de Dispositivo",
+                    "type_list": "Tipos de Dispositivo",
+                    "model_filter_mode": "Filtrar por Modelo de Dispositivo",
+                    "model_list": "Modelos de Dispositivo",
+                    "devices_filter_mode": "Filtrar Dispositivos",
+                    "device_list": "Lista de Dispositivos",
+                    "statistics_logic": "Lógica de Estatísticas"
                 }
             },
             "update_trans_rules": {
@@ -110,9 +173,17 @@
                     "enable_subscribe": "Ativar subscrição LAN"
                 }
             },
+            "network_detect_config": {
+                "title": "Configuração de Rede Integrada",
+                "description": "## Introdução ao Uso\r\n### Endereço de Detecção de Rede\r\nUsado para verificar se a rede está funcionando corretamente. Se não for definido, o endereço padrão do sistema será usado. Se a verificação do endereço padrão falhar, você pode tentar inserir um endereço personalizado.\r\n- Você pode inserir vários endereços de detecção, separados por vírgulas, como `8.8.8.8,https://www.bing.com`\r\n- Se for um endereço IP, a detecção será feita via ping. Se for um endereço HTTP(s), a detecção será feita via solicitação HTTP GET.\r\n- Se você deseja restaurar o endereço de detecção padrão do sistema, insira uma vírgula `,` e clique em 'Próximo'.\r\n- **Esta configuração é global e as alterações afetarão outras instâncias de integração. Modifique com cautela.**\r\n### Verificar Dependências de Rede\r\nVerifique uma por uma as seguintes dependências de rede para ver se são acessíveis. Se os endereços relacionados não forem acessíveis, isso causará problemas de integração.\r\n- Endereço de Autenticação OAuth2: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Endereço da API HTTP da Xiaomi: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Endereço da API SPEC da Xiaomi: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Endereço do Broker MQTT da Xiaomi: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Endereço de Detecção de Rede",
+                    "check_network_deps": "Verificar Dependências de Rede"
+                }
+            },
             "config_confirm": {
                 "title": "Confirmar Configuração",
-                "description": "Olá **{nick_name}**, confirme a informação da configuração mais recente e depois clique em SUBMETER.\r\nA integração será recarregada com a configuração atualizada.\r\n\r\nIdioma da Integração:\t{lang_new}\r\nAlcunha:\t{nick_name_new}\r\nModo de depuração de ação:\t{action_debug}\r\nOcultar entidades não padrão:\t{hide_non_standard_entities}\r\nAlterações aos Dispositivos:\tAdicionar **{devices_add}** dispositivos, Remover **{devices_remove}** dispositivos\r\nAlteração das Regras de Transformação:\tExistem **{trans_rules_count}** regras no total, com **{trans_rules_count_success}** regras atualizadas",
+                "description": "Olá **{nick_name}**, confirme a informação da configuração mais recente e depois clique em SUBMETER.\r\nA integração será recarregada com a configuração atualizada.\r\n\r\nIdioma da Integração:\t{lang_new}\r\nAlcunha:\t{nick_name_new}\r\nModo de depuração de ação:\t{action_debug}\r\nOcultar entidades não padrão:\t{hide_non_standard_entities}\r\nExibir notificações de mudança de status do dispositivo:\t{display_devices_changed_notify}\r\nAlterações aos Dispositivos:\tAdicionar **{devices_add}** dispositivos, Remover **{devices_remove}** dispositivos\r\nAlteração das Regras de Transformação:\tExistem **{trans_rules_count}** regras no total, com **{trans_rules_count_success}** regras atualizadas",
                 "data": {
                     "confirm": "Confirmar a alteração"
                 }
@@ -126,12 +197,21 @@
             "get_token_error": "Não foi possível obter a informação de autorização de login (token OAuth).",
             "get_homeinfo_error": "Não foi possível obter a informação da casa.",
             "get_cert_error": "Não foi possível obter o certificado do gateway central.",
-            "no_devices": "A casa selecionada não possui quaisquer dispositivos. Por favor, selecione uma casa com dispositivos e continue.",
+            "no_devices": "Não há dispositivos na casa selecionada. Por favor, selecione uma casa com dispositivos e continue.",
+            "no_filter_devices": "Os dispositivos filtrados estão vazios. Por favor, selecione critérios de filtro válidos e continue.",
             "no_family_selected": "Nenhuma casa selecionada.",
             "no_central_device": "O [Modo Gateway Central] requer um gateway central Xiaomi disponível na rede local onde o Home Assistant está. Verifique se a casa selecionada cumpre este requisito.",
             "mdns_discovery_error": "Exceção no serviço de descoberta de dispositivos locais.",
             "update_config_error": "Não foi possível atualizar a informação de configuração.",
-            "not_confirm": "As alterações não foram confirmadas. Por favor, confirme a alteração antes de submeter."
+            "not_confirm": "As alterações não foram confirmadas. Por favor, confirme a alteração antes de submeter.",
+            "invalid_network_addr": "Endereço IP ou HTTP inválido detectado, por favor insira um endereço válido.",
+            "invalid_ip_addr": "Endereço IP inacessível detectado, por favor insira um endereço IP válido.",
+            "invalid_http_addr": "Endereço HTTP inacessível detectado, por favor insira um endereço HTTP válido.",
+            "invalid_default_addr": "O endereço de detecção de rede padrão está inacessível, por favor verifique a configuração da rede ou use um endereço de detecção de rede personalizado.",
+            "unreachable_oauth2_host": "Não é possível acessar o endereço de autenticação OAuth2, verifique a configuração da rede.",
+            "unreachable_http_host": "Não é possível acessar o endereço da API HTTP da Xiaomi, verifique a configuração da rede.",
+            "unreachable_spec_host": "Não é possível acessar o endereço da API SPEC da Xiaomi, verifique a configuração da rede.",
+            "unreachable_mqtt_broker": "Não é possível acessar o endereço do Broker MQTT da Xiaomi, verifique a configuração da rede."
         },
         "abort": {
             "network_connect_error": "A configuração falhou. A ligação de rede é anormal. Verifique a configuração da rede do equipamento.",

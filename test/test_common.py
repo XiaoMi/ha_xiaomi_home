@@ -18,7 +18,7 @@ def test_miot_matcher():
             if not matcher.get(topic=f'test/+/{l2}'):
                 matcher[f'test/+/{l2}'] = f'test/+/{l2}'
     # Match
-    match_result: list[(str, dict)] = list(matcher.iter_all_nodes())
+    match_result: list[str] = list(matcher.iter_all_nodes())
     assert len(match_result) == 120
     match_result: list[str] = list(matcher.iter_match(topic='test/1/1'))
     assert len(match_result) == 3

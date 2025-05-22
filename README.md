@@ -26,13 +26,14 @@ For example, update to version v1.0.0
 
 ```bash
 cd config/ha_xiaomi_home
+git fetch
 git checkout v1.0.0
 ./install.sh /config
 ```
 
 ### Method 2: [HACS](https://hacs.xyz/)
 
-One-click installation of the Xiaomi Home integration from HACS:
+One-click installation from HACS:
 
 [![Open your Home Assistant instance and open the Xiaomi Home integration inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=XiaoMi&repository=ha_xiaomi_home&category=integration)
 
@@ -75,6 +76,8 @@ Method: [Settings > Devices & services > Configured > Xiaomi Home](https://my.ho
 ## Security
 
 Xiaomi Home Integration and the affiliated cloud interface is provided by Xiaomi officially. You need to use your Xiaomi account to login to get your device list. Xiaomi Home Integration implements OAuth 2.0 login process, which does not keep your account password in the Home Assistant application. However, due to the limitation of the Home Assistant platform, the user information (including device information, certificates, tokens, etc.) of your Xiaomi account will be saved in the Home Assistant configuration file in clear text after successful login. You need to ensure that your Home Assistant configuration file is properly stored. The exposure of your configuration file may result in others logging in with your identity.
+
+> If you suspect that your OAuth 2.0 token has been leaked, you can revoke the login authorization of your Xiaomi account by the following steps: Xiaomi Home APP -> Profile -> Click your username and get into Xiaomi Account management page -> Basic info: Apps -> Xiaomi Home (Home Assistant Integration) -> Remove
 
 ## FAQ
 
@@ -138,7 +141,7 @@ In MIoT-Spec-V2 protocol, a product is defined as a device. A device contains se
 
 - Property
 
-| format       | access                | value-list   | value-range | Entity in Home Assistant |
+| access       | format                | value-list   | value-range | Entity in Home Assistant |
 | ------------ | --------------------- | ------------ | ----------- | ------------------------ |
 | writable     | string                | -            | -           | Text                     |
 | writable     | bool                  | -            | -           | Switch                   |
@@ -348,7 +351,7 @@ The instance code is the code of the MIoT-Spec-V2 instance, which is in the form
 ```
 service:<siid>                  # service
 service:<siid>:property:<piid>  # property
-service:<siid>:property:<piid>:valuelist:<value> # the value in value-list of a property
+service:<siid>:property:<piid>:valuelist:<index> # The index of a value in the value-list of a property
 service:<siid>:event:<eiid>     # event
 service:<siid>:action:<aiid>    # action
 ```

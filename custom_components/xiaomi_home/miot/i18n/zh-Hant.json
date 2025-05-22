@@ -2,11 +2,47 @@
     "config": {
         "other": {
             "devices": "個設備",
-            "found_central_gateway": "，發現本地中樞網關"
+            "found_central_gateway": "，發現本地中樞網關",
+            "without_room": "未分配房間",
+            "no_display": "不顯示"
         },
         "control_mode": {
             "auto": "自動",
             "cloud": "雲端"
+        },
+        "statistics_logic": {
+            "or": "或邏輯",
+            "and": "與邏輯"
+        },
+        "filter_mode": {
+            "exclude": "排除",
+            "include": "包含"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "yunyi設備",
+            "2": "雲接入設備",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "虛擬設備",
+            "6": "BLE",
+            "7": "本地AP",
+            "8": "WiFi+BLE",
+            "9": "其他",
+            "10": "功能插件",
+            "11": "蜂窩網",
+            "12": "網線",
+            "13": "NB-IoT",
+            "14": "第三方雲接入",
+            "15": "紅外遙控器子設備",
+            "16": "BLE-Mesh",
+            "17": "虛擬設備組",
+            "18": "代理網關子設備",
+            "19": "安全級代理網關子設備",
+            "22": "PLC",
+            "23": "僅網線",
+            "24": "Matter",
+            "25": "WiFi+蜂窩網"
         },
         "room_name_rule": {
             "none": "不同步",
@@ -18,9 +54,34 @@
             "enable": "啟用",
             "disable": "禁用"
         },
+        "binary_mode": {
+            "text": "文本傳感器實體",
+            "bool": "二進制傳感器實體"
+        },
+        "device_state": {
+            "add": "新增",
+            "del": "不可用",
+            "offline": "離線"
+        },
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[提示]** 檢測到多個網卡可能連接同一個網絡，請注意選擇。",
             "net_unavailable": "接口不可用"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "認證成功",
+            "content": "請關閉此頁面，返回帳號認證頁面點擊“下一步”",
+            "button": "關閉"
+        },
+        "fail": {
+            "title": "認證失敗",
+            "content": "{error_msg}，請關閉此頁面，返回帳號認證頁面重新點擊認鏈接進行認證。",
+            "button": "關閉"
+        },
+        "error_msg": {
+            "-10100": "無效的響應參數（“code”或者“state”字段為空）",
+            "-10101": "傳入的“state”字段不一致"
         }
     },
     "miot": {

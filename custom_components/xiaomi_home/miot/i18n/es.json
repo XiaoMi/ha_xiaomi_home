@@ -2,11 +2,47 @@
     "config": {
         "other": {
             "devices": "dispositivos",
-            "found_central_gateway": ", se encontró la puerta de enlace central local"
+            "found_central_gateway": ", se encontró la puerta de enlace central local",
+            "without_room": "Sin habitación asignada",
+            "no_display": "no mostrar"
         },
         "control_mode": {
             "auto": "automático",
             "cloud": "nube"
+        },
+        "statistics_logic": {
+            "or": "lógica OR",
+            "and": "lógica AND"
+        },
+        "filter_mode": {
+            "exclude": "excluir",
+            "include": "incluir"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "dispositivo yunyi",
+            "2": "dispositivo de nube",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "dispositivo virtual",
+            "6": "BLE",
+            "7": "AP local",
+            "8": "WiFi+BLE",
+            "9": "otro",
+            "10": "complemento de función",
+            "11": "red celular",
+            "12": "cable",
+            "13": "NB-IoT",
+            "14": "acceso a la nube de terceros",
+            "15": "dispositivo de control remoto infrarrojo",
+            "16": "BLE-Mesh",
+            "17": "grupo de dispositivos virtuales",
+            "18": "subdispositivo de puerta de enlace",
+            "19": "subdispositivo de puerta de enlace de nivel de seguridad",
+            "22": "PLC",
+            "23": "solo cable",
+            "24": "Matter",
+            "25": "WiFi+red celular"
         },
         "room_name_rule": {
             "none": "no sincronizar",
@@ -18,9 +54,34 @@
             "enable": "habilitar",
             "disable": "deshabilitar"
         },
+        "binary_mode": {
+            "text": "Entidad del sensor de texto",
+            "bool": "Entidad del sensor binario"
+        },
+        "device_state": {
+            "add": "agregar",
+            "del": "no disponible",
+            "offline": "fuera de línea"
+        },
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Aviso]** Se detectaron varias tarjetas de red que pueden estar conectadas a la misma red. Por favor, preste atención a la selección.",
             "net_unavailable": "Interfaz no disponible"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Autenticación exitosa",
+            "content": "Por favor, cierre esta página y regrese a la página de autenticación de la cuenta para hacer clic en 'Siguiente'.",
+            "button": "Cerrar"
+        },
+        "fail": {
+            "title": "Autenticación fallida",
+            "content": "{error_msg}, por favor, cierre esta página y regrese a la página de autenticación de la cuenta para hacer clic en el enlace de autenticación nuevamente.",
+            "button": "Cerrar"
+        },
+        "error_msg": {
+            "-10100": "Parámetros de respuesta inválidos ('code' o 'state' está vacío)",
+            "-10101": "El campo 'state' proporcionado no coincide"
         }
     },
     "miot": {

@@ -93,44 +93,49 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     _prop_target_temp: Optional[MIoTSpecProperty]
     _prop_mode: Optional[MIoTSpecProperty]
 
-    _mode_list: Optional[dict[Any, Any]]
+    _mode_map: Optional[dict[Any, Any]]
 
     def __init__(
         self, miot_device: MIoTDevice, entity_data: MIoTEntityData
     ) -> None:
         """Initialize the Water heater."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._attr_temperature_unit = None
+        self._attr_temperature_unit = None  # type: ignore
         self._attr_supported_features = WaterHeaterEntityFeature(0)
         self._prop_on = None
         self._prop_temp = None
         self._prop_target_temp = None
         self._prop_mode = None
-        self._mode_list = None
+        self._mode_map = None
 
         # properties
         for prop in entity_data.props:
             # on
             if prop.name == 'on':
+                self._attr_supported_features |= WaterHeaterEntityFeature.ON_OFF
                 self._prop_on = prop
             # temperature
             if prop.name == 'temperature':
-                if isinstance(prop.value_range, dict):
-                    if (
-                        self._attr_temperature_unit is None
-                        and prop.external_unit
-                    ):
-                        self._attr_temperature_unit = prop.external_unit
-                    self._prop_temp = prop
-                else:
+                if not prop.value_range:
                     _LOGGER.error(
                         'invalid temperature value_range format, %s',
                         self.entity_id)
+                    continue
+                if prop.external_unit:
+                    self._attr_temperature_unit = prop.external_unit
+                self._attr_min_temp = prop.value_range.min_
+                self._attr_max_temp = prop.value_range.max_
+                self._prop_temp = prop
             # target-temperature
             if prop.name == 'target-temperature':
-                self._attr_min_temp = prop.value_range['min']
-                self._attr_max_temp = prop.value_range['max']
-                self._attr_precision = prop.value_range['step']
+                if not prop.value_range:
+                    _LOGGER.error(
+                        'invalid target-temperature value_range format, %s',
+                        self.entity_id)
+                    continue
+                self._attr_target_temperature_low = prop.value_range.min_
+                self._attr_target_temperature_high = prop.value_range.max_
+                self._attr_precision = prop.value_range.step
                 if self._attr_temperature_unit is None and prop.external_unit:
                     self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
@@ -138,17 +143,12 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                 self._prop_target_temp = prop
             # mode
             if prop.name == 'mode':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'mode value_list is None, %s', self.entity_id)
                     continue
-                self._mode_list = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
-                self._attr_operation_list = list(self._mode_list.values())
+                self._mode_map = prop.value_list.to_map()
+                self._attr_operation_list = list(self._mode_map.values())
                 self._attr_supported_features |= (
                     WaterHeaterEntityFeature.OPERATION_MODE)
                 self._prop_mode = prop
@@ -166,6 +166,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the temperature the water heater should heat water to."""
+        if not self._prop_target_temp:
+            return
         await self.set_property_async(
             prop=self._prop_target_temp, value=kwargs[ATTR_TEMPERATURE])
 
@@ -181,14 +183,11 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
             return
         if self.get_prop_value(prop=self._prop_on) is False:
             await self.set_property_async(
-                prop=self._prop_on, value=True, update=False)
+                prop=self._prop_on, value=True, write_ha_state=False)
         await self.set_property_async(
             prop=self._prop_mode,
-            value=self.__get_mode_value(description=operation_mode))
-
-    async def async_turn_away_mode_on(self) -> None:
-        """Set the water heater to away mode."""
-        await self.hass.async_add_executor_job(self.turn_away_mode_on)
+            value=self.get_map_key(
+                map_=self._mode_map, value=operation_mode))
 
     @property
     def current_temperature(self) -> Optional[float]:
@@ -198,6 +197,8 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     @property
     def target_temperature(self) -> Optional[float]:
         """Return the target temperature."""
+        if not self._prop_target_temp:
+            return None
         return self.get_prop_value(prop=self._prop_target_temp)
 
     @property
@@ -207,20 +208,6 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
             return STATE_OFF
         if not self._prop_mode and self.get_prop_value(prop=self._prop_on):
             return STATE_ON
-        return self.__get_mode_description(
+        return self.get_map_value(
+            map_=self._mode_map,
             key=self.get_prop_value(prop=self._prop_mode))
-
-    def __get_mode_description(self, key: int) -> Optional[str]:
-        """Convert mode value to description."""
-        if self._mode_list is None:
-            return None
-        return self._mode_list.get(key, None)
-
-    def __get_mode_value(self, description: str) -> Optional[int]:
-        """Convert mode description to value."""
-        if self._mode_list is None:
-            return None
-        for key, value in self._mode_list.items():
-            if value == description:
-                return key
-        return None

@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "Grundkonfiguration",
-                "description": "### Anmeldegebiet\r\nWählen Sie das Gebiet, in dem sich Ihr Xiaomi Home-Konto befindet. Sie können es in der Xiaomi Home App unter `Mein (unten im Menü) > Weitere Einstellungen > Über Xiaomi Home` überprüfen.\r\n### Sprache\r\nWählen Sie die Sprache, in der Geräte und Entitätsnamen angezeigt werden. Teile von Sätzen, die nicht übersetzt sind, werden in Englisch angezeigt.\r\n### OAuth2-Authentifizierungs-Umleitungs-URL\r\nDie Umleitungs-URL für die OAuth2-Authentifizierung lautet **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant muss im selben lokalen Netzwerk wie das aktuelle Betriebsterminal (z. B. ein persönlicher Computer) und das Betriebsterminal muss über diese Adresse auf die Home Assistant-Homepage zugreifen können. Andernfalls kann die Anmeldeauthentifizierung fehlschlagen.\r\n### Hinweis\r\n- Für Benutzer mit Hunderten oder mehr Mi Home-Geräten wird das erste Hinzufügen der Integration einige Zeit in Anspruch nehmen. Bitte haben Sie Geduld.\r\n- Wenn Home Assistant in einer Docker-Umgebung läuft, stellen Sie bitte sicher, dass der Docker-Netzwerkmodus auf host eingestellt ist, da sonst die lokale Steuerungsfunktion möglicherweise nicht richtig funktioniert.\r\n- Die lokale Steuerungsfunktion der Integration hat einige Abhängigkeiten. Bitte lesen Sie das README sorgfältig.",
+                "description": "### Anmeldegebiet\r\nWählen Sie das Gebiet, in dem sich Ihr Xiaomi Home-Konto befindet. Sie können es in der Xiaomi Home App unter `Mein (unten im Menü) > Weitere Einstellungen > Über Xiaomi Home` überprüfen.\r\n### Sprache\r\nWählen Sie die Sprache, in der Geräte und Entitätsnamen angezeigt werden. Teile von Sätzen, die nicht übersetzt sind, werden in Englisch angezeigt.\r\n### OAuth2-Authentifizierungs-Umleitungs-URL\r\nDie Umleitungs-URL für die OAuth2-Authentifizierung lautet **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant muss im selben lokalen Netzwerk wie das aktuelle Betriebsterminal (z. B. ein persönlicher Computer) und das Betriebsterminal muss über diese Adresse auf die Home Assistant-Homepage zugreifen können. Andernfalls kann die Anmeldeauthentifizierung fehlschlagen.\r\n### Integrierte Netzwerkkonfiguration\r\nÜberprüfen Sie, ob das lokale Netzwerk normal funktioniert und ob die zugehörigen Netzwerkressourcen zugänglich sind. **Es wird empfohlen, dies beim ersten Hinzufügen auszuwählen.**\r\n### Hinweis\r\n- Für Benutzer mit Hunderten oder mehr Mi Home-Geräten wird das erste Hinzufügen der Integration einige Zeit in Anspruch nehmen. Bitte haben Sie Geduld.\r\n- Wenn Home Assistant in einer Docker-Umgebung läuft, stellen Sie bitte sicher, dass der Docker-Netzwerkmodus auf host eingestellt ist, da sonst die lokale Steuerungsfunktion möglicherweise nicht richtig funktioniert.\r\n- Die lokale Steuerungsfunktion der Integration hat einige Abhängigkeiten. Bitte lesen Sie das README sorgfältig.",
                 "data": {
                     "cloud_server": "Anmeldegebiet",
                     "integration_language": "Sprache",
-                    "oauth_redirect_url": "OAuth2-Authentifizierungs-Umleitungs-URL"
+                    "oauth_redirect_url": "OAuth2-Authentifizierungs-Umleitungs-URL",
+                    "network_detect_config": "Integrierte Netzwerkkonfiguration"
+                }
+            },
+            "network_detect_config": {
+                "title": "Integrierte Netzwerkkonfiguration",
+                "description": "## Gebrauchsanweisung\r\n### Netzwerk-Erkennungsadresse\r\nWird verwendet, um zu überprüfen, ob das Netzwerk normal funktioniert. Wenn nicht festgelegt, wird die Standardadresse des Systems verwendet. Wenn die Standardadressprüfung fehlschlägt, können Sie versuchen, eine benutzerdefinierte Adresse einzugeben.\r\n- Sie können mehrere Erkennungsadressen eingeben, getrennt durch ein Komma, z. B. `8.8.8.8,https://www.bing.com`\r\n- Wenn es sich um eine IP-Adresse handelt, wird die Erkennung durch Ping durchgeführt. Wenn es sich um eine HTTP(s)-Adresse handelt, wird die Erkennung durch einen HTTP GET-Aufruf durchgeführt.\r\n- Wenn Sie die Standarderkennungsadresse des Systems wiederherstellen möchten, geben Sie ein Komma `,` ein und klicken Sie auf 'Weiter'.\r\n- **Diese Konfiguration ist global und Änderungen wirken sich auf andere Integrationsinstanzen aus. Bitte ändern Sie sie mit Vorsicht.**\r\n### Überprüfung der Netzwerkabhängigkeiten\r\nÜberprüfen Sie nacheinander, ob die folgenden Netzwerkabhängigkeiten zugänglich sind. Wenn die entsprechenden Adressen nicht zugänglich sind, führt dies zu Integrationsfehlern.\r\n- OAuth2-Authentifizierungsadresse: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API-Adresse: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API-Adresse: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker-Adresse: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Netzwerkerkennungsadresse",
+                    "check_network_deps": "Überprüfung der Netzwerkabhängigkeiten"
                 }
             },
             "oauth_error": {
@@ -24,13 +33,38 @@
             },
             "homes_select": {
                 "title": "Familie und Geräte auswählen",
-                "description": "## Gebrauchsanweisung\r\n### Steuerungsmodus\r\n- Automatisch: Wenn im lokalen Netzwerk ein verfügbarer Xiaomi-Zentralgateway vorhanden ist, wird Home Assistant bevorzugt Steuerbefehle über den Zentralgateway senden, um eine lokale Steuerung zu ermöglichen. Wenn im lokalen Netzwerk kein Zentralgateway vorhanden ist, wird versucht, Steuerbefehle über das Xiaomi-OT-Protokoll zu senden, um eine lokale Steuerung zu ermöglichen. Nur wenn die oben genannten Bedingungen für die lokale Steuerung nicht erfüllt sind, werden die Steuerbefehle über die Cloud gesendet.\r\n- Cloud: Steuerbefehle werden nur über die Cloud gesendet.\r\n### Familienimport für importierte Geräte\r\nDie Integration fügt Geräte aus den ausgewählten Familien hinzu.\r\n### Raumnamensynchronisationsmodus\r\nWenn Geräte von der Xiaomi Home App zu Home Assistant synchronisiert werden, wird die Bezeichnung des Bereichs, in dem sich die Geräte in Home Assistant befinden, nach folgenden Regeln benannt. Beachten Sie, dass das Synchronisieren von Geräten den von Xiaomi Home App festgelegten Familien- und Raum-Einstellungen nicht ändert.\r\n- Nicht synchronisieren: Das Gerät wird keinem Bereich hinzugefügt.\r\n- Andere Optionen: Der Bereich, in den das Gerät aufgenommen wird, wird nach dem Namen der Familie oder des Raums in der Xiaomi Home App benannt.\r\n### Action-Debug-Modus\r\nFür von MIoT-Spec-V2 definierte Gerätemethoden wird neben der Benachrichtigungs-Entität auch eine Texteingabe-Entität generiert. Damit können Sie bei der Fehlerbehebung Steuerbefehle an das Gerät senden.\r\n### Verstecke Nicht-Standard-Entitäten\r\nVerstecke Entitäten, die von nicht standardmäßigen MIoT-Spec-V2-Instanzen mit einem Namen beginnen, der mit einem \"*\" beginnt.\r\n\r\n&emsp;\r\n### Hallo {nick_name}! Bitte wählen Sie den Steuerungsmodus der Integration sowie die Familie aus, in der sich die hinzuzufügenden Geräte befinden.",
+                "description": "## Gebrauchsanweisung\r\n### Familienimport für importierte Geräte\r\nDie Integration fügt Geräte aus den ausgewählten Familien hinzu.\r\n### Raumnamensynchronisationsmodus\r\nWenn Geräte von der Xiaomi Home App zu Home Assistant synchronisiert werden, wird die Bezeichnung des Bereichs, in dem sich die Geräte in Home Assistant befinden, nach folgenden Regeln benannt. Beachten Sie, dass das Synchronisieren von Geräten den von Xiaomi Home App festgelegten Familien- und Raum-Einstellungen nicht ändert.\r\n- Nicht synchronisieren: Das Gerät wird keinem Bereich hinzugefügt.\r\n- Andere Optionen: Der Bereich, in den das Gerät aufgenommen wird, wird nach dem Namen der Familie oder des Raums in der Xiaomi Home App benannt.\r\n### Erweiterte Einstellungen\r\nZeigen Sie erweiterte Einstellungen an, um die professionellen Konfigurationsoptionen der Integration zu ändern.\r\n\r\n&emsp;\r\n### {nick_name} Hallo! Bitte wählen Sie die Familie aus, zu der Sie das Gerät hinzufügen möchten.",
                 "data": {
-                    "ctrl_mode": "Steuerungsmodus",
                     "home_infos": "Familienimport für importierte Geräte",
                     "area_name_rule": "Raumnamensynchronisationsmodus",
+                    "advanced_options": "Erweiterte Einstellungen"
+                }
+            },
+            "advanced_options": {
+                "title": "Erweiterte Einstellungen",
+                "description": "## Gebrauchsanweisung\r\n### Wenn Sie die Bedeutung der folgenden Optionen nicht genau kennen, belassen Sie sie bitte auf den Standardeinstellungen.\r\n### Geräte filtern\r\nUnterstützt das Filtern von Geräten nach Raumnamen und Gerätetypen sowie das Filtern nach Gerätedimensionen.\r\n\r\n### Steuerungsmodus\r\n- Automatisch: Wenn ein verfügbarer Xiaomi-Hub im lokalen Netzwerk vorhanden ist, priorisiert Home Assistant das Senden von Steuerbefehlen über den Hub, um eine lokale Steuerung zu ermöglichen. Wenn kein Hub vorhanden ist, wird versucht, Steuerbefehle über das Xiaomi-OT-Protokoll zu senden. Nur wenn diese Bedingungen für die lokale Steuerung nicht erfüllt sind, werden die Befehle über die Cloud gesendet.\r\n- Cloud: Steuerbefehle werden ausschließlich über die Cloud gesendet.\r\n### Action-Debug-Modus\r\nFür Methoden, die von MIoT-Spec-V2-Geräten definiert werden, wird neben der Benachrichtigungsentität auch eine Texteingabe-Entität erstellt, mit der Sie während des Debuggens Steuerbefehle an das Gerät senden können.\r\n### Nicht standardmäßige Entitäten ausblenden\r\nBlendet Entitäten aus, die von nicht-standardmäßigen MIoT-Spec-V2-Instanzen generiert werden und deren Name mit „*“ beginnt.\r\n### Binärsensor-Anzeigemodus\r\nZeigt Binärsensoren in Xiaomi Home als Textsensor-Entität oder Binärsensor-Entität an。\r\n### Gerätestatusänderungen anzeigen\r\nDetaillierte Anzeige von Gerätestatusänderungen, es werden nur die ausgewählten Benachrichtigungen angezeigt.",
+                "data": {
+                    "devices_filter": "Geräte filtern",
+                    "ctrl_mode": "Steuerungsmodus",
                     "action_debug": "Action-Debug-Modus",
-                    "hide_non_standard_entities": "Verstecke Nicht-Standard-Entitäten"
+                    "hide_non_standard_entities": "Nicht standardmäßige Entitäten ausblenden",
+                    "display_binary_mode": "Binärsensor-Anzeigemodus",
+                    "display_devices_changed_notify": "Gerätestatusänderungen anzeigen"
+                }
+            },
+            "devices_filter": {
+                "title": "Geräte filtern",
+                "description": "## Gebrauchsanweisung\r\nUnterstützt das Filtern von Geräten nach Raumnamen, Gerätezugriffstyp und Gerätemodell, und unterstützt auch das Filtern nach Gerätegröße. Die Filterlogik ist wie folgt:\r\n- Zuerst wird gemäß der statistischen Logik die Vereinigung oder der Schnittpunkt aller eingeschlossenen Elemente ermittelt, dann der Schnittpunkt oder die Vereinigung der ausgeschlossenen Elemente, und schließlich wird das [eingeschlossene Gesamtergebnis] vom [ausgeschlossenen Gesamtergebnis] subtrahiert, um das [Filterergebnis] zu erhalten.\r\n- Wenn keine eingeschlossenen Elemente ausgewählt sind, bedeutet dies, dass alle eingeschlossen sind.\r\n### Filtermodus\r\n- Ausschließen: Unerwünschte Elemente entfernen.\r\n- Einschließen: Gewünschte Elemente einschließen.\r\n### Statistische Logik\r\n- UND-Logik: Den Schnittpunkt aller Elemente im gleichen Modus nehmen.\r\n- ODER-Logik: Die Vereinigung aller Elemente im gleichen Modus nehmen.\r\n\r\nSie können auch zur Seite [Konfiguration > Geräteliste aktualisieren] des Integrationselements gehen, [Geräte filtern] auswählen, um erneut zu filtern.",
+                "data": {
+                    "room_filter_mode": "Familienraum filtern",
+                    "room_list": "Familienraum",
+                    "type_filter_mode": "Gerätetyp filtern",
+                    "type_list": "Gerätetyp",
+                    "model_filter_mode": "Gerätemodell filtern",
+                    "model_list": "Gerätemodell",
+                    "devices_filter_mode": "Geräte filtern",
+                    "device_list": "Geräteliste",
+                    "statistics_logic": "Statistiklogik"
                 }
             }
         },
@@ -44,10 +78,20 @@
             "mdns_discovery_error": "Lokaler Geräteerkennungsdienst ist nicht verfügbar.",
             "get_cert_error": "Fehler beim Abrufen des Gateway-Zertifikats.",
             "no_family_selected": "Keine Familie ausgewählt.",
-            "no_devices": "In der ausgewählten Familie sind keine Geräte enthalten. Bitte wählen Sie eine Familie mit Geräten aus und fahren Sie fort.",
-            "no_central_device": "Im Modus \"Xiaomi Central Hub Gateway\" muss ein verfügbares Xiaomi Central Hub Gateway im lokalen Netzwerk von Home Assistant vorhanden sein. Stellen Sie sicher, dass die ausgewählte Familie diese Anforderungen erfüllt."
+            "no_devices": "Im ausgewählten Haushalt sind keine Geräte vorhanden. Bitte wählen Sie einen Haushalt mit Geräten aus und fahren Sie fort.",
+            "no_filter_devices": "Gefilterte Geräte sind leer. Bitte wählen Sie gültige Filterkriterien aus und fahren Sie fort.",
+            "no_central_device": "Im Modus \"Xiaomi Central Hub Gateway\" muss ein verfügbares Xiaomi Central Hub Gateway im lokalen Netzwerk von Home Assistant vorhanden sein. Stellen Sie sicher, dass die ausgewählte Familie diese Anforderungen erfüllt.",
+            "invalid_network_addr": "Ungültige IP-Adresse oder HTTP-Adresse vorhanden, bitte geben Sie eine gültige Adresse ein.",
+            "invalid_ip_addr": "Unzugängliche IP-Adresse vorhanden, bitte geben Sie eine gültige IP-Adresse ein.",
+            "invalid_http_addr": "Unzugängliche HTTP-Adresse vorhanden, bitte geben Sie eine gültige HTTP-Adresse ein.",
+            "invalid_default_addr": "Die Standard-Netzwerkerkennungsadresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration oder verwenden Sie eine benutzerdefinierte Netzwerkerkennungsadresse.",
+            "unreachable_oauth2_host": "OAuth2-Authentifizierungsadresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_http_host": "Xiaomi HTTP API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_spec_host": "Xiaomi SPEC API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_mqtt_broker": "Xiaomi MQTT Broker-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration."
         },
         "abort": {
+            "ha_uuid_get_failed": "Fehler beim Abrufen der Home Assistant-UUID.",
             "network_connect_error": "Konfiguration fehlgeschlagen. Netzwerkverbindung fehlgeschlagen. Überprüfen Sie die Netzwerkkonfiguration des Geräts.",
             "already_configured": "Dieser Benutzer hat die Konfiguration bereits abgeschlossen. Gehen Sie zur Integrationsseite und klicken Sie auf die Schaltfläche \"Konfiguration\", um die Konfiguration zu ändern.",
             "invalid_auth_info": "Authentifizierungsinformationen sind abgelaufen. Gehen Sie zur Integrationsseite und klicken Sie auf die Schaltfläche \"Konfiguration\", um die Authentifizierung erneut durchzuführen.",
@@ -69,15 +113,18 @@
             },
             "config_options": {
                 "title": "Konfigurationsoptionen",
-                "description": "### Hallo {nick_name}!\r\n\r\nXiaomi Home-Konto-ID: {uid}\r\nAktuelles Anmeldegebiet: {cloud_server}\r\n\r\nWählen Sie die Optionen aus, die Sie erneut konfigurieren möchten, und klicken Sie dann auf \"Weiter\".",
+                "description": "### Hallo {nick_name}!\r\n\r\nXiaomi Home-Konto-ID: {uid}\r\nAktuelles Anmeldegebiet: {cloud_server}\r\nIntegrationsinstanz-ID: {instance_id}\r\n\r\nWählen Sie die Optionen aus, die Sie erneut konfigurieren möchten, und klicken Sie dann auf \"Weiter\".",
                 "data": {
                     "integration_language": "Integrationsprache",
                     "update_user_info": "Benutzerinformationen aktualisieren",
                     "update_devices": "Geräteliste aktualisieren",
                     "action_debug": "Action-Debug-Modus",
                     "hide_non_standard_entities": "Verstecke Nicht-Standard-Entitäten",
-                    "update_trans_rules": "Entitätskonvertierungsregeln aktualisieren (globale konfiguration)",
-                    "update_lan_ctrl_config": "LAN-Steuerungskonfiguration aktualisieren (globale Konfiguration)"
+                    "display_binary_mode": "Binärsensor-Anzeigemodus",
+                    "display_devices_changed_notify": "Gerätestatusänderungen anzeigen",
+                    "update_trans_rules": "Entitätskonvertierungsregeln aktualisieren",
+                    "update_lan_ctrl_config": "LAN-Steuerungskonfiguration aktualisieren",
+                    "network_detect_config": "Integrierte Netzwerkkonfiguration"
                 }
             },
             "update_user_info": {
@@ -89,10 +136,26 @@
             },
             "homes_select": {
                 "title": "Familie und Geräte neu auswählen",
-                "description": "## Gebrauchsanweisung\r\n### Steuerungsmodus\r\n- Automatisch: Wenn im lokalen Netzwerk ein verfügbarer Xiaomi-Zentralgateway vorhanden ist, wird Home Assistant bevorzugt Steuerbefehle über den Zentralgateway senden, um eine lokale Steuerung zu ermöglichen. Wenn im lokalen Netzwerk kein Zentralgateway vorhanden ist, wird versucht, Steuerbefehle über das Xiaomi-OT-Protokoll zu senden, um eine lokale Steuerung zu ermöglichen. Nur wenn die oben genannten Bedingungen für die lokale Steuerung nicht erfüllt sind, werden die Steuerbefehle über die Cloud gesendet.\r\n- Cloud: Steuerbefehle werden nur über die Cloud gesendet.\r\n### Familienimport für importierte Geräte\r\nDie Integration fügt Geräte aus den ausgewählten Familien hinzu.\r\n&emsp;\r\n### Hallo {nick_name}! Bitte wählen Sie den Steuerungsmodus der Integration sowie die Familie aus, in der sich die hinzuzufügenden Geräte befinden.",
+                "description": "## Gebrauchsanweisung\r\n### Familienimport für importierte Geräte\r\nDie Integration fügt Geräte aus den ausgewählten Familien hinzu.\r\n### Geräte filtern\r\nUnterstützt das Filtern von Geräten nach Raumnamen, Gerätezugriffstyp und Gerätemodell, und unterstützt auch das Filtern nach Gerätegröße. Es wurden **{local_count}** Geräte gefiltert.\r\n### Steuerungsmodus\r\n- Automatisch: Wenn im lokalen Netzwerk ein verfügbarer Xiaomi-Zentralgateway vorhanden ist, wird Home Assistant bevorzugt Steuerbefehle über den Zentralgateway senden, um eine lokale Steuerung zu ermöglichen. Wenn im lokalen Netzwerk kein Zentralgateway vorhanden ist, wird versucht, Steuerbefehle über das Xiaomi-OT-Protokoll zu senden, um eine lokale Steuerung zu ermöglichen. Nur wenn die oben genannten Bedingungen für die lokale Steuerung nicht erfüllt sind, werden die Steuerbefehle über die Cloud gesendet.\r\n- Cloud: Steuerbefehle werden nur über die Cloud gesendet.",
                 "data": {
-                    "ctrl_mode": "Steuerungsmodus",
-                    "home_infos": "Familienimport für importierte Geräte"
+                    "home_infos": "Familienimport für importierte Geräte",
+                    "devices_filter": "Geräte filtern",
+                    "ctrl_mode": "Steuerungsmodus"
+                }
+            },
+            "devices_filter": {
+                "title": "Geräte filtern",
+                "description": "## Gebrauchsanweisung\r\nUnterstützt das Filtern von Geräten nach Raumnamen, Gerätezugriffstyp und Gerätemodell, und unterstützt auch das Filtern nach Gerätegröße. Die Filterlogik ist wie folgt:\r\n- Zuerst wird gemäß der statistischen Logik die Vereinigung oder der Schnittpunkt aller eingeschlossenen Elemente ermittelt, dann der Schnittpunkt oder die Vereinigung der ausgeschlossenen Elemente, und schließlich wird das [eingeschlossene Gesamtergebnis] vom [ausgeschlossenen Gesamtergebnis] subtrahiert, um das [Filterergebnis] zu erhalten.\r\n- Wenn keine eingeschlossenen Elemente ausgewählt sind, bedeutet dies, dass alle eingeschlossen sind.\r\n### Filtermodus\r\n- Ausschließen: Unerwünschte Elemente entfernen.\r\n- Einschließen: Gewünschte Elemente einschließen.\r\n### Statistische Logik\r\n- UND-Logik: Den Schnittpunkt aller Elemente im gleichen Modus nehmen.\r\n- ODER-Logik: Die Vereinigung aller Elemente im gleichen Modus nehmen.\r\n\r\nSie können auch zur Seite [Konfiguration > Geräteliste aktualisieren] des Integrationselements gehen, [Geräte filtern] auswählen, um erneut zu filtern.",
+                "data": {
+                    "room_filter_mode": "Familienraum filtern",
+                    "room_list": "Familienraum",
+                    "type_filter_mode": "Gerätetyp filtern",
+                    "type_list": "Gerätetyp",
+                    "model_filter_mode": "Gerätemodell filtern",
+                    "model_list": "Gerätemodell",
+                    "devices_filter_mode": "Geräte filtern",
+                    "device_list": "Geräteliste",
+                    "statistics_logic": "Statistiklogik"
                 }
             },
             "update_trans_rules": {
@@ -110,9 +173,17 @@
                     "enable_subscribe": "LAN-Abonnement aktivieren"
                 }
             },
+            "network_detect_config": {
+                "title": "Integrierte Netzwerkkonfiguration",
+                "description": "## Gebrauchsanweisung\r\n### Netzwerk-Erkennungsadresse\r\nWird verwendet, um zu überprüfen, ob das Netzwerk normal funktioniert. Wenn nicht festgelegt, wird die Standardadresse des Systems verwendet. Wenn die Standardadressprüfung fehlschlägt, können Sie versuchen, eine benutzerdefinierte Adresse einzugeben.\r\n- Sie können mehrere Erkennungsadressen eingeben, getrennt durch ein Komma, z. B. `8.8.8.8,https://www.bing.com`\r\n- Wenn es sich um eine IP-Adresse handelt, wird die Erkennung durch Ping durchgeführt. Wenn es sich um eine HTTP(s)-Adresse handelt, wird die Erkennung durch einen HTTP GET-Aufruf durchgeführt.\r\n- Wenn Sie die Standarderkennungsadresse des Systems wiederherstellen möchten, geben Sie ein Komma `,` ein und klicken Sie auf 'Weiter'.\r\n- **Diese Konfiguration ist global und Änderungen wirken sich auf andere Integrationsinstanzen aus. Bitte ändern Sie sie mit Vorsicht.**\r\n### Überprüfung der Netzwerkabhängigkeiten\r\nÜberprüfen Sie nacheinander, ob die folgenden Netzwerkabhängigkeiten zugänglich sind. Wenn die entsprechenden Adressen nicht zugänglich sind, führt dies zu Integrationsfehlern.\r\n- OAuth2-Authentifizierungsadresse: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API-Adresse: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API-Adresse: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker-Adresse: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Netzwerkerkennungsadresse",
+                    "check_network_deps": "Überprüfung der Netzwerkabhängigkeiten"
+                }
+            },
             "config_confirm": {
                 "title": "Bestätigen Sie die Konfiguration",
-                "description": "**{nick_name}**, bitte bestätigen Sie die neuesten Konfigurationsinformationen und klicken Sie dann auf \"Senden\". Die Integration wird mit den aktualisierten Konfigurationen erneut geladen.\r\n\r\nIntegrationsprache:\t{lang_new}\r\nBenutzername:\t{nick_name_new}\r\nAction-Debug-Modus:\t{action_debug}\r\nVerstecke Nicht-Standard-Entitäten:\t{hide_non_standard_entities}\r\nGeräteänderungen:\t{devices_add} neue Geräte hinzufügen, {devices_remove} Geräte entfernen\r\nKonvertierungsregeländerungen:\tInsgesamt {trans_rules_count} Regeln, aktualisiert {trans_rules_count_success} Regeln",
+                "description": "**{nick_name}**, bitte bestätigen Sie die neuesten Konfigurationsinformationen und klicken Sie dann auf \"Senden\". Die Integration wird mit den aktualisierten Konfigurationen erneut geladen.\r\n\r\nIntegrationsprache:\t{lang_new}\r\nBenutzername:\t{nick_name_new}\r\nAction-Debug-Modus:\t{action_debug}\r\nVerstecke Nicht-Standard-Entitäten:\t{hide_non_standard_entities}\r\nGerätestatusänderungen anzeigen:\t{display_devices_changed_notify}\r\nGeräteänderungen:\t{devices_add} neue Geräte hinzufügen, {devices_remove} Geräte entfernen\r\nKonvertierungsregeländerungen:\tInsgesamt {trans_rules_count} Regeln, aktualisiert {trans_rules_count_success} Regeln",
                 "data": {
                     "confirm": "Änderungen bestätigen"
                 }
@@ -127,11 +198,20 @@
             "get_homeinfo_error": "Fehler beim Abrufen von Home-Informationen.",
             "get_cert_error": "Fehler beim Abrufen des Zentralzertifikats.",
             "no_family_selected": "Keine Familie ausgewählt.",
-            "no_devices": "In der ausgewählten Familie sind keine Geräte vorhanden. Bitte wählen Sie eine Familie mit Geräten und fahren Sie dann fort.",
+            "no_devices": "Im ausgewählten Haushalt sind keine Geräte vorhanden. Bitte wählen Sie einen Haushalt mit Geräten aus und fahren Sie fort.",
+            "no_filter_devices": "Gefilterte Geräte sind leer. Bitte wählen Sie gültige Filterkriterien aus und fahren Sie fort.",
             "no_central_device": "Der Modus \"Zentral Gateway\" erfordert ein verfügbares Xiaomi-Zentral-Gateway im lokalen Netzwerk, in dem Home Assistant installiert ist. Überprüfen Sie, ob die ausgewählte Familie diese Anforderung erfüllt.",
             "mdns_discovery_error": "Lokaler Geräteerkennungsdienstfehler.",
             "update_config_error": "Fehler beim Aktualisieren der Konfigurationsinformationen.",
-            "not_confirm": "Änderungen wurden nicht bestätigt. Bitte bestätigen Sie die Auswahl, bevor Sie sie einreichen."
+            "not_confirm": "Änderungen wurden nicht bestätigt. Bitte bestätigen Sie die Auswahl, bevor Sie sie einreichen.",
+            "invalid_network_addr": "Ungültige IP-Adresse oder HTTP-Adresse vorhanden, bitte geben Sie eine gültige Adresse ein.",
+            "invalid_ip_addr": "Unzugängliche IP-Adresse vorhanden, bitte geben Sie eine gültige IP-Adresse ein.",
+            "invalid_http_addr": "Unzugängliche HTTP-Adresse vorhanden, bitte geben Sie eine gültige HTTP-Adresse ein.",
+            "invalid_default_addr": "Die Standard-Netzwerkerkennungsadresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration oder verwenden Sie eine benutzerdefinierte Netzwerkerkennungsadresse.",
+            "unreachable_oauth2_host": "OAuth2-Authentifizierungsadresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_http_host": "Xiaomi HTTP API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_spec_host": "Xiaomi SPEC API-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration.",
+            "unreachable_mqtt_broker": "Xiaomi MQTT Broker-Adresse ist nicht erreichbar, bitte überprüfen Sie die Netzwerkkonfiguration."
         },
         "abort": {
             "network_connect_error": "Konfiguration fehlgeschlagen. Netzwerkverbindungsfehler. Überprüfen Sie die Netzwerkkonfiguration des Geräts.",

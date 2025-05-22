@@ -50,7 +50,7 @@ import base64
 import binascii
 import copy
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable, Coroutine, Optional
 import logging
 
 from zeroconf import (
@@ -98,8 +98,8 @@ class MipsServiceData:
     def __init__(self, service_info: AsyncServiceInfo) -> None:
         if service_info is None:
             raise MipsServiceError('invalid params')
-        properties = service_info.decoded_properties
-        if properties is None:
+        properties: dict = service_info.decoded_properties
+        if not properties:
             raise MipsServiceError('invalid service properties')
         self.profile = properties.get('profile', None)
         if self.profile is None:
@@ -111,11 +111,13 @@ class MipsServiceData:
         if not self.addresses:
             raise MipsServiceError('invalid addresses')
         self.addresses.sort()
+        if not service_info.port:
+            raise MipsServiceError('invalid port')
         self.port = service_info.port
         self.type = service_info.type
-        self.server = service_info.server
+        self.server = service_info.server or ''
         # Parse profile
-        self.did = str(int.from_bytes(self.profile_bin[1:9]))
+        self.did = str(int.from_bytes(self.profile_bin[1:9], byteorder='big'))
         self.group_id = binascii.hexlify(
             self.profile_bin[9:17][::-1]).decode('utf-8')
         self.role = int(self.profile_bin[20] >> 4)
@@ -150,8 +152,8 @@ class MipsService:
     _aio_browser: AsyncServiceBrowser
     _services: dict[str, dict]
     # key = (key, group_id)
-    _sub_list: dict[(str, str), Callable[[
-        str, MipsServiceState, dict], asyncio.Future]]
+    _sub_list: dict[tuple[str, str], Callable[[
+        str, MipsServiceState, dict], Coroutine]]
 
     def __init__(
         self, aiozc: AsyncZeroconf,
@@ -159,7 +161,6 @@ class MipsService:
     ) -> None:
         self._aiozc = aiozc
         self._main_loop = loop or asyncio.get_running_loop()
-        self._aio_browser = None
 
         self._services = {}
         self._sub_list = {}
@@ -207,7 +208,7 @@ class MipsService:
 
     def sub_service_change(
             self, key: str, group_id: str,
-            handler: Callable[[str, MipsServiceState, dict], asyncio.Future]
+            handler: Callable[[str, MipsServiceState, dict], Coroutine]
     ) -> None:
         if key is None or group_id is None or handler is None:
             raise MipsServiceError('invalid params')
@@ -232,7 +233,7 @@ class MipsService:
             for item in list(self._services.values()):
                 if item['name'] != name:
                     continue
-                service_data = self._services.pop(item['group_id'], None)
+                service_data = self._services.pop(item['group_id'], {})
                 self.__call_service_change(
                     state=MipsServiceState.REMOVED, data=service_data)
                 return
@@ -275,10 +276,10 @@ class MipsService:
             _LOGGER.error('invalid mips service, %s, %s', error, info)
 
     def __call_service_change(
-        self, state: MipsServiceState, data: dict = None
+        self, state: MipsServiceState, data: dict
     ) -> None:
         _LOGGER.info('call service change, %s, %s', state, data)
         for keys in list(self._sub_list.keys()):
-            if keys[1] in [data['group_id'], '*']:
+            if keys[1] in [data.get('group_id', None), '*']:
                 self._main_loop.create_task(
                     self._sub_list[keys](data['group_id'], state, data))

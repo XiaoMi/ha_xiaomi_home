@@ -68,9 +68,10 @@ async def async_setup_entry(
 
     new_entities = []
     for miot_device in device_list:
-        for prop in miot_device.prop_list.get('binary_sensor', []):
-            new_entities.append(BinarySensor(
-                miot_device=miot_device, spec=prop))
+        if miot_device.miot_client.display_binary_bool:
+            for prop in miot_device.prop_list.get('binary_sensor', []):
+                new_entities.append(BinarySensor(
+                    miot_device=miot_device, spec=prop))
 
     if new_entities:
         async_add_entities(new_entities)
@@ -88,4 +89,8 @@ class BinarySensor(MIoTPropertyEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """On/Off state. True if the binary sensor is on, False otherwise."""
+        if self.spec.name == 'contact-state':
+            return self._value is False
+        elif self.spec.name == 'occupancy-status':
+            return bool(self._value)
         return self._value is True

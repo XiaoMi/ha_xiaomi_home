@@ -11,11 +11,20 @@
             },
             "auth_config": {
                 "title": "Basisconfiguratie",
-                "description": "### Inlogregio\r\nSelecteer de regio van uw Xiaomi-account. U kunt deze vinden in de Xiaomi Home APP > Profiel (onderin het menu) > Extra instellingen > Over Xiaomi Home.\r\n### Taal\r\nKies de taal voor de apparaats- en entiteitsnamen. Sommige zinnen zonder vertaling worden in het Engels weergegeven.\r\n### OAuth2 Omleidings-URL\r\nHet OAuth2 authenticatie omleidingsadres is **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant moet zich in hetzelfde lokale netwerk bevinden als de huidige werkterminal (bijv. de persoonlijke computer) en de werkterminal moet toegang hebben tot de startpagina van Home Assistant via dit adres. Anders kan de inlogauthenticatie mislukken.\r\n### Opmerking\r\n- Voor gebruikers met honderden of meer Mi Home-apparaten kan het aanvankelijke toevoegen van de integratie enige tijd duren. Wees geduldig.\r\n- Als Home Assistant draait in een Docker-omgeving, zorg er dan voor dat de Docker-netwerkmodus is ingesteld op host, anders werkt de lokale controlefunctionaliteit mogelijk niet correct.\r\n- De lokale controlefunctionaliteit van de integratie heeft enkele afhankelijkheden. Lees het README zorgvuldig.",
+                "description": "### Inlogregio\r\nSelecteer de regio van uw Xiaomi-account. U kunt deze vinden in de Xiaomi Home APP > Profiel (onderin het menu) > Extra instellingen > Over Xiaomi Home.\r\n### Taal\r\nKies de taal voor de apparaats- en entiteitsnamen. Sommige zinnen zonder vertaling worden in het Engels weergegeven.\r\n### OAuth2 Omleidings-URL\r\nHet OAuth2 authenticatie omleidingsadres is **[http://homeassistant.local:8123](http://homeassistant.local:8123)**. Home Assistant moet zich in hetzelfde lokale netwerk bevinden als de huidige werkterminal (bijv. de persoonlijke computer) en de werkterminal moet toegang hebben tot de startpagina van Home Assistant via dit adres. Anders kan de inlogauthenticatie mislukken.\r\n### Geïntegreerde Netwerkconfiguratie\r\nControleer of het lokale netwerk correct functioneert en of de gerelateerde netwerkbronnen toegankelijk zijn. **Het wordt aanbevolen om dit te selecteren bij het eerste toevoegen.**\r\n### Opmerking\r\n- Voor gebruikers met honderden of meer Mi Home-apparaten kan het aanvankelijke toevoegen van de integratie enige tijd duren. Wees geduldig.\r\n- Als Home Assistant draait in een Docker-omgeving, zorg er dan voor dat de Docker-netwerkmodus is ingesteld op host, anders werkt de lokale controlefunctionaliteit mogelijk niet correct.\r\n- De lokale controlefunctionaliteit van de integratie heeft enkele afhankelijkheden. Lees het README zorgvuldig.",
                 "data": {
                     "cloud_server": "Inlogregio",
                     "integration_language": "Taal",
-                    "oauth_redirect_url": "OAuth2 Omleidings-URL"
+                    "oauth_redirect_url": "OAuth2 Omleidings-URL",
+                    "network_detect_config": "Geïntegreerde Netwerkconfiguratie"
+                }
+            },
+            "network_detect_config": {
+                "title": "Geïntegreerde Netwerkconfiguratie",
+                "description": "## Gebruiksinstructie\r\n### Netwerkdetectieadres\r\nWordt gebruikt om te controleren of het netwerk correct functioneert. Als dit niet is ingesteld, wordt het standaardadres van het systeem gebruikt. Als de standaardadrescontrole mislukt, kunt u proberen een aangepast adres in te voeren.\r\n- U kunt meerdere detectieadressen invoeren, gescheiden door komma's, zoals `8.8.8.8,https://www.bing.com`\r\n- Als het een IP-adres is, wordt de detectie uitgevoerd via ping. Als het een HTTP(s)-adres is, wordt de detectie uitgevoerd via een HTTP GET-verzoek.\r\n- Als u het standaarddetectieadres van het systeem wilt herstellen, voert u een komma `,` in en klikt u op 'Volgende'.\r\n- **Deze configuratie is globaal en wijzigingen zullen andere integratie-instanties beïnvloeden. Wijzig met voorzichtigheid.**\r\n### Controleer Netwerkafhankelijkheden\r\nControleer een voor een de volgende netwerkafhankelijkheden om te zien of ze toegankelijk zijn. Als de gerelateerde adressen niet toegankelijk zijn, zal dit integratieproblemen veroorzaken.\r\n- OAuth2-authenticatieadres: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API-adres: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API-adres: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker-adres: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Netwerkdetectieadres",
+                    "check_network_deps": "Controleer Netwerkafhankelijkheden"
                 }
             },
             "oauth_error": {
@@ -23,14 +32,39 @@
                 "description": "Klik OP VOLGENDE om het opnieuw te proberen."
             },
             "homes_select": {
-                "title": "Selecteer Huis en Apparaten",
-                "description": "## Gebruiksinstructies\r\n### Controlemodus\r\n- Auto: Wanneer er een beschikbare Xiaomi centrale hubgateway in het lokale netwerk is, geeft Home Assistant de voorkeur aan het verzenden van apparaatbedieningscommando's via de centrale hubgateway om lokale controle te bereiken. Als er geen centrale hubgateway in het lokale netwerk is, zal het proberen bedieningscommando's te verzenden via de Xiaomi LAN-controlefunctie. Alleen wanneer de bovenstaande lokale controlevoorwaarden niet zijn vervuld, worden de apparaatbedieningscommando's via de cloud verzonden.\r\n- Cloud: Alle bedieningscommando's worden via de cloud verzonden.\r\n### Apparaten importeren vanuit huis\r\nDe integratie voegt apparaten toe van de geselecteerde huizen.\n### Ruimtenaamsynchronisatiemodus\nBij het importeren van apparaten vanuit de Xiaomi Home APP naar Home Assistant is de naamgevingsconventie van het gebied waarin het apparaat wordt toegevoegd als volgt. Opmerking: het synchronisatieproces van het apparaat verandert de huis- of ruimte-instellingen in de Xiaomi Home APP niet.\r\n- Niet synchroniseren: Het apparaat wordt aan geen enkel gebied toegevoegd.\r\n- Andere opties: Het apparaat wordt toegevoegd aan een gebied dat is genoemd naar de huis- en/of ruimtenamen die al bestaan in de Xiaomi Home APP.\r\n### Debugmodus voor actie\r\nVoor de actie gedefinieerd in MIoT-Spec-V2 van het apparaat, wordt er een Tekstentiteit samen met een Notificatie-entiteit aangemaakt, waarin u bedieningscommando's naar het apparaat kunt sturen voor debugging.\r\n### Verberg niet-standaard gemaakte entiteiten\r\nVerberg de entiteiten die zijn gegenereerd vanuit niet-standaard MIoT-Spec-V2-instanties, waarvan de namen beginnen met \"*\".\r\n\r\n&emsp;\r\n### Hallo {nick_name}, selecteer alstublieft de integratie controlemethodiek en het huis waar het apparaat dat u wilt importeren zich bevindt.",
+                "title": "Selecteer Familie en Apparaat",
+                "description": "## Inleiding\r\n### Importeer de familie van het apparaat\r\nDe integratie voegt apparaten toe uit de geselecteerde familie.\r\n### Kamernaam Synchronisatiemodus\r\nBij het synchroniseren van apparaten van de Mi Home-app naar Home Assistant, wordt de naam van het gebied in Home Assistant volgens de volgende regels genoemd. Houd er rekening mee dat het synchronisatieproces de instellingen van familie en kamer in de Mi Home-app niet zal wijzigen.\r\n- Niet synchroniseren: Het apparaat wordt niet aan een gebied toegevoegd.\r\n- Andere opties: Het gebied waaraan het apparaat wordt toegevoegd, wordt genoemd naar de familie- of kamernaam in de Mi Home-app.\r\n### Geavanceerde instellingen\r\nToon geavanceerde instellingen om de professionele configuratie-opties van de integratie te wijzigen.\r\n\r\n&emsp;\r\n### {nick_name} Hallo! Selecteer de familie waaraan u het apparaat wilt toevoegen.",
                 "data": {
-                    "ctrl_mode": "Controlemodus",
-                    "home_infos": "Importeer apparaten uit huis",
-                    "area_name_rule": "Ruimtenaamsynchronisatiemodus",
-                    "action_debug": "Debugmodus voor actie",
-                    "hide_non_standard_entities": "Verberg niet-standaard gemaakte entiteiten"
+                    "home_infos": "Importeer de familie van het apparaat",
+                    "area_name_rule": "Kamernaam Synchronisatiemodus",
+                    "advanced_options": "Geavanceerde instellingen"
+                }
+            },
+            "advanced_options": {
+                "title": "Geavanceerde Instellingen",
+                "description": "## Inleiding\r\n### Tenzij u zeer goed op de hoogte bent van de betekenis van de volgende opties, houdt u de standaardinstellingen.\r\n### Apparaten filteren\r\nOndersteunt het filteren van apparaten op basis van kamer- en apparaattypen, en ondersteunt ook apparaatdimensiefiltering.\r\n### Besturingsmodus\r\n- Automatisch: Wanneer er een beschikbare Xiaomi centrale hubgateway in het lokale netwerk is, zal Home Assistant eerst apparaatbesturingsinstructies via de centrale hubgateway verzenden om lokale controlefunctionaliteit te bereiken. Als er geen centrale hub in het lokale netwerk is, zal het proberen om besturingsinstructies via het Xiaomi OT-protocol te verzenden om lokale controlefunctionaliteit te bereiken. Alleen als de bovenstaande lokale controlevoorwaarden niet worden vervuld, worden apparaatbesturingsinstructies via de cloud verzonden.\r\n- Cloud: Besturingsinstructies worden alleen via de cloud verzonden.\r\n### Actie-debugmodus\r\nVoor methoden die zijn gedefinieerd in de MIoT-Spec-V2 van het apparaat, wordt naast het genereren van een meldingsentiteit ook een tekstinvoerveldentiteit gegenereerd. U kunt dit gebruiken om besturingsinstructies naar het apparaat te sturen tijdens het debuggen.\r\n### Niet-standaard entiteiten verbergen\r\nVerberg entiteiten die zijn gegenereerd door niet-standaard MIoT-Spec-V2-instanties die beginnen met \"*\".\r\n### Binaire sensorweergavemodus\r\nToont binaire sensoren in Xiaomi Home als tekstsensor-entiteit of binairesensor-entiteit。\r\n### Apparaatstatuswijzigingen weergeven\r\nGedetailleerde apparaatstatuswijzigingen weergeven, alleen de geselecteerde meldingen weergeven.",
+                "data": {
+                    "devices_filter": "Apparaten filteren",
+                    "ctrl_mode": "Besturingsmodus",
+                    "action_debug": "Actie-debugmodus",
+                    "hide_non_standard_entities": "Niet-standaard entiteiten verbergen",
+                    "display_binary_mode": "Binaire sensorweergavemodus",
+                    "display_devices_changed_notify": "Apparaatstatuswijzigingen weergeven"
+                }
+            },
+            "devices_filter": {
+                "title": "Apparaten filteren",
+                "description": "## Gebruiksinstructies\r\nOndersteunt het filteren van apparaten op kamernaam, apparaattoegangstype en apparaattype, en ondersteunt ook het filteren op apparaatdimensie. De filterlogica is als volgt:\r\n- Eerst, volgens de statistische logica, de vereniging of doorsnede van alle opgenomen items verkrijgen, vervolgens de doorsnede of vereniging van de uitgesloten items verkrijgen, en ten slotte het [opgenomen samenvattingsresultaat] aftrekken van het [uitgesloten samenvattingsresultaat] om het [filterresultaat] te verkrijgen.\r\n- Als er geen opgenomen items zijn geselecteerd, betekent dit dat alles is opgenomen.\r\n### Filtermodus\r\n- Uitsluiten: Ongewenste items verwijderen.\r\n- Opnemen: Gewenste items opnemen.\r\n### Statistische Logica\r\n- EN-logica: Neem de doorsnede van alle items in dezelfde modus.\r\n- OF-logica: Neem de vereniging van alle items in dezelfde modus.\r\n\r\nU kunt ook naar de pagina [Configuratie > Apparaatlijst bijwerken] van het integratie-item gaan, [Apparaten filteren] aanvinken om opnieuw te filteren.",
+                "data": {
+                    "room_filter_mode": "Kamerfiltermodus",
+                    "room_list": "Kamers",
+                    "type_filter_mode": "Apparaattypen filteren",
+                    "type_list": "Apparaattypen",
+                    "model_filter_mode": "Apparaatmodel filteren",
+                    "model_list": "Apparaatmodellen",
+                    "devices_filter_mode": "Apparaten filteren",
+                    "device_list": "Apparaatlijst",
+                    "statistics_logic": "Statistische logica"
                 }
             }
         },
@@ -44,10 +78,20 @@
             "mdns_discovery_error": "Lokaal apparaatsontdekkingsservice-exceptie.",
             "get_cert_error": "Mislukt bij het ophalen van het certificaat van de centrale hubgateway.",
             "no_family_selected": "Geen huis geselecteerd.",
-            "no_devices": "Het geselecteerde huis heeft geen apparaten. Kies a.u.b. een huis met apparaten en ga verder.",
-            "no_central_device": "[Centrale Hub Gateway Modus] vereist een beschikbare Xiaomi centrale hubgateway in het lokale netwerk waar Home Assistant zich bevindt. Controleer of het geselecteerde huis aan deze vereiste voldoet."
+            "no_devices": "Er zijn geen apparaten in het geselecteerde huis. Selecteer een huis met apparaten en ga verder.",
+            "no_filter_devices": "Gefilterde apparaten zijn leeg. Selecteer geldige filtercriteria en ga verder.",
+            "no_central_device": "[Centrale Hub Gateway Modus] vereist een beschikbare Xiaomi centrale hubgateway in het lokale netwerk waar Home Assistant zich bevindt. Controleer of het geselecteerde huis aan deze vereiste voldoet.",
+            "invalid_network_addr": "Ongeldig IP-adres of HTTP-adres gedetecteerd, voer een geldig adres in.",
+            "invalid_ip_addr": "Onbereikbaar IP-adres gedetecteerd, voer een geldig IP-adres in.",
+            "invalid_http_addr": "Onbereikbaar HTTP-adres gedetecteerd, voer een geldig HTTP-adres in.",
+            "invalid_default_addr": "Standaard netwerkdetectieadres is onbereikbaar, controleer de netwerkconfiguratie of gebruik een aangepast netwerkdetectieadres.",
+            "unreachable_oauth2_host": "Kan OAuth2-authenticatieadres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_http_host": "Kan Xiaomi HTTP API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_spec_host": "Kan Xiaomi SPEC API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_mqtt_broker": "Kan Xiaomi MQTT Broker-adres niet bereiken, controleer de netwerkconfiguratie."
         },
         "abort": {
+            "ha_uuid_get_failed": "Mislukt bij het ophalen van Home Assistant UUID.",
             "network_connect_error": "Configuratie mislukt. De netwerkverbinding is abnormaal. Controleer de netwerkinstellingen van de apparatuur.",
             "already_configured": "Configuratie voor deze gebruiker is al voltooid. Ga naar de integratiepagina en klik op de CONFIGUREER-knop om wijzigingen aan te brengen.",
             "invalid_auth_info": "Authenticatie-informatie is verlopen. Ga naar de integratiepagina en klik op de CONFIGUREER-knop om opnieuw te authentiseren.",
@@ -69,15 +113,18 @@
             },
             "config_options": {
                 "title": "Configuratie-opties",
-                "description": "### Hallo, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nHuidige inlogregio: {cloud_server}\r\n\r\nKies de opties die u wilt configureren en klik vervolgens op VOLGENDE.",
+                "description": "### Hallo, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nHuidige inlogregio: {cloud_server}\r\nIntegratie-instantie-ID: {instance_id}\r\n\r\nKies de opties die u wilt configureren en klik vervolgens op VOLGENDE.",
                 "data": {
                     "integration_language": "Integratietaal",
                     "update_user_info": "Werk gebruikersinformatie bij",
                     "update_devices": "Werk apparatenlijst bij",
                     "action_debug": "Debugmodus voor actie",
                     "hide_non_standard_entities": "Verberg niet-standaard gemaakte entiteiten",
+                    "display_binary_mode": "Binaire sensorweergavemodus",
+                    "display_devices_changed_notify": "Apparaatstatuswijzigingen weergeven",
                     "update_trans_rules": "Werk entiteitsconversieregels bij",
-                    "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij"
+                    "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij",
+                    "network_detect_config": "Geïntegreerde Netwerkconfiguratie"
                 }
             },
             "update_user_info": {
@@ -89,10 +136,26 @@
             },
             "homes_select": {
                 "title": "Huis en Apparaten opnieuw selecteren",
-                "description": "## Gebruiksinstructies\r\n### Controlemodus\r\n- Auto: Wanneer er een beschikbare Xiaomi centrale hubgateway in het lokale netwerk is, geeft Home Assistant de voorkeur aan het verzenden van apparaatbedieningscommando's via de centrale hubgateway om lokale controle te bereiken. Als er geen centrale hubgateway in het lokale netwerk is, zal het proberen bedieningscommando's te verzenden via de Xiaomi LAN-controlefunctie. Alleen wanneer de bovenstaande lokale controlevoorwaarden niet zijn vervuld, worden de apparaatbedieningscommando's via de cloud verzonden.\r\n- Cloud: Alle bedieningscommando's worden via de cloud verzonden.\r\n### Apparaten importeren vanuit huis\r\nDe integratie voegt apparaten toe van de geselecteerde huizen.\r\n&emsp;\r\n### Hallo {nick_name}, selecteer alstublieft de integratie controlemethodiek en het huis waar het apparaat dat u wilt importeren zich bevindt.",
+                "description": "## Gebruiksinstructies\r\n### Importeer apparaten uit huis\r\nDe integratie voegt apparaten toe van de geselecteerde huizen.\r\n### Apparaten filteren\r\nOndersteunt het filteren van apparaten op kamernaam, apparaattoegangstype en apparaattype, en ondersteunt ook het filteren op apparaatdimensie. **{local_count}** apparaten zijn gefilterd.\r\n### Controlemodus\r\n- Auto: Wanneer er een beschikbare Xiaomi centrale hubgateway in het lokale netwerk is, geeft Home Assistant de voorkeur aan het verzenden van apparaatbedieningscommando's via de centrale hubgateway om lokale controle te bereiken. Als er geen centrale hubgateway in het lokale netwerk is, zal het proberen bedieningscommando's te verzenden via de Xiaomi LAN-controlefunctie. Alleen wanneer de bovenstaande lokale controlevoorwaarden niet zijn vervuld, worden de apparaatbedieningscommando's via de cloud verzonden.\r\n- Cloud: Alle bedieningscommando's worden via de cloud verzonden.",
                 "data": {
-                    "ctrl_mode": "Controlemodus",
-                    "home_infos": "Importeer apparaten uit huis"
+                    "home_infos": "Importeer apparaten uit huis",
+                    "devices_filter": "Apparaten filteren",
+                    "ctrl_mode": "Controlemodus"
+                }
+            },
+            "devices_filter": {
+                "title": "Apparaten filteren",
+                "description": "## Gebruiksinstructies\r\nOndersteunt het filteren van apparaten op kamernaam, apparaattoegangstype en apparaattype, en ondersteunt ook het filteren op apparaatdimensie. De filterlogica is als volgt:\r\n- Eerst, volgens de statistische logica, de vereniging of doorsnede van alle opgenomen items verkrijgen, vervolgens de doorsnede of vereniging van de uitgesloten items verkrijgen, en ten slotte het [opgenomen samenvattingsresultaat] aftrekken van het [uitgesloten samenvattingsresultaat] om het [filterresultaat] te verkrijgen.\r\n- Als er geen opgenomen items zijn geselecteerd, betekent dit dat alles is opgenomen.\r\n### Filtermodus\r\n- Uitsluiten: Ongewenste items verwijderen.\r\n- Opnemen: Gewenste items opnemen.\r\n### Statistische Logica\r\n- EN-logica: Neem de doorsnede van alle items in dezelfde modus.\r\n- OF-logica: Neem de vereniging van alle items in dezelfde modus.\r\n\r\nU kunt ook naar de pagina [Configuratie > Apparaatlijst bijwerken] van het integratie-item gaan, [Apparaten filteren] aanvinken om opnieuw te filteren.",
+                "data": {
+                    "room_filter_mode": "Kamerfiltermodus",
+                    "room_list": "Kamers",
+                    "type_filter_mode": "Apparaattypen filteren",
+                    "type_list": "Apparaattypen",
+                    "model_filter_mode": "Apparaatmodel filteren",
+                    "model_list": "Apparaatmodellen",
+                    "devices_filter_mode": "Apparaten filteren",
+                    "device_list": "Apparaatlijst",
+                    "statistics_logic": "Statistische logica"
                 }
             },
             "update_trans_rules": {
@@ -110,9 +173,17 @@
                     "enable_subscribe": "Zet LAN-abonnement aan"
                 }
             },
+            "network_detect_config": {
+                "title": "Geïntegreerde Netwerkconfiguratie",
+                "description": "## Gebruiksinstructie\r\n### Netwerkdetectieadres\r\nWordt gebruikt om te controleren of het netwerk correct functioneert. Als dit niet is ingesteld, wordt het standaardadres van het systeem gebruikt. Als de standaardadrescontrole mislukt, kunt u proberen een aangepast adres in te voeren.\r\n- U kunt meerdere detectieadressen invoeren, gescheiden door komma's, zoals `8.8.8.8,https://www.bing.com`\r\n- Als het een IP-adres is, wordt de detectie uitgevoerd via ping. Als het een HTTP(s)-adres is, wordt de detectie uitgevoerd via een HTTP GET-verzoek.\r\n- Als u het standaarddetectieadres van het systeem wilt herstellen, voert u een komma `,` in en klikt u op 'Volgende'.\r\n- **Deze configuratie is globaal en wijzigingen zullen andere integratie-instanties beïnvloeden. Wijzig met voorzichtigheid.**\r\n### Controleer Netwerkafhankelijkheden\r\nControleer een voor een de volgende netwerkafhankelijkheden om te zien of ze toegankelijk zijn. Als de gerelateerde adressen niet toegankelijk zijn, zal dit integratieproblemen veroorzaken.\r\n- OAuth2-authenticatieadres: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API-adres: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API-adres: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker-adres: `mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`.",
+                "data": {
+                    "network_detect_addr": "Netwerkdetectieadres",
+                    "check_network_deps": "Controleer Netwerkafhankelijkheden"
+                }
+            },
             "config_confirm": {
                 "title": "Bevestig Configuratie",
-                "description": "Hallo **{nick_name}**, bevestig alstublieft de nieuwste configuratie-informatie en klik vervolgens op INDENKEN.\r\nDe integratie zal opnieuw laden met de bijgewerkte configuratie.\r\n\r\nIntegratietaal: \t{lang_new}\r\nBijnaam: \t{nick_name_new}\r\nDebugmodus voor actie: \t{action_debug}\r\nVerberg niet-standaard gemaakte entiteiten: \t{hide_non_standard_entities}\r\nWijzigingen in apparaten: \tVoeg **{devices_add}** apparaten toe, Verwijder **{devices_remove}** apparaten\r\nWijzigingen in transformateregels: \tEr zijn in totaal **{trans_rules_count}** regels, en **{trans_rules_count_success}** regels zijn bijgewerkt",
+                "description": "Hallo **{nick_name}**, bevestig alstublieft de nieuwste configuratie-informatie en klik vervolgens op INDENKEN.\r\nDe integratie zal opnieuw laden met de bijgewerkte configuratie.\r\n\r\nIntegratietaal: \t{lang_new}\r\nBijnaam: \t{nick_name_new}\r\nDebugmodus voor actie: \t{action_debug}\r\nVerberg niet-standaard gemaakte entiteiten: \t{hide_non_standard_entities}\r\nApparaatstatuswijzigingen weergeven:\t{display_devices_changed_notify}\r\nWijzigingen in apparaten: \tVoeg **{devices_add}** apparaten toe, Verwijder **{devices_remove}** apparaten\r\nWijzigingen in transformateregels: \tEr zijn in totaal **{trans_rules_count}** regels, en **{trans_rules_count_success}** regels zijn bijgewerkt",
                 "data": {
                     "confirm": "Bevestig de wijziging"
                 }
@@ -126,12 +197,21 @@
             "get_token_error": "Mislukt bij het ophalen van inlogautorisatie-informatie (OAuth-token).",
             "get_homeinfo_error": "Mislukt bij het ophalen van huisinformatie.",
             "get_cert_error": "Mislukt bij het ophalen van het certificaat van de centrale hubgateway.",
-            "no_devices": "Het geselecteerde huis heeft geen apparaten. Kies a.u.b. een huis met apparaten en ga verder.",
+            "no_devices": "Er zijn geen apparaten in het geselecteerde huis. Selecteer een huis met apparaten en ga verder.",
+            "no_filter_devices": "Gefilterde apparaten zijn leeg. Selecteer geldige filtercriteria en ga verder.",
             "no_family_selected": "Geen huis geselecteerd.",
             "no_central_device": "[Centrale Hub Gateway Modus] vereist een beschikbare Xiaomi centrale hubgateway in het lokale netwerk waar Home Assistant zich bevindt. Controleer of het geselecteerde huis aan deze vereiste voldoet.",
             "mdns_discovery_error": "Lokaal apparaatsontdekkingsservice-exceptie.",
             "update_config_error": "Mislukt bij het bijwerken van configuratie-informatie.",
-            "not_confirm": "Wijzigingen zijn niet bevestigd. Bevestig de wijziging voordat u deze indient."
+            "not_confirm": "Wijzigingen zijn niet bevestigd. Bevestig de wijziging voordat u deze indient.",
+            "invalid_network_addr": "Ongeldig IP-adres of HTTP-adres gedetecteerd, voer een geldig adres in.",
+            "invalid_ip_addr": "Onbereikbaar IP-adres gedetecteerd, voer een geldig IP-adres in.",
+            "invalid_http_addr": "Onbereikbaar HTTP-adres gedetecteerd, voer een geldig HTTP-adres in.",
+            "invalid_default_addr": "Standaard netwerkdetectieadres is onbereikbaar, controleer de netwerkconfiguratie of gebruik een aangepast netwerkdetectieadres.",
+            "unreachable_oauth2_host": "Kan OAuth2-authenticatieadres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_http_host": "Kan Xiaomi HTTP API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_spec_host": "Kan Xiaomi SPEC API-adres niet bereiken, controleer de netwerkconfiguratie.",
+            "unreachable_mqtt_broker": "Kan Xiaomi MQTT Broker-adres niet bereiken, controleer de netwerkconfiguratie."
         },
         "abort": {
             "network_connect_error": "Configuratie mislukt. De netwerkverbinding is abnormaal. Controleer de netwerkinstellingen van de apparatuur.",

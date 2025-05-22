@@ -76,6 +76,12 @@ async def async_setup_entry(
         for prop in miot_device.prop_list.get('sensor', []):
             new_entities.append(Sensor(miot_device=miot_device, spec=prop))
 
+        if miot_device.miot_client.display_binary_text:
+            for prop in miot_device.prop_list.get('binary_sensor', []):
+                if not prop.value_list:
+                    continue
+                new_entities.append(Sensor(miot_device=miot_device, spec=prop))
+
     if new_entities:
         async_add_entities(new_entities)
 
@@ -89,9 +95,9 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
         # Set device_class
         if self._value_list:
             self._attr_device_class = SensorDeviceClass.ENUM
-            self._attr_icon = 'mdi:message-text'
+            self._attr_icon = 'mdi:format-text'
             self._attr_native_unit_of_measurement = None
-            self._attr_options = list(self._value_list.values())
+            self._attr_options = self._value_list.descriptions
         else:
             self._attr_device_class = spec.device_class
             if spec.external_unit:
@@ -100,11 +106,17 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
                 # device_class is not empty but unit is empty.
                 # Set the default unit according to device_class.
                 unit_sets = DEVICE_CLASS_UNITS.get(
-                    self._attr_device_class, None)
+                    self._attr_device_class, None)  # type: ignore
                 self._attr_native_unit_of_measurement = list(
                     unit_sets)[0] if unit_sets else None
+            # Set suggested precision
+            if spec.format_ in {int, float} and spec.expr is None:
+                self._attr_suggested_display_precision = spec.precision
+            # Set state_class
+            if spec.state_class:
+                self._attr_state_class = spec.state_class
         # Set icon
-        if spec.icon:
+        if spec.icon and not self.device_class:
             self._attr_icon = spec.icon
 
     @property
@@ -112,14 +124,14 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
         """Return the current value of the sensor."""
         if self._value_range and isinstance(self._value, (int, float)):
             if (
-                self._value < self._value_range['min']
-                or self._value > self._value_range['max']
+                self._value < self._value_range.min_
+                or self._value > self._value_range.max_
             ):
                 _LOGGER.info(
                     '%s, data exception, out of range, %s, %s',
                     self.entity_id, self._value, self._value_range)
         if self._value_list:
-            return self._value_list.get(self._value, None)
+            return self.get_vlist_description(self._value)
         if isinstance(self._value, str):
             return self._value[:255]
         return self._value

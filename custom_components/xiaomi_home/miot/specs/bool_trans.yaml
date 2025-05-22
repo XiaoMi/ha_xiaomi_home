@@ -1,0 +1,246 @@
+data:
+  urn:miot-spec-v2:property:air-cooler:000000EB: open_close
+  urn:miot-spec-v2:property:alarm:00000012: open_close
+  urn:miot-spec-v2:property:anion:00000025: open_close
+  urn:miot-spec-v2:property:anti-fake:00000130: yes_no
+  urn:miot-spec-v2:property:arrhythmia:000000B4: yes_no
+  urn:miot-spec-v2:property:auto-cleanup:00000124: open_close
+  urn:miot-spec-v2:property:auto-deodorization:00000125: open_close
+  urn:miot-spec-v2:property:auto-keep-warm:0000002B: open_close
+  urn:miot-spec-v2:property:automatic-feeding:000000F0: open_close
+  urn:miot-spec-v2:property:blow:000000CD: open_close
+  urn:miot-spec-v2:property:card-insertion-state:00000106: yes_no
+  urn:miot-spec-v2:property:contact-state:0000007C: contact_state
+  urn:miot-spec-v2:property:current-physical-control-lock:00000099: open_close
+  urn:miot-spec-v2:property:delay:0000014F: yes_no
+  urn:miot-spec-v2:property:deodorization:000000C6: open_close
+  urn:miot-spec-v2:property:dns-auto-mode:000000DC: open_close
+  urn:miot-spec-v2:property:driving-status:000000B9: yes_no
+  urn:miot-spec-v2:property:dryer:00000027: open_close
+  urn:miot-spec-v2:property:eco:00000024: open_close
+  urn:miot-spec-v2:property:glimmer-full-color:00000089: open_close
+  urn:miot-spec-v2:property:guard-mode:000000B6: open_close
+  urn:miot-spec-v2:property:heater:00000026: open_close
+  urn:miot-spec-v2:property:heating:000000C7: open_close
+  urn:miot-spec-v2:property:horizontal-swing:00000017: open_close
+  urn:miot-spec-v2:property:hot-water-recirculation:0000011C: open_close
+  urn:miot-spec-v2:property:image-distortion-correction:0000010F: open_close
+  urn:miot-spec-v2:property:local-storage:0000011E: yes_no
+  urn:miot-spec-v2:property:motion-detection:00000056: open_close
+  urn:miot-spec-v2:property:motion-state:0000007D: motion_state
+  urn:miot-spec-v2:property:motion-tracking:0000008A: open_close
+  urn:miot-spec-v2:property:motor-reverse:00000072: yes_no
+  urn:miot-spec-v2:property:mute:00000040: open_close
+  urn:miot-spec-v2:property:off-delay:00000053: open_close
+  urn:miot-spec-v2:property:on:00000006: open_close
+  urn:miot-spec-v2:property:physical-controls-locked:0000001D: open_close
+  urn:miot-spec-v2:property:plasma:00000132: yes_no
+  urn:miot-spec-v2:property:preheat:00000103: open_close
+  urn:miot-spec-v2:property:seating-state:000000B8: yes_no
+  urn:miot-spec-v2:property:silent-execution:000000FB: yes_no
+  urn:miot-spec-v2:property:sleep-aid-mode:0000010B: open_close
+  urn:miot-spec-v2:property:sleep-mode:00000028: open_close
+  urn:miot-spec-v2:property:snore-state:0000012A: yes_no
+  urn:miot-spec-v2:property:soft-wind:000000CF: open_close
+  urn:miot-spec-v2:property:speed-control:000000E8: open_close
+  urn:miot-spec-v2:property:submersion-state:0000007E: yes_no
+  urn:miot-spec-v2:property:time-watermark:00000087: open_close
+  urn:miot-spec-v2:property:un-straight-blowing:00000100: open_close
+  urn:miot-spec-v2:property:uv:00000029: open_close
+  urn:miot-spec-v2:property:valve-switch:000000FE: open_close
+  urn:miot-spec-v2:property:ventilation:000000CE: open_close
+  urn:miot-spec-v2:property:vertical-swing:00000018: open_close
+  urn:miot-spec-v2:property:wake-up-mode:00000107: open_close
+  urn:miot-spec-v2:property:water-pump:000000F2: open_close
+  urn:miot-spec-v2:property:watering:000000CC: open_close
+  urn:miot-spec-v2:property:wdr-mode:00000088: open_close
+  urn:miot-spec-v2:property:wet:0000002A: open_close
+  urn:miot-spec-v2:property:wifi-band-combine:000000E0: open_close
+  urn:miot-spec-v2:property:wifi-ssid-hidden:000000E3: yes_no
+  urn:miot-spec-v2:property:wind-reverse:00000117: yes_no
+translate:
+  default:
+    de:
+      'false': Falsch
+      'true': Wahr
+    en:
+      'false': 'False'
+      'true': 'True'
+    es:
+      'false': Falso
+      'true': Verdadero
+    fr:
+      'false': Faux
+      'true': Vrai
+    it:
+      'false': Falso
+      'true': Vero
+    ja:
+      'false': 偽
+      'true': 真
+    nl:
+      'false': 'False'
+      'true': 'True'
+    pt:
+      'false': 'False'
+      'true': 'True'
+    pt-BR:
+      'false': 'False'
+      'true': 'True'
+    ru:
+      'false': Ложь
+      'true': Истина
+    zh-Hans:
+      'false': 假
+      'true': 真
+    zh-Hant:
+      'false': 假
+      'true': 真
+  contact_state:
+    de:
+      'false': Kein Kontakt
+      'true': Kontakt
+    en:
+      'false': No Contact
+      'true': Contact
+    es:
+      'false': Sin contacto
+      'true': Contacto
+    fr:
+      'false': Pas de contact
+      'true': Contact
+    it:
+      'false': Nessun contatto
+      'true': Contatto
+    ja:
+      'false': 非接触
+      'true': 接触
+    nl:
+      'false': Geen contact
+      'true': Contact
+    pt:
+      'false': Sem contato
+      'true': Contato
+    pt-BR:
+      'false': Sem contato
+      'true': Contato
+    ru:
+      'false': Нет контакта
+      'true': Контакт
+    zh-Hans:
+      'false': 分离
+      'true': 接触
+    zh-Hant:
+      'false': 分離
+      'true': 接觸
+  motion_state:
+    de:
+      'false': Keine Bewegung erkannt
+      'true': Bewegung erkannt
+    en:
+      'false': No Motion Detected
+      'true': Motion Detected
+    es:
+      'false': No se detecta movimiento
+      'true': Movimiento detectado
+    fr:
+      'false': Aucun mouvement détecté
+      'true': Mouvement détecté
+    it:
+      'false': Nessun Movimento Rilevato
+      'true': Movimento Rilevato
+    ja:
+      'false': 動きが検出されません
+      'true': 動きを検知
+    nl:
+      'false': Geen contact
+      'true': Contact
+    pt:
+      'false': Sem contato
+      'true': Contato
+    pt-BR:
+      'false': Sem contato
+      'true': Contato
+    ru:
+      'false': Движение не обнаружено
+      'true': Обнаружено движение
+    zh-Hans:
+      'false': 无人
+      'true': 有人
+    zh-Hant:
+      'false': 無人
+      'true': 有人
+  open_close:
+    de:
+      'false': Schließen
+      'true': Öffnen
+    en:
+      'false': Close
+      'true': Open
+    es:
+      'false': Cerrado
+      'true': Abierto
+    fr:
+      'false': Fermer
+      'true': Ouvert
+    it:
+      'false': Chiuso
+      'true': Aperto
+    ja:
+      'false': 閉じる
+      'true': 開く
+    nl:
+      'false': Dicht
+      'true': Open
+    pt:
+      'false': Fechado
+      'true': Aberto
+    pt-BR:
+      'false': Fechado
+      'true': Aberto
+    ru:
+      'false': Закрыть
+      'true': Открыть
+    zh-Hans:
+      'false': 关闭
+      'true': 开启
+    zh-Hant:
+      'false': 關閉
+      'true': 開啟
+  yes_no:
+    de:
+      'false': Nein
+      'true': Ja
+    en:
+      'false': 'No'
+      'true': 'Yes'
+    es:
+      'false': 'No'
+      'true': Sí
+    fr:
+      'false': Non
+      'true': Oui
+    it:
+      'false': 'No'
+      'true': Si
+    ja:
+      'false': いいえ
+      'true': はい
+    nl:
+      'false': Nee
+      'true': Ja
+    pt:
+      'false': Não
+      'true': Sim
+    pt-BR:
+      'false': Não
+      'true': Sim
+    ru:
+      'false': Нет
+      'true': Да
+    zh-Hans:
+      'false': 否
+      'true': 是
+    zh-Hant:
+      'false': 否
+      'true': 是

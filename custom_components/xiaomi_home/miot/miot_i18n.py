@@ -48,7 +48,7 @@ MIoT internationalization translation.
 import asyncio
 import logging
 import os
-from typing import Optional
+from typing import Optional, Union
 
 # pylint: disable=relative-beyond-top-level
 from .common import load_json_file
@@ -71,7 +71,7 @@ class MIoTI18n:
     ) -> None:
         self._main_loop = loop or asyncio.get_event_loop()
         self._lang = lang
-        self._data = None
+        self._data = {}
 
     async def init_async(self) -> None:
         if self._data:
@@ -94,11 +94,11 @@ class MIoTI18n:
         self._data = data
 
     async def deinit_async(self) -> None:
-        self._data = None
+        self._data = {}
 
     def translate(
         self, key: str, replace: Optional[dict[str, str]] = None
-    ) -> str | dict | None:
+    ) -> Union[str, dict, None]:
         result = self._data
         for item in key.split('.'):
             if item not in result:

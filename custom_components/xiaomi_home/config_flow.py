@@ -47,10 +47,12 @@ Config flow for Xiaomi Home.
 """
 import asyncio
 import hashlib
+import ipaddress
 import json
 import secrets
 import traceback
-from typing import Optional
+from typing import Optional, Set, Tuple
+from urllib.parse import urlparse
 from aiohttp import web
 from aiohttp.hdrs import METH_GET
 import voluptuous as vol
@@ -66,6 +68,7 @@ from homeassistant.components.webhook import (
 )
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import AbortFlow
+from homeassistant.helpers.instance_id import async_get
 import homeassistant.helpers.config_validation as cv
 
 from .miot.const import (
@@ -73,7 +76,9 @@ from .miot.const import (
     DEFAULT_CTRL_MODE,
     DEFAULT_INTEGRATION_LANGUAGE,
     DEFAULT_NICK_NAME,
+    DEFAULT_OAUTH2_API_HOST,
     DOMAIN,
+    OAUTH2_AUTH_URL,
     OAUTH2_CLIENT_ID,
     CLOUD_SERVERS,
     OAUTH_REDIRECT_URL,
@@ -86,7 +91,8 @@ from .miot.miot_cloud import MIoTHttpClient, MIoTOauthClient
 from .miot.miot_storage import MIoTStorage, MIoTCert
 from .miot.miot_mdns import MipsService
 from .miot.web_pages import oauth_redirect_page
-from .miot.miot_error import MIoTConfigError, MIoTError, MIoTOauthError
+from .miot.miot_error import (
+    MIoTConfigError, MIoTError, MIoTErrorCode, MIoTOauthError)
 from .miot.miot_i18n import MIoTI18n
 from .miot.miot_network import MIoTNetwork
 from .miot.miot_client import MIoTClient, get_miot_instance_async
@@ -101,135 +107,157 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     # pylint: disable=unused-argument, inconsistent-quotes
     VERSION = 1
     MINOR_VERSION = 1
+    DEFAULT_AREA_NAME_RULE = 'room'
     _main_loop: asyncio.AbstractEventLoop
-    _mips_service: Optional[MipsService]
-    _miot_storage: Optional[MIoTStorage]
-    _miot_network: Optional[MIoTNetwork]
-    _miot_i18n: Optional[MIoTI18n]
-
-    _integration_language: Optional[str]
-    _storage_path: Optional[str]
-    _virtual_did: Optional[str]
-    _uid: Optional[str]
-    _uuid: Optional[str]
-    _ctrl_mode: Optional[str]
-    _area_name_rule: Optional[str]
-    _action_debug: bool
-    _hide_non_standard_entities: bool
-    _auth_info: Optional[dict]
-    _nick_name: Optional[str]
-    _home_selected: Optional[dict]
-    _home_info_buffer: Optional[dict[str, str | dict[str, dict]]]
-    _home_list: Optional[dict]
-
-    _cloud_server: Optional[str]
-    _oauth_redirect_url: Optional[str]
+    _miot_network: MIoTNetwork
+    _mips_service: MipsService
+    _miot_storage: MIoTStorage
+    _miot_i18n: MIoTI18n
     _miot_oauth: Optional[MIoTOauthClient]
     _miot_http: Optional[MIoTHttpClient]
-    _user_cert_state: bool
 
-    _oauth_auth_url: Optional[str]
-    _task_oauth: Optional[asyncio.Task[None]]
-    _config_error_reason: Optional[str]
+    _storage_path: str
+    _virtual_did: str
+    _uid: str
+    _uuid: str
+    _ctrl_mode: str
+    _area_name_rule: str
+    _action_debug: bool
+    _hide_non_standard_entities: bool
+    _display_binary_mode: list[str]
+    _display_devices_changed_notify: list[str]
 
-    _fut_oauth_code: Optional[asyncio.Future]
+    _cloud_server: str
+    _integration_language: str
+    _auth_info: dict
+    _nick_name: str
+    _home_selected: dict
+    _devices_filter: dict
+    _device_list_sorted: dict
+    _oauth_redirect_url_full: str
+
+    # Config cache
+    _cc_home_info: dict
+    _cc_home_list_show: dict
+    _cc_network_detect_addr: str
+    _cc_oauth_auth_url: str
+    _cc_user_cert_done: bool
+    _cc_task_oauth: Optional[asyncio.Task[None]]
+    _cc_config_rc: Optional[str]
+    _cc_fut_oauth_code: Optional[asyncio.Future]
+    _opt_check_network_deps: bool
 
     def __init__(self) -> None:
         self._main_loop = asyncio.get_running_loop()
-        self._mips_service = None
-        self._miot_storage = None
-        self._miot_network = None
-        self._miot_i18n = None
-
-        self._integration_language = None
-        self._storage_path = None
-        self._virtual_did = None
-        self._uid = None
-        self._uuid = None   # MQTT client id
-        self._ctrl_mode = None
-        self._area_name_rule = None
+        self._cloud_server = DEFAULT_CLOUD_SERVER
+        self._integration_language = DEFAULT_INTEGRATION_LANGUAGE
+        self._storage_path = ''
+        self._virtual_did = ''
+        self._uid = ''
+        self._uuid = ''   # MQTT client id
+        self._ctrl_mode = DEFAULT_CTRL_MODE
+        self._area_name_rule = self.DEFAULT_AREA_NAME_RULE
         self._action_debug = False
         self._hide_non_standard_entities = False
-        self._auth_info = None
-        self._nick_name = None
+        self._display_binary_mode = ['bool']
+        self._display_devices_changed_notify = ['add', 'del', 'offline']
+        self._auth_info = {}
+        self._nick_name = DEFAULT_NICK_NAME
         self._home_selected = {}
-        self._home_info_buffer = None
-        self._home_list = None
-
-        self._cloud_server = None
-        self._oauth_redirect_url = None
+        self._devices_filter = {}
+        self._device_list_sorted = {}
+        self._oauth_redirect_url_full = ''
         self._miot_oauth = None
         self._miot_http = None
-        self._user_cert_state = False
 
-        self._oauth_auth_url = None
-        self._task_oauth = None
-        self._config_error_reason = None
-        self._fut_oauth_code = None
+        self._cc_home_info = {}
+        self._cc_home_list_show = {}
+        self._cc_network_detect_addr = ''
+        self._cc_oauth_auth_url = ''
+        self._cc_user_cert_done = False
+        self._cc_task_oauth = None
+        self._cc_config_rc = None
+        self._cc_fut_oauth_code = None
+        self._opt_check_network_deps = False
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+        self, user_input: Optional[dict] = None
+    ):
         self.hass.data.setdefault(DOMAIN, {})
-        loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
-
-        if self._virtual_did is None:
+        if not self._virtual_did:
             self._virtual_did = str(secrets.randbits(64))
             self.hass.data[DOMAIN].setdefault(self._virtual_did, {})
-        if self._storage_path is None:
+        if not self._storage_path:
             self._storage_path = self.hass.config.path('.storage', DOMAIN)
-        # MIoT network
-        self._miot_network = self.hass.data[DOMAIN].get('miot_network', None)
-        if self._miot_network is None:
-            self._miot_network = MIoTNetwork(loop=loop)
-            self.hass.data[DOMAIN]['miot_network'] = self._miot_network
-            await self._miot_network.init_async(
-                refresh_interval=NETWORK_REFRESH_INTERVAL)
-            _LOGGER.info('async_step_user, create miot network')
-        # Mips server
-        self._mips_service = self.hass.data[DOMAIN].get('mips_service', None)
-        if self._mips_service is None:
-            aiozc: HaAsyncZeroconf = await zeroconf.async_get_async_instance(
-                self.hass)
-            self._mips_service = MipsService(aiozc=aiozc, loop=loop)
-            self.hass.data[DOMAIN]['mips_service'] = self._mips_service
-            await self._mips_service.init_async()
-            _LOGGER.info('async_step_user, create mips service')
         # MIoT storage
         self._miot_storage = self.hass.data[DOMAIN].get('miot_storage', None)
-        if self._miot_storage is None:
+        if not self._miot_storage:
             self._miot_storage = MIoTStorage(
-                root_path=self._storage_path, loop=loop)
+                root_path=self._storage_path, loop=self._main_loop)
             self.hass.data[DOMAIN]['miot_storage'] = self._miot_storage
             _LOGGER.info(
                 'async_step_user, create miot storage, %s', self._storage_path)
-
-        # Check network
-        if not await self._miot_network.get_network_status_async(timeout=5):
-            raise AbortFlow(reason='network_connect_error',
-                            description_placeholders={})
+        # MIoT network
+        network_detect_addr = (await self._miot_storage.load_user_config_async(
+            uid='global_config', cloud_server='all',
+            keys=['network_detect_addr'])).get('network_detect_addr', {})
+        self._cc_network_detect_addr = ','.join(
+            network_detect_addr.get('ip', [])
+            + network_detect_addr.get('url', []))
+        self._miot_network = self.hass.data[DOMAIN].get('miot_network', None)
+        if not self._miot_network:
+            self._miot_network = MIoTNetwork(
+                ip_addr_list=network_detect_addr.get('ip', []),
+                url_addr_list=network_detect_addr.get('url', []),
+                refresh_interval=NETWORK_REFRESH_INTERVAL,
+                loop=self._main_loop)
+            self.hass.data[DOMAIN]['miot_network'] = self._miot_network
+            await self._miot_network.init_async()
+            _LOGGER.info('async_step_user, create miot network')
+        # MIPS service
+        self._mips_service = self.hass.data[DOMAIN].get('mips_service', None)
+        if not self._mips_service:
+            aiozc: HaAsyncZeroconf = await zeroconf.async_get_async_instance(
+                self.hass)
+            self._mips_service = MipsService(aiozc=aiozc, loop=self._main_loop)
+            self.hass.data[DOMAIN]['mips_service'] = self._mips_service
+            await self._mips_service.init_async()
+            _LOGGER.info('async_step_user, create mips service')
 
         return await self.async_step_eula(user_input)
 
-    async def async_step_eula(self, user_input=None):
+    async def async_step_eula(
+        self, user_input: Optional[dict] = None
+    ):
         if user_input:
             if user_input.get('eula', None) is True:
                 return await self.async_step_auth_config()
-            return await self.__display_eula('eula_not_agree')
-        return await self.__display_eula('')
+            return await self.__show_eula_form('eula_not_agree')
+        return await self.__show_eula_form('')
 
-    async def __display_eula(self, reason: str):
+    async def __show_eula_form(self, reason: str):
         return self.async_show_form(
             step_id='eula',
             data_schema=vol.Schema({
-                vol.Required('eula', default=False): bool,
+                vol.Required('eula', default=False): bool,  # type: ignore
             }),
             last_step=False,
             errors={'base': reason},
         )
 
-    async def async_step_auth_config(self, user_input=None):
+    async def async_step_auth_config(
+        self, user_input: Optional[dict] = None
+    ):
         if user_input:
             self._cloud_server = user_input.get(
-                'cloud_server', DEFAULT_CLOUD_SERVER)
+                'cloud_server', self._cloud_server)
+            # Gen instance uuid
+            ha_uuid = await async_get(self.hass)
+            if not ha_uuid:
+                raise AbortFlow(reason='ha_uuid_get_failed')
+            self._uuid = hashlib.sha256(
+                f'{ha_uuid}.{self._virtual_did}.{self._cloud_server}'.encode(
+                    'utf-8')).hexdigest()[:32]
             self._integration_language = user_input.get(
                 'integration_language', DEFAULT_INTEGRATION_LANGUAGE)
             self._miot_i18n = MIoTI18n(
@@ -237,9 +265,15 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self._miot_i18n.init_async()
             webhook_path = webhook_async_generate_path(
                 webhook_id=self._virtual_did)
-            self._oauth_redirect_url = (
+            self._oauth_redirect_url_full = (
                 f'{user_input.get("oauth_redirect_url")}{webhook_path}')
+
+            if user_input.get('network_detect_config', False):
+                return await self.async_step_network_detect_config()
             return await self.async_step_oauth(user_input)
+        return await self.__show_auth_config_form('')
+
+    async def __show_auth_config_form(self, reason: str):
         # Generate default language from HomeAssistant config (not user config)
         default_language: str = self.hass.config.language
         if default_language not in INTEGRATION_LANGUAGES:
@@ -252,35 +286,157 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(
                     'cloud_server',
-                    default=DEFAULT_CLOUD_SERVER): vol.In(CLOUD_SERVERS),
+                    default=self._cloud_server  # type: ignore
+                ):  vol.In(CLOUD_SERVERS),
                 vol.Required(
                     'integration_language',
-                    default=default_language): vol.In(INTEGRATION_LANGUAGES),
+                    default=default_language  # type: ignore
+                ):   vol.In(INTEGRATION_LANGUAGES),
                 vol.Required(
                     'oauth_redirect_url',
-                    default=OAUTH_REDIRECT_URL): vol.In([OAUTH_REDIRECT_URL]),
+                    default=OAUTH_REDIRECT_URL  # type: ignore
+                ): vol.In([OAUTH_REDIRECT_URL]),
+                vol.Required(
+                    'network_detect_config',
+                    default=False  # type: ignore
+                ): bool,
             }),
+            errors={'base': reason},
             last_step=False,
         )
 
-    async def async_step_oauth(self, user_input=None):
+    async def async_step_network_detect_config(
+        self, user_input: Optional[dict] = None
+    ):
+        if not user_input:
+            return await self.__show_network_detect_config_form(reason='')
+        self._cc_network_detect_addr = user_input.get(
+            'network_detect_addr', self._cc_network_detect_addr)
+
+        ip_list, url_list, invalid_list = _handle_network_detect_addr(
+            addr_str=self._cc_network_detect_addr)
+        if invalid_list:
+            return await self.__show_network_detect_config_form(
+                reason='invalid_network_addr')
+        if ip_list or url_list:
+            if ip_list and not await self._miot_network.ping_multi_async(
+                    ip_list=ip_list):
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_ip_addr')
+            if url_list and not await self._miot_network.http_multi_async(
+                    url_list=url_list):
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_http_addr')
+        else:
+            if not await self._miot_network.get_network_status_async():
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_default_addr')
+        network_detect_addr: dict = {'ip': ip_list, 'url': url_list}
+        # Save
+        if await self._miot_storage.update_user_config_async(
+            uid='global_config', cloud_server='all', config={
+                'network_detect_addr': network_detect_addr}):
+            _LOGGER.info(
+                'update network_detect_addr, %s', network_detect_addr)
+        await self._miot_network.update_addr_list_async(
+            ip_addr_list=ip_list, url_addr_list=url_list)
+        # Check network deps
+        self._opt_check_network_deps = user_input.get(
+            'check_network_deps', self._opt_check_network_deps)
+        if self._opt_check_network_deps:
+            # OAuth2
+            if not await self._miot_network.http_multi_async(
+                    url_list=[OAUTH2_AUTH_URL]):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_oauth2_host')
+            # HTTP API
+            http_host = (
+                DEFAULT_OAUTH2_API_HOST
+                if self._cloud_server == DEFAULT_CLOUD_SERVER
+                else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')
+            if not await self._miot_network.http_multi_async(
+                    url_list=[
+                        f'https://{http_host}/app/v2/ha/oauth/get_token']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_http_host')
+            # SPEC API
+            if not await self._miot_network.http_multi_async(
+                    url_list=[
+                        'https://miot-spec.org/miot-spec-v2/template/list/'
+                        'device']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_spec_host')
+            # MQTT Broker
+            # pylint: disable=import-outside-toplevel
+            try:
+                from paho.mqtt import client
+                mqtt_client = client.Client(
+                    client_id=f'ha.{self._uid}',
+                    protocol=client.MQTTv5)  # type: ignore
+                if mqtt_client.connect(
+                        host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
+                        port=8883) != 0:
+                    raise RuntimeError('mqtt connect error')
+                mqtt_client.disconnect()
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error('try connect mqtt broker error, %s', err)
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_mqtt_broker')
+
+        return await self.async_step_oauth()
+
+    async def __show_network_detect_config_form(self, reason: str):
+        if not self._cc_network_detect_addr:
+            addr_list: dict = (await self._miot_storage.load_user_config_async(
+                'global_config', 'all', ['network_detect_addr'])).get(
+                    'network_detect_addr', {})
+            self._cc_network_detect_addr = ','.join(
+                addr_list.get('ip', [])+addr_list.get('url', []))
+        return self.async_show_form(
+            step_id='network_detect_config',
+            data_schema=vol.Schema({
+                vol.Optional(
+                    'network_detect_addr',
+                    default=self._cc_network_detect_addr  # type: ignore
+                ): str,
+                vol.Optional(
+                    'check_network_deps',
+                    default=self._opt_check_network_deps  # type: ignore
+                ): bool,
+            }),
+            errors={'base': reason},
+            description_placeholders={
+                'cloud_server': self._cloud_server,
+                'http_host': (
+                    DEFAULT_OAUTH2_API_HOST
+                    if self._cloud_server == DEFAULT_CLOUD_SERVER
+                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')},
+            last_step=False
+        )
+
+    async def async_step_oauth(
+        self, user_input: Optional[dict] = None
+    ):
         # 1: Init miot_oauth, generate auth url
         try:
-            if self._miot_oauth is None:
+            if not self._miot_oauth:
                 _LOGGER.info(
                     'async_step_oauth, redirect_url: %s',
-                    self._oauth_redirect_url)
+                    self._oauth_redirect_url_full)
                 miot_oauth = MIoTOauthClient(
                     client_id=OAUTH2_CLIENT_ID,
-                    redirect_url=self._oauth_redirect_url,
-                    cloud_server=self._cloud_server
-                )
-                state = str(secrets.randbits(64))
-                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
-                self._oauth_auth_url = miot_oauth.gen_auth_url(
-                    redirect_url=self._oauth_redirect_url, state=state)
+                    redirect_url=self._oauth_redirect_url_full,
+                    cloud_server=self._cloud_server,
+                    uuid=self._uuid,
+                    loop=self._main_loop)
+                self._cc_oauth_auth_url = miot_oauth.gen_auth_url(
+                    redirect_url=self._oauth_redirect_url_full)
+                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = (
+                    miot_oauth.state)
+                self.hass.data[DOMAIN][self._virtual_did]['i18n'] = (
+                    self._miot_i18n)
                 _LOGGER.info(
-                    'async_step_oauth, oauth_url: %s', self._oauth_auth_url)
+                    'async_step_oauth, oauth_url: %s', self._cc_oauth_auth_url)
                 webhook_async_unregister(
                     self.hass, webhook_id=self._virtual_did)
                 webhook_async_register(
@@ -288,15 +444,15 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     domain=DOMAIN,
                     name='oauth redirect url webhook',
                     webhook_id=self._virtual_did,
-                    handler=handle_oauth_webhook,
+                    handler=_handle_oauth_webhook,
                     allowed_methods=(METH_GET,),
                 )
-                self._fut_oauth_code = self.hass.data[DOMAIN][
+                self._cc_fut_oauth_code = self.hass.data[DOMAIN][
                     self._virtual_did].get('fut_oauth_code', None)
-                if self._fut_oauth_code is None:
-                    self._fut_oauth_code = self._main_loop.create_future()
+                if not self._cc_fut_oauth_code:
+                    self._cc_fut_oauth_code = self._main_loop.create_future()
                     self.hass.data[DOMAIN][self._virtual_did][
-                        'fut_oauth_code'] = self._fut_oauth_code
+                        'fut_oauth_code'] = self._cc_fut_oauth_code
                 _LOGGER.info(
                     'async_step_oauth, webhook.async_register: %s',
                     self._virtual_did)
@@ -307,36 +463,42 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_progress_done(next_step_id='oauth_error')
 
         # 2: show OAuth2 loading page
-        if self._task_oauth is None:
-            self._task_oauth = self.hass.async_create_task(
+        if self._cc_task_oauth is None:
+            self._cc_task_oauth = self.hass.async_create_task(
                 self.__check_oauth_async())
-        if self._task_oauth.done():
-            if (error := self._task_oauth.exception()):
+        if self._cc_task_oauth.done():
+            if (error := self._cc_task_oauth.exception()):
                 _LOGGER.error('task_oauth exception, %s', error)
-                self._config_error_reason = str(error)
+                self._cc_config_rc = str(error)
                 return self.async_show_progress_done(next_step_id='oauth_error')
             if self._miot_oauth:
                 await self._miot_oauth.deinit_async()
                 self._miot_oauth = None
             return self.async_show_progress_done(next_step_id='homes_select')
+        # pylint: disable=unexpected-keyword-arg
         return self.async_show_progress(
             step_id='oauth',
             progress_action='oauth',
             description_placeholders={
                 'link_left':
-                    f'<a href="{self._oauth_auth_url}" target="_blank">',
+                    f'<a href="{self._cc_oauth_auth_url}" target="_blank">',
                 'link_right': '</a>'
             },
-            progress_task=self._task_oauth,
+            progress_task=self._cc_task_oauth,  # type: ignore
         )
 
     async def __check_oauth_async(self) -> None:
         # TASK 1: Get oauth code
-        oauth_code: Optional[str] = await self._fut_oauth_code
-
+        if not self._cc_fut_oauth_code:
+            raise MIoTConfigError('oauth_code_fut_error')
+        oauth_code: Optional[str] = await self._cc_fut_oauth_code
+        if not oauth_code:
+            raise MIoTConfigError('oauth_code_error')
         # TASK 2: Get access_token and user_info from miot_oauth
         if not self._auth_info:
             try:
+                if not self._miot_oauth:
+                    raise MIoTConfigError('oauth_client_error')
                 auth_info = await self._miot_oauth.get_access_token_async(
                     code=oauth_code)
                 if not self._miot_http:
@@ -350,15 +512,10 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         client_id=OAUTH2_CLIENT_ID,
                         access_token=auth_info['access_token'])
                 self._auth_info = auth_info
-                # Gen uuid
-                self._uuid = hashlib.sha256(
-                    f'{self._virtual_did}.{auth_info["access_token"]}'.encode(
-                        'utf-8')
-                ).hexdigest()[:32]
                 try:
                     self._nick_name = (
                         await self._miot_http.get_user_info_async() or {}
-                    ).get('miliaoNick', DEFAULT_NICK_NAME)
+                    ).get('miliaoNick', self._nick_name)
                 except (MIoTOauthError, json.JSONDecodeError):
                     self._nick_name = DEFAULT_NICK_NAME
                     _LOGGER.error('get nick name failed')
@@ -369,12 +526,20 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # TASK 3: Get home info
         try:
-            self._home_info_buffer = (
+            if not self._miot_http:
+                raise MIoTConfigError('http_client_error')
+            self._cc_home_info = (
                 await self._miot_http.get_devices_async())
-            _LOGGER.info('get_homeinfos response: %s', self._home_info_buffer)
-            self._uid = self._home_info_buffer['uid']
+            _LOGGER.info('get_homeinfos response: %s', self._cc_home_info)
+            self._uid = self._cc_home_info['uid']
             if self._uid == self._nick_name:
                 self._nick_name = DEFAULT_NICK_NAME
+            # Save auth_info
+            if not (await self._miot_storage.update_user_config_async(
+                    uid=self._uid, cloud_server=self._cloud_server, config={
+                        'auth_info': self._auth_info
+                    })):
+                raise MIoTError('miot_storage.update_user_config_async error')
         except Exception as err:
             _LOGGER.error(
                 'get_homeinfos error, %s, %s', err, traceback.format_exc())
@@ -400,36 +565,41 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         home_list = {}
         tip_devices = self._miot_i18n.translate(key='config.other.devices')
         # home list
-        for home_id, home_info in self._home_info_buffer[
-                'homes']['home_list'].items():
-            # i18n
-            tip_central = ''
-            group_id = home_info.get('group_id', None)
-            dev_list = {
-                device['did']: device
-                for device in list(self._home_info_buffer['devices'].values())
-                if device.get('home_id', None) == home_id}
-            if (
-                mips_list
-                and group_id in mips_list
-                and mips_list[group_id].get('did', None) in dev_list
-            ):
+        for device_source in ['home_list','share_home_list',
+                              'separated_shared_list']:
+            if device_source not in self._cc_home_info['homes']:
+                continue
+            for home_id, home_info in self._cc_home_info[
+                    'homes'][device_source].items():
                 # i18n
-                tip_central = self._miot_i18n.translate(
-                    key='config.other.found_central_gateway')
-                home_info['central_did'] = mips_list[group_id].get('did', None)
-            home_list[home_id] = (
-                f'{home_info["home_name"]} '
-                f'[ {len(dev_list)} {tip_devices}{tip_central} ]')
+                tip_central = ''
+                group_id = home_info.get('group_id', None)
+                dev_list = {
+                    device['did']: device
+                    for device in list(self._cc_home_info['devices'].values())
+                    if device.get('home_id', None) == home_id}
+                if (
+                    mips_list
+                    and group_id in mips_list
+                    and mips_list[group_id].get('did', None) in dev_list
+                ):
+                    # i18n
+                    tip_central = self._miot_i18n.translate(
+                        key='config.other.found_central_gateway')
+                    home_info['central_did'] = mips_list[group_id].get(
+                        'did', None)
+                home_list[home_id] = (
+                    f'{home_info["home_name"]} '
+                    f'[ {len(dev_list)} {tip_devices} {tip_central} ]')
 
-        self._home_list = dict(sorted(home_list.items()))
+        self._cc_home_list_show = dict(sorted(home_list.items()))
 
         # TASK 7: Get user's MiHome certificate
         if self._cloud_server in SUPPORT_CENTRAL_GATEWAY_CTRL:
             miot_cert = MIoTCert(
                 storage=self._miot_storage,
                 uid=self._uid, cloud_server=self._cloud_server)
-            if not self._user_cert_state:
+            if not self._cc_user_cert_done:
                 try:
                     if await miot_cert.user_cert_remaining_time_async(
                             did=self._virtual_did) < MIHOME_CERT_EXPIRE_MARGIN:
@@ -443,10 +613,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             user_key=user_key, did=self._virtual_did)
                         crt_str = await self._miot_http.get_central_cert_async(
                             csr_str)
+                        if not crt_str:
+                            raise MIoTError('get_central_cert_async failed')
                         if not await miot_cert.update_user_cert_async(
                                 cert=crt_str):
                             raise MIoTError('update_user_cert_async failed')
-                        self._user_cert_state = True
+                        self._cc_user_cert_done = True
                         _LOGGER.info(
                             'get mihome cert success, %s, %s',
                             self._uid, self._virtual_did)
@@ -467,13 +639,13 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     # Show setup error message
     async def async_step_oauth_error(self, user_input=None):
-        if self._config_error_reason is None:
+        if self._cc_config_rc is None:
             return await self.async_step_oauth()
-        if self._config_error_reason.startswith('Flow aborted: '):
+        if self._cc_config_rc.startswith('Flow aborted: '):
             raise AbortFlow(
-                reason=self._config_error_reason.replace('Flow aborted: ', ''))
-        error_reason = self._config_error_reason
-        self._config_error_reason = None
+                reason=self._cc_config_rc.replace('Flow aborted: ', ''))
+        error_reason = self._cc_config_rc
+        self._cc_config_rc = None
         return self.async_show_form(
             step_id='oauth_error',
             data_schema=vol.Schema({}),
@@ -481,70 +653,51 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors={'base': error_reason},
         )
 
-    async def async_step_homes_select(self, user_input=None):
+    async def async_step_homes_select(
+        self, user_input: Optional[dict] = None
+    ):
         _LOGGER.debug('async_step_homes_select')
         try:
-            if user_input is None:
-                return await self.display_homes_select_form('')
+            if not user_input:
+                return await self.__show_homes_select_form('')
 
             home_selected: list = user_input.get('home_infos', [])
             if not home_selected:
-                return await self.display_homes_select_form(
+                return await self.__show_homes_select_form(
                     'no_family_selected')
-            self._ctrl_mode = user_input.get('ctrl_mode')
-            for home_id, home_info in self._home_info_buffer[
-                    'homes']['home_list'].items():
-                if home_id in home_selected:
-                    self._home_selected[home_id] = home_info
-            self._area_name_rule = user_input.get('area_name_rule')
-            self._action_debug = user_input.get(
-                'action_debug', self._action_debug)
-            self._hide_non_standard_entities = user_input.get(
-                'hide_non_standard_entities', self._hide_non_standard_entities)
+            for device_source in ['home_list','share_home_list',
+                                  'separated_shared_list']:
+                if device_source not in self._cc_home_info['homes']:
+                    continue
+                for home_id, home_info in self._cc_home_info[
+                        'homes'][device_source].items():
+                    if home_id in home_selected:
+                        self._home_selected[home_id] = home_info
+            self._area_name_rule = user_input.get(
+                'area_name_rule', self._area_name_rule)
             # Storage device list
             devices_list: dict[str, dict] = {
                 did: dev_info
-                for did, dev_info in self._home_info_buffer['devices'].items()
+                for did, dev_info in self._cc_home_info['devices'].items()
                 if dev_info['home_id'] in home_selected}
             if not devices_list:
-                return await self.display_homes_select_form('no_devices')
-            devices_list_sort = dict(sorted(
+                return await self.__show_homes_select_form('no_devices')
+            self._device_list_sorted = dict(sorted(
                 devices_list.items(), key=lambda item:
                     item[1].get('home_id', '')+item[1].get('room_id', '')))
+
             if not await self._miot_storage.save_async(
                     domain='miot_devices',
                     name=f'{self._uid}_{self._cloud_server}',
-                    data=devices_list_sort):
+                    data=self._device_list_sorted):
                 _LOGGER.error(
                     'save devices async failed, %s, %s',
                     self._uid, self._cloud_server)
-                return await self.display_homes_select_form(
+                return await self.__show_homes_select_form(
                     'devices_storage_failed')
-            if not (await self._miot_storage.update_user_config_async(
-                    uid=self._uid, cloud_server=self._cloud_server, config={
-                        'auth_info': self._auth_info
-                    })):
-                raise MIoTError('miot_storage.update_user_config_async error')
-            return self.async_create_entry(
-                title=(
-                    f'{self._nick_name}: {self._uid} '
-                    f'[{CLOUD_SERVERS[self._cloud_server]}]'),
-                data={
-                    'virtual_did': self._virtual_did,
-                    'uuid': self._uuid,
-                    'integration_language': self._integration_language,
-                    'storage_path': self._storage_path,
-                    'uid': self._uid,
-                    'nick_name': self._nick_name,
-                    'cloud_server': self._cloud_server,
-                    'oauth_redirect_url': self._oauth_redirect_url,
-                    'ctrl_mode': self._ctrl_mode,
-                    'home_selected': self._home_selected,
-                    'area_name_rule': self._area_name_rule,
-                    'action_debug': self._action_debug,
-                    'hide_non_standard_entities':
-                        self._hide_non_standard_entities,
-                })
+            if user_input.get('advanced_options', False):
+                return await self.async_step_advanced_options()
+            return await self.config_flow_done()
         except Exception as err:
             _LOGGER.error(
                 'async_step_homes_select, %s, %s',
@@ -555,19 +708,20 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     'error': f'config_flow error, {err}'}
             ) from err
 
-    async def display_homes_select_form(self, reason: str):
+    async def __show_homes_select_form(self, reason: str):
         return self.async_show_form(
             step_id='homes_select',
             data_schema=vol.Schema({
-                vol.Required('ctrl_mode', default=DEFAULT_CTRL_MODE): vol.In(
-                    self._miot_i18n.translate(key='config.control_mode')),
-                vol.Required('home_infos'): cv.multi_select(self._home_list),
-                vol.Required('area_name_rule', default='room'): vol.In(
-                    self._miot_i18n.translate(key='config.room_name_rule')),
-                vol.Required('action_debug', default=self._action_debug): bool,
+                vol.Required('home_infos'): cv.multi_select(
+                    self._cc_home_list_show),
                 vol.Required(
-                    'hide_non_standard_entities',
-                    default=self._hide_non_standard_entities): bool,
+                    'area_name_rule',
+                    default=self._area_name_rule  # type: ignore
+                ): vol.In(self._miot_i18n.translate(
+                    key='config.room_name_rule')),
+                vol.Required(
+                    'advanced_options', default=False  # type: ignore
+                ): bool,
             }),
             errors={'base': reason},
             description_placeholders={
@@ -576,8 +730,234 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=False,
         )
 
-    @staticmethod
-    @callback
+    async def async_step_advanced_options(
+        self, user_input: Optional[dict] = None
+    ):
+        if user_input:
+            self._ctrl_mode = user_input.get('ctrl_mode', self._ctrl_mode)
+            self._action_debug = user_input.get(
+                'action_debug', self._action_debug)
+            self._hide_non_standard_entities = user_input.get(
+                'hide_non_standard_entities', self._hide_non_standard_entities)
+            self._display_binary_mode = user_input.get(
+                'display_binary_mode', self._display_binary_mode)
+            self._display_devices_changed_notify = user_input.get(
+                'display_devices_changed_notify',
+                self._display_devices_changed_notify)
+            # Device filter
+            if user_input.get('devices_filter', False):
+                return await self.async_step_devices_filter()
+            return await self.config_flow_done()
+        return self.async_show_form(
+            step_id='advanced_options',
+            data_schema=vol.Schema({
+                vol.Required(
+                    'devices_filter', default=False): bool,  # type: ignore
+                vol.Required(
+                    'ctrl_mode', default=self._ctrl_mode  # type: ignore
+                ): vol.In(self._miot_i18n.translate(key='config.control_mode')),
+                vol.Required(
+                    'action_debug', default=self._action_debug  # type: ignore
+                ): bool,
+                vol.Required(
+                    'hide_non_standard_entities',
+                    default=self._hide_non_standard_entities  # type: ignore
+                ): bool,
+                vol.Required(
+                    'display_binary_mode',
+                    default=self._display_binary_mode  # type: ignore
+                ): cv.multi_select(
+                    self._miot_i18n.translate(
+                        key='config.binary_mode')),  # type: ignore
+                vol.Required(
+                    'display_devices_changed_notify',
+                    default=self._display_devices_changed_notify  # type: ignore
+                ): cv.multi_select(
+                    self._miot_i18n.translate(
+                        key='config.device_state')),  # type: ignore
+            }),
+            last_step=False,
+        )
+
+    async def async_step_devices_filter(
+        self, user_input: Optional[dict] = None
+    ):
+        if user_input:
+            # Room filter
+            include_items: dict = {}
+            exclude_items: dict = {}
+            room_list_in: list = user_input.get('room_list', [])
+            if room_list_in:
+                if user_input.get(
+                        'room_filter_mode', 'exclude') == 'include':
+                    include_items['room_id'] = room_list_in
+                else:
+                    exclude_items['room_id'] = room_list_in
+            # Connect Type filter
+            type_list_in: list = user_input.get('type_list', [])
+            if type_list_in:
+                if user_input.get(
+                        'type_filter_mode', 'exclude') == 'include':
+                    include_items['connect_type'] = type_list_in
+                else:
+                    exclude_items['connect_type'] = type_list_in
+            # Model filter
+            model_list_in: list = user_input.get('model_list', [])
+            if model_list_in:
+                if user_input.get(
+                        'model_filter_mode', 'exclude') == 'include':
+                    include_items['model'] = model_list_in
+                else:
+                    exclude_items['model'] = model_list_in
+            # Device filter
+            device_list_in: list = user_input.get('device_list', [])
+            if device_list_in:
+                if user_input.get(
+                        'devices_filter_mode', 'exclude') == 'include':
+                    include_items['did'] = device_list_in
+                else:
+                    exclude_items['did'] = device_list_in
+            device_filter_list = _handle_devices_filter(
+                devices=self._device_list_sorted,
+                logic_or=(user_input.get('statistics_logic', 'or') == 'or'),
+                item_in=include_items, item_ex=exclude_items)
+            if not device_filter_list:
+                return await self.__show_devices_filter_form(
+                    reason='no_filter_devices')
+            self._device_list_sorted = dict(sorted(
+                device_filter_list.items(), key=lambda item:
+                    item[1].get('home_id', '')+item[1].get('room_id', '')))
+            # Save devices
+            if not await self._miot_storage.save_async(
+                    domain='miot_devices',
+                    name=f'{self._uid}_{self._cloud_server}',
+                    data=self._device_list_sorted):
+                _LOGGER.error(
+                    'save devices async failed, %s, %s',
+                    self._uid, self._cloud_server)
+                raise AbortFlow(
+                    reason='storage_error', description_placeholders={
+                        'error': 'save user devices error'})
+            self._devices_filter = {
+                'room_list': {
+                    'items': room_list_in,
+                    'mode': user_input.get('room_filter_mode', 'exclude')},
+                'type_list': {
+                    'items': type_list_in,
+                    'mode': user_input.get('type_filter_mode', 'exclude')},
+                'model_list': {
+                    'items': model_list_in,
+                    'mode': user_input.get('model_filter_mode', 'exclude')},
+                'device_list': {
+                    'items': device_list_in,
+                    'mode': user_input.get('devices_filter_mode', 'exclude')},
+                'statistics_logic': user_input.get('statistics_logic', 'or'),
+            }
+            return await self.config_flow_done()
+        return await self.__show_devices_filter_form(reason='')
+
+    async def __show_devices_filter_form(self, reason: str):
+        tip_devices: str = self._miot_i18n.translate(
+            key='config.other.devices')  # type: ignore
+        tip_without_room: str = self._miot_i18n.translate(
+            key='config.other.without_room')  # type: ignore
+        trans_statistics_logic: dict = self._miot_i18n.translate(
+            key='config.statistics_logic')  # type: ignore
+        trans_filter_mode: dict = self._miot_i18n.translate(
+            key='config.filter_mode')  # type: ignore
+        trans_connect_type: dict = self._miot_i18n.translate(
+            key='config.connect_type')  # type: ignore
+
+        room_device_count: dict = {}
+        model_device_count: dict = {}
+        connect_type_count: dict = {}
+        device_list: dict = {}
+        for did, info in self._device_list_sorted.items():
+            device_list[did] = (
+                f'[ {info["home_name"]} {info["room_name"]} ] ' +
+                f'{info["name"]}, {did}')
+            room_device_count.setdefault(info['room_id'], 0)
+            room_device_count[info['room_id']] += 1
+            model_device_count.setdefault(info['model'], 0)
+            model_device_count[info['model']] += 1
+            connect_type_count.setdefault(str(info['connect_type']), 0)
+            connect_type_count[str(info['connect_type'])] += 1
+        model_list: dict = {}
+        for model, count in model_device_count.items():
+            model_list[model] = f'{model} [ {count} {tip_devices} ]'
+        type_list: dict = {
+            k: f'{trans_connect_type.get(k, f"Connect Type ({k})")} '
+            f'[ {v} {tip_devices} ]'
+            for k, v in connect_type_count.items()}
+        room_list: dict = {}
+        for home_id, home_info in self._home_selected.items():
+            for room_id, room_name in home_info['room_info'].items():
+                if room_id not in room_device_count:
+                    continue
+                room_list[room_id] = (
+                    f'{home_info["home_name"]} {room_name}'
+                    f' [ {room_device_count[room_id]}{tip_devices} ]')
+            if home_id in room_device_count:
+                room_list[home_id] = (
+                    f'{home_info["home_name"]} {tip_without_room}'
+                    f' [ {room_device_count[home_id]}{tip_devices} ]')
+        return self.async_show_form(
+            step_id='devices_filter',
+            data_schema=vol.Schema({
+                vol.Required(
+                    'room_filter_mode', default='exclude'  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('room_list'): cv.multi_select(room_list),
+                vol.Required(
+                    'type_filter_mode', default='exclude'  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('type_list'): cv.multi_select(type_list),
+                vol.Required(
+                    'model_filter_mode', default='exclude'  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('model_list'): cv.multi_select(dict(sorted(
+                    model_list.items(), key=lambda item: item[0]))),
+                vol.Required(
+                    'devices_filter_mode', default='exclude'  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('device_list'): cv.multi_select(dict(sorted(
+                    device_list.items(), key=lambda device: device[1]))),
+                vol.Required(
+                    'statistics_logic', default='or'  # type: ignore
+                ): vol.In(trans_statistics_logic),
+            }),
+            errors={'base': reason},
+            last_step=False
+        )
+
+    async def config_flow_done(self):
+        return self.async_create_entry(
+            title=(
+                f'{self._nick_name}: {self._uid} '
+                f'[{CLOUD_SERVERS[self._cloud_server]}]'),
+            data={
+                'virtual_did': self._virtual_did,
+                'uuid': self._uuid,
+                'integration_language': self._integration_language,
+                'storage_path': self._storage_path,
+                'uid': self._uid,
+                'nick_name': self._nick_name,
+                'cloud_server': self._cloud_server,
+                'oauth_redirect_url': self._oauth_redirect_url_full,
+                'ctrl_mode': self._ctrl_mode,
+                'home_selected': self._home_selected,
+                'devices_filter': self._devices_filter,
+                'area_name_rule': self._area_name_rule,
+                'action_debug': self._action_debug,
+                'hide_non_standard_entities':
+                    self._hide_non_standard_entities,
+                'display_binary_mode': self._display_binary_mode,
+                'display_devices_changed_notify':
+                    self._display_devices_changed_notify
+            })
+
+    @ staticmethod
+    @ callback
     def async_get_options_flow(
             config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
@@ -590,108 +970,123 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     # pylint: disable=inconsistent-quotes
     _config_entry: config_entries.ConfigEntry
     _main_loop: asyncio.AbstractEventLoop
-    _miot_client: Optional[MIoTClient]
+    _miot_client: MIoTClient
 
-    _miot_network: Optional[MIoTNetwork]
-    _miot_storage: Optional[MIoTStorage]
-    _mips_service: Optional[MipsService]
-    _miot_oauth: Optional[MIoTOauthClient]
-    _miot_http: Optional[MIoTHttpClient]
-    _miot_i18n: Optional[MIoTI18n]
-    _miot_lan: Optional[MIoTLan]
+    _miot_network: MIoTNetwork
+    _miot_storage: MIoTStorage
+    _mips_service: MipsService
+    _miot_oauth: MIoTOauthClient
+    _miot_http: MIoTHttpClient
+    _miot_i18n: MIoTI18n
+    _miot_lan: MIoTLan
 
     _entry_data: dict
-    _virtual_did: Optional[str]
-    _uid: Optional[str]
-    _storage_path: Optional[str]
-    _cloud_server: Optional[str]
-    _oauth_redirect_url: Optional[str]
-    _integration_language: Optional[str]
-    _ctrl_mode: Optional[str]
-    _nick_name: Optional[str]
-    _home_selected_list: Optional[list]
+    _virtual_did: str
+    _uid: str
+    _storage_path: str
+    _cloud_server: str
+
+    _integration_language: str
+    _ctrl_mode: str
+    _nick_name: str
+    _home_selected_list: list
+    _devices_filter: dict
     _action_debug: bool
     _hide_non_standard_entities: bool
+    _display_binary_mode: list[str]
+    _display_devs_notify: list[str]
 
-    _auth_info: Optional[dict]
-    _home_selected_dict: Optional[dict]
-    _home_info_buffer: Optional[dict[str, str | dict[str, dict]]]
-    _home_list: Optional[dict]
-    _device_list: Optional[dict[str, dict]]
+    _oauth_redirect_url_full: str
+    _auth_info: dict
+    _home_selected: dict
+    _device_list_sorted: dict
     _devices_add: list[str]
     _devices_remove: list[str]
 
-    _oauth_auth_url: Optional[str]
-    _task_oauth: Optional[asyncio.Task[None]]
-    _config_error_reason: Optional[str]
-    _fut_oauth_code: Optional[asyncio.Future]
     # Config options
-    _lang_new: Optional[str]
+    _lang_new: str
     _nick_name_new: Optional[str]
     _action_debug_new: bool
     _hide_non_standard_entities_new: bool
+    _display_binary_mode_new: list[str]
     _update_user_info: bool
     _update_devices: bool
     _update_trans_rules: bool
-    _update_lan_ctrl_config: bool
+    _opt_lan_ctrl_cfg: bool
+    _opt_network_detect_cfg: bool
+    _opt_check_network_deps: bool
+
     _trans_rules_count: int
     _trans_rules_count_success: int
 
     _need_reload: bool
 
+    # Config cache
+    _cc_home_info: dict
+    _cc_home_list_show: dict
+    _cc_oauth_auth_url: Optional[str]
+    _cc_task_oauth: Optional[asyncio.Task[None]]
+    _cc_config_rc: Optional[str]
+    _cc_fut_oauth_code: Optional[asyncio.Future]
+    _cc_devices_local: dict
+    _cc_network_detect_addr: str
+
     def __init__(self, config_entry: config_entries.ConfigEntry):
         self._config_entry = config_entry
-        self._main_loop = None
-        self._miot_client = None
-
-        self._miot_network = None
-        self._miot_storage = None
-        self._mips_service = None
-        self._miot_oauth = None
-        self._miot_http = None
-        self._miot_i18n = None
-        self._miot_lan = None
+        self._main_loop = asyncio.get_event_loop()
 
         self._entry_data = dict(config_entry.data)
         self._virtual_did = self._entry_data['virtual_did']
         self._uid = self._entry_data['uid']
         self._storage_path = self._entry_data['storage_path']
         self._cloud_server = self._entry_data['cloud_server']
-        self._oauth_redirect_url = self._entry_data['oauth_redirect_url']
-        self._ctrl_mode = self._entry_data['ctrl_mode']
-        self._integration_language = self._entry_data['integration_language']
-        self._nick_name = self._entry_data['nick_name']
+        self._ctrl_mode = self._entry_data.get('ctrl_mode', DEFAULT_CTRL_MODE)
+        self._integration_language = self._entry_data.get(
+            'integration_language', DEFAULT_INTEGRATION_LANGUAGE)
+        self._nick_name = self._entry_data.get('nick_name', DEFAULT_NICK_NAME)
         self._action_debug = self._entry_data.get('action_debug', False)
         self._hide_non_standard_entities = self._entry_data.get(
             'hide_non_standard_entities', False)
+        self._display_binary_mode = self._entry_data.get(
+            'display_binary_mode', ['text'])
+        self._display_devs_notify = self._entry_data.get(
+            'display_devices_changed_notify', ['add', 'del', 'offline'])
         self._home_selected_list = list(
             self._entry_data['home_selected'].keys())
+        self._devices_filter = self._entry_data.get('devices_filter', {})
 
-        self._auth_info = None
-        self._home_selected_dict = {}
-        self._home_info_buffer = None
-        self._home_list = None
-        self._device_list = None
+        self._oauth_redirect_url_full = ''
+        self._auth_info = {}
+        self._home_selected = {}
+        self._device_list_sorted = {}
+
         self._devices_add = []
         self._devices_remove = []
 
-        self._oauth_auth_url = None
-        self._task_oauth = None
-        self._config_error_reason = None
-        self._fut_oauth_code = None
-
-        self._lang_new = None
+        self._lang_new = self._integration_language
         self._nick_name_new = None
         self._action_debug_new = False
         self._hide_non_standard_entities_new = False
+        self._display_binary_mode_new = []
         self._update_user_info = False
         self._update_devices = False
         self._update_trans_rules = False
-        self._update_lan_ctrl_config = False
+        self._opt_lan_ctrl_cfg = False
+        self._opt_network_detect_cfg = False
+        self._opt_check_network_deps = False
         self._trans_rules_count = 0
         self._trans_rules_count_success = 0
 
         self._need_reload = False
+
+        self._cc_home_info = {}
+        self._cc_home_list_show = {}
+        self._cc_oauth_auth_url = None
+        self._cc_task_oauth = None
+        self._cc_config_rc = None
+        self._cc_fut_oauth_code = None
+        self._cc_devices_local = {}
+        self._cc_network_detect_addr = ''
 
         _LOGGER.info(
             'options init, %s, %s, %s, %s', config_entry.entry_id,
@@ -701,10 +1096,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self.hass.data.setdefault(DOMAIN, {})
         self.hass.data[DOMAIN].setdefault(self._virtual_did, {})
         try:
-            # main loop
-            self._main_loop = asyncio.get_running_loop()
             # MIoT client
-            self._miot_client: MIoTClient = await get_miot_instance_async(
+            self._miot_client = await get_miot_instance_async(
                 hass=self.hass, entry_id=self._config_entry.entry_id)
             if not self._miot_client:
                 raise MIoTConfigError('invalid miot client')
@@ -737,8 +1130,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Check token
             if not await self._miot_client.refresh_oauth_info_async():
                 # Check network
-                if not await self._miot_network.get_network_status_async(
-                        timeout=3):
+                if not await self._miot_network.get_network_status_async():
                     raise AbortFlow(
                         reason='network_connect_error',
                         description_placeholders={})
@@ -765,7 +1157,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input:
             webhook_path = webhook_async_generate_path(
                 webhook_id=self._virtual_did)
-            self._oauth_redirect_url = (
+            self._oauth_redirect_url_full = (
                 f'{user_input.get("oauth_redirect_url")}{webhook_path}')
             return await self.async_step_oauth(user_input)
         return self.async_show_form(
@@ -773,7 +1165,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema({
                 vol.Required(
                     'oauth_redirect_url',
-                    default=OAUTH_REDIRECT_URL): vol.In([OAUTH_REDIRECT_URL]),
+                    default=OAUTH_REDIRECT_URL  # type: ignore
+                ): vol.In([OAUTH_REDIRECT_URL]),
             }),
             description_placeholders={
                 'cloud_server': CLOUD_SERVERS[self._cloud_server],
@@ -783,16 +1176,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_oauth(self, user_input=None):
         try:
-            if self._task_oauth is None:
-                state = str(secrets.randbits(64))
-                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = state
-                self._miot_oauth.set_redirect_url(
-                    redirect_url=self._oauth_redirect_url)
-                self._oauth_auth_url = self._miot_oauth.gen_auth_url(
-                    redirect_url=self._oauth_redirect_url, state=state)
+            if self._cc_task_oauth is None:
+                self._cc_oauth_auth_url = self._miot_oauth.gen_auth_url(
+                    redirect_url=self._oauth_redirect_url_full)
+                self.hass.data[DOMAIN][self._virtual_did]['oauth_state'] = (
+                    self._miot_oauth.state)
+                self.hass.data[DOMAIN][self._virtual_did]['i18n'] = (
+                    self._miot_i18n)
                 _LOGGER.info(
-                    'async_step_oauth, oauth_url: %s',
-                    self._oauth_auth_url)
+                    'async_step_oauth, oauth_url: %s', self._cc_oauth_auth_url)
                 webhook_async_unregister(
                     self.hass, webhook_id=self._virtual_did)
                 webhook_async_register(
@@ -800,26 +1192,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     domain=DOMAIN,
                     name='oauth redirect url webhook',
                     webhook_id=self._virtual_did,
-                    handler=handle_oauth_webhook,
+                    handler=_handle_oauth_webhook,
                     allowed_methods=(METH_GET,),
                 )
-                self._fut_oauth_code = self.hass.data[DOMAIN][
+                self._cc_fut_oauth_code = self.hass.data[DOMAIN][
                     self._virtual_did].get('fut_oauth_code', None)
-                if self._fut_oauth_code is None:
-                    self._fut_oauth_code = self._main_loop.create_future()
+                if self._cc_fut_oauth_code is None:
+                    self._cc_fut_oauth_code = self._main_loop.create_future()
                     self.hass.data[DOMAIN][self._virtual_did][
-                        'fut_oauth_code'] = self._fut_oauth_code
-                self._task_oauth = self.hass.async_create_task(
+                        'fut_oauth_code'] = self._cc_fut_oauth_code
+                self._cc_task_oauth = self.hass.async_create_task(
                     self.__check_oauth_async())
                 _LOGGER.info(
                     'async_step_oauth, webhook.async_register: %s',
                     self._virtual_did)
 
-            if self._task_oauth.done():
-                if (error := self._task_oauth.exception()):
+            if self._cc_task_oauth.done():
+                if (error := self._cc_task_oauth.exception()):
                     _LOGGER.error('task_oauth exception, %s', error)
-                    self._config_error_reason = str(error)
-                    self._task_oauth = None
+                    self._cc_config_rc = str(error)
+                    self._cc_task_oauth = None
                     return self.async_show_progress_done(
                         next_step_id='oauth_error')
                 return self.async_show_progress_done(
@@ -828,27 +1220,31 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             _LOGGER.error(
                 'async_step_oauth error, %s, %s',
                 err, traceback.format_exc())
-            self._config_error_reason = str(err)
+            self._cc_config_rc = str(err)
             return self.async_show_progress_done(next_step_id='oauth_error')
-
+        # pylint: disable=unexpected-keyword-arg
         return self.async_show_progress(
             step_id='oauth',
             progress_action='oauth',
             description_placeholders={
                 'link_left':
-                    f'<a href="{self._oauth_auth_url}" target="_blank">',
+                    f'<a href="{self._cc_oauth_auth_url}" target="_blank">',
                 'link_right': '</a>'
             },
-            progress_task=self._task_oauth,
+            progress_task=self._cc_task_oauth,  # type: ignore
         )
 
     async def __check_oauth_async(self) -> None:
         # Get oauth code
-        oauth_code: Optional[str] = await self._fut_oauth_code
+        if not self._cc_fut_oauth_code:
+            raise MIoTConfigError('oauth_code_fut_error')
+        oauth_code: str = await self._cc_fut_oauth_code
+        if not oauth_code:
+            raise MIoTConfigError('oauth_code_error')
         _LOGGER.debug('options flow __check_oauth_async, %s', oauth_code)
         # Get access_token and user_info from miot_oauth
-        if self._auth_info is None:
-            auth_info: dict = None
+        if not self._auth_info:
+            auth_info: dict = {}
             try:
                 auth_info = await self._miot_oauth.get_access_token_async(
                     code=oauth_code)
@@ -882,13 +1278,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     # Show setup error message
     async def async_step_oauth_error(self, user_input=None):
-        if self._config_error_reason is None:
+        if self._cc_config_rc is None:
             return await self.async_step_oauth()
-        if self._config_error_reason.startswith('Flow aborted: '):
+        if self._cc_config_rc.startswith('Flow aborted: '):
             raise AbortFlow(
-                reason=self._config_error_reason.replace('Flow aborted: ', ''))
-        error_reason = self._config_error_reason
-        self._config_error_reason = None
+                reason=self._cc_config_rc.replace('Flow aborted: ', ''))
+        error_reason = self._cc_config_rc
+        self._cc_config_rc = None
         return self.async_show_form(
             step_id='oauth_error',
             data_schema=vol.Schema({}),
@@ -901,37 +1297,65 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_show_form(
                 step_id='config_options',
                 data_schema=vol.Schema({
+                    # Integration configure
                     vol.Required(
                         'integration_language',
-                        default=self._integration_language
+                        default=self._integration_language  # type: ignore
                     ): vol.In(INTEGRATION_LANGUAGES),
                     vol.Required(
                         'update_user_info',
-                        default=self._update_user_info): bool,
+                        default=self._update_user_info  # type: ignore
+                    ): bool,
                     vol.Required(
-                        'update_devices', default=self._update_devices): bool,
+                        'network_detect_config',
+                        default=self._opt_network_detect_cfg  # type: ignore
+                    ): bool,
+                    # Device info configure
                     vol.Required(
-                        'action_debug', default=self._action_debug): bool,
+                        'update_devices',
+                        default=self._update_devices  # type: ignore
+                    ): bool,
                     vol.Required(
-                        'hide_non_standard_entities',
-                        default=self._hide_non_standard_entities): bool,
-                    vol.Required(
-                        'update_trans_rules',
-                        default=self._update_trans_rules): bool,
+                        'display_devices_changed_notify',
+                        default=self._display_devs_notify  # type: ignore
+                    ): cv.multi_select(
+                        self._miot_i18n.translate(
+                            'config.device_state')),  # type: ignore
                     vol.Required(
                         'update_lan_ctrl_config',
-                        default=self._update_lan_ctrl_config): bool
+                        default=self._opt_lan_ctrl_cfg  # type: ignore
+                    ): bool,
+                    # Entity info configure
+                    vol.Required(
+                        'action_debug',
+                        default=self._action_debug  # type: ignore
+                    ): bool,
+                    vol.Required(
+                        'hide_non_standard_entities',
+                        default=self._hide_non_standard_entities  # type: ignore
+                    ): bool,
+                    vol.Required(
+                        'display_binary_mode',
+                        default=self._display_binary_mode  # type: ignore
+                    ): cv.multi_select(
+                        self._miot_i18n.translate(
+                            'config.binary_mode')),  # type: ignore
+                    vol.Required(
+                        'update_trans_rules',
+                        default=self._update_trans_rules  # type: ignore
+                    ): bool,
                 }),
                 errors={},
                 description_placeholders={
                     'nick_name': self._nick_name,
                     'uid': self._uid,
-                    'cloud_server': CLOUD_SERVERS[self._cloud_server]
+                    'cloud_server': CLOUD_SERVERS[self._cloud_server],
+                    'instance_id': f'ha.{self._entry_data["uuid"]}'
                 },
                 last_step=False,
             )
         # Check network
-        if not await self._miot_network.get_network_status_async(timeout=3):
+        if not await self._miot_network.get_network_status_async():
             raise AbortFlow(
                 reason='network_connect_error', description_placeholders={})
         self._lang_new = user_input.get(
@@ -944,10 +1368,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'action_debug', self._action_debug)
         self._hide_non_standard_entities_new = user_input.get(
             'hide_non_standard_entities', self._hide_non_standard_entities)
+        self._display_binary_mode_new = user_input.get(
+            'display_binary_mode', self._display_binary_mode)
+        self._display_devs_notify = user_input.get(
+            'display_devices_changed_notify', self._display_devs_notify)
         self._update_trans_rules = user_input.get(
             'update_trans_rules', self._update_trans_rules)
-        self._update_lan_ctrl_config = user_input.get(
-            'update_lan_ctrl_config', self._update_lan_ctrl_config)
+        self._opt_lan_ctrl_cfg = user_input.get(
+            'update_lan_ctrl_config', self._opt_lan_ctrl_cfg)
+        self._opt_network_detect_cfg = user_input.get(
+            'network_detect_config', self._opt_network_detect_cfg)
 
         return await self.async_step_update_user_info()
 
@@ -972,7 +1402,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._nick_name_new = user_input.get('nick_name')
         return await self.async_step_homes_select()
 
-    async def async_step_homes_select(self, user_input=None):
+    async def async_step_homes_select(
+        self, user_input: Optional[dict] = None
+    ):
         if not self._update_devices:
             return await self.async_step_update_trans_rules()
         if not user_input:
@@ -987,7 +1419,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             # Get home info
             try:
-                self._home_info_buffer = (
+                self._cc_home_info = (
                     await self._miot_http.get_devices_async())
             except Exception as err:
                 _LOGGER.error(
@@ -997,86 +1429,274 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             home_list = {}
             tip_devices = self._miot_i18n.translate(key='config.other.devices')
             # home list
-            for home_id, home_info in self._home_info_buffer[
-                    'homes']['home_list'].items():
-                # i18n
-                tip_central = ''
-                group_id = home_info.get('group_id', None)
-                did_list = {
-                    device['did']: device for device in list(
-                        self._home_info_buffer['devices'].values())
-                    if device.get('home_id', None) == home_id}
-                if (
-                    group_id in mips_list
-                    and mips_list[group_id].get('did', None) in did_list
-                ):
+            for device_source in ['home_list','share_home_list',
+                                  'separated_shared_list']:
+                if device_source not in self._cc_home_info['homes']:
+                    continue
+                for home_id, home_info in self._cc_home_info[
+                        'homes'][device_source].items():
                     # i18n
-                    tip_central = self._miot_i18n.translate(
-                        key='config.other.found_central_gateway')
-                    home_info['central_did'] = mips_list[group_id].get(
-                        'did', None)
-                home_list[home_id] = (
-                    f'{home_info["home_name"]} '
-                    f'[ {len(did_list)} {tip_devices}{tip_central} ]')
+                    tip_central = ''
+                    group_id = home_info.get('group_id', None)
+                    did_list = {
+                        device['did']: device for device in list(
+                            self._cc_home_info['devices'].values())
+                        if device.get('home_id', None) == home_id}
+                    if (
+                        group_id in mips_list
+                        and mips_list[group_id].get('did', None) in did_list
+                    ):
+                        # i18n
+                        tip_central = self._miot_i18n.translate(
+                            key='config.other.found_central_gateway')
+                        home_info['central_did'] = mips_list[group_id].get(
+                            'did', None)
+                    home_list[home_id] = (
+                        f'{home_info["home_name"]} '
+                        f'[ {len(did_list)} {tip_devices} {tip_central} ]')
             # Remove deleted item
             self._home_selected_list = [
                 home_id for home_id in self._home_selected_list
                 if home_id in home_list]
+            self._cc_home_list_show = dict(sorted(home_list.items()))
+            # Get local devices
+            self._cc_devices_local = (
+                await self._miot_storage.load_async(
+                    domain='miot_devices',
+                    name=f'{self._uid}_{self._cloud_server}',
+                    type_=dict)) or {}  # type: ignore
 
-            self._home_list = dict(sorted(home_list.items()))
-            return await self.display_homes_select_form('')
+            return await self.__show_homes_select_form('')
 
         self._home_selected_list = user_input.get('home_infos', [])
         if not self._home_selected_list:
-            return await self.display_homes_select_form('no_family_selected')
-        self._ctrl_mode = user_input.get('ctrl_mode')
-        self._home_selected_dict = {}
-        for home_id, home_info in self._home_info_buffer[
-                'homes']['home_list'].items():
-            if home_id in self._home_selected_list:
-                self._home_selected_dict[home_id] = home_info
+            return await self.__show_homes_select_form('no_family_selected')
+        self._ctrl_mode = user_input.get('ctrl_mode', self._ctrl_mode)
+        self._home_selected = {}
+        for device_source in ['home_list','share_home_list',
+                              'separated_shared_list']:
+            if device_source not in self._cc_home_info['homes']:
+                continue
+            for home_id, home_info in self._cc_home_info[
+                    'homes'][device_source].items():
+                if home_id in self._home_selected_list:
+                    self._home_selected[home_id] = home_info
         # Get device list
-        self._device_list: dict[str, dict] = {
+        device_list: dict = {
             did: dev_info
-            for did, dev_info in self._home_info_buffer['devices'].items()
+            for did, dev_info in self._cc_home_info['devices'].items()
             if dev_info['home_id'] in self._home_selected_list}
-        if not self._device_list:
-            return await self.display_homes_select_form('no_devices')
-        # Statistics devices changed
-        self._devices_add = []
-        self._devices_remove = []
-        local_devices = await self._miot_storage.load_async(
-            domain='miot_devices',
-            name=f'{self._uid}_{self._cloud_server}',
-            type_=dict) or {}
+        if not device_list:
+            return await self.__show_homes_select_form('no_devices')
+        self._device_list_sorted = dict(sorted(
+            device_list.items(), key=lambda item:
+                item[1].get('home_id', '')+item[1].get('room_id', '')))
 
-        self._devices_add = [
-            did for did in self._device_list.keys() if did not in local_devices]
-        self._devices_remove = [
-            did for did in local_devices.keys() if did not in self._device_list]
-        _LOGGER.debug(
-            'devices update, add->%s, remove->%s',
-            self._devices_add, self._devices_remove)
-        return await self.async_step_update_trans_rules()
+        if user_input.get('devices_filter', False):
+            return await self.async_step_devices_filter()
+        return await self.update_devices_done_async()
 
-    async def display_homes_select_form(self, reason: str):
+    async def __show_homes_select_form(self, reason: str):
+        devices_local_count: str = str(len(self._cc_devices_local))
         return self.async_show_form(
             step_id='homes_select',
             data_schema=vol.Schema({
                 vol.Required(
-                    'ctrl_mode', default=self._ctrl_mode
-                ): vol.In(self._miot_i18n.translate(key='config.control_mode')),
-                vol.Required(
                     'home_infos',
-                    default=self._home_selected_list
-                ): cv.multi_select(self._home_list),
+                    default=self._home_selected_list  # type: ignore
+                ): cv.multi_select(self._cc_home_list_show),
+                vol.Required(
+                    'devices_filter', default=False  # type: ignore
+                ): bool,
+                vol.Required(
+                    'ctrl_mode', default=self._ctrl_mode  # type: ignore
+                ): vol.In(self._miot_i18n.translate(key='config.control_mode')),
             }),
             errors={'base': reason},
             description_placeholders={
-                'nick_name': self._nick_name
+                'local_count': devices_local_count
             },
             last_step=False
         )
+
+    async def async_step_devices_filter(
+        self, user_input: Optional[dict] = None
+    ):
+        if user_input:
+            # Room filter
+            include_items: dict = {}
+            exclude_items: dict = {}
+            room_list_in: list = user_input.get('room_list', [])
+            room_filter_mode: str = user_input.get(
+                'room_filter_mode', 'exclude')
+            if room_list_in:
+                if room_filter_mode == 'include':
+                    include_items['room_id'] = room_list_in
+                else:
+                    exclude_items['room_id'] = room_list_in
+            # Connect Type filter
+            type_list_in: list = user_input.get('type_list', [])
+            type_filter_mode: str = user_input.get(
+                'type_filter_mode', 'exclude')
+            if type_list_in:
+                if type_filter_mode == 'include':
+                    include_items['connect_type'] = type_list_in
+                else:
+                    exclude_items['connect_type'] = type_list_in
+            # Model filter
+            model_list_in: list = user_input.get('model_list', [])
+            model_filter_mode: str = user_input.get(
+                'model_filter_mode', 'exclude')
+            if model_list_in:
+                if model_filter_mode == 'include':
+                    include_items['model'] = model_list_in
+                else:
+                    exclude_items['model'] = model_list_in
+            # Device filter
+            device_list_in: list = user_input.get('device_list', [])
+            device_filter_mode: str = user_input.get(
+                'devices_filter_mode', 'exclude')
+            if device_list_in:
+                if device_filter_mode == 'include':
+                    include_items['did'] = device_list_in
+                else:
+                    exclude_items['did'] = device_list_in
+            statistics_logic: str = user_input.get('statistics_logic', 'or')
+            device_filter_list = _handle_devices_filter(
+                devices=self._device_list_sorted,
+                logic_or=(statistics_logic == 'or'),
+                item_in=include_items, item_ex=exclude_items)
+            if not device_filter_list:
+                return await self.__show_devices_filter_form(
+                    reason='no_filter_devices')
+            self._device_list_sorted = dict(sorted(
+                device_filter_list.items(), key=lambda item:
+                    item[1].get('home_id', '')+item[1].get('room_id', '')))
+            self._devices_filter = {
+                'room_list': {
+                    'items': room_list_in, 'mode': room_filter_mode},
+                'type_list': {
+                    'items': type_list_in, 'mode': type_filter_mode},
+                'model_list': {
+                    'items': model_list_in, 'mode': model_filter_mode},
+                'device_list': {
+                    'items': device_list_in, 'mode': device_filter_mode},
+                'statistics_logic': statistics_logic}
+            return await self.update_devices_done_async()
+        return await self.__show_devices_filter_form(reason='')
+
+    async def __show_devices_filter_form(self, reason: str):
+        tip_devices: str = self._miot_i18n.translate(
+            key='config.other.devices')  # type: ignore
+        tip_without_room: str = self._miot_i18n.translate(
+            key='config.other.without_room')  # type: ignore
+        trans_statistics_logic: dict = self._miot_i18n.translate(
+            key='config.statistics_logic')  # type: ignore
+        trans_filter_mode: dict = self._miot_i18n.translate(
+            key='config.filter_mode')  # type: ignore
+        trans_connect_type: dict = self._miot_i18n.translate(
+            key='config.connect_type')  # type: ignore
+
+        room_device_count: dict = {}
+        model_device_count: dict = {}
+        connect_type_count: dict = {}
+        device_list: dict = {}
+        for did, info in self._device_list_sorted.items():
+            device_list[did] = (
+                f'[ {info["home_name"]} {info["room_name"]} ] ' +
+                f'{info["name"]}, {did}')
+            room_device_count.setdefault(info['room_id'], 0)
+            room_device_count[info['room_id']] += 1
+            model_device_count.setdefault(info['model'], 0)
+            model_device_count[info['model']] += 1
+            connect_type_count.setdefault(str(info['connect_type']), 0)
+            connect_type_count[str(info['connect_type'])] += 1
+        model_list: dict = {}
+        for model, count in model_device_count.items():
+            model_list[model] = f'{model} [ {count} {tip_devices} ]'
+        type_list: dict = {
+            k: f'{trans_connect_type.get(k, f"Connect Type ({k})")} '
+            f'[ {v} {tip_devices} ]'
+            for k, v in connect_type_count.items()}
+        room_list: dict = {}
+        for home_id, home_info in self._home_selected.items():
+            for room_id, room_name in home_info['room_info'].items():
+                if room_id not in room_device_count:
+                    continue
+                room_list[room_id] = (
+                    f'{home_info["home_name"]} {room_name}'
+                    f' [ {room_device_count[room_id]}{tip_devices} ]')
+            if home_id in room_device_count:
+                room_list[home_id] = (
+                    f'{home_info["home_name"]} {tip_without_room}'
+                    f' [ {room_device_count[home_id]}{tip_devices} ]')
+        return self.async_show_form(
+            step_id='devices_filter',
+            data_schema=vol.Schema({
+                vol.Required(
+                    'room_filter_mode', default=self._devices_filter.get(
+                        'room_list', {}).get('mode', 'exclude')  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('room_list', default=[
+                    room_id for room_id in self._devices_filter.get(
+                        'room_list', {}).get('items', [])
+                    if room_id in room_list]  # type: ignore
+                ): cv.multi_select(room_list),
+                vol.Required(
+                    'type_filter_mode', default=self._devices_filter.get(
+                        'type_list', {}).get('mode', 'exclude')  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('type_list', default=[
+                    type_ for type_ in self._devices_filter.get(
+                        'type_list', {}).get('items', [])
+                    if type_ in type_list]  # type: ignore
+                ): cv.multi_select(type_list),
+                vol.Required(
+                    'model_filter_mode',
+                    default=self._devices_filter.get('model_list', {}).get(
+                        'mode', 'exclude')  # type: ignore
+                ): vol.In(trans_filter_mode),
+                vol.Optional('model_list', default=[
+                    model for model in self._devices_filter.get(
+                        'model_list', {}).get('items', [])
+                    if model in model_list]  # type: ignore
+                ): cv.multi_select(dict(sorted(
+                    model_list.items(), key=lambda item: item[0]))),
+                vol.Required(
+                    'devices_filter_mode', default=self._devices_filter.get(
+                        'device_list', {}).get(
+                            'mode', 'exclude')  # type: ignore
+                ):  vol.In(trans_filter_mode),
+                vol.Optional('device_list', default=[
+                    did for did in self._devices_filter.get(
+                        'device_list', {}).get('items', [])
+                    if did in device_list]  # type: ignore
+                ): cv.multi_select(dict(sorted(
+                    device_list.items(), key=lambda device: device[1]))),
+                vol.Required(
+                    'statistics_logic', default=self._devices_filter.get(
+                        'statistics_logic', 'or')
+                ): vol.In(trans_statistics_logic),
+            }),
+            errors={'base': reason},
+            last_step=False
+        )
+
+    async def update_devices_done_async(self):
+        # Statistics devices changed
+        self._devices_add = []
+        self._devices_remove = []
+
+        self._devices_add = [
+            did for did in list(self._device_list_sorted.keys())
+            if did not in self._cc_devices_local]
+        self._devices_remove = [
+            did for did in self._cc_devices_local.keys()
+            if did not in self._device_list_sorted]
+        _LOGGER.debug(
+            'devices update, add->%s, remove->%s',
+            self._devices_add, self._devices_remove)
+        return await self.async_step_update_trans_rules()
 
     async def async_step_update_trans_rules(self, user_input=None):
         if not self._update_trans_rules:
@@ -1090,10 +1710,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_show_form(
                 step_id='update_trans_rules',
                 data_schema=vol.Schema({
-                    vol.Required('confirm', default=False): bool
+                    vol.Required(
+                        'confirm', default=False  # type: ignore
+                    ): bool
                 }),
                 description_placeholders={
-                    'urn_count': self._trans_rules_count,
+                    'urn_count': str(self._trans_rules_count),
                 },
                 last_step=False
             )
@@ -1113,8 +1735,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return await self.async_step_update_lan_ctrl_config()
 
     async def async_step_update_lan_ctrl_config(self, user_input=None):
-        if not self._update_lan_ctrl_config:
-            return await self.async_step_config_confirm()
+        if not self._opt_lan_ctrl_cfg:
+            return await self.async_step_network_detect_config()
         if not user_input:
             notice_net_dup: str = ''
             lan_ctrl_config = await self._miot_storage.load_user_config_async(
@@ -1133,8 +1755,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     f'{if_name} ({info.ip}/{info.netmask})')
                 net_segs.add(info.net_seg)
             if len(net_segs) != len(net_info):
-                notice_net_dup = self._miot_i18n.translate(
-                    key='config.lan_ctrl_config.notice_net_dup')
+                notice_net_dup: str = self._miot_i18n.translate(
+                    key='config.lan_ctrl_config.notice_net_dup')  # type: ignore
             return self.async_show_form(
                 step_id='update_lan_ctrl_config',
                 data_schema=vol.Schema({
@@ -1173,7 +1795,118 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             await self._miot_lan.update_subscribe_option(
                 enable_subscribe=enable_subscribe_new)
 
+        return await self.async_step_network_detect_config()
+
+    async def async_step_network_detect_config(
+        self, user_input: Optional[dict] = None
+    ):
+        if not self._opt_network_detect_cfg:
+            return await self.async_step_config_confirm()
+        if not user_input:
+            return await self.__show_network_detect_config_form(reason='')
+        self._cc_network_detect_addr = user_input.get(
+            'network_detect_addr', self._cc_network_detect_addr)
+
+        ip_list, url_list, invalid_list = _handle_network_detect_addr(
+            addr_str=self._cc_network_detect_addr)
+        if invalid_list:
+            return await self.__show_network_detect_config_form(
+                reason='invalid_network_addr')
+        if ip_list or url_list:
+            if ip_list and not await self._miot_network.ping_multi_async(
+                    ip_list=ip_list):
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_ip_addr')
+            if url_list and not await self._miot_network.http_multi_async(
+                    url_list=url_list):
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_http_addr')
+        else:
+            if not await self._miot_network.get_network_status_async():
+                return await self.__show_network_detect_config_form(
+                    reason='invalid_default_addr')
+        network_detect_addr: dict = {'ip': ip_list, 'url': url_list}
+        # Save
+        if await self._miot_storage.update_user_config_async(
+            uid='global_config', cloud_server='all', config={
+                'network_detect_addr': network_detect_addr}):
+            _LOGGER.info(
+                'update network_detect_addr, %s', network_detect_addr)
+        await self._miot_network.update_addr_list_async(
+            ip_addr_list=ip_list, url_addr_list=url_list)
+        # Check network deps
+        self._opt_check_network_deps = user_input.get(
+            'check_network_deps', False)
+        if self._opt_check_network_deps:
+            # OAuth2
+            if not await self._miot_network.http_multi_async(
+                    url_list=[OAUTH2_AUTH_URL]):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_oauth2_host')
+            # HTTP API
+            http_host = (
+                DEFAULT_OAUTH2_API_HOST
+                if self._cloud_server == DEFAULT_CLOUD_SERVER
+                else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')
+            if not await self._miot_network.http_multi_async(
+                    url_list=[
+                        f'https://{http_host}/app/v2/ha/oauth/get_token']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_http_host')
+            # SPEC API
+            if not await self._miot_network.http_multi_async(
+                    url_list=[
+                        'https://miot-spec.org/miot-spec-v2/template/list/'
+                        'device']):
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_spec_host')
+            # MQTT Broker
+            # pylint: disable=import-outside-toplevel
+            try:
+                from paho.mqtt import client
+                mqtt_client = client.Client(
+                    client_id=f'ha.{self._uid}',
+                    protocol=client.MQTTv5)  # type: ignore
+                if mqtt_client.connect(
+                        host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
+                        port=8883) != 0:
+                    raise RuntimeError('mqtt connect error')
+                mqtt_client.disconnect()
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error('try connect mqtt broker error, %s', err)
+                return await self.__show_network_detect_config_form(
+                    reason='unreachable_mqtt_broker')
+
         return await self.async_step_config_confirm()
+
+    async def __show_network_detect_config_form(self, reason: str):
+        if not self._cc_network_detect_addr:
+            addr_list: dict = (await self._miot_storage.load_user_config_async(
+                'global_config', 'all', ['network_detect_addr'])).get(
+                    'network_detect_addr', {})
+            self._cc_network_detect_addr = ','.join(
+                addr_list.get('ip', [])+addr_list.get('url', []))
+        return self.async_show_form(
+            step_id='network_detect_config',
+            data_schema=vol.Schema({
+                vol.Optional(
+                    'network_detect_addr',
+                    default=self._cc_network_detect_addr  # type: ignore
+                ): str,
+                vol.Optional(
+                    'check_network_deps',
+                    default=self._opt_check_network_deps  # type: ignore
+                ): bool,
+            }),
+            errors={'base': reason},
+            description_placeholders={
+                'cloud_server': self._cloud_server,
+                'http_host': (
+                    DEFAULT_OAUTH2_API_HOST
+                    if self._cloud_server == DEFAULT_CLOUD_SERVER
+                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')},
+            last_step=False
+        )
 
     async def async_step_config_confirm(self, user_input=None):
         if not user_input or not user_input.get('confirm', False):
@@ -1181,10 +1914,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 key='config.option_status.enable')
             disable_text = self._miot_i18n.translate(
                 key='config.option_status.disable')
+            trans_devs_display: dict = self._miot_i18n.translate(
+                key='config.device_state')  # type: ignore
             return self.async_show_form(
                 step_id='config_confirm',
                 data_schema=vol.Schema({
-                    vol.Required('confirm', default=False): bool
+                    vol.Required(
+                        'confirm', default=False): bool  # type: ignore
                 }),
                 description_placeholders={
                     'nick_name': self._nick_name,
@@ -1201,12 +1937,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     'hide_non_standard_entities': (
                         enable_text if self._hide_non_standard_entities_new
                         else disable_text),
-                },
+                    'display_devices_changed_notify': (' '.join(
+                        trans_devs_display[key]
+                        for key in self._display_devs_notify
+                        if key in trans_devs_display)
+                        if self._display_devs_notify
+                        else self._miot_i18n.translate(
+                            key='config.other.no_display'))
+                },  # type: ignore
                 errors={'base': 'not_confirm'} if user_input else {},
                 last_step=True
             )
 
-        self._entry_data['oauth_redirect_url'] = self._oauth_redirect_url
         if self._lang_new != self._integration_language:
             self._entry_data['integration_language'] = self._lang_new
             self._need_reload = True
@@ -1214,14 +1956,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self._entry_data['nick_name'] = self._nick_name_new
         if self._update_devices:
             self._entry_data['ctrl_mode'] = self._ctrl_mode
-            self._entry_data['home_selected'] = self._home_selected_dict
-            devices_list_sort = dict(sorted(
-                self._device_list.items(), key=lambda item:
-                    item[1].get('home_id', '')+item[1].get('room_id', '')))
+            self._entry_data['home_selected'] = self._home_selected
+            self._entry_data['devices_filter'] = self._devices_filter
             if not await self._miot_storage.save_async(
                     domain='miot_devices',
                     name=f'{self._uid}_{self._cloud_server}',
-                    data=devices_list_sort):
+                    data=self._device_list_sorted):
                 _LOGGER.error(
                     'save devices async failed, %s, %s',
                     self._uid, self._cloud_server)
@@ -1241,6 +1981,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self._entry_data['hide_non_standard_entities'] = (
                 self._hide_non_standard_entities_new)
             self._need_reload = True
+        if set(self._display_binary_mode) != set(self._display_binary_mode_new):
+            self._entry_data['display_binary_mode'] = (
+                self._display_binary_mode_new)
+            self._need_reload = True
+        # Update display_devices_changed_notify
+        self._entry_data['display_devices_changed_notify'] = (
+            self._display_devs_notify)
+        self._miot_client.display_devices_changed_notify = (
+            self._display_devs_notify)
         if (
                 self._devices_remove
                 and not await self._miot_storage.update_user_config_async(
@@ -1266,29 +2015,129 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_create_entry(title='', data={})
 
 
-async def handle_oauth_webhook(hass, webhook_id, request):
+async def _handle_oauth_webhook(hass, webhook_id, request):
+    """Webhook to handle oauth2 callback."""
     # pylint: disable=inconsistent-quotes
+    i18n: MIoTI18n = hass.data[DOMAIN][webhook_id].get('i18n', None)
     try:
         data = dict(request.query)
         if data.get('code', None) is None or data.get('state', None) is None:
-            raise MIoTConfigError('invalid oauth code')
+            raise MIoTConfigError(
+                'invalid oauth code or state',
+                MIoTErrorCode.CODE_CONFIG_INVALID_INPUT)
 
         if data['state'] != hass.data[DOMAIN][webhook_id]['oauth_state']:
             raise MIoTConfigError(
-                f'invalid oauth state, '
-                f'{hass.data[DOMAIN][webhook_id]["oauth_state"]}, '
-                f'{data["state"]}')
+                f'inconsistent state, '
+                f'{hass.data[DOMAIN][webhook_id]["oauth_state"]}!='
+                f'{data["state"]}', MIoTErrorCode.CODE_CONFIG_INVALID_STATE)
 
         fut_oauth_code: asyncio.Future = hass.data[DOMAIN][webhook_id].pop(
             'fut_oauth_code', None)
         fut_oauth_code.set_result(data['code'])
         _LOGGER.info('webhook code: %s', data['code'])
 
+        success_trans: dict = {}
+        if i18n:
+            success_trans = i18n.translate(
+                'oauth2.success') or {}  # type: ignore
+        # Delete
+        del hass.data[DOMAIN][webhook_id]['oauth_state']
+        del hass.data[DOMAIN][webhook_id]['i18n']
         return web.Response(
-            body=oauth_redirect_page(
-                hass.config.language, 'success'), content_type='text/html')
+            body=await oauth_redirect_page(
+                title=success_trans.get('title', 'Success'),
+                content=success_trans.get(
+                    'content', (
+                        'Please close this page and return to the account '
+                        'authentication page to click NEXT')),
+                button=success_trans.get('button', 'Close Page'),
+                success=True,
+            ), content_type='text/html')
 
-    except MIoTConfigError:
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        fail_trans: dict = {}
+        err_msg: str = str(err)
+        if i18n:
+            if isinstance(err, MIoTConfigError):
+                err_msg = i18n.translate(
+                    f'oauth2.error_msg.{err.code.value}'
+                ) or err.message  # type: ignore
+            fail_trans = i18n.translate('oauth2.fail') or {}  # type: ignore
         return web.Response(
-            body=oauth_redirect_page(hass.config.language, 'fail'),
+            body=await oauth_redirect_page(
+                title=fail_trans.get('title', 'Authentication Failed'),
+                content=str(fail_trans.get('content', (
+                    '{error_msg}, Please close this page and return to the '
+                    'account authentication page to click the authentication '
+                    'link again.'))).replace('{error_msg}', err_msg),
+                button=fail_trans.get('button', 'Close Page'),
+                success=False),
             content_type='text/html')
+
+
+def _handle_devices_filter(
+    devices: dict, logic_or: bool, item_in: dict, item_ex: dict
+) -> dict:
+    """Private method to filter devices."""
+    include_set: Set = set([])
+    if not item_in:
+        include_set = set(devices.keys())
+    else:
+        filter_item: list[set] = []
+        for key, value in item_in.items():
+            filter_item.append(set([
+                did for did, info in devices.items()
+                if str(info[key]) in value]))
+        include_set = (
+            set.union(*filter_item)
+            if logic_or else set.intersection(*filter_item))
+    if not include_set:
+        return {}
+    if item_ex:
+        filter_item: list[set] = []
+        for key, value in item_ex.items():
+            filter_item.append(set([
+                did for did, info in devices.items()
+                if str(info[key]) in value]))
+        exclude_set: Set = (
+            set.union(*filter_item)
+            if logic_or else set.intersection(*filter_item))
+        if exclude_set:
+            include_set = include_set-exclude_set
+    if not include_set:
+        return {}
+    return {
+        did: info for did, info in devices.items() if did in include_set}
+
+
+def _handle_network_detect_addr(
+    addr_str: str
+) -> Tuple[list[str], list[str], list[str]]:
+    ip_list: list[str] = []
+    url_list: list[str] = []
+    invalid_list: list[str] = []
+    if addr_str:
+        for addr in addr_str.split(','):
+            addr = addr.strip()
+            if not addr:
+                continue
+            # pylint: disable=broad-exception-caught
+            try:
+                ipaddress.ip_address(addr)
+                ip_list.append(addr)
+                continue
+            except Exception:
+                pass
+            try:
+                result = urlparse(addr)
+                if (
+                    result.netloc
+                    and result.scheme.startswith('http')
+                ):
+                    url_list.append(addr)
+                    continue
+            except Exception:
+                pass
+            invalid_list.append(addr)
+    return ip_list, url_list, invalid_list

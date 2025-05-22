@@ -26,6 +26,7 @@ cd ha_xiaomi_home
 
 ```bash
 cd config/ha_xiaomi_home
+git fetch
 git checkout v1.0.0
 ./install.sh /config
 ```
@@ -75,6 +76,8 @@ git checkout v1.0.0
 ## 安全性
 
 米家集成及其使用的云端接口由小米官方提供。您需要使用小米账号登录以获取设备列表。米家集成使用 OAuth 2.0 的登录方式，不会在 Home Assistant 中保存您的小米账号密码。但由于 Home Assistant 平台的限制，登录成功后，您的小米用户信息（包括设备信息、证书、 token 等）会明文保存在 Home Assistant 的配置文件中。因此，您需要保管好自己 Home Assistant 配置文件。一旦该文件泄露，其他人可能会冒用您的身份登录。
+
+> 如果您怀疑您的 OAuth 2.0 令牌已泄露，您可以通过以下步骤取消小米账号的登录授权： 米家 APP -> 我的 -> 点击用户名进入小米账号页面 -> 应用授权 -> Xiaomi Home (Home Assistant Integration) -> 取消授权
 
 ## 常见问题
 
@@ -350,7 +353,7 @@ instance code 为 MIoT-Spec-V2 实例代码，格式如下：
 ```
 service:<siid>                  # 服务
 service:<siid>:property:<piid>  # 属性
-service:<siid>:property:<piid>:valuelist:<value> # 属性取值列表的值
+service:<siid>:property:<piid>:valuelist:<value> # 属性取值列表的索引值
 service:<siid>:event:<eiid>     # 事件
 service:<siid>:action:<aiid>    # 方法
 ```
@@ -373,7 +376,7 @@ siid、piid、eiid、aiid、value 均为十进制三位整数。
 }
 ```
 
-> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/translations/` 路径下的 `specv2entity.py`、`spec_filter.json`、`multi_lang.json` 文件的内容，需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
+> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/miot/specs` 路径下的 `specv2entity.py`、`spec_filter.json`、`multi_lang.json` 文件的内容，需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
 
 ## 文档
 

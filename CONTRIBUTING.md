@@ -98,6 +98,9 @@ footer: Optional. The footer is the place to reference GitHub issues and PRs tha
 
 When contributing to this project, you agree that your contributions will be licensed under the project's [LICENSE](../LICENSE.md).
 
+
+When you submit your first pull request, GitHub Action will prompt you to sign the Contributor License Agreement (CLA). Only after you sign the CLA, your pull request will be merged.
+
 ## How to Get Help
 
 If you need help or have questions, feel free to ask in [discussions](https://github.com/XiaoMi/ha_xiaomi_home/discussions/) on GitHub.

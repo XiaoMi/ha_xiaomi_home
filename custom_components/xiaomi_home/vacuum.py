@@ -120,28 +120,18 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         # properties
         for prop in entity_data.props:
             if prop.name == 'status':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'invalid status value_list, %s', self.entity_id)
                     continue
-                self._status_map = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
+                self._status_map = prop.value_list.to_map()
                 self._prop_status = prop
             elif prop.name == 'fan-level':
-                if (
-                    not isinstance(prop.value_list, list)
-                    or not prop.value_list
-                ):
+                if not prop.value_list:
                     _LOGGER.error(
                         'invalid fan-level value_list, %s', self.entity_id)
                     continue
-                self._fan_level_map = {
-                    item['value']: item['description']
-                    for item in prop.value_list}
+                self._fan_level_map = prop.value_list.to_map()
                 self._attr_fan_speed_list = list(self._fan_level_map.values())
                 self._attr_supported_features |= VacuumEntityFeature.FAN_SPEED
                 self._prop_fan_level = prop
@@ -202,7 +192,7 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     @property
     def state(self) -> Optional[str]:
         """Return the current state of the vacuum cleaner."""
-        return self.get_map_description(
+        return self.get_map_value(
             map_=self._status_map,
             key=self.get_prop_value(prop=self._prop_status))
 
@@ -214,6 +204,6 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     @property
     def fan_speed(self) -> Optional[str]:
         """Return the current fan speed of the vacuum cleaner."""
-        return self.get_map_description(
+        return self.get_map_value(
             map_=self._fan_level_map,
             key=self.get_prop_value(prop=self._prop_fan_level))

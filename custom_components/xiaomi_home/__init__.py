@@ -54,6 +54,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components import persistent_notification
 from homeassistant.helpers import device_registry, entity_registry
 
+from .miot.common import slugify_did
 from .miot.miot_storage import (
     DeviceManufacturer, MIoTStorage, MIoTCert)
 from .miot.miot_spec import (
@@ -92,7 +93,7 @@ async def async_setup_entry(
         """Send messages in Notifications dialog box."""
         if title:
             persistent_notification.async_create(
-                hass=hass,  message=message,
+                hass=hass,  message=message or '',
                 title=title, notification_id=notify_id)
         else:
             persistent_notification.async_dismiss(
@@ -125,9 +126,8 @@ async def async_setup_entry(
         miot_devices: list[MIoTDevice] = []
         er = entity_registry.async_get(hass=hass)
         for did, info in miot_client.device_list.items():
-            spec_instance: MIoTSpecInstance = await spec_parser.parse(
-                urn=info['urn'])
-            if spec_instance is None:
+            spec_instance = await spec_parser.parse(urn=info['urn'])
+            if not isinstance(spec_instance, MIoTSpecInstance):
                 _LOGGER.error('spec content is None, %s, %s', did, info)
                 continue
             device: MIoTDevice = MIoTDevice(
@@ -155,7 +155,9 @@ async def async_setup_entry(
                     for entity in filter_entities:
                         device.entity_list[platform].remove(entity)
                         entity_id = device.gen_service_entity_id(
-                            ha_domain=platform, siid=entity.spec.iid)
+                            ha_domain=platform,
+                            siid=entity.spec.iid,
+                            description=entity.spec.description)
                         if er.async_get(entity_id_or_uuid=entity_id):
                             er.async_remove(entity_id=entity_id)
                 if platform in device.prop_list:
@@ -208,17 +210,27 @@ async def async_setup_entry(
                             if er.async_get(entity_id_or_uuid=entity_id):
                                 er.async_remove(entity_id=entity_id)
             # Action debug
-            if miot_client.action_debug:
-                if 'notify' in device.action_list:
-                    # Add text entity for debug action
-                    device.action_list['action_text'] = (
-                        device.action_list['notify'])
-            else:
+            if not miot_client.action_debug:
                 # Remove text entity for debug action
                 for action in device.action_list.get('notify', []):
                     entity_id = device.gen_action_entity_id(
                         ha_domain='text', spec_name=action.name,
                         siid=action.service.iid, aiid=action.iid)
+                    if er.async_get(entity_id_or_uuid=entity_id):
+                        er.async_remove(entity_id=entity_id)
+            # Binary sensor display
+            if not miot_client.display_binary_bool:
+                for prop in device.prop_list.get('binary_sensor', []):
+                    entity_id = device.gen_prop_entity_id(
+                        ha_domain='binary_sensor', spec_name=prop.name,
+                        siid=prop.service.iid, piid=prop.iid)
+                    if er.async_get(entity_id_or_uuid=entity_id):
+                        er.async_remove(entity_id=entity_id)
+            if not miot_client.display_binary_text:
+                for prop in device.prop_list.get('binary_sensor', []):
+                    entity_id = device.gen_prop_entity_id(
+                        ha_domain='sensor', spec_name=prop.name,
+                        siid=prop.service.iid, piid=prop.iid)
                     if er.async_get(entity_id_or_uuid=entity_id):
                         er.async_remove(entity_id=entity_id)
 
@@ -237,7 +249,7 @@ async def async_setup_entry(
                 device_entry = dr.async_get_device(
                     identifiers={(
                         DOMAIN,
-                        MIoTDevice.gen_did_tag(
+                        slugify_did(
                             cloud_server=config_entry.data['cloud_server'],
                             did=did))},
                     connections=None)
@@ -307,4 +319,33 @@ async def async_remove_entry(
     # Clean cert file
     await miot_cert.remove_user_cert_async()
     await miot_cert.remove_user_key_async()
+    return True
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    device_entry: device_registry.DeviceEntry
+) -> bool:
+    """Remove the device."""
+    miot_client: MIoTClient = await get_miot_instance_async(
+        hass=hass, entry_id=config_entry.entry_id)
+
+    if len(device_entry.identifiers) != 1:
+        _LOGGER.error(
+            'remove device failed, invalid identifiers, %s, %s',
+            device_entry.id, device_entry.identifiers)
+        return False
+    identifiers = list(device_entry.identifiers)[0]
+    if identifiers[0] != DOMAIN:
+        _LOGGER.error(
+            'remove device failed, invalid domain, %s, %s',
+            device_entry.id, device_entry.identifiers)
+        return False
+
+    # Remove device
+    await miot_client.remove_device2_async(did_tag=identifiers[1])
+    device_registry.async_get(hass).async_remove_device(device_entry.id)
+    _LOGGER.info(
+        'remove device, %s, %s', identifiers[1], device_entry.id)
     return True

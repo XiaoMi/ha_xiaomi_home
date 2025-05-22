@@ -2,11 +2,47 @@
     "config": {
         "other": {
             "devices": "Devices",
-            "found_central_gateway": ", Found Local Central Hub Gateway"
+            "found_central_gateway": ", Found Local Central Hub Gateway",
+            "without_room": "No room assigned",
+            "no_display": "Do not display"
         },
         "control_mode": {
             "auto": "Auto",
             "cloud": "Cloud"
+        },
+        "statistics_logic": {
+            "or": "OR logic",
+            "and": "AND logic"
+        },
+        "filter_mode": {
+            "exclude": "Exclude",
+            "include": "Include"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "yunyi device",
+            "2": "Cloud device",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "Virtual device",
+            "6": "BLE",
+            "7": "Local AP",
+            "8": "WiFi+BLE",
+            "9": "Other",
+            "10": "Function plug-in",
+            "11": "Cellular network",
+            "12": "Cable",
+            "13": "NB-IoT",
+            "14": "Third-party cloud access",
+            "15": "Infrared remote control device",
+            "16": "BLE-Mesh",
+            "17": "Virtual device group",
+            "18": "Gateway sub-device",
+            "19": "Security level gateway sub-device",
+            "22": "PLC",
+            "23": "Cable only",
+            "24": "Matter",
+            "25": "WiFi+Cellular network"
         },
         "room_name_rule": {
             "none": "Do not synchronize",
@@ -18,9 +54,34 @@
             "enable": "Enable",
             "disable": "Disable"
         },
+        "binary_mode": {
+            "text": "Text Sensor Entity",
+            "bool": "Binary Sensor Entity"
+        },
+        "device_state": {
+            "add": "Add",
+            "del": "Unavailable",
+            "offline": "Offline"
+        },
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Notice]** Multiple network cards detected that may be connected to the same network. Please pay attention to the selection.",
             "net_unavailable": "Interface unavailable"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Authentication Successful",
+            "content": "Please close this page and return to the account authentication page to click 'Next'.",
+            "button": "Close"
+        },
+        "fail": {
+            "title": "Authentication Failed",
+            "content": "{error_msg}, please close this page and return to the account authentication page to click the authentication link again.",
+            "button": "Close"
+        },
+        "error_msg": {
+            "-10100": "Invalid response parameters ('code' or 'state' field is empty)",
+            "-10101": "Passed-in 'state' field mismatch"
         }
     },
     "miot": {

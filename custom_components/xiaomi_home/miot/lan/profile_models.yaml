@@ -18,6 +18,10 @@
   ts: 1603967572
 1245.airpurifier.dl01:
   ts: 1607502661
+17216.magic_touch.d150:
+  ts: 1575097876
+17216.magic_touch.d152:
+  ts: 1575097876
 17216.massage.ec1266a:
   ts: 1615881124
 397.light.hallight:
@@ -56,6 +60,10 @@ bj352.airmonitor.m30:
   ts: 1686644541
 bj352.waterpuri.s100cm:
   ts: 1615795630
+bymiot.gateway.v1:
+  ts: 1575097876
+bymiot.gateway.v2:
+  ts: 1575097876
 cgllc.airmonitor.b1:
   ts: 1676339912
 cgllc.airmonitor.s1:
@@ -64,6 +72,8 @@ cgllc.clock.cgc1:
   ts: 1686644422
 cgllc.clock.dove:
   ts: 1619607474
+cgllc.gateway.s1:
+  ts: 1575097876
 cgllc.magnet.hodor:
   ts: 1724329476
 cgllc.motion.cgpr1:
@@ -120,8 +130,14 @@ chuangmi.cateye.ipc018:
   ts: 1632735241
 chuangmi.cateye.ipc508:
   ts: 1633677521
+chuangmi.door.hmi508:
+  ts: 1611733437
 chuangmi.door.hmi515:
   ts: 1640334316
+chuangmi.gateway.ipc011:
+  ts: 1575097876
+chuangmi.ir.v2:
+  ts: 1575097876
 chuangmi.lock.hmi501:
   ts: 1614742147
 chuangmi.lock.hmi501b01:
@@ -142,10 +158,18 @@ chuangmi.plug.v1:
   ts: 1621925183
 chuangmi.plug.v3:
   ts: 1644480255
+chuangmi.plug.vtl_v1:
+  ts: 1575097876
 chuangmi.radio.v1:
   ts: 1531108800
 chuangmi.radio.v2:
   ts: 1531108800
+chuangmi.remote.h102a03:
+  ts: 1575097876
+chuangmi.remote.h102c01:
+  ts: 1575097876
+chuangmi.remote.v2:
+  ts: 1575097876
 chunmi.cooker.eh1:
   ts: 1607339278
 chunmi.cooker.eh402:
@@ -204,6 +228,8 @@ dmaker.airfresh.t2017:
   ts: 1686731233
 dmaker.fan.p5:
   ts: 1655793784
+doco.fcb.docov001:
+  ts: 1575097876
 dsm.lock.h3:
   ts: 1615283790
 dsm.lock.q3:
@@ -218,6 +244,30 @@ fawad.airrtc.fwd20011:
   ts: 1610607149
 fbs.airmonitor.pth02:
   ts: 1686644918
+fengmi.projector.fm05:
+  ts: 1575097876
+fengmi.projector.fm15:
+  ts: 1575097876
+fengmi.projector.fm154k:
+  ts: 1575097876
+fengmi.projector.l166:
+  ts: 1650352923
+fengmi.projector.l176:
+  ts: 1649936204
+fengmi.projector.l246:
+  ts: 1575097876
+fengmi.projector.m055:
+  ts: 1652839826
+fengmi.projector.m055d:
+  ts: 1654067980
+fengyu.intercom.beebird:
+  ts: 1575097876
+fengyu.intercom.sharkv1:
+  ts: 1575097876
+fotile.hood.emd1tmi:
+  ts: 1607483642
+guoshi.other.sem01:
+  ts: 1602662080
 hannto.printer.anise:
   ts: 1618989537
 hannto.printer.honey:
@@ -226,14 +276,26 @@ hannto.printer.honey1s:
   ts: 1614332725
 hfjh.fishbowl.v1:
   ts: 1615278556
+hhcc.bleflowerpot.v2:
+  ts: 1575097876
 hhcc.plantmonitor.v1:
   ts: 1664163526
 hith.foot_bath.q2:
   ts: 1531108800
+hmpace.bracelet.v4:
+  ts: 1575097876
+hmpace.scales.mibfs:
+  ts: 1575097876
+hmpace.scales.miscale2:
+  ts: 1575097876
 huohe.lock.m1:
   ts: 1635410938
+huoman.litter_box.co1:
+  ts: 1687165034
 hutlon.lock.v0001:
   ts: 1634799698
+idelan.aircondition.g1:
+  ts: 1575097876
 idelan.aircondition.v1:
   ts: 1614666973
 idelan.aircondition.v2:
@@ -248,14 +310,22 @@ ikea.light.led1537r6:
   ts: 1605162872
 ikea.light.led1545g12:
   ts: 1605162937
+ikea.light.led1546g12:
+  ts: 1575097876
 ikea.light.led1623g12:
   ts: 1605163009
 ikea.light.led1649c5:
   ts: 1605163064
+ikea.light.led1650r5:
+  ts: 1575097876
 imibar.cooker.mbihr3:
   ts: 1624620659
 imou99.camera.tp2:
   ts: 1531108800
+inovel.projector.me2:
+  ts: 1575097876
+iracc.aircondition.d19:
+  ts: 1609914362
 isa.camera.df3:
   ts: 1531108800
 isa.camera.hl5:
@@ -266,18 +336,34 @@ isa.camera.isc5:
   ts: 1531108800
 isa.camera.isc5c1:
   ts: 1621238175
+isa.camera.qf3:
+  ts: 1575097876
+isa.cateye.hldb6:
+  ts: 1575097876
 isa.magnet.dw2hl:
   ts: 1638274655
+jieman.magic_touch.js78:
+  ts: 1575097876
+jiqid.mistory.ipen1:
+  ts: 1575097876
 jiqid.mistory.pro:
   ts: 1531108800
 jiqid.mistory.v1:
   ts: 1531108800
 jiqid.mistudy.v2:
   ts: 1610612349
+jiqid.robot.cube:
+  ts: 1575097876
 jiwu.lock.jwp01:
   ts: 1614752632
 jyaiot.cm.ccj01:
   ts: 1611824545
+k0918.toothbrush.kid01:
+  ts: 1575097876
+kejia.airer.th001:
+  ts: 1575097876
+ksmb.treadmill.k12:
+  ts: 1575097876
 ksmb.treadmill.v1:
   ts: 1611211447
 ksmb.treadmill.v2:
@@ -390,6 +476,8 @@ loock.lock.xfvl10:
   ts: 1632814256
 loock.safe.v1:
   ts: 1619607755
+lumi.acpartner.mcn02:
+  ts: 1655791626
 lumi.acpartner.v1:
   ts: 1531108800
 lumi.acpartner.v2:
@@ -462,6 +550,8 @@ lumi.lock.acn02:
   ts: 1623928631
 lumi.lock.acn03:
   ts: 1614752574
+lumi.lock.aq1:
+  ts: 1612518044
 lumi.lock.bacn01:
   ts: 1614741699
 lumi.lock.bmcn02:
@@ -482,6 +572,8 @@ lumi.lock.mcn007:
   ts: 1650446757
 lumi.lock.mcn01:
   ts: 1679881881
+lumi.lock.v1:
+  ts: 1575097876
 lumi.lock.wbmcn1:
   ts: 1619422072
 lumi.motion.bmgl01:
@@ -510,14 +602,20 @@ lumi.sensor_86sw1.v1:
   ts: 1609311038
 lumi.sensor_86sw2.v1:
   ts: 1608795035
+lumi.sensor_cube.aqgl01:
+  ts: 1575097876
 lumi.sensor_ht.v1:
   ts: 1621239877
 lumi.sensor_magnet.aq2:
   ts: 1641112867
+lumi.sensor_magnet.v1:
+  ts: 1606120416
 lumi.sensor_magnet.v2:
   ts: 1641113779
 lumi.sensor_motion.aq2:
   ts: 1676433994
+lumi.sensor_motion.v1:
+  ts: 1605093075
 lumi.sensor_motion.v2:
   ts: 1672818550
 lumi.sensor_natgas.v1:
@@ -530,6 +628,8 @@ lumi.sensor_switch.aq2:
   ts: 1615256430
 lumi.sensor_switch.aq3:
   ts: 1607399487
+lumi.sensor_switch.v1:
+  ts: 1606874434
 lumi.sensor_switch.v2:
   ts: 1609310683
 lumi.sensor_wleak.aq1:
@@ -574,6 +674,20 @@ miaomiaoce.sensor_ht.t1:
   ts: 1616057242
 miaomiaoce.sensor_ht.t2:
   ts: 1636603553
+miaomiaoce.thermo.t01:
+  ts: 1575097876
+midea.aircondition.v1:
+  ts: 1575097876
+midea.aircondition.xa1:
+  ts: 1575097876
+midea.aircondition.xa2:
+  ts: 1575097876
+midr.rv_mirror.m2:
+  ts: 1575097876
+midr.rv_mirror.m5:
+  ts: 1575097876
+midr.rv_mirror.v1:
+  ts: 1575097876
 miir.aircondition.ir01:
   ts: 1531108800
 miir.aircondition.ir02:
@@ -612,6 +726,8 @@ minij.washer.v5:
   ts: 1622792196
 minij.washer.v8:
   ts: 1615777868
+minuo.tracker.lm001:
+  ts: 1575097876
 miot.light.plato2:
   ts: 1685518142
 miot.light.plato3:
@@ -624,18 +740,32 @@ mmgg.feeder.snack:
   ts: 1607503182
 moyu.washer.s1hm:
   ts: 1624620888
+mrbond.airer.m0:
+  ts: 1575097876
 mrbond.airer.m1pro:
   ts: 1646393746
 mrbond.airer.m1s:
   ts: 1646393874
+mrbond.airer.m1super:
+  ts: 1575097876
 msj.f_washer.m1:
   ts: 1614914340
 mxiang.cateye.mdb10:
   ts: 1616140362
 mxiang.cateye.xmcatt1:
   ts: 1616140207
+nhy.airrtc.v1:
+  ts: 1575097876
+ninebot.scooter.v1:
+  ts: 1602662395
+ninebot.scooter.v6:
+  ts: 1575097876
+nuwa.robot.minikiwi:
+  ts: 1575097876
 nwt.derh.wdh318efw1:
   ts: 1611822375
+onemore.wifispeaker.sm4:
+  ts: 1575097876
 opple.light.bydceiling:
   ts: 1608187619
 opple.light.fanlight:
@@ -646,6 +776,8 @@ opple.remote.5pb112:
   ts: 1627453840
 opple.remote.5pb113:
   ts: 1636599905
+orion.wifispeaker.cm1:
+  ts: 1575097876
 ows.towel_w.mj1x0:
   ts: 1610604939
 philips.light.bceiling1:
@@ -696,6 +828,8 @@ pwzn.relay.apple:
   ts: 1611217196
 pwzn.relay.banana:
   ts: 1646647255
+qicyc.bike.tdp02z:
+  ts: 1575097876
 qike.bhf_light.qk201801:
   ts: 1608174909
 qmi.powerstrip.v1:
@@ -726,8 +860,32 @@ roborock.vacuum.t6:
   ts: 1619423841
 rockrobo.vacuum.v1:
   ts: 1531108800
+roidmi.carairpuri.pro:
+  ts: 1575097876
+roidmi.carairpuri.v1:
+  ts: 1575097876
+roidmi.cleaner.f8pro:
+  ts: 1575097876
+roidmi.cleaner.v1:
+  ts: 1575097876
+roidmi.cleaner.v2:
+  ts: 1638514177
+roidmi.cleaner.v382:
+  ts: 1575097876
+roidmi.vacuum.v1:
+  ts: 1575097876
+rokid.robot.me:
+  ts: 1575097876
+rokid.robot.mini:
+  ts: 1575097876
+rokid.robot.pebble:
+  ts: 1575097876
+rokid.robot.pebble2:
+  ts: 1575097876
 roome.bhf_light.yf6002:
   ts: 1531108800
+rotai.magic_touch.sx300:
+  ts: 1602662578
 rotai.massage.rt5728:
   ts: 1610607000
 rotai.massage.rt5850:
@@ -738,22 +896,42 @@ rotai.massage.rt5863:
   ts: 1611827937
 rotai.massage.rt5870:
   ts: 1632376570
+runmi.suitcase.v1:
+  ts: 1575097876
 scishare.coffee.s1102:
   ts: 1611824402
+shjszn.gateway.c1:
+  ts: 1575097876
+shjszn.lock.c1:
+  ts: 1575097876
+shjszn.lock.kx:
+  ts: 1575097876
+shuii.humidifier.jsq001:
+  ts: 1575097876
 shuii.humidifier.jsq002:
   ts: 1606376290
+skyrc.feeder.dfeed:
+  ts: 1626082349
 skyrc.pet_waterer.fre1:
   ts: 1608186812
+smith.w_soften.cxs05ta1:
+  ts: 1575097876
 smith.waterheater.cxea1:
   ts: 1611826349
 smith.waterheater.cxeb1:
   ts: 1611826388
 smith.waterpuri.jnt600:
   ts: 1531108800
+soocare.toothbrush.m1:
+  ts: 1575097876
 soocare.toothbrush.m1s:
   ts: 1610611310
+soocare.toothbrush.mc1:
+  ts: 1575097876
 soocare.toothbrush.t501:
   ts: 1672192586
+soocare.toothbrush.x3:
+  ts: 1575097876
 sxds.pillow.pillow02:
   ts: 1611222235
 syniot.curtain.syc1:
@@ -778,6 +956,10 @@ tokit.oven.tk32pro1:
   ts: 1617002408
 tokit.pre_cooker.tkih1:
   ts: 1607410832
+trios1.bleshoes.v02:
+  ts: 1602662599
+txdd.wifispeaker.x1:
+  ts: 1575097876
 viomi.aircondition.v10:
   ts: 1606375041
 viomi.aircondition.v21:
@@ -830,12 +1012,16 @@ viomi.fridge.u13:
   ts: 1614667152
 viomi.fridge.u15:
   ts: 1607505693
+viomi.fridge.u17:
+  ts: 1575097876
 viomi.fridge.u18:
   ts: 1614655755
 viomi.fridge.u2:
   ts: 1531108800
 viomi.fridge.u24:
   ts: 1614667214
+viomi.fridge.u25:
+  ts: 1575097876
 viomi.fridge.u4:
   ts: 1614667295
 viomi.fridge.u6:
@@ -992,6 +1178,82 @@ xiaomi.aircondition.ma6:
   ts: 1721629272
 xiaomi.aircondition.ma9:
   ts: 1721629362
+xiaomi.plc.v1:
+  ts: 1575097876
+xiaomi.repeater.v1:
+  ts: 1575097876
+xiaomi.repeater.v2:
+  ts: 1575097876
+xiaomi.repeater.v3:
+  ts: 1575097876
+xiaomi.router.d01:
+  ts: 1575097876
+xiaomi.router.lv1:
+  ts: 1575097876
+xiaomi.router.lv3:
+  ts: 1575097876
+xiaomi.router.mv1:
+  ts: 1575097876
+xiaomi.router.r2100:
+  ts: 1575097876
+xiaomi.router.r3600:
+  ts: 1575097876
+xiaomi.router.r3a:
+  ts: 1575097876
+xiaomi.router.r3d:
+  ts: 1575097876
+xiaomi.router.r3g:
+  ts: 1575097876
+xiaomi.router.r3gv2:
+  ts: 1575097876
+xiaomi.router.r3gv2n:
+  ts: 1575097876
+xiaomi.router.r3p:
+  ts: 1575097876
+xiaomi.router.r4:
+  ts: 1575097876
+xiaomi.router.r4a:
+  ts: 1575097876
+xiaomi.router.r4ac:
+  ts: 1575097876
+xiaomi.router.r4c:
+  ts: 1575097876
+xiaomi.router.r4cm:
+  ts: 1575097876
+xiaomi.router.rm1800:
+  ts: 1575097876
+xiaomi.router.v1:
+  ts: 1575097876
+xiaomi.router.v2:
+  ts: 1575097876
+xiaomi.router.v3:
+  ts: 1575097876
+xiaomi.split_tv.b1:
+  ts: 1575097876
+xiaomi.split_tv.v1:
+  ts: 1575097876
+xiaomi.tv.b1:
+  ts: 1661248580
+xiaomi.tv.h1:
+  ts: 1575097876
+xiaomi.tv.i1:
+  ts: 1661248572
+xiaomi.tv.v1:
+  ts: 1670811870
+xiaomi.tvbox.b1:
+  ts: 1694503508
+xiaomi.tvbox.i1:
+  ts: 1694503515
+xiaomi.tvbox.v1:
+  ts: 1694503501
+xiaomi.watch.band1:
+  ts: 1575097876
+xiaomi.watch.band1A:
+  ts: 1575097876
+xiaomi.watch.band1S:
+  ts: 1575097876
+xiaomi.watch.band2:
+  ts: 1575097876
 xiaomi.wifispeaker.l04m:
   ts: 1658817956
 xiaomi.wifispeaker.l06a:
@@ -1012,6 +1274,10 @@ xiaomi.wifispeaker.lx5a:
   ts: 1672299577
 xiaomi.wifispeaker.s12:
   ts: 1672299594
+xiaomi.wifispeaker.v1:
+  ts: 1575097876
+xiaomi.wifispeaker.v3:
+  ts: 1575097876
 xiaomi.wifispeaker.x08a:
   ts: 1672818945
 xiaomi.wifispeaker.x08c:
@@ -1028,6 +1294,44 @@ xiaovv.camera.xvd5:
   ts: 1531108800
 xiaovv.camera.xvsnowman:
   ts: 1531108800
+xiaoxun.robot.v1:
+  ts: 1575097876
+xiaoxun.tracker.v1:
+  ts: 1575097876
+xiaoxun.watch.sw306:
+  ts: 1575097876
+xiaoxun.watch.sw560:
+  ts: 1575097876
+xiaoxun.watch.sw705:
+  ts: 1575097876
+xiaoxun.watch.sw710a2:
+  ts: 1575097876
+xiaoxun.watch.sw760:
+  ts: 1575097876
+xiaoxun.watch.sw900:
+  ts: 1575097876
+xiaoxun.watch.sw960:
+  ts: 1575097876
+xiaoxun.watch.v1:
+  ts: 1575097876
+xiaoxun.watch.v10:
+  ts: 1575097876
+xiaoxun.watch.v11:
+  ts: 1575097876
+xiaoxun.watch.v2:
+  ts: 1575097876
+xiaoxun.watch.v3:
+  ts: 1575097876
+xiaoxun.watch.v4:
+  ts: 1575097876
+xiaoxun.watch.v5:
+  ts: 1575097876
+xiaoxun.watch.v7:
+  ts: 1575097876
+xiaoxun.watch.v8:
+  ts: 1575097876
+xiaoxun.watch.v9:
+  ts: 1575097876
 xjx.toilet.pro:
   ts: 1615965466
 xjx.toilet.pure:
@@ -1054,6 +1358,8 @@ yeelink.bhf_light.v3:
   ts: 1608790102
 yeelink.bhf_light.v5:
   ts: 1601292562
+yeelink.gateway.v1:
+  ts: 1575097876
 yeelink.light.bslamp1:
   ts: 1703120679
 yeelink.light.bslamp2:
@@ -1192,6 +1498,10 @@ yunmi.kettle.r2:
   ts: 1606372087
 yunmi.kettle.r3:
   ts: 1637309534
+yunmi.kettle.v1:
+  ts: 1575097876
+yunmi.kettle.v9:
+  ts: 1602662686
 yunmi.plmachine.mg2:
   ts: 1611833658
 yunmi.waterpuri.c5:
@@ -1230,18 +1540,26 @@ yunmi.waterpurifier.v2:
   ts: 1632377061
 yunmi.waterpurifier.v3:
   ts: 1611221428
+yunyi.camera.v1:
+  ts: 1575097876
 yyunyi.wopener.yypy24:
   ts: 1616741966
+yyzhn.gateway.yn181126:
+  ts: 1610689325
 zdeer.ajh.a8:
   ts: 1531108800
 zdeer.ajh.a9:
   ts: 1531108800
+zdeer.ajh.ajb:
+  ts: 1608276454
 zdeer.ajh.zda10:
   ts: 1531108800
 zdeer.ajh.zda9:
   ts: 1531108800
 zdeer.ajh.zjy:
   ts: 1531108800
+zhij.toothbrush.bv1:
+  ts: 1575097876
 zhimi.aircondition.ma1:
   ts: 1615185265
 zhimi.aircondition.ma3:
@@ -1250,6 +1568,8 @@ zhimi.aircondition.ma4:
   ts: 1626334057
 zhimi.aircondition.v1:
   ts: 1610610931
+zhimi.aircondition.v2:
+  ts: 1575097876
 zhimi.aircondition.va1:
   ts: 1609924720
 zhimi.aircondition.za1:
@@ -1276,8 +1596,12 @@ zhimi.airpurifier.sa2:
   ts: 1635820002
 zhimi.airpurifier.v1:
   ts: 1635855633
+zhimi.airpurifier.v2:
+  ts: 1575097876
 zhimi.airpurifier.v3:
   ts: 1676339933
+zhimi.airpurifier.v5:
+  ts: 1575097876
 zhimi.airpurifier.v6:
   ts: 1636978652
 zhimi.airpurifier.v7:
@@ -1318,3 +1642,5 @@ zimi.mosq.v1:
   ts: 1620728957
 zimi.powerstrip.v2:
   ts: 1620812714
+zimi.projector.v1:
+  ts: 1575097876

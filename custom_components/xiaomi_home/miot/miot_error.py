@@ -72,8 +72,11 @@ class MIoTErrorCode(Enum):
     # MIoT ev error code, -10080
     # Mips service error code, -10090
     # Config flow error code, -10100
+    CODE_CONFIG_INVALID_INPUT = -10100
+    CODE_CONFIG_INVALID_STATE = -10101
     # Options flow error code , -10110
     # MIoT lan error code, -10120
+    CODE_LAN_UNAVAILABLE = -10120
 
 
 class MIoTError(Exception):
@@ -140,4 +143,8 @@ class MIoTConfigError(MIoTError):
 
 
 class MIoTOptionsError(MIoTError):
+    ...
+
+
+class MIoTLanError(MIoTError):
     ...

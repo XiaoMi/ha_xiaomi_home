@@ -2,11 +2,47 @@
     "config": {
         "other": {
             "devices": "appareils",
-            "found_central_gateway": ", passerelle centrale locale trouvée"
+            "found_central_gateway": ", passerelle centrale locale trouvée",
+            "without_room": "Aucune pièce attribuée",
+            "no_display": "ne pas afficher"
         },
         "control_mode": {
             "auto": "automatique",
             "cloud": "cloud"
+        },
+        "statistics_logic": {
+            "or": "ou logique",
+            "and": "et logique"
+        },
+        "filter_mode": {
+            "exclude": "exclure",
+            "include": "inclure"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "appareil yunyi",
+            "2": "appareil cloud",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "appareil virtuel",
+            "6": "BLE",
+            "7": "AP local",
+            "8": "WiFi+BLE",
+            "9": "autre",
+            "10": "plug-in de fonction",
+            "11": "réseau cellulaire",
+            "12": "câble",
+            "13": "NB-IoT",
+            "14": "accès cloud tiers",
+            "15": "appareil de télécommande infrarouge",
+            "16": "BLE-Mesh",
+            "17": "groupe d'appareils virtuels",
+            "18": "sous-appareil de passerelle",
+            "19": "niveau de sécurité sous-appareil de passerelle",
+            "22": "PLC",
+            "23": "câble uniquement",
+            "24": "Matter",
+            "25": "WiFi+réseau cellulaire"
         },
         "room_name_rule": {
             "none": "ne pas synchroniser",
@@ -18,9 +54,34 @@
             "enable": "activer",
             "disable": "désactiver"
         },
+        "binary_mode": {
+            "text": "Entité du capteur de texte",
+            "bool": "Entité du capteur binaire"
+        },
+        "device_state": {
+            "add": "Ajouter",
+            "del": "Supprimer",
+            "offline": "hors ligne"
+        },
         "lan_ctrl_config": {
             "notice_net_dup": "\r\n**[Remarque]** Plusieurs cartes réseau détectées qui peuvent être connectées au même réseau. Veuillez faire attention à la sélection.",
             "net_unavailable": "Interface non disponible"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Authentification réussie",
+            "content": "Veuillez fermer cette page et revenir à la page d'authentification du compte pour cliquer sur 'Suivant'.",
+            "button": "Fermer"
+        },
+        "fail": {
+            "title": "Échec de l'authentification",
+            "content": "{error_msg}, veuillez fermer cette page et revenir à la page d'authentification du compte pour cliquer à nouveau sur le lien d'authentification.",
+            "button": "Fermer"
+        },
+        "error_msg": {
+            "-10100": "Paramètres de réponse invalides ('code' ou 'state' est vide)",
+            "-10101": "Le champ 'state' transmis ne correspond pas"
         }
     },
     "miot": {

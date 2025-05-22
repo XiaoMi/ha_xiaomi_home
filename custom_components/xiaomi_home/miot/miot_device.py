@@ -56,6 +56,7 @@ from homeassistant.const import (
     CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,
     CONCENTRATION_PARTS_PER_MILLION,
+    DEGREE,
     LIGHT_LUX,
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS,
@@ -72,10 +73,11 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfVolume,
     UnitOfVolumeFlowRate,
+    UnitOfDataRate
 )
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.components.switch import SwitchDeviceClass
-from homeassistant.util import slugify
+
 
 # pylint: disable=relative-beyond-top-level
 from .specs.specv2entity import (
@@ -85,6 +87,7 @@ from .specs.specv2entity import (
     SPEC_PROP_TRANS_MAP,
     SPEC_SERVICE_TRANS_MAP
 )
+from .common import slugify_name, slugify_did
 from .const import DOMAIN
 from .miot_client import MIoTClient
 from .miot_error import MIoTClientError, MIoTDeviceError
@@ -94,7 +97,9 @@ from .miot_spec import (
     MIoTSpecEvent,
     MIoTSpecInstance,
     MIoTSpecProperty,
-    MIoTSpecService
+    MIoTSpecService,
+    MIoTSpecValueList,
+    MIoTSpecValueRange
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -142,9 +147,12 @@ class MIoTDevice:
     _room_id: str
     _room_name: str
 
-    _suggested_area: str
+    _suggested_area: Optional[str]
 
-    _device_state_sub_list: dict[str, Callable[[str, MIoTDeviceState], None]]
+    _sub_id: int
+    _device_state_sub_list: dict[str, dict[
+        str, Callable[[str, MIoTDeviceState], None]]]
+    _value_sub_list: dict[str, dict[str, Callable[[dict, Any], None]]]
 
     _entity_list: dict[str, list[MIoTEntityData]]
     _prop_list: dict[str, list[MIoTSpecProperty]]
@@ -153,7 +161,7 @@ class MIoTDevice:
 
     def __init__(
         self, miot_client: MIoTClient,
-        device_info: dict[str, str],
+        device_info: dict[str, Any],
         spec_instance: MIoTSpecInstance
     ) -> None:
         self.miot_client = miot_client
@@ -183,7 +191,9 @@ class MIoTDevice:
             case _:
                 self._suggested_area = None
 
+        self._sub_id = 0
         self._device_state_sub_list = {}
+        self._value_sub_list = {}
         self._entity_list = {}
         self._prop_list = {}
         self._event_list = {}
@@ -234,36 +244,76 @@ class MIoTDevice:
 
     def sub_device_state(
         self, key: str, handler: Callable[[str, MIoTDeviceState], None]
-    ) -> bool:
-        self._device_state_sub_list[key] = handler
-        return True
+    ) -> int:
+        sub_id = self.__gen_sub_id()
+        if key in self._device_state_sub_list:
+            self._device_state_sub_list[key][str(sub_id)] = handler
+        else:
+            self._device_state_sub_list[key] = {str(sub_id): handler}
+        return sub_id
 
-    def unsub_device_state(self, key: str) -> bool:
-        self._device_state_sub_list.pop(key, None)
-        return True
+    def unsub_device_state(self, key: str, sub_id: int) -> None:
+        sub_list = self._device_state_sub_list.get(key, None)
+        if sub_list:
+            sub_list.pop(str(sub_id), None)
+        if not sub_list:
+            self._device_state_sub_list.pop(key, None)
 
     def sub_property(
-        self, handler: Callable[[dict, Any], None], siid: int = None,
-        piid: int = None, handler_ctx: Any = None
-    ) -> bool:
-        return self.miot_client.sub_prop(
-            did=self._did, handler=handler, siid=siid, piid=piid,
-            handler_ctx=handler_ctx)
+        self, handler: Callable[[dict, Any], None], siid: int, piid: int
+    ) -> int:
+        key: str = f'p.{siid}.{piid}'
 
-    def unsub_property(self, siid: int = None, piid: int = None) -> bool:
-        return self.miot_client.unsub_prop(did=self._did, siid=siid, piid=piid)
+        def _on_prop_changed(params: dict, ctx: Any) -> None:
+            for handler in self._value_sub_list[key].values():
+                handler(params, ctx)
+
+        sub_id = self.__gen_sub_id()
+        if key in self._value_sub_list:
+            self._value_sub_list[key][str(sub_id)] = handler
+        else:
+            self._value_sub_list[key] = {str(sub_id): handler}
+            self.miot_client.sub_prop(
+                did=self._did, handler=_on_prop_changed, siid=siid, piid=piid)
+        return sub_id
+
+    def unsub_property(self, siid: int, piid: int, sub_id: int) -> None:
+        key: str = f'p.{siid}.{piid}'
+
+        sub_list = self._value_sub_list.get(key, None)
+        if sub_list:
+            sub_list.pop(str(sub_id), None)
+        if not sub_list:
+            self.miot_client.unsub_prop(did=self._did, siid=siid, piid=piid)
+            self._value_sub_list.pop(key, None)
 
     def sub_event(
-        self, handler: Callable[[dict, Any], None], siid: int = None,
-        eiid: int = None, handler_ctx: Any = None
-    ) -> bool:
-        return self.miot_client.sub_event(
-            did=self._did, handler=handler, siid=siid, eiid=eiid,
-            handler_ctx=handler_ctx)
+        self, handler: Callable[[dict, Any], None], siid: int, eiid: int
+    ) -> int:
+        key: str = f'e.{siid}.{eiid}'
 
-    def unsub_event(self, siid: int = None, eiid: int = None) -> bool:
-        return self.miot_client.unsub_event(
-            did=self._did, siid=siid, eiid=eiid)
+        def _on_event_occurred(params: dict, ctx: Any) -> None:
+            for handler in self._value_sub_list[key].values():
+                handler(params, ctx)
+
+        sub_id = self.__gen_sub_id()
+        if key in self._value_sub_list:
+            self._value_sub_list[key][str(sub_id)] = handler
+        else:
+            self._value_sub_list[key] = {str(sub_id): handler}
+            self.miot_client.sub_event(
+                did=self._did, handler=_on_event_occurred, siid=siid, eiid=eiid)
+        return sub_id
+
+    def unsub_event(self, siid: int, eiid: int, sub_id: int) -> None:
+        key: str = f'e.{siid}.{eiid}'
+
+        sub_list = self._value_sub_list.get(key, None)
+        if sub_list:
+            sub_list.pop(str(sub_id), None)
+        if not sub_list:
+            self.miot_client.unsub_event(did=self._did, siid=siid, eiid=eiid)
+            self._value_sub_list.pop(key, None)
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -287,42 +337,43 @@ class MIoTDevice:
 
     @property
     def did_tag(self) -> str:
-        return slugify(f'{self.miot_client.cloud_server}_{self._did}')
-
-    @staticmethod
-    def gen_did_tag(cloud_server: str, did: str) -> str:
-        return slugify(f'{cloud_server}_{did}')
+        return slugify_did(
+            cloud_server=self.miot_client.cloud_server, did=self._did)
 
     def gen_device_entity_id(self, ha_domain: str) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
             f'{self._model_strs[-1][:20]}')
 
-    def gen_service_entity_id(self, ha_domain: str, siid: int) -> str:
+    def gen_service_entity_id(self, ha_domain: str, siid: int,
+                              description: str) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_s_{siid}')
+            f'{self._model_strs[-1][:20]}_s_{siid}_{description}')
 
     def gen_prop_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, piid: int
     ) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_{slugify(spec_name)}_p_{siid}_{piid}')
+            f'{self._model_strs[-1][:20]}_{slugify_name(spec_name)}'
+            f'_p_{siid}_{piid}')
 
     def gen_event_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, eiid: int
     ) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_{slugify(spec_name)}_e_{siid}_{eiid}')
+            f'{self._model_strs[-1][:20]}_{slugify_name(spec_name)}'
+            f'_e_{siid}_{eiid}')
 
     def gen_action_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, aiid: int
     ) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_{slugify(spec_name)}_a_{siid}_{aiid}')
+            f'{self._model_strs[-1][:20]}_{slugify_name(spec_name)}'
+            f'_a_{siid}_{aiid}')
 
     @property
     def name(self) -> str:
@@ -341,14 +392,20 @@ class MIoTDevice:
         self._entity_list[entity_data.platform].append(entity_data)
 
     def append_prop(self, prop: MIoTSpecProperty) -> None:
+        if not prop.platform:
+            return
         self._prop_list.setdefault(prop.platform, [])
         self._prop_list[prop.platform].append(prop)
 
     def append_event(self, event: MIoTSpecEvent) -> None:
+        if not event.platform:
+            return
         self._event_list.setdefault(event.platform, [])
         self._event_list[event.platform].append(event)
 
     def append_action(self, action: MIoTSpecAction) -> None:
+        if not action.platform:
+            return
         self._action_list.setdefault(action.platform, [])
         self._action_list[action.platform].append(action)
 
@@ -360,10 +417,12 @@ class MIoTDevice:
         spec_name: str = spec_instance.name
         if isinstance(SPEC_DEVICE_TRANS_MAP[spec_name], str):
             spec_name = SPEC_DEVICE_TRANS_MAP[spec_name]
+        if 'required' not in SPEC_DEVICE_TRANS_MAP[spec_name]:
+            return None
         # 1. The device shall have all required services.
         required_services = SPEC_DEVICE_TRANS_MAP[spec_name]['required'].keys()
         if not {
-                service.name for service in spec_instance.services
+            service.name for service in spec_instance.services
         }.issuperset(required_services):
             return None
         optional_services = SPEC_DEVICE_TRANS_MAP[spec_name]['optional'].keys()
@@ -373,9 +432,13 @@ class MIoTDevice:
         for service in spec_instance.services:
             if service.platform:
                 continue
+            required_properties: dict
+            optional_properties: dict
+            required_actions: set
+            optional_actions: set
             # 2. The service shall have all required properties, actions.
             if service.name in required_services:
-                required_properties: dict = SPEC_DEVICE_TRANS_MAP[spec_name][
+                required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'required'].get(
                         service.name, {}
                 ).get('required', {}).get('properties', {})
@@ -392,7 +455,7 @@ class MIoTDevice:
                         service.name, {}
                 ).get('optional', {}).get('actions', set({}))
             elif service.name in optional_services:
-                required_properties: dict = SPEC_DEVICE_TRANS_MAP[spec_name][
+                required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'optional'].get(
                         service.name, {}
                 ).get('required', {}).get('properties', {})
@@ -430,7 +493,7 @@ class MIoTDevice:
                         set(required_properties.keys()), optional_properties):
                     if prop.unit:
                         prop.external_unit = self.unit_convert(prop.unit)
-                        prop.icon = self.icon_convert(prop.unit)
+                    #     prop.icon = self.icon_convert(prop.unit)
                     prop.platform = platform
                     entity_data.props.add(prop)
             # action
@@ -445,79 +508,94 @@ class MIoTDevice:
         return entity_data
 
     def parse_miot_service_entity(
-        self, service_instance: MIoTSpecService
+        self, miot_service: MIoTSpecService
     ) -> Optional[MIoTEntityData]:
-        service = service_instance
-        if service.platform or (service.name not in SPEC_SERVICE_TRANS_MAP):
+        if (
+            miot_service.platform
+            or miot_service.name not in SPEC_SERVICE_TRANS_MAP
+        ):
             return None
-
-        service_name = service.name
+        service_name = miot_service.name
         if isinstance(SPEC_SERVICE_TRANS_MAP[service_name], str):
             service_name = SPEC_SERVICE_TRANS_MAP[service_name]
-        # 1. The service shall have all required properties.
+        if 'required' not in SPEC_SERVICE_TRANS_MAP[service_name]:
+            return None
+        # Required properties, required access mode
         required_properties: dict = SPEC_SERVICE_TRANS_MAP[service_name][
             'required'].get('properties', {})
         if not {
-            prop.name for prop in service.properties if prop.access
+            prop.name for prop in miot_service.properties if prop.access
         }.issuperset(set(required_properties.keys())):
             return None
-        # 2. The required property shall have all required access mode.
-        for prop in service.properties:
+        for prop in miot_service.properties:
             if prop.name in required_properties:
                 if not set(prop.access).issuperset(
                         required_properties[prop.name]):
                     return None
+        # Required actions
+        # Required events
         platform = SPEC_SERVICE_TRANS_MAP[service_name]['entity']
-        entity_data = MIoTEntityData(platform=platform, spec=service_instance)
+        entity_data = MIoTEntityData(platform=platform, spec=miot_service)
+        # Optional properties
         optional_properties = SPEC_SERVICE_TRANS_MAP[service_name][
             'optional'].get('properties', set({}))
-        for prop in service.properties:
+        for prop in miot_service.properties:
             if prop.name in set.union(
                     set(required_properties.keys()), optional_properties):
                 if prop.unit:
                     prop.external_unit = self.unit_convert(prop.unit)
-                    prop.icon = self.icon_convert(prop.unit)
+                    # prop.icon = self.icon_convert(prop.unit)
                 prop.platform = platform
                 entity_data.props.add(prop)
-        # action
-        # event
-        # No actions or events is in SPEC_SERVICE_TRANS_MAP now.
-        service.platform = platform
+        # Optional actions
+        # Optional events
+        miot_service.platform = platform
+        # entity_category
+        if entity_category := SPEC_SERVICE_TRANS_MAP[service_name].get(
+            'entity_category', None):
+            miot_service.entity_category = entity_category
         return entity_data
 
-    def parse_miot_property_entity(
-        self, property_instance: MIoTSpecProperty
-    ) -> Optional[dict[str, str]]:
-        prop = property_instance
+    def parse_miot_property_entity(self, miot_prop: MIoTSpecProperty) -> bool:
         if (
-            prop.platform
-            or (prop.name not in SPEC_PROP_TRANS_MAP['properties'])
+            miot_prop.platform
+            or miot_prop.name not in SPEC_PROP_TRANS_MAP['properties']
         ):
-            return None
-
-        prop_name = prop.name
+            return False
+        prop_name = miot_prop.name
         if isinstance(SPEC_PROP_TRANS_MAP['properties'][prop_name], str):
             prop_name = SPEC_PROP_TRANS_MAP['properties'][prop_name]
         platform = SPEC_PROP_TRANS_MAP['properties'][prop_name]['entity']
+        # Check
         prop_access: set = set({})
-        if prop.readable:
+        if miot_prop.readable:
             prop_access.add('read')
-        if prop.writable:
+        if miot_prop.writable:
             prop_access.add('write')
         if prop_access != (SPEC_PROP_TRANS_MAP[
                 'entities'][platform]['access']):
-            return None
-        if prop.format_ not in SPEC_PROP_TRANS_MAP[
+            return False
+        if miot_prop.format_.__name__ not in SPEC_PROP_TRANS_MAP[
                 'entities'][platform]['format']:
-            return None
-        if prop.unit:
-            prop.external_unit = self.unit_convert(prop.unit)
-            prop.icon = self.icon_convert(prop.unit)
-        device_class = SPEC_PROP_TRANS_MAP['properties'][prop_name][
+            return False
+        miot_prop.device_class = SPEC_PROP_TRANS_MAP['properties'][prop_name][
             'device_class']
-        prop.platform = device_class
-
-        return {'platform': platform, 'device_class': device_class}
+        # Optional params
+        if 'state_class' in SPEC_PROP_TRANS_MAP['properties'][prop_name]:
+            miot_prop.state_class = SPEC_PROP_TRANS_MAP['properties'][
+                prop_name]['state_class']
+        if (
+            not miot_prop.external_unit
+            and 'unit_of_measurement' in SPEC_PROP_TRANS_MAP['properties'][
+                prop_name]
+        ):
+            # Priority: spec_modify.unit > unit_convert > specv2entity.unit
+            miot_prop.external_unit = SPEC_PROP_TRANS_MAP['properties'][
+                prop_name]['unit_of_measurement']
+        # Priority: default.icon when device_class is set > spec_modify.icon
+        #           > icon_convert
+        miot_prop.platform = platform
+        return True
 
     def spec_transform(self) -> None:
         """Parse service, property, event, action from device spec."""
@@ -529,7 +607,7 @@ class MIoTDevice:
         # STEP 2: service conversion
         for service in self.spec_instance.services:
             service_entity = self.parse_miot_service_entity(
-                service_instance=service)
+                miot_service=service)
             if service_entity:
                 self.append_entity(entity_data=service_entity)
             # STEP 3.1: property conversion
@@ -538,18 +616,16 @@ class MIoTDevice:
                     continue
                 if prop.unit:
                     prop.external_unit = self.unit_convert(prop.unit)
-                    prop.icon = self.icon_convert(prop.unit)
-                prop_entity = self.parse_miot_property_entity(
-                    property_instance=prop)
-                if prop_entity:
-                    prop.platform = prop_entity['platform']
-                    prop.device_class = prop_entity['device_class']
-                # general conversion
+                    if not prop.icon:
+                        prop.icon = self.icon_convert(prop.unit)
+                # Special conversion
+                self.parse_miot_property_entity(miot_prop=prop)
+                # General conversion
                 if not prop.platform:
                     if prop.writable:
-                        if prop.format_ == 'str':
+                        if prop.format_ == str:
                             prop.platform = 'text'
-                        elif prop.format_ == 'bool':
+                        elif prop.format_ == bool:
                             prop.platform = 'switch'
                             prop.device_class = SwitchDeviceClass.SWITCH
                         elif prop.value_list:
@@ -558,11 +634,13 @@ class MIoTDevice:
                             prop.platform = 'number'
                         else:
                             # Irregular property will not be transformed.
-                            pass
+                            continue
                     elif prop.readable or prop.notifiable:
-                        prop.platform = 'sensor'
-                if prop.platform:
-                    self.append_prop(prop=prop)
+                        if prop.format_ == bool:
+                            prop.platform = 'binary_sensor'
+                        else:
+                            prop.platform = 'sensor'
+                self.append_prop(prop=prop)
             # STEP 3.2: event conversion
             for event in service.events:
                 if event.platform:
@@ -584,11 +662,66 @@ class MIoTDevice:
                 self.append_action(action=action)
 
     def unit_convert(self, spec_unit: str) -> Optional[str]:
-        """Convert MIoT unit to Home Assistant unit."""
+        """Convert MIoT unit to Home Assistant unit.
+        25/01/20: All online prop unit statistical tables: unit, quantity.
+        {
+            "no_unit": 148499,
+            "percentage": 10042,
+            "kelvin": 1895,
+            "rgb": 772,            // color
+            "celsius": 5762,
+            "none": 16106,
+            "hours": 1540,
+            "minutes": 5061,
+            "ms": 27,
+            "watt": 216,
+            "arcdegrees": 159,
+            "ppm": 177,
+            "μg/m3": 106,
+            "days": 571,
+            "seconds": 2749,
+            "B/s": 21,
+            "pascal": 110,
+            "mg/m3": 339,
+            "lux": 125,
+            "kWh": 124,
+            "mv": 2,
+            "V": 38,
+            "A": 29,
+            "mV": 4,
+            "L": 352,
+            "m": 37,
+            "毫摩尔每升": 2,          // blood-sugar, cholesterol
+            "mmol/L": 1,            // urea
+            "weeks": 26,
+            "meter": 3,
+            "dB": 26,
+            "hour": 14,
+            "calorie": 19,          // 1 cal = 4.184 J
+            "ppb": 3,
+            "arcdegress": 30,
+            "bpm": 4,               // realtime-heartrate
+            "gram": 7,
+            "km/h": 9,
+            "W": 1,
+            "m3/h": 2,
+            "kilopascal": 1,
+            "mL": 4,
+            "mmHg": 4,
+            "w": 1,
+            "liter": 1,
+            "cm": 3,
+            "mA": 2,
+            "kilogram": 2,
+            "kcal/d": 2,            // basal-metabolism
+            "times": 1              // exercise-count
+        }
+        """
         unit_map = {
             'percentage': PERCENTAGE,
             'weeks': UnitOfTime.WEEKS,
             'days': UnitOfTime.DAYS,
+            'hour': UnitOfTime.HOURS,
             'hours': UnitOfTime.HOURS,
             'minutes': UnitOfTime.MINUTES,
             'seconds': UnitOfTime.SECONDS,
@@ -603,97 +736,125 @@ class MIoTDevice:
             'ppb': CONCENTRATION_PARTS_PER_BILLION,
             'lux': LIGHT_LUX,
             'pascal': UnitOfPressure.PA,
+            'kilopascal': UnitOfPressure.KPA,
+            'mmHg': UnitOfPressure.MMHG,
             'bar': UnitOfPressure.BAR,
-            'watt': UnitOfPower.WATT,
             'L': UnitOfVolume.LITERS,
+            'liter': UnitOfVolume.LITERS,
             'mL': UnitOfVolume.MILLILITERS,
             'km/h': UnitOfSpeed.KILOMETERS_PER_HOUR,
             'm/s': UnitOfSpeed.METERS_PER_SECOND,
+            'watt': UnitOfPower.WATT,
+            'w': UnitOfPower.WATT,
+            'W': UnitOfPower.WATT,
             'kWh': UnitOfEnergy.KILO_WATT_HOUR,
             'A': UnitOfElectricCurrent.AMPERE,
             'mA': UnitOfElectricCurrent.MILLIAMPERE,
             'V': UnitOfElectricPotential.VOLT,
+            'mv': UnitOfElectricPotential.MILLIVOLT,
             'mV': UnitOfElectricPotential.MILLIVOLT,
+            'cm': UnitOfLength.CENTIMETERS,
             'm': UnitOfLength.METERS,
+            'meter': UnitOfLength.METERS,
             'km': UnitOfLength.KILOMETERS,
             'm3/h': UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
             'gram': UnitOfMass.GRAMS,
+            'kilogram': UnitOfMass.KILOGRAMS,
             'dB': SIGNAL_STRENGTH_DECIBELS,
+            'arcdegrees': DEGREE,
+            'arcdegress': DEGREE,
             'kB': UnitOfInformation.KILOBYTES,
+            'MB': UnitOfInformation.MEGABYTES,
+            'GB': UnitOfInformation.GIGABYTES,
+            'TB': UnitOfInformation.TERABYTES,
+            'B/s': UnitOfDataRate.BYTES_PER_SECOND,
+            'KB/s': UnitOfDataRate.KILOBYTES_PER_SECOND,
+            'MB/s': UnitOfDataRate.MEGABYTES_PER_SECOND,
+            'GB/s': UnitOfDataRate.GIGABYTES_PER_SECOND
         }
 
         # Handle UnitOfConductivity separately since
         # it might not be available in all HA versions
         try:
             # pylint: disable=import-outside-toplevel
-            from homeassistant.const import UnitOfConductivity
+            from homeassistant.const import UnitOfConductivity  # type: ignore
             unit_map['μS/cm'] = UnitOfConductivity.MICROSIEMENS_PER_CM
-        except ImportError:
+            unit_map['mWh'] = UnitOfEnergy.MILLIWATT_HOUR
+        except Exception:  # pylint: disable=broad-except
             unit_map['μS/cm'] = 'μS/cm'
+            unit_map['mWh'] = 'mWh'
 
         return unit_map.get(spec_unit, None)
 
     def icon_convert(self, spec_unit: str) -> Optional[str]:
-        if spec_unit in ['percentage']:
+        if spec_unit in {'percentage'}:
             return 'mdi:percent'
-        if spec_unit in [
-                'weeks', 'days', 'hours', 'minutes', 'seconds', 'ms', 'μs']:
+        if spec_unit in {
+            'weeks', 'days', 'hour', 'hours', 'minutes', 'seconds', 'ms', 'μs'
+        }:
             return 'mdi:clock'
-        if spec_unit in ['celsius']:
+        if spec_unit in {'celsius'}:
             return 'mdi:temperature-celsius'
-        if spec_unit in ['fahrenheit']:
+        if spec_unit in {'fahrenheit'}:
             return 'mdi:temperature-fahrenheit'
-        if spec_unit in ['kelvin']:
+        if spec_unit in {'kelvin'}:
             return 'mdi:temperature-kelvin'
-        if spec_unit in ['μg/m3', 'mg/m3', 'ppm', 'ppb']:
+        if spec_unit in {'μg/m3', 'mg/m3', 'ppm', 'ppb'}:
             return 'mdi:blur'
-        if spec_unit in ['lux']:
+        if spec_unit in {'lux'}:
             return 'mdi:brightness-6'
-        if spec_unit in ['pascal', 'megapascal', 'bar']:
+        if spec_unit in {'pascal', 'kilopascal', 'megapascal', 'mmHg', 'bar'}:
             return 'mdi:gauge'
-        if spec_unit in ['watt']:
+        if spec_unit in {'watt', 'w', 'W'}:
             return 'mdi:flash-triangle'
-        if spec_unit in ['L', 'mL']:
+        if spec_unit in {'L', 'mL'}:
             return 'mdi:gas-cylinder'
-        if spec_unit in ['km/h', 'm/s']:
+        if spec_unit in {'km/h', 'm/s'}:
             return 'mdi:speedometer'
-        if spec_unit in ['kWh']:
+        if spec_unit in {'kWh'}:
             return 'mdi:transmission-tower'
-        if spec_unit in ['A', 'mA']:
+        if spec_unit in {'A', 'mA'}:
             return 'mdi:current-ac'
-        if spec_unit in ['V', 'mV']:
+        if spec_unit in {'V', 'mv', 'mV'}:
             return 'mdi:current-dc'
-        if spec_unit in ['m', 'km']:
+        if spec_unit in {'cm', 'm', 'meter', 'km'}:
             return 'mdi:ruler'
-        if spec_unit in ['rgb']:
+        if spec_unit in {'rgb'}:
             return 'mdi:palette'
-        if spec_unit in ['m3/h', 'L/s']:
+        if spec_unit in {'m3/h', 'L/s'}:
             return 'mdi:pipe-leak'
-        if spec_unit in ['μS/cm']:
+        if spec_unit in {'μS/cm'}:
             return 'mdi:resistor-nodes'
-        if spec_unit in ['gram']:
+        if spec_unit in {'gram', 'kilogram'}:
             return 'mdi:weight'
-        if spec_unit in ['dB']:
+        if spec_unit in {'dB'}:
             return 'mdi:signal-distance-variant'
-        if spec_unit in ['times']:
+        if spec_unit in {'times'}:
             return 'mdi:counter'
-        if spec_unit in ['mmol/L']:
+        if spec_unit in {'mmol/L'}:
             return 'mdi:dots-hexagon'
-        if spec_unit in ['arcdegress']:
-            return 'mdi:angle-obtuse'
-        if spec_unit in ['kB']:
+        if spec_unit in {'kB', 'MB', 'GB'}:
             return 'mdi:network-pos'
-        if spec_unit in ['calorie', 'kCal']:
+        if spec_unit in {'arcdegress', 'arcdegrees'}:
+            return 'mdi:angle-obtuse'
+        if spec_unit in {'B/s', 'KB/s', 'MB/s', 'GB/s'}:
+            return 'mdi:network'
+        if spec_unit in {'calorie', 'kCal'}:
             return 'mdi:food'
         return None
+
+    def __gen_sub_id(self) -> int:
+        self._sub_id += 1
+        return self._sub_id
 
     def __on_device_state_changed(
         self, did: str, state: MIoTDeviceState, ctx: Any
     ) -> None:
-        self._online = state
-        for key, handler in self._device_state_sub_list.items():
-            self.miot_client.main_loop.call_soon_threadsafe(
-                handler, key, state)
+        self._online = state == MIoTDeviceState.ONLINE
+        for key, sub_list in self._device_state_sub_list.items():
+            for handler in sub_list.values():
+                self.miot_client.main_loop.call_soon_threadsafe(
+                    handler, key, state)
 
 
 class MIoTServiceEntity(Entity):
@@ -705,8 +866,11 @@ class MIoTServiceEntity(Entity):
 
     _main_loop: asyncio.AbstractEventLoop
     _prop_value_map: dict[MIoTSpecProperty, Any]
+    _state_sub_id: int
+    _value_sub_ids: dict[str, int]
 
-    _event_occurred_handler: Callable[[MIoTSpecEvent, dict], None]
+    _event_occurred_handler: Optional[
+        Callable[[MIoTSpecEvent, dict], None]]
     _prop_changed_subs: dict[
         MIoTSpecProperty, Callable[[MIoTSpecProperty, Any], None]]
 
@@ -725,16 +889,20 @@ class MIoTServiceEntity(Entity):
         self.entity_data = entity_data
         self._main_loop = miot_device.miot_client.main_loop
         self._prop_value_map = {}
+        self._state_sub_id = 0
+        self._value_sub_ids = {}
         # Gen entity id
-        if isinstance(entity_data.spec, MIoTSpecInstance):
+        if isinstance(self.entity_data.spec, MIoTSpecInstance):
             self.entity_id = miot_device.gen_device_entity_id(DOMAIN)
             self._attr_name = f' {self.entity_data.spec.description_trans}'
-        elif isinstance(entity_data.spec, MIoTSpecService):
+        elif isinstance(self.entity_data.spec, MIoTSpecService):
             self.entity_id = miot_device.gen_service_entity_id(
-                DOMAIN, siid=entity_data.spec.iid)
+                DOMAIN, siid=self.entity_data.spec.iid,
+                description=self.entity_data.spec.description)
             self._attr_name = (
                 f'{"* "if self.entity_data.spec.proprietary else " "}'
                 f'{self.entity_data.spec.description_trans}')
+            self._attr_entity_category = entity_data.spec.entity_category
         # Set entity attr
         self._attr_unique_id = self.entity_id
         self._attr_should_poll = False
@@ -750,7 +918,9 @@ class MIoTServiceEntity(Entity):
             self.entity_id)
 
     @property
-    def event_occurred_handler(self) -> Callable[[MIoTSpecEvent, dict], None]:
+    def event_occurred_handler(
+        self
+    ) -> Optional[Callable[[MIoTSpecEvent, dict], None]]:
         return self._event_occurred_handler
 
     @event_occurred_handler.setter
@@ -771,25 +941,27 @@ class MIoTServiceEntity(Entity):
         self._prop_changed_subs.pop(prop, None)
 
     @property
-    def device_info(self) -> dict:
+    def device_info(self) -> Optional[DeviceInfo]:
         return self.miot_device.device_info
 
     async def async_added_to_hass(self) -> None:
         state_id = 's.0'
         if isinstance(self.entity_data.spec, MIoTSpecService):
             state_id = f's.{self.entity_data.spec.iid}'
-        self.miot_device.sub_device_state(
+        self._state_sub_id = self.miot_device.sub_device_state(
             key=state_id, handler=self.__on_device_state_changed)
         # Sub prop
         for prop in self.entity_data.props:
             if not prop.notifiable and not prop.readable:
                 continue
-            self.miot_device.sub_property(
+            key = f'p.{prop.service.iid}.{prop.iid}'
+            self._value_sub_ids[key] = self.miot_device.sub_property(
                 handler=self.__on_properties_changed,
                 siid=prop.service.iid, piid=prop.iid)
         # Sub event
         for event in self.entity_data.events:
-            self.miot_device.sub_event(
+            key = f'e.{event.service.iid}.{event.iid}'
+            self._value_sub_ids[key] = self.miot_device.sub_event(
                 handler=self.__on_event_occurred,
                 siid=event.service.iid, eiid=event.iid)
 
@@ -804,34 +976,43 @@ class MIoTServiceEntity(Entity):
         state_id = 's.0'
         if isinstance(self.entity_data.spec, MIoTSpecService):
             state_id = f's.{self.entity_data.spec.iid}'
-        self.miot_device.unsub_device_state(key=state_id)
+        self.miot_device.unsub_device_state(
+            key=state_id, sub_id=self._state_sub_id)
         # Unsub prop
         for prop in self.entity_data.props:
             if not prop.notifiable and not prop.readable:
                 continue
-            self.miot_device.unsub_property(
-                siid=prop.service.iid, piid=prop.iid)
+            sub_id = self._value_sub_ids.pop(
+                f'p.{prop.service.iid}.{prop.iid}', None)
+            if sub_id:
+                self.miot_device.unsub_property(
+                    siid=prop.service.iid, piid=prop.iid, sub_id=sub_id)
         # Unsub event
         for event in self.entity_data.events:
-            self.miot_device.unsub_event(
-                siid=event.service.iid, eiid=event.iid)
+            sub_id = self._value_sub_ids.pop(
+                f'e.{event.service.iid}.{event.iid}', None)
+            if sub_id:
+                self.miot_device.unsub_event(
+                    siid=event.service.iid, eiid=event.iid, sub_id=sub_id)
 
-    def get_map_description(self, map_: dict[int, Any], key: int) -> Any:
+    def get_map_value(
+        self, map_: Optional[dict[int, Any]], key: int
+    ) -> Any:
         if map_ is None:
             return None
         return map_.get(key, None)
 
-    def get_map_value(
-        self, map_: dict[int, Any], description: Any
+    def get_map_key(
+        self, map_: Optional[dict[int, Any]], value: Any
     ) -> Optional[int]:
         if map_ is None:
             return None
-        for key, value in map_.items():
-            if value == description:
+        for key, value_ in map_.items():
+            if value_ == value:
                 return key
         return None
 
-    def get_prop_value(self, prop: MIoTSpecProperty) -> Any:
+    def get_prop_value(self, prop: Optional[MIoTSpecProperty]) -> Any:
         if not prop:
             _LOGGER.error(
                 'get_prop_value error, property is None, %s, %s',
@@ -839,7 +1020,9 @@ class MIoTServiceEntity(Entity):
             return None
         return self._prop_value_map.get(prop, None)
 
-    def set_prop_value(self, prop: MIoTSpecProperty, value: Any) -> None:
+    def set_prop_value(
+        self, prop: Optional[MIoTSpecProperty], value: Any
+    ) -> None:
         if not prop:
             _LOGGER.error(
                 'set_prop_value error, property is None, %s, %s',
@@ -848,13 +1031,14 @@ class MIoTServiceEntity(Entity):
         self._prop_value_map[prop] = value
 
     async def set_property_async(
-        self, prop: MIoTSpecProperty, value: Any, update: bool = True
+        self, prop: Optional[MIoTSpecProperty], value: Any,
+        update_value: bool = True, write_ha_state: bool = True
     ) -> bool:
-        value = prop.value_format(value)
         if not prop:
             raise RuntimeError(
                 f'set property failed, property is None, '
                 f'{self.entity_id}, {self.name}')
+        value = prop.value_format(value)
         if prop not in self.entity_data.props:
             raise RuntimeError(
                 f'set property failed, unknown property, '
@@ -870,8 +1054,9 @@ class MIoTServiceEntity(Entity):
         except MIoTClientError as e:
             raise RuntimeError(
                 f'{e}, {self.entity_id}, {self.name}, {prop.name}') from e
-        if update:
+        if update_value:
             self._prop_value_map[prop] = value
+        if write_ha_state:
             self.async_write_ha_state()
         return True
 
@@ -986,11 +1171,12 @@ class MIoTPropertyEntity(Entity):
     service: MIoTSpecService
 
     _main_loop: asyncio.AbstractEventLoop
-    # {'min':int, 'max':int, 'step': int}
-    _value_range: dict[str, int]
+    _value_range: Optional[MIoTSpecValueRange]
     # {Any: Any}
-    _value_list: dict[Any, Any]
+    _value_list: Optional[MIoTSpecValueList]
     _value: Any
+    _state_sub_id: int
+    _value_sub_id: int
 
     _pending_write_ha_state_timer: Optional[asyncio.TimerHandle]
 
@@ -1002,12 +1188,10 @@ class MIoTPropertyEntity(Entity):
         self.service = spec.service
         self._main_loop = miot_device.miot_client.main_loop
         self._value_range = spec.value_range
-        if spec.value_list:
-            self._value_list = {
-                item['value']: item['description'] for item in spec.value_list}
-        else:
-            self._value_list = None
+        self._value_list = spec.value_list
         self._value = None
+        self._state_sub_id = 0
+        self._value_sub_id = 0
         self._pending_write_ha_state_timer = None
         # Gen entity_id
         self.entity_id = self.miot_device.gen_prop_entity_id(
@@ -1029,16 +1213,16 @@ class MIoTPropertyEntity(Entity):
             self._value_list)
 
     @property
-    def device_info(self) -> dict:
+    def device_info(self) -> Optional[DeviceInfo]:
         return self.miot_device.device_info
 
     async def async_added_to_hass(self) -> None:
         # Sub device state changed
-        self.miot_device.sub_device_state(
+        self._state_sub_id = self.miot_device.sub_device_state(
             key=f'{ self.service.iid}.{self.spec.iid}',
             handler=self.__on_device_state_changed)
         # Sub value changed
-        self.miot_device.sub_property(
+        self._value_sub_id = self.miot_device.sub_property(
             handler=self.__on_value_changed,
             siid=self.service.iid, piid=self.spec.iid)
         # Refresh value
@@ -1050,22 +1234,21 @@ class MIoTPropertyEntity(Entity):
             self._pending_write_ha_state_timer.cancel()
             self._pending_write_ha_state_timer = None
         self.miot_device.unsub_device_state(
-            key=f'{ self.service.iid}.{self.spec.iid}')
+            key=f'{ self.service.iid}.{self.spec.iid}',
+            sub_id=self._state_sub_id)
         self.miot_device.unsub_property(
-            siid=self.service.iid, piid=self.spec.iid)
+            siid=self.service.iid, piid=self.spec.iid,
+            sub_id=self._value_sub_id)
 
-    def get_vlist_description(self, value: Any) -> str:
+    def get_vlist_description(self, value: Any) -> Optional[str]:
         if not self._value_list:
             return None
-        return self._value_list.get(value, None)
+        return self._value_list.get_description_by_value(value)
 
     def get_vlist_value(self, description: str) -> Any:
         if not self._value_list:
             return None
-        for key, value in self._value_list.items():
-            if value == description:
-                return key
-        return None
+        return self._value_list.get_value_by_description(description)
 
     async def set_property_async(self, value: Any) -> bool:
         if not self.spec.writable:
@@ -1098,6 +1281,7 @@ class MIoTPropertyEntity(Entity):
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
         self._value = self.spec.value_format(params['value'])
+        self._value = self.spec.eval_expr(self._value)
         if not self._pending_write_ha_state_timer:
             self.async_write_ha_state()
 
@@ -1135,9 +1319,10 @@ class MIoTEventEntity(Entity):
     service: MIoTSpecService
 
     _main_loop: asyncio.AbstractEventLoop
-    _value: Any
     _attr_event_types: list[str]
     _arguments_map: dict[int, str]
+    _state_sub_id: int
+    _value_sub_id: int
 
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecEvent) -> None:
         if miot_device is None or spec is None or spec.service is None:
@@ -1146,7 +1331,6 @@ class MIoTEventEntity(Entity):
         self.spec = spec
         self.service = spec.service
         self._main_loop = miot_device.miot_client.main_loop
-        self._value = None
         # Gen entity_id
         self.entity_id = self.miot_device.gen_event_entity_id(
             ha_domain=DOMAIN, spec_name=spec.name,
@@ -1164,6 +1348,8 @@ class MIoTEventEntity(Entity):
         self._arguments_map = {}
         for prop in spec.argument:
             self._arguments_map[prop.iid] = prop.description_trans
+        self._state_sub_id = 0
+        self._value_sub_id = 0
 
         _LOGGER.info(
             'new miot event entity, %s, %s, %s, %s, %s',
@@ -1171,35 +1357,37 @@ class MIoTEventEntity(Entity):
             spec.device_class, self.entity_id)
 
     @property
-    def device_info(self) -> dict:
+    def device_info(self) -> Optional[DeviceInfo]:
         return self.miot_device.device_info
 
     async def async_added_to_hass(self) -> None:
         # Sub device state changed
-        self.miot_device.sub_device_state(
+        self._state_sub_id = self.miot_device.sub_device_state(
             key=f'event.{ self.service.iid}.{self.spec.iid}',
             handler=self.__on_device_state_changed)
         # Sub value changed
-        self.miot_device.sub_event(
+        self._value_sub_id = self.miot_device.sub_event(
             handler=self.__on_event_occurred,
             siid=self.service.iid, eiid=self.spec.iid)
 
     async def async_will_remove_from_hass(self) -> None:
         self.miot_device.unsub_device_state(
-            key=f'event.{ self.service.iid}.{self.spec.iid}')
+            key=f'event.{ self.service.iid}.{self.spec.iid}',
+            sub_id=self._state_sub_id)
         self.miot_device.unsub_event(
-            siid=self.service.iid, eiid=self.spec.iid)
+            siid=self.service.iid, eiid=self.spec.iid,
+            sub_id=self._value_sub_id)
 
     @abstractmethod
     def on_event_occurred(
-        self, name: str, arguments: list[dict[int, Any]]
-    ): ...
+        self, name: str, arguments: dict[str, Any] | None = None
+    ) -> None: ...
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('event occurred, %s',  params)
         trans_arg = {}
-        try:
-            for item in params['arguments']:
+        for item in params['arguments']:
+            try:
                 if 'value' not in item:
                     continue
                 if 'piid' in item:
@@ -1215,10 +1403,10 @@ class MIoTEventEntity(Entity):
                         for index, prop in enumerate(self.spec.argument)
                     }
                     break
-        except KeyError as error:
-            _LOGGER.error(
-                'on event msg, invalid args, %s, %s, %s',
-                self.entity_id, params, error)
+            except KeyError as error:
+                _LOGGER.debug(
+                    'on event msg, invalid args, %s, %s, %s',
+                    self.entity_id, params, error)
         self.on_event_occurred(
             name=self.spec.description_trans, arguments=trans_arg)
         self.async_write_ha_state()
@@ -1240,11 +1428,11 @@ class MIoTActionEntity(Entity):
     miot_device: MIoTDevice
     spec: MIoTSpecAction
     service: MIoTSpecService
-    action_platform: str
 
     _main_loop: asyncio.AbstractEventLoop
     _in_map: dict[int, MIoTSpecProperty]
     _out_map: dict[int, MIoTSpecProperty]
+    _state_sub_id: int
 
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecAction) -> None:
         if miot_device is None or spec is None or spec.service is None:
@@ -1252,8 +1440,8 @@ class MIoTActionEntity(Entity):
         self.miot_device = miot_device
         self.spec = spec
         self.service = spec.service
-        self.action_platform = 'action'
         self._main_loop = miot_device.miot_client.main_loop
+        self._state_sub_id = 0
         # Gen entity_id
         self.entity_id = self.miot_device.gen_action_entity_id(
             ha_domain=DOMAIN, spec_name=spec.name,
@@ -1273,19 +1461,22 @@ class MIoTActionEntity(Entity):
             spec.device_class, self.entity_id)
 
     @property
-    def device_info(self) -> dict:
+    def device_info(self) -> Optional[DeviceInfo]:
         return self.miot_device.device_info
 
     async def async_added_to_hass(self) -> None:
-        self.miot_device.sub_device_state(
-            key=f'{self.action_platform}.{ self.service.iid}.{self.spec.iid}',
+        self._state_sub_id = self.miot_device.sub_device_state(
+            key=f'a.{ self.service.iid}.{self.spec.iid}',
             handler=self.__on_device_state_changed)
 
     async def async_will_remove_from_hass(self) -> None:
         self.miot_device.unsub_device_state(
-            key=f'{self.action_platform}.{ self.service.iid}.{self.spec.iid}')
+            key=f'a.{ self.service.iid}.{self.spec.iid}',
+            sub_id=self._state_sub_id)
 
-    async def action_async(self, in_list: list = None) -> Optional[list]:
+    async def action_async(
+        self, in_list: Optional[list] = None
+    ) -> Optional[list]:
         try:
             return await self.miot_device.miot_client.action_async(
                 did=self.miot_device.did,
