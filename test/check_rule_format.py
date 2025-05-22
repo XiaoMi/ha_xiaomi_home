@@ -18,6 +18,8 @@ SPEC_BOOL_TRANS_FILE = path.join(
     ROOT_PATH, '../custom_components/xiaomi_home/miot/specs/bool_trans.yaml')
 SPEC_FILTER_FILE = path.join(
     ROOT_PATH, '../custom_components/xiaomi_home/miot/specs/spec_filter.yaml')
+SPEC_MULTI_LANG_FILE = path.join(
+    ROOT_PATH, '../custom_components/xiaomi_home/miot/specs/multi_lang.json')
 SPEC_ADD_FILE = path.join(
     ROOT_PATH, '../custom_components/xiaomi_home/miot/specs/spec_add.json')
 SPEC_MODIFY_FILE = path.join(
@@ -138,6 +140,14 @@ def bool_trans(d: dict) -> bool:
                          default_keys, trans_keys)
             return False
     return True
+
+
+def multi_lang(data: dict) -> bool:
+    """dict[str, dict[str, dict[str, str]]]"""
+    for key in data.keys():
+        if key.count(':') != 5:
+            return False
+    return nested_3_dict_str_str(data)
 
 
 def spec_add(data: dict) -> bool:
@@ -304,6 +314,10 @@ def sort_spec_add(file_path: str):
     return dict(sorted(filter_data.items()))
 
 
+def sort_multi_lang(file_path: str):
+    return sort_spec_add(file_path)
+
+
 def sort_spec_modify(file_path: str):
     filter_data = load_yaml_file(file_path=file_path)
     assert isinstance(filter_data, dict), f'{file_path} format error'
@@ -324,6 +338,14 @@ def test_spec_filter():
     assert isinstance(data, dict)
     assert data, f'load {SPEC_FILTER_FILE} failed'
     assert spec_filter(data), f'{SPEC_FILTER_FILE} format error'
+
+
+@pytest.mark.github
+def test_multi_lang():
+    data = load_json_file(SPEC_MULTI_LANG_FILE)
+    assert isinstance(data, dict)
+    assert data, f'load {SPEC_MULTI_LANG_FILE} failed'
+    assert multi_lang(data), f'{SPEC_MULTI_LANG_FILE} format error'
 
 
 @pytest.mark.github
@@ -418,6 +440,12 @@ def test_miot_data_sort():
             f'{SPEC_FILTER_FILE} not sorted, goto project root path'
             ' and run the following command sorting, ',
             'pytest -s -v -m update ./test/check_rule_format.py')
+    assert json.dumps(
+        load_json_file(file_path=SPEC_MULTI_LANG_FILE)) == json.dumps(
+            sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)), (
+                f'{SPEC_MULTI_LANG_FILE} not sorted, goto project root path'
+                ' and run the following command sorting, ',
+                'pytest -s -v -m update ./test/check_rule_format.py')
     assert json.dumps(load_json_file(file_path=SPEC_ADD_FILE)) == json.dumps(
         sort_spec_add(file_path=SPEC_ADD_FILE)), (
             f'{SPEC_ADD_FILE} not sorted, goto project root path'
@@ -438,6 +466,8 @@ def test_sort_spec_data():
     sort_data = sort_spec_filter(file_path=SPEC_FILTER_FILE)
     save_yaml_file(file_path=SPEC_FILTER_FILE, data=sort_data)
     _LOGGER.info('%s formatted.', SPEC_FILTER_FILE)
+    sort_data = sort_multi_lang(file_path=SPEC_MULTI_LANG_FILE)
+    save_json_file(file_path=SPEC_MULTI_LANG_FILE, data=sort_data)
     sort_data = sort_spec_add(file_path=SPEC_ADD_FILE)
     save_json_file(file_path=SPEC_ADD_FILE, data=sort_data)
     _LOGGER.info('%s formatted.', SPEC_ADD_FILE)
