@@ -100,7 +100,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
     ) -> None:
         """Initialize the Water heater."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._attr_temperature_unit = None  # type: ignore
+        self._attr_temperature_unit = None
         self._attr_supported_features = WaterHeaterEntityFeature(0)
         self._prop_on = None
         self._prop_temp = None
@@ -123,8 +123,6 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                     continue
                 if prop.external_unit:
                     self._attr_temperature_unit = prop.external_unit
-                self._attr_min_temp = prop.value_range.min_
-                self._attr_max_temp = prop.value_range.max_
                 self._prop_temp = prop
             # target-temperature
             if prop.name == 'target-temperature':
@@ -133,9 +131,9 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                         'invalid target-temperature value_range format, %s',
                         self.entity_id)
                     continue
-                self._attr_target_temperature_low = prop.value_range.min_
-                self._attr_target_temperature_high = prop.value_range.max_
-                self._attr_precision = prop.value_range.step
+                self._attr_min_temp= prop.value_range.min_
+                self._attr_max_temp = prop.value_range.max_
+                self._attr_target_temperature_step = prop.value_range.step
                 if self._attr_temperature_unit is None and prop.external_unit:
                     self._attr_temperature_unit = prop.external_unit
                 self._attr_supported_features |= (
