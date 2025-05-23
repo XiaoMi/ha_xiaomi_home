@@ -601,7 +601,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         if value is None:
             return None
         if self.format_ == int:
-            return int(value)
+            return int(round(value))
         if self.format_ == float:
             return round(value, self.precision)
         if self.format_ == bool:
