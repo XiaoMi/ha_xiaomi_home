@@ -1,4 +1,16 @@
 # CHANGELOG
+## v0.3.2
+> Xiaomi Home has been added to the Home Assistant Community Store (HACS) as a default since May 8, 2025.
+### Added
+- Modify MIoT-Spec-V2 property format by spec_modify.yaml. [#1111](https://github.com/XiaoMi/ha_xiaomi_home/pull/1111)
+### Changed
+- Update the instructions of Xiaomi Home integration installation from HACS. [#102](https://github.com/XiaoMi/ha_xiaomi_home/pull/102) [#1088](https://github.com/XiaoMi/ha_xiaomi_home/pull/1088)
+- Add an alongside switch entity for zimi.waterheater.h03 and xiaomi.waterheater.yms2. [#1115](https://github.com/XiaoMi/ha_xiaomi_home/pull/1115)
+### Fixed
+- Fix Chinese encoding in LAN Control. [#1114](https://github.com/XiaoMi/ha_xiaomi_home/pull/1114)
+- Fix the MIoT-Spec-V2 of lxzn.switch.jcbcsm power consumption, voltage and current, shhf.light.sfla10 fan direction, zhimi.fan.za4 fan-level, zhimi.fan.sa1 fan-level. [#1110](https://github.com/XiaoMi/ha_xiaomi_home/pull/1110)
+- Revise the Chinese descriptions of loock.lock.t2pv1 door state value-list. [#1110](https://github.com/XiaoMi/ha_xiaomi_home/pull/1110)
+
 ## v0.3.1
 ### Changed
 - Setting the fan speed level when the fan is off will turning the fan on first. [#1031](https://github.com/XiaoMi/ha_xiaomi_home/pull/1031)

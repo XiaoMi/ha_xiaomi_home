@@ -226,7 +226,7 @@ class _MIoTLanDevice:
     def gen_packet(
         self, out_buffer: bytearray, clear_data: dict, did: str, offset: int
     ) -> int:
-        clear_bytes = json.dumps(clear_data).encode('utf-8')
+        clear_bytes = json.dumps(clear_data, ensure_ascii=False).encode('utf-8')
         padder = padding.PKCS7(algorithms.AES128.block_size).padder()
         padded_data = padder.update(clear_bytes) + padder.finalize()
         if len(padded_data) + self.OT_HEADER_LEN > len(out_buffer):

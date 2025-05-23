@@ -397,7 +397,7 @@ SPEC_SERVICE_TRANS_MAP: dict = {
             }
         },
         'optional': {
-            'properties': {'on', 'temperature', 'target-temperature', 'mode'}
+            'properties': {'temperature', 'target-temperature', 'mode'}
         },
         'entity': 'water_heater'
     },

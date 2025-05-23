@@ -33,9 +33,11 @@ git checkout v1.0.0
 
 ### 方法 2: [HACS](https://hacs.xyz/)
 
-HACS > 右上角三个点 > Custom repositories > Repository: https://github.com/XiaoMi/ha_xiaomi_home.git & Category or Type: Integration > ADD > 点击 HACS 的 New 或 Available for download 分类下的 Xiaomi Home ，进入集成详情页  > DOWNLOAD
+一键从 HACS 安装米家集成：
 
-> 米家集成暂未添加到 HACS 商店，敬请期待。
+[![打开您的 Home Assistant 实例并打开 Home Assistant 社区商店内的米家集成。](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=XiaoMi&repository=ha_xiaomi_home&category=integration)
+
+或者，HACS > 在搜索框中输入 **Xiaomi Home** > 点击 **Xiaomi Home** ，进入集成详情页  > DOWNLOAD
 
 ### 方法 3：通过 [Samba](https://github.com/home-assistant/addons/tree/master/samba) 或 [FTPS](https://github.com/hassio-addons/addon-ftp) 手动安装
 
@@ -47,7 +49,7 @@ HACS > 右上角三个点 > Custom repositories > Repository: https://github.com
 
 [设置 > 设备与服务 > 添加集成](https://my.home-assistant.io/redirect/brand/?brand=xiaomi_home) > 搜索“`Xiaomi Home`” > 下一步 > 请点击此处进行登录 > 使用小米账号登录
 
-[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=xiaomi_home)
+[![打开您的 Home Assistant 实例并开始配置一个新的米家集成实例。](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=xiaomi_home)
 
 ### 添加 MIoT 设备
 
@@ -59,7 +61,7 @@ HACS > 右上角三个点 > Custom repositories > Repository: https://github.com
 
 方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 添加中枢 > 下一步 > 请点击此处进行登录 > 使用小米账号登录
 
-[![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home)
+[![打开您的 Home Assistant 实例并显示米家集成。](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home)
 
 ### 修改配置项
 
@@ -353,7 +355,7 @@ instance code 为 MIoT-Spec-V2 实例代码，格式如下：
 ```
 service:<siid>                  # 服务
 service:<siid>:property:<piid>  # 属性
-service:<siid>:property:<piid>:valuelist:<value> # 属性取值列表的值
+service:<siid>:property:<piid>:valuelist:<value> # 属性取值列表的索引值
 service:<siid>:event:<eiid>     # 事件
 service:<siid>:action:<aiid>    # 方法
 ```

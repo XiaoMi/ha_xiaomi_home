@@ -601,7 +601,7 @@ class MIoTSpecProperty(_MIoTSpecBase):
         if value is None:
             return None
         if self.format_ == int:
-            return int(value)
+            return int(round(value))
         if self.format_ == float:
             return round(value, self.precision)
         if self.format_ == bool:
@@ -1195,6 +1195,9 @@ class _SpecModify:
     def get_prop_unit(self, siid: int, piid: int) -> Optional[str]:
         return self.__get_prop_item(siid=siid, piid=piid, key='unit')
 
+    def get_prop_format(self, siid: int, piid: int) -> Optional[str]:
+        return self.__get_prop_item(siid=siid, piid=piid, key='format')
+
     def get_prop_expr(self, siid: int, piid: int) -> Optional[str]:
         return self.__get_prop_item(siid=siid, piid=piid, key='expr')
 
@@ -1518,6 +1521,10 @@ class MIoTSpecParser:
                     siid=service['iid'], piid=property_['iid'])
                 if custom_access:
                     spec_prop.access = custom_access
+                custom_format = self._spec_modify.get_prop_format(
+                    siid=service['iid'], piid=property_['iid'])
+                if custom_format:
+                    spec_prop.format_ = custom_format
                 custom_range = self._spec_modify.get_prop_value_range(
                     siid=service['iid'], piid=property_['iid'])
                 if custom_range:
