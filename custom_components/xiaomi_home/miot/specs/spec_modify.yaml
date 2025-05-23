@@ -108,6 +108,11 @@ urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
 urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:
   prop.2.1004:
     name: contact-state
+    value-list:
+    - value: 0
+      description: open
+    - value: 1
+      description: closed
     expr: src_value!=1
 urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
   prop.3.2:
