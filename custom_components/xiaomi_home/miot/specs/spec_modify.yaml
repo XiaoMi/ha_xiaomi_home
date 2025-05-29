@@ -56,6 +56,9 @@ urn:miot-spec-v2:device:fan:0000A005:dmaker-p5:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p69:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:zhimi-sa1:3:
   prop.2.2:
     name: fan-level-a
@@ -189,6 +192,11 @@ urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
     expr: src_value!=1
+urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm:1:0000D042:
+  prop.27.3:
+    name: light-on
+  prop.27.4:
+    name: light-fan-on
 urn:miot-spec-v2:device:switch:0000A003:lxzn-cbcsmj:1:0000D00D:
   prop.3.1:
     expr: round(src_value/100, 2)
