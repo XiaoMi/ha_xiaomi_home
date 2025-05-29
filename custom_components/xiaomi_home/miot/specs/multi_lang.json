@@ -168,7 +168,7 @@
       "service:003:property:1021:valuelist:002": "已上锁(反锁)",
       "service:003:property:1021:valuelist:003": "已上锁(反锁+童锁)",
       "service:003:property:1021:valuelist:004": "已开锁",
-      "service:003:property:1021:valuelist:008": "门未关（门超时未关）",
+      "service:003:property:1021:valuelist:008": "门未关(门超时未关)",
       "service:003:property:1021:valuelist:012": "门虚掩"
     }
   },
