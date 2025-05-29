@@ -123,6 +123,10 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
     - read
     - notify
     unit: mV
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:1: urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2:
+  prop.2.8:
+    name: people-number
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:
   prop.2.6:
     unit: cm
