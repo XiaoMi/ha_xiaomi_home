@@ -26,6 +26,9 @@ urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
     - 1
     - 1
 urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:2: urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1
+urn:miot-spec-v2:device:airer:0000A00D:mrbond-m1t:1:
+  prop.2.3:
+    name: current-position-a
 urn:miot-spec-v2:device:airer:0000A00D:mrbond-m33a:1:
   prop.2.3:
     name: current-position-a
