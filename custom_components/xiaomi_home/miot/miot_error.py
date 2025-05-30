@@ -45,12 +45,14 @@ off Xiaomi or its affiliates' products.
 
 MIoT error code and exception.
 """
+
 from enum import Enum
 from typing import Any
 
 
 class MIoTErrorCode(Enum):
     """MIoT error code."""
+
     # Base error code
     CODE_UNKNOWN = -10000
     CODE_UNAVAILABLE = -10001
@@ -81,11 +83,12 @@ class MIoTErrorCode(Enum):
 
 class MIoTError(Exception):
     """MIoT error."""
+
     code: MIoTErrorCode
     message: Any
 
     def __init__(
-        self,  message: Any, code: MIoTErrorCode = MIoTErrorCode.CODE_UNKNOWN
+        self, message: Any, code: MIoTErrorCode = MIoTErrorCode.CODE_UNKNOWN
     ) -> None:
         self.message = message
         self.code = code
@@ -98,53 +101,40 @@ class MIoTError(Exception):
         return {"code": self.code.value, "message": self.message}
 
 
-class MIoTOauthError(MIoTError):
-    ...
+class MIoTOauthError(MIoTError): ...
 
 
-class MIoTHttpError(MIoTError):
-    ...
+class MIoTHttpError(MIoTError): ...
 
 
-class MIoTMipsError(MIoTError):
-    ...
+class MIoTMipsError(MIoTError): ...
 
 
-class MIoTDeviceError(MIoTError):
-    ...
+class MIoTDeviceError(MIoTError): ...
 
 
-class MIoTSpecError(MIoTError):
-    ...
+class MIoTSpecError(MIoTError): ...
 
 
-class MIoTStorageError(MIoTError):
-    ...
+class MIoTStorageError(MIoTError): ...
 
 
-class MIoTCertError(MIoTError):
-    ...
+class MIoTCertError(MIoTError): ...
 
 
-class MIoTClientError(MIoTError):
-    ...
+class MIoTClientError(MIoTError): ...
 
 
-class MIoTEvError(MIoTError):
-    ...
+class MIoTEvError(MIoTError): ...
 
 
-class MipsServiceError(MIoTError):
-    ...
+class MipsServiceError(MIoTError): ...
 
 
-class MIoTConfigError(MIoTError):
-    ...
+class MIoTConfigError(MIoTError): ...
 
 
-class MIoTOptionsError(MIoTError):
-    ...
+class MIoTOptionsError(MIoTError): ...
 
 
-class MIoTLanError(MIoTError):
-    ...
+class MIoTLanError(MIoTError): ...
