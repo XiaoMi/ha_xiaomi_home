@@ -260,5 +260,13 @@
       "service:004:property:006": "максимальная температура цели",
       "service:004:property:007": "минимальная температура цели "
     }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:ijai-v1": {
+    "zh_cn": {
+      "service:007:property:005:valuelist:000": "安静",
+      "service:007:property:005:valuelist:001": "标准",
+      "service:007:property:005:valuelist:002": "中档",
+      "service:007:property:005:valuelist:003": "强力"
+    }
   }
 }
