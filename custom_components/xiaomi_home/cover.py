@@ -161,7 +161,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
                 for item in prop.value_list.items:
                     if item.name in {'opening', 'open', 'up'}:
                         self._prop_status_opening.append(item.value)
-                    elif item.name in {'closing', 'close', 'down'}:
+                    elif item.name in {'closing', 'close', 'down', 'dowm'}:
                         self._prop_status_closing.append(item.value)
                     elif item.name in {'stop', 'stopped', 'pause'}:
                         self._prop_status_stop.append(item.value)
