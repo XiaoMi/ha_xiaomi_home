@@ -65,7 +65,7 @@ from homeassistant.components.light import (
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util.color import value_to_brightness, brightness_to_value
-from homeassistant.helpers.entity_platform import async_get_current_platform
+from homeassistant.helpers.entity import EntityCategory
 from .miot.miot_spec import MIoTSpecProperty
 from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
 from .miot.const import DOMAIN
@@ -381,6 +381,9 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
         self._attr_options = ["Send One by One", "Batch Send Command"]
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]  # 默认选项
+        self._attr_entity_category = (
+            EntityCategory.CONFIG
+        )  # **重点：告诉 HA 这是配置类实体**
 
     async def async_select_option(self, option: str):
         """处理用户选择的选项。"""
