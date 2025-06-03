@@ -62,6 +62,7 @@ from homeassistant.components.light import (
     LightEntityFeature,
     ColorMode,
 )
+from homeassistant.helpers.entity_platform import async_get_platforms
 from homeassistant.components.select import SelectEntity
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util.color import value_to_brightness, brightness_to_value
@@ -101,7 +102,9 @@ async def async_setup_entry(
         async_add_entities(new_entities)
     # Add an extra switch. Since turning on the lights is a batch command or a separate command
     if new_select_entities:
-        async_add_entities(new_select_entities)
+        select_platforms = await async_get_platforms(hass, "select")
+        if select_platforms:
+            await select_platforms[0].async_add_entities([new_select_entities])
 
 
 class Light(MIoTServiceEntity, LightEntity):
