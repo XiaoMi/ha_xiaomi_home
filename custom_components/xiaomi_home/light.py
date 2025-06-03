@@ -62,8 +62,10 @@ from homeassistant.components.light import (
     LightEntityFeature,
     ColorMode,
 )
-
+from homeassistant.components.select import SelectEntity
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util.color import value_to_brightness, brightness_to_value
+from homeassistant.helpers.entity import EntityCategory
 from .miot.miot_spec import MIoTSpecProperty
 from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
 from .miot.const import DOMAIN
@@ -80,14 +82,26 @@ async def async_setup_entry(
     device_list: list[MIoTDevice] = hass.data[DOMAIN]["devices"][config_entry.entry_id]
 
     new_entities = []
+    new_select_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get("light", []):
-            new_entities.append(
-                Light(miot_device=miot_device, entity_data=data, hass=hass)
+            light_entity = Light(miot_device=miot_device, entity_data=data, hass=hass)
+            new_entities.append(light_entity)
+            device_id = (
+                list(light_entity.device_info["identifiers"])[0][1]
+                if light_entity.device_info.get("identifiers")
+                else light_entity.entity_id
             )
+            select_entity = LightCommandSendMode(
+                hass, light_entity.entity_id, device_id
+            )
+            new_select_entities.append(select_entity)
 
     if new_entities:
         async_add_entities(new_entities)
+    # Add an extra switch. Since turning on the lights is a batch command or a separate command
+    if new_select_entities:
+        async_add_entities(new_select_entities)
 
 
 class Light(MIoTServiceEntity, LightEntity):
@@ -350,3 +364,40 @@ class Light(MIoTServiceEntity, LightEntity):
         # Dirty logic for lumi.gateway.mgl03 indicator light
         value_on = False if self._prop_on.format_ == bool else 0
         await self.set_property_async(prop=self._prop_on, value=value_on)
+
+
+class LightCommandSendMode(SelectEntity, RestoreEntity):
+    """To control whether to turn on the light, you need to send the light-on command first and
+    then send other color temperatures and brightness or send them all at the same time.
+    The default is to send one by one."""
+
+    def __init__(self, hass: HomeAssistant, light_entity_id: str, device_id: str):
+        super().__init__()
+        self.hass = hass
+        self._device_id = device_id
+        self._attr_name = f"{light_entity_id.split('.')[-1]} Command Send Mode"
+        self._attr_unique_id = f"{light_entity_id}_command_send_mode"
+        self._attr_options = ["Send One by One", "Batch Send Command"]
+        self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
+        self._attr_current_option = self._attr_options[0]  # 默认选项
+        self._attr_entity_category = (
+            EntityCategory.CONFIG
+        )  # **重点：告诉 HA 这是配置类实体**
+
+    async def async_select_option(self, option: str):
+        """处理用户选择的选项。"""
+        if option in self._attr_options:
+            self._attr_current_option = option
+            self.async_write_ha_state()
+
+    async def async_added_to_hass(self):
+        """在实体添加到 Home Assistant 时恢复上次的状态。"""
+        await super().async_added_to_hass()
+        if (
+            last_state := await self.async_get_last_state()
+        ) and last_state.state in self._attr_options:
+            self._attr_current_option = last_state.state
+
+    @property
+    def current_option(self):
+        return self._attr_current_option
