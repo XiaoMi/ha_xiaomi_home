@@ -87,21 +87,22 @@ async def async_setup_entry(
         for data in miot_device.entity_list.get("light", []):
             light_entity = Light(miot_device=miot_device, entity_data=data, hass=hass)
             new_entities.append(light_entity)
-            device_id = (
-                list(light_entity.device_info["identifiers"])[0][1]
-                if light_entity.device_info.get("identifiers")
-                else light_entity.entity_id
-            )
-            select_entity = LightCommandSendMode(
-                hass, light_entity.entity_id, device_id
-            )
-            new_select_entities.append(select_entity)
 
     if new_entities:
         async_add_entities(new_entities)
     # Add an extra switch. Since turning on the lights is a batch command or a separate command
-    if new_select_entities:
-        async_add_entities(new_select_entities)
+    for light_entity in new_entities:
+        device_id = None
+        if light_entity.device_info and light_entity.device_info.get("identifiers"):
+            device_id = list(light_entity.device_info["identifiers"])[0][1]
+
+        if device_id:
+            select_entity = LightCommandSendMode(
+                hass, light_entity.unique_id, device_id
+            )
+            new_select_entities.append(select_entity)
+
+    async_add_entities(new_select_entities)
 
 
 class Light(MIoTServiceEntity, LightEntity):
@@ -371,12 +372,12 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     then send other color temperatures and brightness or send them all at the same time.
     The default is to send one by one."""
 
-    def __init__(self, hass: HomeAssistant, light_entity_id: str, device_id: str):
+    def __init__(self, hass: HomeAssistant, light_unique_id: str, device_id: str):
         super().__init__()
         self.hass = hass
         self._device_id = device_id
-        self._attr_name = f"{light_entity_id.split('.')[-1]} Command Send Mode"
-        self._attr_unique_id = f"{light_entity_id}_command_send_mode"
+        self._attr_name = f"{light_unique_id.split('.')[-1]} Command Send Mode"
+        self._attr_unique_id = f"{light_unique_id}_command_send_mode"
         self._attr_options = ["Send One by One", "Batch Send Command"]
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]  # 默认选项
