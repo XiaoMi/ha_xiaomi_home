@@ -5,6 +5,9 @@ urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ma4:
   - 15.*
   services:
   - '10'
+urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:
+  properties:
+  - '3.2'
 urn:miot-spec-v2:device:curtain:0000A00C:lumi-hmcn01:
   properties:
   - '5.1'

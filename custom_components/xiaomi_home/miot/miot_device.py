@@ -345,10 +345,11 @@ class MIoTDevice:
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
             f'{self._model_strs[-1][:20]}')
 
-    def gen_service_entity_id(self, ha_domain: str, siid: int) -> str:
+    def gen_service_entity_id(self, ha_domain: str, siid: int,
+                              description: str) -> str:
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_s_{siid}')
+            f'{self._model_strs[-1][:20]}_s_{siid}_{description}')
 
     def gen_prop_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, piid: int
@@ -549,6 +550,10 @@ class MIoTDevice:
         # Optional actions
         # Optional events
         miot_service.platform = platform
+        # entity_category
+        if entity_category := SPEC_SERVICE_TRANS_MAP[service_name].get(
+            'entity_category', None):
+            miot_service.entity_category = entity_category
         return entity_data
 
     def parse_miot_property_entity(self, miot_prop: MIoTSpecProperty) -> bool:
@@ -587,13 +592,8 @@ class MIoTDevice:
             # Priority: spec_modify.unit > unit_convert > specv2entity.unit
             miot_prop.external_unit = SPEC_PROP_TRANS_MAP['properties'][
                 prop_name]['unit_of_measurement']
-        if (
-            not miot_prop.icon
-            and 'icon' in SPEC_PROP_TRANS_MAP['properties'][prop_name]
-        ):
-            # Priority: spec_modify.icon > icon_convert > specv2entity.icon
-            miot_prop.icon = SPEC_PROP_TRANS_MAP['properties'][prop_name][
-                'icon']
+        # Priority: default.icon when device_class is set > spec_modify.icon
+        #           > icon_convert
         miot_prop.platform = platform
         return True
 
@@ -779,8 +779,10 @@ class MIoTDevice:
             # pylint: disable=import-outside-toplevel
             from homeassistant.const import UnitOfConductivity  # type: ignore
             unit_map['μS/cm'] = UnitOfConductivity.MICROSIEMENS_PER_CM
+            unit_map['mWh'] = UnitOfEnergy.MILLIWATT_HOUR
         except Exception:  # pylint: disable=broad-except
             unit_map['μS/cm'] = 'μS/cm'
+            unit_map['mWh'] = 'mWh'
 
         return unit_map.get(spec_unit, None)
 
@@ -895,10 +897,12 @@ class MIoTServiceEntity(Entity):
             self._attr_name = f' {self.entity_data.spec.description_trans}'
         elif isinstance(self.entity_data.spec, MIoTSpecService):
             self.entity_id = miot_device.gen_service_entity_id(
-                DOMAIN, siid=self.entity_data.spec.iid)
+                DOMAIN, siid=self.entity_data.spec.iid,
+                description=self.entity_data.spec.description)
             self._attr_name = (
                 f'{"* "if self.entity_data.spec.proprietary else " "}'
                 f'{self.entity_data.spec.description_trans}')
+            self._attr_entity_category = entity_data.spec.entity_category
         # Set entity attr
         self._attr_unique_id = self.entity_id
         self._attr_should_poll = False

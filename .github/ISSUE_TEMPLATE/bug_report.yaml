@@ -1,7 +1,7 @@
 name: Bug Report / 报告问题
 description: Create a report to help us improve. / 报告问题以帮助我们改进
 body:
-  - type: input
+  - type: textarea
     attributes:
       label: Describe the Bug / 描述问题
       description: |

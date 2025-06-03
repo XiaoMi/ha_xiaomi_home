@@ -1,4 +1,107 @@
 # CHANGELOG
+## v0.3.2
+> Xiaomi Home has been added to the Home Assistant Community Store (HACS) as a default since May 8, 2025.
+### Added
+- Modify MIoT-Spec-V2 property format by spec_modify.yaml. [#1111](https://github.com/XiaoMi/ha_xiaomi_home/pull/1111)
+### Changed
+- Update the instructions of Xiaomi Home integration installation from HACS. [#102](https://github.com/XiaoMi/ha_xiaomi_home/pull/102) [#1088](https://github.com/XiaoMi/ha_xiaomi_home/pull/1088)
+- Add an alongside switch entity for zimi.waterheater.h03 and xiaomi.waterheater.yms2. [#1115](https://github.com/XiaoMi/ha_xiaomi_home/pull/1115)
+### Fixed
+- Fix Chinese encoding in LAN Control. [#1114](https://github.com/XiaoMi/ha_xiaomi_home/pull/1114)
+- Fix the MIoT-Spec-V2 of lxzn.switch.jcbcsm power consumption, voltage and current, shhf.light.sfla10 fan direction, zhimi.fan.za4 fan-level, zhimi.fan.sa1 fan-level. [#1110](https://github.com/XiaoMi/ha_xiaomi_home/pull/1110)
+- Revise the Chinese descriptions of loock.lock.t2pv1 door state value-list. [#1110](https://github.com/XiaoMi/ha_xiaomi_home/pull/1110)
+
+## v0.3.1
+### Changed
+- Setting the fan speed level when the fan is off will turning the fan on first. [#1031](https://github.com/XiaoMi/ha_xiaomi_home/pull/1031)
+### Fixed
+- Fix update device list error when there is no shared devices. [#1024](https://github.com/XiaoMi/ha_xiaomi_home/pull/1024)
+- Fix the humidifier get_prop_value error when the property is None. [#1035](https://github.com/XiaoMi/ha_xiaomi_home/pull/1035)
+- Fix the MIoT-Spec-V2 of zhimi.fan.v3 fan-level, cuco.plug.cp1md voltage and current, zimi.plug.zncz01 electric-power, giot.plug.v8icm power-consumption unit, yunmi.kettle.r3 tds unit, and dmaker.fan.p5 fan-level. [#1037](https://github.com/XiaoMi/ha_xiaomi_home/pull/1037)
+
+## v0.3.0
+注意：v0.3.0 变更了部分实体 unique_id 的生成规则，如果勾选 xiaomi_home > 配置 > 更新实体转换规则，会导致部分实体已配置的自动化失效。如果想要避免重新配置大量自动化，可使用这个[补丁](https://github.com/XiaoMi/ha_xiaomi_home/pull/972)。
+
+CAUTION: v0.3.0 changes the unique_id of some entities. If you check the option `xiaomi_home > CONFIGURE > Update entity conversion rules`, it may cause the automation settings for these entities to fail. To avoid having to reconfigure a large number of automation settings, you can use this [patch](https://github.com/XiaoMi/ha_xiaomi_home/pull/972).
+### Added
+- Import the devices in the shared homes and the separated shared devices. [#1021](https://github.com/XiaoMi/ha_xiaomi_home/pull/1021)
+- Support _attr_hvac_action of the climate entity. [#956](https://github.com/XiaoMi/ha_xiaomi_home/pull/956)
+- Add custom defined MIoT-Spec-V2 instance via spec_add.json. [#953](https://github.com/XiaoMi/ha_xiaomi_home/pull/953)
+### Fixed
+- Ignore 'Event loop is closed' when unsub a closed event loop. [#991](https://github.com/XiaoMi/ha_xiaomi_home/pull/991)
+- Fix contact-state for linp.magnet.m1 and loock.safe.v1. [#977](https://github.com/XiaoMi/ha_xiaomi_home/pull/977)
+- Fix the mode initialization error of aupu.bhf_light.s368m. [#955](https://github.com/XiaoMi/ha_xiaomi_home/pull/955)
+- Fix the MIoT-Spec-V2 of lumi.gateway.mcn001, qmi.plug.psv3, lumi.motion.acn001, izq.sensor_occupy.24, linp.sensor_occupy.hb01 and yunmi.waterpuri.s20. [#949](https://github.com/XiaoMi/ha_xiaomi_home/pull/949)
+
+## v0.2.4
+### Added
+- Convert the submersion-state, the contact-state and the occupancy-status property to the binary_sensor entity. [#905](https://github.com/XiaoMi/ha_xiaomi_home/pull/905)
+### Changed
+- suittc.airrtc.wk168 mode descriptions are set to strings of numbers from 1 to 16. [#921](https://github.com/XiaoMi/ha_xiaomi_home/pull/921)
+- Do not set _attr_suggested_display_precision when the spec.expr is set in spec_modify.yaml [#929](https://github.com/XiaoMi/ha_xiaomi_home/pull/929)
+- Set "unknown event msg" log to info level.
+### Fixed
+- hhcc.plantmonitor.v1 soil moisture and soil ec icon and unit. [#927](https://github.com/XiaoMi/ha_xiaomi_home/pull/27)
+- cuco.plug.cp2 voltage and power value ratio.
+- cgllc.airmonitor.s1 unit ppb.
+- roswan.waterpuri.lte01 tds unit.
+- lumi.relay.c2acn01 power consumption unit
+- xiaomi.bhf_light.s1 fan level of ventilation.
+
+## v0.2.3
+### Changed
+- Specify the service name and the property name during the climate entity's on/off feature initialization. [#899](https://github.com/XiaoMi/ha_xiaomi_home/pull/899)
+- Remove the useless total-battery property from `SPEC_PROP_TRANS_MAP`.
+### Fixed
+- Fix the hvac mode setting error when changing the preset mode of the ptc-bath-heater.
+- Fix the ambiguous descriptions of yeelink.bhf_light.v10 ptc-bath-heater mode value-list.
+- Fix the power consumption value of chuangmi.plug.212a01. [#910](https://github.com/XiaoMi/ha_xiaomi_home/pull/910)
+
+## v0.2.2
+This version has modified the conversion rules of the climate entity, which will have effect on the devices with the ptc-bath-heater, the air-conditioner and the air-fresh service. After updating, you need to restart Home Assistant and check `xiaomi_home > CONFIGURE >
+Update entity conversion rules > NEXT` to reload the integration.
+
+这个版本修改了浴霸、空调、新风机的实体转换规则，更新之后需要重启 Home Assistant，并且勾选 `xiaomi_home > 配置 > 更新实体转换规则 > 下一步` 重新加载集成。
+### Added
+- Add conversion rules for the air-conditioner service and the air-fresh service. [#879](https://github.com/XiaoMi/ha_xiaomi_home/pull/879)
+### Changed
+- Convert the mode of the ptc bath heater to the preset mode of the climate entity. [#874](https://github.com/XiaoMi/ha_xiaomi_home/pull/874)
+- Use Home Assistant default icon when device_class is set. [#855](https://github.com/XiaoMi/ha_xiaomi_home/pull/855)
+### Fixed
+- Fix xiaomi.aircondition.m9 humidity-range unit. [#878](https://github.com/XiaoMi/ha_xiaomi_home/pull/878)
+- Fix MIoT-Spec-V2 conflicts of xiaomi.fan.p5 and mike.bhf_light.2. [#866](https://github.com/XiaoMi/ha_xiaomi_home/pull/866)
+
+## v0.2.1
+### Added
+- Add the preset mode for the thermostat. [#833](https://github.com/XiaoMi/ha_xiaomi_home/pull/833)
+### Changed
+- Change paho-mqtt version to adapt Home Assistant 2025.03. [#839](https://github.com/XiaoMi/ha_xiaomi_home/pull/839)
+- Revert to use multi_lang.json. [#834](https://github.com/XiaoMi/ha_xiaomi_home/pull/834)
+### Fixed
+- Fix the opening and the closing status of linp.wopener.wd1lb. [#826](https://github.com/XiaoMi/ha_xiaomi_home/pull/826)
+- Fix the format type of the wind-reverse property. [#810](https://github.com/XiaoMi/ha_xiaomi_home/pull/810)
+- Fix the fan-level property without value-list but with value-range. [#808](https://github.com/XiaoMi/ha_xiaomi_home/pull/808)
+
+## v0.2.0
+This version has modified some default units of sensors. After updating, it may cause Home Assistant to pop up some compatibility warnings. You can re-add the integration to resolve it.
+
+这个版本修改了一些传感器默认单位，更新后会导致 Home Assistant 弹出一些兼容性提示，您可以重新添加集成解决。
+
+### Added
+- Add prop trans rule for surge-power. [#595](https://github.com/XiaoMi/ha_xiaomi_home/pull/595)
+- Support modify spec and value conversion. [#663](https://github.com/XiaoMi/ha_xiaomi_home/pull/663)
+- Support the electric blanket. [#781](https://github.com/XiaoMi/ha_xiaomi_home/pull/781)
+- Add device with motor-control service as cover entity. [#688](https://github.com/XiaoMi/ha_xiaomi_home/pull/688)
+### Changed
+- Update README file. [#681](https://github.com/XiaoMi/ha_xiaomi_home/pull/681) [#747](https://github.com/XiaoMi/ha_xiaomi_home/pull/747)
+- Update CONTRIBUTING.md. [#681](https://github.com/XiaoMi/ha_xiaomi_home/pull/681)
+- Refactor climate.py. [#614](https://github.com/XiaoMi/ha_xiaomi_home/pull/614)
+### Fixed
+- Fix variable name or comment errors & fix test_lan error. [#678](https://github.com/XiaoMi/ha_xiaomi_home/pull/678) [#690](https://github.com/XiaoMi/ha_xiaomi_home/pull/690)
+- Fix water heater error & some type error. [#684](https://github.com/XiaoMi/ha_xiaomi_home/pull/684)
+- Fix fan level with value-list & fan reverse [#689](https://github.com/XiaoMi/ha_xiaomi_home/pull/689)
+- Fix sensor display precision [#708](https://github.com/XiaoMi/ha_xiaomi_home/pull/708)
+- Fix event:motion-detected without arguments [#712](https://github.com/XiaoMi/ha_xiaomi_home/pull/712)
 
 ## v0.1.5b2
 ### Added
@@ -91,10 +194,10 @@ This version will cause some Xiaomi routers that do not support access (#564) to
 ### Changed
 ### Fixed
 - Fix humidifier trans rule. https://github.com/XiaoMi/ha_xiaomi_home/issues/59
-- Fix get homeinfo error.  https://github.com/XiaoMi/ha_xiaomi_home/issues/22 
+- Fix get homeinfo error.  https://github.com/XiaoMi/ha_xiaomi_home/issues/22
 - Fix air-conditioner switch on. https://github.com/XiaoMi/ha_xiaomi_home/issues/37 https://github.com/XiaoMi/ha_xiaomi_home/issues/16
-- Fix invalid cover status. https://github.com/XiaoMi/ha_xiaomi_home/issues/11  https://github.com/XiaoMi/ha_xiaomi_home/issues/85 
-- Water heater entity add STATE_OFF. https://github.com/XiaoMi/ha_xiaomi_home/issues/105 https://github.com/XiaoMi/ha_xiaomi_home/issues/17 
+- Fix invalid cover status. https://github.com/XiaoMi/ha_xiaomi_home/issues/11  https://github.com/XiaoMi/ha_xiaomi_home/issues/85
+- Water heater entity add STATE_OFF. https://github.com/XiaoMi/ha_xiaomi_home/issues/105 https://github.com/XiaoMi/ha_xiaomi_home/issues/17
 
 ## v0.1.0
 ### Added

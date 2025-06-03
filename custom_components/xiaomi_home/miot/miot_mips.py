@@ -1213,10 +1213,13 @@ class MipsLocalClient(_MipsClient):
                 or 'did' not in msg
                 or 'siid' not in msg
                 or 'eiid' not in msg
-                or 'arguments' not in msg
+                # or 'arguments' not in msg
             ):
-                # self.log_error(f'on_event_msg, recv unknown msg, {payload}')
+                self.log_info('unknown event msg, %s', payload)
                 return
+            if 'arguments' not in msg:
+                self.log_info('wrong event msg, %s', payload)
+                msg['arguments'] = []
             if handler:
                 self.log_debug('local, on event_occurred, %s', payload)
                 handler(msg, ctx)

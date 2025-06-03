@@ -33,9 +33,11 @@ git checkout v1.0.0
 
 ### Method 2: [HACS](https://hacs.xyz/)
 
-HACS > Overflow Menu > Custom repositories > Repository: https://github.com/XiaoMi/ha_xiaomi_home.git & Category or Type: Integration > ADD > Xiaomi Home in New or Available for download section of HACS > DOWNLOAD
+One-click installation from HACS:
 
-> Xiaomi Home has not been added to the HACS store as a default yet. It's coming soon.
+[![Open your Home Assistant instance and open the Xiaomi Home integration inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=XiaoMi&repository=ha_xiaomi_home&category=integration)
+
+Or, HACS > In the search box, type **Xiaomi Home** > Click **Xiaomi Home**, getting into the detail page > DOWNLOAD
 
 ### Method 3: Manually installation via [Samba](https://github.com/home-assistant/addons/tree/master/samba) / [FTPS](https://github.com/hassio-addons/addon-ftp)
 
@@ -47,7 +49,7 @@ Download and copy `custom_components/xiaomi_home` folder to `config/custom_compo
 
 [Settings > Devices & services > ADD INTEGRATION](https://my.home-assistant.io/redirect/brand/?brand=xiaomi_home) > Search `Xiaomi Home` > NEXT > Click here to login > Sign in with Xiaomi account
 
-[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=xiaomi_home)
+[![Open your Home Assistant instance and start setting up a new Xiaomi Home integration instance.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=xiaomi_home)
 
 ### Add MIoT Devices
 
@@ -59,7 +61,7 @@ After a Xiaomi account login and its user configuration are completed, you can c
 
 Method: [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > ADD HUB > NEXT > Click here to login > Sign in with Xiaomi account
 
-[![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home)
+[![Open your Home Assistant instance and show Xiaomi Home integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home)
 
 ### Update Configurations
 

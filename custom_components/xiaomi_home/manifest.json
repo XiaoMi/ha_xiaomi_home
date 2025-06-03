@@ -20,12 +20,12 @@
     ],
     "requirements": [
         "construct>=2.10.56",
-        "paho-mqtt<2.0.0",
+        "paho-mqtt",
         "numpy",
         "cryptography",
         "psutil"
     ],
-    "version": "v0.1.5b2",
+    "version": "v0.3.2",
     "zeroconf": [
         "_miot-central._tcp.local."
     ]

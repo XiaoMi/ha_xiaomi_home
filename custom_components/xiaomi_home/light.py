@@ -179,7 +179,7 @@ class Light(MIoTServiceEntity, LightEntity):
                         ) / prop.value_range.step)
                         > self._VALUE_RANGE_MODE_COUNT_MAX
                     ):
-                        _LOGGER.info(
+                        _LOGGER.error(
                             'too many mode values, %s, %s, %s',
                             self.entity_id, prop.name, prop.value_range)
                     else:

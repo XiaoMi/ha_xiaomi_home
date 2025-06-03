@@ -565,27 +565,32 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         home_list = {}
         tip_devices = self._miot_i18n.translate(key='config.other.devices')
         # home list
-        for home_id, home_info in self._cc_home_info[
-                'homes']['home_list'].items():
-            # i18n
-            tip_central = ''
-            group_id = home_info.get('group_id', None)
-            dev_list = {
-                device['did']: device
-                for device in list(self._cc_home_info['devices'].values())
-                if device.get('home_id', None) == home_id}
-            if (
-                mips_list
-                and group_id in mips_list
-                and mips_list[group_id].get('did', None) in dev_list
-            ):
+        for device_source in ['home_list','share_home_list',
+                              'separated_shared_list']:
+            if device_source not in self._cc_home_info['homes']:
+                continue
+            for home_id, home_info in self._cc_home_info[
+                    'homes'][device_source].items():
                 # i18n
-                tip_central = self._miot_i18n.translate(
-                    key='config.other.found_central_gateway')
-                home_info['central_did'] = mips_list[group_id].get('did', None)
-            home_list[home_id] = (
-                f'{home_info["home_name"]} '
-                f'[ {len(dev_list)} {tip_devices} {tip_central} ]')
+                tip_central = ''
+                group_id = home_info.get('group_id', None)
+                dev_list = {
+                    device['did']: device
+                    for device in list(self._cc_home_info['devices'].values())
+                    if device.get('home_id', None) == home_id}
+                if (
+                    mips_list
+                    and group_id in mips_list
+                    and mips_list[group_id].get('did', None) in dev_list
+                ):
+                    # i18n
+                    tip_central = self._miot_i18n.translate(
+                        key='config.other.found_central_gateway')
+                    home_info['central_did'] = mips_list[group_id].get(
+                        'did', None)
+                home_list[home_id] = (
+                    f'{home_info["home_name"]} '
+                    f'[ {len(dev_list)} {tip_devices} {tip_central} ]')
 
         self._cc_home_list_show = dict(sorted(home_list.items()))
 
@@ -660,10 +665,14 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not home_selected:
                 return await self.__show_homes_select_form(
                     'no_family_selected')
-            for home_id, home_info in self._cc_home_info[
-                    'homes']['home_list'].items():
-                if home_id in home_selected:
-                    self._home_selected[home_id] = home_info
+            for device_source in ['home_list','share_home_list',
+                                  'separated_shared_list']:
+                if device_source not in self._cc_home_info['homes']:
+                    continue
+                for home_id, home_info in self._cc_home_info[
+                        'homes'][device_source].items():
+                    if home_id in home_selected:
+                        self._home_selected[home_id] = home_info
             self._area_name_rule = user_input.get(
                 'area_name_rule', self._area_name_rule)
             # Storage device list
@@ -1420,27 +1429,31 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             home_list = {}
             tip_devices = self._miot_i18n.translate(key='config.other.devices')
             # home list
-            for home_id, home_info in self._cc_home_info[
-                    'homes']['home_list'].items():
-                # i18n
-                tip_central = ''
-                group_id = home_info.get('group_id', None)
-                did_list = {
-                    device['did']: device for device in list(
-                        self._cc_home_info['devices'].values())
-                    if device.get('home_id', None) == home_id}
-                if (
-                    group_id in mips_list
-                    and mips_list[group_id].get('did', None) in did_list
-                ):
+            for device_source in ['home_list','share_home_list',
+                                  'separated_shared_list']:
+                if device_source not in self._cc_home_info['homes']:
+                    continue
+                for home_id, home_info in self._cc_home_info[
+                        'homes'][device_source].items():
                     # i18n
-                    tip_central = self._miot_i18n.translate(
-                        key='config.other.found_central_gateway')
-                    home_info['central_did'] = mips_list[group_id].get(
-                        'did', None)
-                home_list[home_id] = (
-                    f'{home_info["home_name"]} '
-                    f'[ {len(did_list)} {tip_devices} {tip_central} ]')
+                    tip_central = ''
+                    group_id = home_info.get('group_id', None)
+                    did_list = {
+                        device['did']: device for device in list(
+                            self._cc_home_info['devices'].values())
+                        if device.get('home_id', None) == home_id}
+                    if (
+                        group_id in mips_list
+                        and mips_list[group_id].get('did', None) in did_list
+                    ):
+                        # i18n
+                        tip_central = self._miot_i18n.translate(
+                            key='config.other.found_central_gateway')
+                        home_info['central_did'] = mips_list[group_id].get(
+                            'did', None)
+                    home_list[home_id] = (
+                        f'{home_info["home_name"]} '
+                        f'[ {len(did_list)} {tip_devices} {tip_central} ]')
             # Remove deleted item
             self._home_selected_list = [
                 home_id for home_id in self._home_selected_list
@@ -1460,10 +1473,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return await self.__show_homes_select_form('no_family_selected')
         self._ctrl_mode = user_input.get('ctrl_mode', self._ctrl_mode)
         self._home_selected = {}
-        for home_id, home_info in self._cc_home_info[
-                'homes']['home_list'].items():
-            if home_id in self._home_selected_list:
-                self._home_selected[home_id] = home_info
+        for device_source in ['home_list','share_home_list',
+                              'separated_shared_list']:
+            if device_source not in self._cc_home_info['homes']:
+                continue
+            for home_id, home_info in self._cc_home_info[
+                    'homes'][device_source].items():
+                if home_id in self._home_selected_list:
+                    self._home_selected[home_id] = home_info
         # Get device list
         device_list: dict = {
             did: dev_info
