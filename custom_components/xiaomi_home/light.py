@@ -374,7 +374,6 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     def __init__(self, hass: HomeAssistant, light_entity_id: str, device_id: str):
         super().__init__()
         self.hass = hass
-        self._entity_id = light_entity_id
         self._device_id = device_id
         self._attr_name = f"{light_entity_id.split('.')[-1]} Command Send Mode"
         self._attr_unique_id = f"{light_entity_id}_command_send_mode"
