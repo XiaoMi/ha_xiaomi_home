@@ -82,14 +82,26 @@ async def async_setup_entry(
     device_list: list[MIoTDevice] = hass.data[DOMAIN]["devices"][config_entry.entry_id]
 
     new_entities = []
+    new_select_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get("light", []):
-            new_entities.append(
-                Light(miot_device=miot_device, entity_data=data, hass=hass)
+            light_entity = Light(miot_device=miot_device, entity_data=data, hass=hass)
+            new_entities.append(light_entity)
+            device_id = (
+                list(light_entity.device_info["identifiers"])[0][1]
+                if light_entity.device_info.get("identifiers")
+                else light_entity.entity_id
             )
+            select_entity = LightCommandSendMode(
+                hass, light_entity.entity_id, device_id
+            )
+            new_select_entities.append(select_entity)
 
     if new_entities:
         async_add_entities(new_entities)
+    # Add an extra switch. Since turning on the lights is a batch command or a separate command
+    if new_select_entities:
+        async_add_entities(new_select_entities)
 
 
 class Light(MIoTServiceEntity, LightEntity):
@@ -210,20 +222,6 @@ class Light(MIoTServiceEntity, LightEntity):
             elif self._prop_on:
                 self._attr_supported_color_modes.add(ColorMode.ONOFF)
                 self._attr_color_mode = ColorMode.ONOFF
-
-    async def async_added_to_hass(self):
-        await super().async_added_to_hass()
-        # Add an extra switch. Since turning on the lights is a batch command or a separate command
-        device_id = (
-            list(self.device_info["identifiers"])[0][1]
-            if self.device_info.get("identifiers")
-            else self.entity_id
-        )
-        self._command_send_mode = LightCommandSendMode(
-            self.hass, self.entity_id, device_id
-        )
-        platform = async_get_current_platform()
-        platform.async_add_entities([self._command_send_mode])
 
     @property
     def is_on(self) -> Optional[bool]:
@@ -374,8 +372,9 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     The default is to send one by one."""
 
     def __init__(self, hass: HomeAssistant, light_entity_id: str, device_id: str):
+        super().__init__()
         self.hass = hass
-        self._entity_id = f"{light_entity_id}_command_send_mode"
+        self._entity_id = light_entity_id
         self._device_id = device_id
         self._attr_name = f"{light_entity_id.split('.')[-1]} Command Send Mode"
         self._attr_unique_id = f"{light_entity_id}_command_send_mode"
