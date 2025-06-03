@@ -101,8 +101,8 @@ async def async_setup_entry(
                 hass, light_entity.unique_id, device_id
             )
             new_select_entities.append(select_entity)
-
-    async_add_entities(new_select_entities)
+    if new_entities:
+        async_add_entities(new_select_entities)
 
 
 class Light(MIoTServiceEntity, LightEntity):
