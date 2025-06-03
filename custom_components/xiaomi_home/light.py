@@ -375,10 +375,10 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
 
     def __init__(self, hass: HomeAssistant, light_entity_id: str, device_id: str):
         self.hass = hass
-        self._entity_id = light_entity_id
+        self._entity_id = f"{light_entity_id}_command_send_mode"
         self._device_id = device_id
-        self._attr_name = f"{light_entity_id.split('.')[-1]} Command Mode"
-        self._attr_unique_id = f"{light_entity_id}_command_mode"
+        self._attr_name = f"{light_entity_id.split('.')[-1]} Command Send Mode"
+        self._attr_unique_id = f"{light_entity_id}_command_send_mode"
         self._attr_options = ["Send One by One", "Batch Send Command"]
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]  # 默认选项
