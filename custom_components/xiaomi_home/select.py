@@ -80,7 +80,7 @@ async def async_setup_entry(
     light_command_send_mode_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get("light", []):
-            unique_id = f"{miot_device.did}_{data.entity_id}_command_send_mode"
+            unique_id = f"{miot_device.did}_command_send_mode"
             device_id = miot_device.did
             light_command_send_mode_entities.append(
                 LightCommandSendMode(hass, unique_id, device_id)
