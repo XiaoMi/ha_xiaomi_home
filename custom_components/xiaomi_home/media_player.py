@@ -451,7 +451,6 @@ class WifiSpeaker(FeatureVolumeSet, FeatureVolumeMute, FeaturePlay,
         """Initialize the device."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
 
-        self._attr_icon = 'mdi:speaker-wireless'
         self._attr_device_class = MediaPlayerDeviceClass.SPEAKER
         self._attr_media_content_type = MediaType.MUSIC
 
@@ -467,6 +466,5 @@ class Television(FeatureVolumeSet, FeatureVolumeMute, FeaturePlay, FeaturePause,
         """Initialize the device."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
 
-        self._attr_icon = 'mdi:television'
         self._attr_device_class = MediaPlayerDeviceClass.TV
         self._attr_media_content_type = MediaType.VIDEO
