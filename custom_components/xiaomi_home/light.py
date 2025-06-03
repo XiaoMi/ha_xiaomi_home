@@ -89,9 +89,7 @@ async def async_setup_entry(
             new_entities.append(light_entity)
 
     if new_entities:
-        platform = hass.data[DOMAIN].get("select_platform")
-        if platform:
-            platform.async_add_entities(new_select_entities)
+        async_add_entities(new_entities)
 
     # Add an extra switch. Since turning on the lights is a batch command or a separate command
     for light_entity in new_entities:
@@ -104,8 +102,10 @@ async def async_setup_entry(
                 hass, light_entity.unique_id, device_id
             )
             new_select_entities.append(select_entity)
-    if new_entities:
-        async_add_entities(new_select_entities)
+    if new_select_entities:
+        platform = hass.data[DOMAIN].get("select_platform")
+        if platform:
+            platform.async_add_entities(new_select_entities)
 
 
 class Light(MIoTServiceEntity, LightEntity):
