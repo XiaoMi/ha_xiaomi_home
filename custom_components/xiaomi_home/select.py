@@ -126,7 +126,7 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
         self._device_id = device_id
         self._attr_name = f"{light_entity_id.split('.')[-1]} Command Send Mode"
         self._attr_unique_id = f"{light_entity_id}_command_send_mode"
-        self._attr_options = ["Send One by One", "Send Batch"]
+        self._attr_options = ["Send One by One", "Send Turn On First", "Send Together"]
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]  # 默认选项
         self._attr_entity_category = (
