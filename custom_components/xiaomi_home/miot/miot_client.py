@@ -655,7 +655,6 @@ class MIoTClient:
         if did not in self._device_list_cache:
             raise MIoTClientError(f"did not exist, {did}")
         # Priority local control
-        _LOGGER.error(f"set_prop_async did/siid/piid/value {did} {siid} {piid} {value}")
         if self._ctrl_mode == CtrlMode.AUTO:
             # Gateway control
             device_gw = self._device_list_gateway.get(did, None)
@@ -737,7 +736,6 @@ class MIoTClient:
         if did not in self._device_list_cache:
             raise MIoTClientError(f"did not exist, {did}")
         # Priority local control
-        _LOGGER.error(f"set_props_async {props_list}")
         if self._ctrl_mode == CtrlMode.AUTO:
             # Gateway control
             device_gw = self._device_list_gateway.get(did, None)
