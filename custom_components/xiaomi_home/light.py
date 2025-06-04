@@ -308,7 +308,6 @@ class Light(MIoTServiceEntity, LightEntity):
             if self._prop_on:
                 value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
                 set_properties_list.append({"prop": self._prop_on, "value": value_on})
-                await self.set_property_async(prop=self._prop_on, value=value_on)
             # color-temperature
             if ATTR_COLOR_TEMP_KELVIN in kwargs:
                 set_properties_list.append(
