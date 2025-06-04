@@ -113,6 +113,7 @@ class DeviceTracker(MIoTServiceEntity, TrackerEntity):
         return None if self._prop_latitude is None else self.get_prop_value(
             prop=self._prop_latitude)
 
+    @property
     def longitude(self) -> Optional[float]:
         """The longitude coordinate of the device."""
         return None if self._prop_longitude is None else self.get_prop_value(
