@@ -12,6 +12,11 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:1: urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:2: urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3:
+  prop.3.5:
+    expr: (src_value*6)
 urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
   prop.2.3:
     name: current-position-a
