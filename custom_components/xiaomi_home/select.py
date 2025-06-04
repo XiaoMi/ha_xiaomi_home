@@ -87,6 +87,7 @@ async def async_setup_entry(
             device_id = list(miot_device.device_info.get("identifiers"))[0][1]
             _LOGGER.error(f"device_id sadasd {device_id}")
             light_entity_id = miot_device.gen_device_entity_id(DOMAIN)
+            _LOGGER.error(f"light_entity_id sadasd {light_entity_id}")
             new_select_entities.append(
                 LightCommandSendMode(
                     hass=hass, light_entity_id=light_entity_id, device_id=device_id
