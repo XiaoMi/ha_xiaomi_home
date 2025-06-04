@@ -655,6 +655,7 @@ class MIoTClient:
         if did not in self._device_list_cache:
             raise MIoTClientError(f"did not exist, {did}")
         # Priority local control
+        _LOGGER.error(f"set_prop_async did/siid/piid/value {did} {siid} {piid} {value}")
         if self._ctrl_mode == CtrlMode.AUTO:
             # Gateway control
             device_gw = self._device_list_gateway.get(did, None)
@@ -668,14 +669,9 @@ class MIoTClient:
                 if mips is None:
                     _LOGGER.error("no gw route, %s, try control throw cloud", device_gw)
                 else:
-                    _LOGGER.error(
-                        f"send_command did/siid/piid/value {did} {siid} {piid} {value}"
-                    )
-
                     result = await mips.set_prop_async(
                         did=did, siid=siid, piid=piid, value=value
                     )
-                    _LOGGER.error(f"send_command dan result {result}")
                     rc = (result or {}).get(
                         "code", MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value
                     )
@@ -741,6 +737,7 @@ class MIoTClient:
         if did not in self._device_list_cache:
             raise MIoTClientError(f"did not exist, {did}")
         # Priority local control
+        _LOGGER.error(f"set_props_async {props_list}")
         if self._ctrl_mode == CtrlMode.AUTO:
             # Gateway control
             device_gw = self._device_list_gateway.get(did, None)
@@ -755,7 +752,6 @@ class MIoTClient:
                     _LOGGER.error("no gw route, %s, try control throw cloud", device_gw)
                 else:
                     result = await mips.set_props_async(did=did, props_list=props_list)
-                    _LOGGER.error(f"send_command result {result}")
                     rc = {
                         (r or {}).get(
                             "code", MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value
