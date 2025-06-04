@@ -48,7 +48,7 @@ Light entities for Xiaomi Home.
 
 from __future__ import annotations
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, List, Dict
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -82,7 +82,9 @@ async def async_setup_entry(
     new_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get("light", []):
-            new_entities.append(Light(miot_device=miot_device, entity_data=data))
+            new_entities.append(
+                Light(miot_device=miot_device, entity_data=data, hass=hass)
+            )
 
     if new_entities:
         async_add_entities(new_entities)
@@ -102,12 +104,16 @@ class Light(MIoTServiceEntity, LightEntity):
     _brightness_scale: Optional[tuple[int, int]]
     _mode_map: Optional[dict[Any, Any]]
 
-    def __init__(self, miot_device: MIoTDevice, entity_data: MIoTEntityData) -> None:
+    def __init__(
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData, hass: HomeAssistant
+    ) -> None:
         """Initialize the Light."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
+        self.hass = hass
         self._attr_color_mode = None
         self._attr_supported_color_modes = set()
         self._attr_supported_features = LightEntityFeature(0)
+        self.miot_device = miot_device
         if miot_device.did.startswith("group."):
             self._attr_icon = "mdi:lightbulb-group"
 
@@ -250,43 +256,97 @@ class Light(MIoTServiceEntity, LightEntity):
         """
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        if self._prop_on:
-            value_on = True if self._prop_on.format_ == bool else 1
-            await self.set_property_async(prop=self._prop_on, value=value_on)
-        # brightness
-        if ATTR_BRIGHTNESS in kwargs:
-            brightness = brightness_to_value(
-                self._brightness_scale, kwargs[ATTR_BRIGHTNESS]
-            )
-            await self.set_property_async(
-                prop=self._prop_brightness, value=brightness, write_ha_state=False
-            )
-        # color-temperature
-        if ATTR_COLOR_TEMP_KELVIN in kwargs:
-            await self.set_property_async(
-                prop=self._prop_color_temp,
-                value=kwargs[ATTR_COLOR_TEMP_KELVIN],
-                write_ha_state=False,
-            )
-            self._attr_color_mode = ColorMode.COLOR_TEMP
-        # rgb color
-        if ATTR_RGB_COLOR in kwargs:
-            r = kwargs[ATTR_RGB_COLOR][0]
-            g = kwargs[ATTR_RGB_COLOR][1]
-            b = kwargs[ATTR_RGB_COLOR][2]
-            rgb = (r << 16) | (g << 8) | b
-            await self.set_property_async(
-                prop=self._prop_color, value=rgb, write_ha_state=False
-            )
-            self._attr_color_mode = ColorMode.RGB
-        # mode
-        if ATTR_EFFECT in kwargs:
-            await self.set_property_async(
-                prop=self._prop_mode,
-                value=self.get_map_key(map_=self._mode_map, value=kwargs[ATTR_EFFECT]),
-                write_ha_state=False,
-            )
-        self.async_write_ha_state()
+        # Determine whether the device sends the light-on properties in batches or one by one
+        select_entity_id = f"select.{self.entity_id.split('.')[-1]}_command_send_mode"
+        _LOGGER.error(f"self.entity_id {self.entity_id}")
+        _LOGGER.error(f"self.miot_device.did {self.miot_device.did}")
+        _LOGGER.error(
+            f"self.miot_device.identifiers {list(self.miot_device.device_info.get('identifiers'))[0][1]}"
+        )
+        command_send_mode = self.hass.states.get(select_entity_id)
+        _LOGGER.error(f"command_send_mode {command_send_mode}")
+        if command_send_mode and command_send_mode == "Batch Send Command":
+            set_properties_list: List[Dict[str, Any]] = []
+            if self._prop_on:
+                value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
+                set_properties_list.append({"prop": self._prop_on, "value": value_on})
+            # brightness
+            if ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale, kwargs[ATTR_BRIGHTNESS]
+                )
+                set_properties_list.append(
+                    {"prop": self._prop_brightness, "value": brightness}
+                )
+            # color-temperature
+            if ATTR_COLOR_TEMP_KELVIN in kwargs:
+                set_properties_list.append(
+                    {
+                        "prop": self._prop_color_temp,
+                        "value": kwargs[ATTR_COLOR_TEMP_KELVIN],
+                    }
+                )
+                self._attr_color_mode = ColorMode.COLOR_TEMP
+            # rgb color
+            if ATTR_RGB_COLOR in kwargs:
+                r = kwargs[ATTR_RGB_COLOR][0]
+                g = kwargs[ATTR_RGB_COLOR][1]
+                b = kwargs[ATTR_RGB_COLOR][2]
+                rgb = (r << 16) | (g << 8) | b
+                set_properties_list.append({"prop": self._prop_color, "value": rgb})
+                self._attr_color_mode = ColorMode.RGB
+            # mode
+            if ATTR_EFFECT in kwargs:
+                set_properties_list.append(
+                    {
+                        "prop": self._prop_mode,
+                        "value": self.get_map_key(
+                            map_=self._mode_map, value=kwargs[ATTR_EFFECT]
+                        ),
+                    }
+                )
+            await self.set_properties_async(set_properties_list)
+            self.async_write_ha_state()
+        else:
+            if self._prop_on:
+                value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
+                await self.set_property_async(prop=self._prop_on, value=value_on)
+            # brightness
+            if ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale, kwargs[ATTR_BRIGHTNESS]
+                )
+                await self.set_property_async(
+                    prop=self._prop_brightness, value=brightness, write_ha_state=False
+                )
+            # color-temperature
+            if ATTR_COLOR_TEMP_KELVIN in kwargs:
+                await self.set_property_async(
+                    prop=self._prop_color_temp,
+                    value=kwargs[ATTR_COLOR_TEMP_KELVIN],
+                    write_ha_state=False,
+                )
+                self._attr_color_mode = ColorMode.COLOR_TEMP
+            # rgb color
+            if ATTR_RGB_COLOR in kwargs:
+                r = kwargs[ATTR_RGB_COLOR][0]
+                g = kwargs[ATTR_RGB_COLOR][1]
+                b = kwargs[ATTR_RGB_COLOR][2]
+                rgb = (r << 16) | (g << 8) | b
+                await self.set_property_async(
+                    prop=self._prop_color, value=rgb, write_ha_state=False
+                )
+                self._attr_color_mode = ColorMode.RGB
+            # mode
+            if ATTR_EFFECT in kwargs:
+                await self.set_property_async(
+                    prop=self._prop_mode,
+                    value=self.get_map_key(
+                        map_=self._mode_map, value=kwargs[ATTR_EFFECT]
+                    ),
+                    write_ha_state=False,
+                )
+            self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the light off."""
