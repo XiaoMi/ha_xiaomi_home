@@ -56,7 +56,7 @@ import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Callable, Optional, final, Coroutine
+from typing import Any, Callable, Optional, final, Coroutine, Dict, List
 
 from paho.mqtt.client import (
     MQTT_ERR_SUCCESS,
@@ -1338,6 +1338,43 @@ class MipsLocalClient(_MipsClient):
                 return result_obj['result'][0]
             if 'error' in result_obj:
                 return result_obj['error']
+        return {
+            'code': MIoTErrorCode.CODE_INTERNAL_ERROR.value,
+            'message': 'Invalid result'}
+
+    @final
+    async def set_props_async(
+        self, did: str, props_list: List[Dict[str, Any]],
+        timeout_ms: int = 10000
+    ) -> dict:
+        # props_list= [{
+                    # 'did': did,
+                    # 'siid': siid,
+                    # 'piid': piid,
+                    # 'value': value
+                # }]
+        payload_obj: dict = {
+            "did": did,
+            "rpc": {
+                "id": self.__gen_mips_id,
+                "method": "set_properties",
+                "params": props_list,
+            }
+        }
+        result_obj = await self.__request_async(
+            topic="proxy/rpcReq",
+            payload=json.dumps(payload_obj),
+            timeout_ms=timeout_ms)
+        if result_obj:
+            if (
+                "result" in result_obj
+                and len(result_obj["result"]) == len(props_list)
+                and result_obj["result"][0].get("did") == did
+                and all("code" in item for item in result_obj["result"])
+            ):
+                return result_obj["result"]
+            if "error" in result_obj:
+                return result_obj["error"]
         return {
             'code': MIoTErrorCode.CODE_INTERNAL_ERROR.value,
             'message': 'Invalid result'}
