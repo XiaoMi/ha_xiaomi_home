@@ -66,7 +66,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a config entry."""
+<<<<<<< HEAD
     device_list: list[MIoTDevice] = hass.data[DOMAIN]['devices'][
+=======
+    device_list: list[MIoTDevice] = hass.data[DOMAIN]["devices"][
+>>>>>>> 83899f8 (fomatted code)
         config_entry.entry_id]
 
     new_entities = []
@@ -80,12 +84,25 @@ async def async_setup_entry(
     # create select for light
     new_light_select_entities = []
     for miot_device in device_list:
+<<<<<<< HEAD
         # Add it to all devices with light entities, because some bathroom heaters and clothes drying racks also have lights.
         # if "device:light" in miot_device.spec_instance.urn:
         if miot_device.entity_list.get("light", []):
             device_id = list(miot_device.device_info.get("identifiers"))[0][1]
             new_light_select_entities.append(
                 LightCommandSendMode(hass=hass, device_id=device_id))
+=======
+        if "device:light" in miot_device.spec_instance.urn:
+            if miot_device.entity_list.get("light", []):
+                device_id = list(
+                    miot_device.device_info.get("identifiers"))[0][1]
+                light_entity_id = miot_device.gen_device_entity_id(DOMAIN)
+                new_light_select_entities.append(
+                    LightCommandSendMode(hass=hass,
+                                         light_entity_id=light_entity_id,
+                                         device_id=device_id))
+
+>>>>>>> 83899f8 (fomatted code)
     if new_light_select_entities:
         async_add_entities(new_light_select_entities)
 
@@ -100,8 +117,13 @@ class Select(MIoTPropertyEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
+<<<<<<< HEAD
         await self.set_property_async(
             value=self.get_vlist_value(description=option))
+=======
+        await self.set_property_async(value=self.get_vlist_value(
+            description=option))
+>>>>>>> 83899f8 (fomatted code)
 
     @property
     def current_option(self) -> Optional[str]:
@@ -114,19 +136,34 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     then send other color temperatures and brightness or send them all at the same time.
     The default is to send one by one."""
 
+<<<<<<< HEAD
     def __init__(self, hass: HomeAssistant, device_id: str):
+=======
+    def __init__(self, hass: HomeAssistant, light_entity_id: str,
+                 device_id: str):
+>>>>>>> 83899f8 (fomatted code)
         super().__init__()
         self.hass = hass
         self._device_id = device_id
         self._attr_name = "Command Send Mode"
+<<<<<<< HEAD
         self.entity_id = f"select.light_{device_id}_command_send_mode"
         self._attr_unique_id = self.entity_id
+=======
+        self._attr_unique_id = f"{light_entity_id}_command_send_mode"
+>>>>>>> 83899f8 (fomatted code)
         self._attr_options = [
             "Send One by One", "Send Turn On First", "Send Together"
         ]
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
+<<<<<<< HEAD
         self._attr_current_option = self._attr_options[0]
         self._attr_entity_category = EntityCategory.CONFIG
+=======
+        self._attr_current_option = self._attr_options[0]  # 默认选项
+        self._attr_entity_category = (EntityCategory.CONFIG
+                                     )  # **重点：告诉 HA 这是配置类实体**
+>>>>>>> 83899f8 (fomatted code)
 
     async def async_select_option(self, option: str):
         if option in self._attr_options:

@@ -101,6 +101,7 @@ class _MipsMessage:
         data_start = 0
         data_end = 0
         while data_start < data_len:
+<<<<<<< HEAD
             data_end = data_start+5
             unpack_len, unpack_type = struct.unpack(
                 '<IB', data[data_start:data_end])
@@ -113,6 +114,20 @@ class _MipsMessage:
                 case _MipsMsgTypeOptions.RET_TOPIC.value:
                     mips_msg.ret_topic = str(
                         unpack_data.strip(b'\x00'), 'utf-8')
+=======
+            data_end = data_start + 5
+            unpack_len, unpack_type = struct.unpack("<IB",
+                                                    data[data_start:data_end])
+            unpack_data = data[data_end:data_end + unpack_len]
+            #  string end with \x00
+            match unpack_type:
+                case _MipsMsgTypeOptions.ID.value:
+                    mips_msg.mid = int.from_bytes(unpack_data,
+                                                  byteorder="little")
+                case _MipsMsgTypeOptions.RET_TOPIC.value:
+                    mips_msg.ret_topic = str(unpack_data.strip(b"\x00"),
+                                             "utf-8")
+>>>>>>> 83899f8 (fomatted code)
                 case _MipsMsgTypeOptions.PAYLOAD.value:
                     mips_msg.payload = str(unpack_data.strip(b'\x00'), 'utf-8')
                 case _MipsMsgTypeOptions.FROM.value:
@@ -386,8 +401,13 @@ class _MipsClient(ABC):
     def update_mqtt_password(self, password: str) -> None:
         self._password = password
         if self._mqtt:
+<<<<<<< HEAD
             self._mqtt.username_pw_set(
                 username=self._username, password=self._password)
+=======
+            self._mqtt.username_pw_set(username=self._username,
+                                       password=self._password)
+>>>>>>> 83899f8 (fomatted code)
 
     def log_debug(self, msg, *args, **kwargs) -> None:
         if self._logger:
@@ -404,9 +424,14 @@ class _MipsClient(ABC):
     def enable_logger(self, logger: Optional[logging.Logger] = None) -> None:
         self._logger = logger
 
+<<<<<<< HEAD
     def enable_mqtt_logger(
         self, logger: Optional[logging.Logger] = None
     ) -> None:
+=======
+    def enable_mqtt_logger(self,
+                           logger: Optional[logging.Logger] = None) -> None:
+>>>>>>> 83899f8 (fomatted code)
         self._mqtt_logger = logger
         if self._mqtt:
             if logger:
@@ -415,9 +440,8 @@ class _MipsClient(ABC):
                 self._mqtt.disable_logger()
 
     @final
-    def sub_mips_state(
-        self, key: str, handler: Callable[[str, bool], Coroutine]
-    ) -> bool:
+    def sub_mips_state(self, key: str, handler: Callable[[str, bool],
+                                                         Coroutine]) -> bool:
         """Subscribe mips state.
         NOTICE: callback to main loop thread
         This will be called before the client is connected.
@@ -448,6 +472,7 @@ class _MipsClient(ABC):
         handler: Callable[[dict, Any], None],
         siid: Optional[int] = None,
         piid: Optional[int] = None,
+<<<<<<< HEAD
         handler_ctx: Any = None
     ) -> bool: ...
 
@@ -458,6 +483,18 @@ class _MipsClient(ABC):
         siid: Optional[int] = None,
         piid: Optional[int] = None
     ) -> bool: ...
+=======
+        handler_ctx: Any = None,
+    ) -> bool:
+        ...
+
+    @abstractmethod
+    def unsub_prop(self,
+                   did: str,
+                   siid: Optional[int] = None,
+                   piid: Optional[int] = None) -> bool:
+        ...
+>>>>>>> 83899f8 (fomatted code)
 
     @abstractmethod
     def sub_event(
@@ -466,6 +503,7 @@ class _MipsClient(ABC):
         handler: Callable[[dict, Any], None],
         siid: Optional[int] = None,
         eiid: Optional[int] = None,
+<<<<<<< HEAD
         handler_ctx: Any = None
     ) -> bool: ...
 
@@ -483,13 +521,35 @@ class _MipsClient(ABC):
         payload: Optional[str] = None,
         timeout_ms: int = 10000
     ) -> dict[str, dict]: ...
+=======
+        handler_ctx: Any = None,
+    ) -> bool:
+        ...
 
     @abstractmethod
-    async def get_prop_async(
-        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
-    ) -> Any: ...
+    def unsub_event(self,
+                    did: str,
+                    siid: Optional[int] = None,
+                    eiid: Optional[int] = None) -> bool:
+        ...
 
     @abstractmethod
+    async def get_dev_list_async(self,
+                                 payload: Optional[str] = None,
+                                 timeout_ms: int = 10000) -> dict[str, dict]:
+        ...
+>>>>>>> 83899f8 (fomatted code)
+
+    @abstractmethod
+    async def get_prop_async(self,
+                             did: str,
+                             siid: int,
+                             piid: int,
+                             timeout_ms: int = 10000) -> Any:
+        ...
+
+    @abstractmethod
+<<<<<<< HEAD
     async def set_prop_async(
         self, did: str, siid: int, piid: int, value: Any,
         timeout_ms: int = 10000
@@ -500,15 +560,36 @@ class _MipsClient(ABC):
         self, did: str, siid: int, aiid: int, in_list: list,
         timeout_ms: int = 10000
     ) -> dict: ...
+=======
+    async def set_prop_async(self,
+                             did: str,
+                             siid: int,
+                             piid: int,
+                             value: Any,
+                             timeout_ms: int = 10000) -> dict:
+        ...
 
     @abstractmethod
-    def _on_mips_message(self, topic: str, payload: bytes) -> None: ...
+    async def action_async(self,
+                           did: str,
+                           siid: int,
+                           aiid: int,
+                           in_list: list,
+                           timeout_ms: int = 10000) -> dict:
+        ...
+>>>>>>> 83899f8 (fomatted code)
 
     @abstractmethod
-    def _on_mips_connect(self, rc: int, props: dict) -> None: ...
+    def _on_mips_message(self, topic: str, payload: bytes) -> None:
+        ...
 
     @abstractmethod
-    def _on_mips_disconnect(self, rc: int, props: dict) -> None: ...
+    def _on_mips_connect(self, rc: int, props: dict) -> None:
+        ...
+
+    @abstractmethod
+    def _on_mips_disconnect(self, rc: int, props: dict) -> None:
+        ...
 
     @final
     def _mips_sub_internal(self, topic: str) -> None:
@@ -519,12 +600,24 @@ class _MipsClient(ABC):
         if not self._mqtt or not self._mqtt.is_connected():
             self.log_error(f'mips sub when not connected, {topic}')
             return
+<<<<<<< HEAD
 
         if topic not in self._mips_sub_pending_map:
             self._mips_sub_pending_map[topic] = 0
         if not self._mips_sub_pending_timer:
             self._mips_sub_pending_timer = self._internal_loop.call_later(
                 0.01, self.__mips_sub_internal_pending_handler, topic)
+=======
+        try:
+            if topic not in self._mips_sub_pending_map:
+                self._mips_sub_pending_map[topic] = 0
+            if not self._mips_sub_pending_timer:
+                self._mips_sub_pending_timer = self._internal_loop.call_later(
+                    0.01, self.__mips_sub_internal_pending_handler, topic)
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            # Catch all exception
+            self.log_error(f"mips sub internal error, {topic}. {err}")
+>>>>>>> 83899f8 (fomatted code)
 
     @final
     def _mips_unsub_internal(self, topic: str) -> None:
@@ -537,12 +630,21 @@ class _MipsClient(ABC):
             return
         try:
             result, mid = self._mqtt.unsubscribe(topic=topic)
+<<<<<<< HEAD
             if (result == MQTT_ERR_SUCCESS) or (result == MQTT_ERR_NO_CONN):
                 self.log_debug(
                     f'mips unsub internal success, {result}, {mid}, {topic}')
                 return
             self.log_error(
                 f'mips unsub internal error, {result}, {mid}, {topic}')
+=======
+            if result == MQTT_ERR_SUCCESS:
+                self.log_debug(
+                    f"mips unsub internal success, {result}, {mid}, {topic}")
+                return
+            self.log_error(
+                f"mips unsub internal error, {result}, {mid}, {topic}")
+>>>>>>> 83899f8 (fomatted code)
         except Exception as err:  # pylint: disable=broad-exception-caught
             # Catch all exception
             self.log_error(f'mips unsub internal error, {topic}, {err}')
@@ -560,8 +662,14 @@ class _MipsClient(ABC):
         if not self._mqtt or not self._mqtt.is_connected():
             return False
         try:
+<<<<<<< HEAD
             handle = self._mqtt.publish(
                 topic=topic, payload=payload, qos=self.MIPS_QOS)
+=======
+            handle = self._mqtt.publish(topic=topic,
+                                        payload=payload,
+                                        qos=self.MIPS_QOS)
+>>>>>>> 83899f8 (fomatted code)
             # self.log_debug(f'_mips_publish_internal, {topic}, {payload}')
             if wait_for_publish is True:
                 handle.wait_for_publish(timeout_ms/1000.0)
@@ -604,8 +712,13 @@ class _MipsClient(ABC):
             if self._mqtt:
                 self._mqtt.loop_misc()
             if self._mqtt and self._mqtt.want_write():
+<<<<<<< HEAD
                 self._internal_loop.add_writer(
                     self._mqtt_fd, self.__mqtt_write_handler)
+=======
+                self._internal_loop.add_writer(self._mqtt_fd,
+                                               self.__mqtt_write_handler)
+>>>>>>> 83899f8 (fomatted code)
         except Exception as err:  # pylint: disable=broad-exception-caught
             # Catch all exception
             self.log_error(f'__mqtt_loop_handler, {err}')
@@ -619,6 +732,7 @@ class _MipsClient(ABC):
         self._mqtt.enable_logger(logger=self._mqtt_logger)
         # Set mqtt config
         if self._username:
+<<<<<<< HEAD
             self._mqtt.username_pw_set(
                 username=self._username, password=self._password)
         if (
@@ -626,6 +740,11 @@ class _MipsClient(ABC):
             and self._cert_file
             and self._key_file
         ):
+=======
+            self._mqtt.username_pw_set(username=self._username,
+                                       password=self._password)
+        if self._ca_file and self._cert_file and self._key_file:
+>>>>>>> 83899f8 (fomatted code)
             self._mqtt.tls_set(
                 tls_version=ssl.PROTOCOL_TLS_CLIENT,
                 ca_certs=self._ca_file,
@@ -661,8 +780,12 @@ class _MipsClient(ABC):
                 if item.handler is None:
                     continue
                 self.main_loop.call_soon_threadsafe(
+<<<<<<< HEAD
                     self.main_loop.create_task,
                     item.handler(item.key, True))
+=======
+                    self.main_loop.create_task, item.handler(item.key, True))
+>>>>>>> 83899f8 (fomatted code)
         # Resolve future
         self.main_loop.call_soon_threadsafe(
             self._event_connect.set)
@@ -676,8 +799,13 @@ class _MipsClient(ABC):
 
     def __on_disconnect(self,  client, user_data, rc, props) -> None:
         if self._mqtt_state:
+<<<<<<< HEAD
             (self.log_info if rc == 0 else self.log_error)(
                 f'mips disconnect, {rc}, {props}')
+=======
+            (self.log_info
+             if rc == 0 else self.log_error)(f"mips disconnect, {rc}, {props}")
+>>>>>>> 83899f8 (fomatted code)
             self._mqtt_state = False
             if self._mqtt_timer:
                 self._mqtt_timer.cancel()
@@ -710,18 +838,27 @@ class _MipsClient(ABC):
         self.main_loop.call_soon_threadsafe(
             self._event_connect.clear)
 
+<<<<<<< HEAD
     def __on_message(
         self,
         client: Client,
         user_data: Any,
         msg: MQTTMessage
     ) -> None:
+=======
+    def __on_message(self, client: Client, user_data: Any,
+                     msg: MQTTMessage) -> None:
+>>>>>>> 83899f8 (fomatted code)
         self._on_mips_message(topic=msg.topic, payload=msg.payload)
 
     def __mips_sub_internal_pending_handler(self, ctx: Any) -> None:
         if not self._mqtt or not self._mqtt.is_connected():
             _LOGGER.error(
+<<<<<<< HEAD
                 'mips sub internal pending, but mqtt is None or disconnected')
+=======
+                "mips sub internal pending, but mqtt is None or disconnected")
+>>>>>>> 83899f8 (fomatted code)
             return
         subbed_count = 1
         for topic in list(self._mips_sub_pending_map.keys()):
@@ -745,7 +882,11 @@ class _MipsClient(ABC):
                 self.log_error(f'mips sub internal error, {topic}. {err}')
             self._mips_sub_pending_map[topic] = count+1
             self.log_error(
+<<<<<<< HEAD
                 f'retry mips sub internal, {count}, {topic}, {result}, {mid}')
+=======
+                f"retry mips sub internal, {count}, {topic}, {result}, {mid}")
+>>>>>>> 83899f8 (fomatted code)
 
         if len(self._mips_sub_pending_map):
             self._mips_sub_pending_timer = self._internal_loop.call_later(
@@ -782,6 +923,7 @@ class _MipsClient(ABC):
             socket = self._mqtt.socket()
             if socket is None:
                 self.log_error(
+<<<<<<< HEAD
                     '__mips_connect, connect success, but socket is None')
                 self.__mips_try_reconnect()
                 return
@@ -792,6 +934,18 @@ class _MipsClient(ABC):
             if self._mqtt.want_write():
                 self._internal_loop.add_writer(
                     self._mqtt_fd, self.__mqtt_write_handler)
+=======
+                    "__mips_connect, connect success, but socket is None")
+                self.__mips_try_reconnect()
+                return
+            self._mqtt_fd = socket.fileno()
+            self.log_debug(f"__mips_connect, _mqtt_fd, {self._mqtt_fd}")
+            self._internal_loop.add_reader(self._mqtt_fd,
+                                           self.__mqtt_read_handler)
+            if self._mqtt.want_write():
+                self._internal_loop.add_writer(self._mqtt_fd,
+                                               self.__mqtt_write_handler)
+>>>>>>> 83899f8 (fomatted code)
             self._mqtt_timer = self._internal_loop.call_later(
                 self.MQTT_INTERVAL_S, self.__mqtt_timer_handler)
         else:
@@ -843,7 +997,11 @@ class _MipsClient(ABC):
             self._mips_reconnect_interval = self.MIPS_RECONNECT_INTERVAL_MIN
         else:
             self._mips_reconnect_interval = min(
+<<<<<<< HEAD
                 self._mips_reconnect_interval*2,
+=======
+                self._mips_reconnect_interval * 2,
+>>>>>>> 83899f8 (fomatted code)
                 self.MIPS_RECONNECT_INTERVAL_MAX)
         return self._mips_reconnect_interval
 
@@ -892,8 +1050,13 @@ class MipsCloudClient(_MipsClient):
             raise MIoTMipsError('invalid params')
 
         topic: str = (
+<<<<<<< HEAD
             f'device/{did}/up/properties_changed/'
             f'{"#" if siid is None or piid is None else f"{siid}/{piid}"}')
+=======
+            f"device/{did}/up/properties_changed/"
+            f"{'#' if siid is None or piid is None else f'{siid}/{piid}'}")
+>>>>>>> 83899f8 (fomatted code)
 
         def on_prop_msg(topic: str, payload: str, ctx: Any) -> None:
             try:
@@ -902,6 +1065,7 @@ class MipsCloudClient(_MipsClient):
                 self.log_error(
                     f'on_prop_msg, invalid msg, {topic}, {payload}')
                 return
+<<<<<<< HEAD
             if (
                 not isinstance(msg.get('params', None), dict)
                 or 'siid' not in msg['params']
@@ -924,11 +1088,37 @@ class MipsCloudClient(_MipsClient):
         siid: Optional[int] = None,
         piid: Optional[int] = None
     ) -> bool:
+=======
+            if (not isinstance(msg.get("params", None), dict) or
+                    "siid" not in msg["params"] or
+                    "piid" not in msg["params"] or
+                    "value" not in msg["params"]):
+                self.log_error(f"on_prop_msg, invalid msg, {topic}, {payload}")
+                return
+            if handler:
+                self.log_debug("on properties_changed, %s", payload)
+                handler(msg["params"], ctx)
+
+        return self.__reg_broadcast_external(topic=topic,
+                                             handler=on_prop_msg,
+                                             handler_ctx=handler_ctx)
+
+    @final
+    def unsub_prop(self,
+                   did: str,
+                   siid: Optional[int] = None,
+                   piid: Optional[int] = None) -> bool:
+>>>>>>> 83899f8 (fomatted code)
         if not isinstance(did, str):
             raise MIoTMipsError('invalid params')
         topic: str = (
+<<<<<<< HEAD
             f'device/{did}/up/properties_changed/'
             f'{"#" if siid is None or piid is None else f"{siid}/{piid}"}')
+=======
+            f"device/{did}/up/properties_changed/"
+            f"{'#' if siid is None or piid is None else f'{siid}/{piid}'}")
+>>>>>>> 83899f8 (fomatted code)
         return self.__unreg_broadcast_external(topic=topic)
 
     @final
@@ -944,8 +1134,13 @@ class MipsCloudClient(_MipsClient):
             raise MIoTMipsError('invalid params')
         # Spelling error: event_occured
         topic: str = (
+<<<<<<< HEAD
             f'device/{did}/up/event_occured/'
             f'{"#" if siid is None or eiid is None else f"{siid}/{eiid}"}')
+=======
+            f"device/{did}/up/event_occured/"
+            f"{'#' if siid is None or eiid is None else f'{siid}/{eiid}'}")
+>>>>>>> 83899f8 (fomatted code)
 
         def on_event_msg(topic: str, payload: str, ctx: Any) -> None:
             try:
@@ -954,6 +1149,7 @@ class MipsCloudClient(_MipsClient):
                 self.log_error(
                     f'on_event_msg, invalid msg, {topic}, {payload}')
                 return
+<<<<<<< HEAD
             if (
                 not isinstance(msg.get('params', None), dict)
                 or 'siid' not in msg['params']
@@ -977,12 +1173,39 @@ class MipsCloudClient(_MipsClient):
         siid: Optional[int] = None,
         eiid: Optional[int] = None
     ) -> bool:
+=======
+            if (not isinstance(msg.get("params", None), dict) or
+                    "siid" not in msg["params"] or
+                    "eiid" not in msg["params"] or
+                    "arguments" not in msg["params"]):
+                self.log_error(f"on_event_msg, invalid msg, {topic}, {payload}")
+                return
+            if handler:
+                self.log_debug("on on_event_msg, %s", payload)
+                msg["params"]["from"] = "cloud"
+                handler(msg["params"], ctx)
+
+        return self.__reg_broadcast_external(topic=topic,
+                                             handler=on_event_msg,
+                                             handler_ctx=handler_ctx)
+
+    @final
+    def unsub_event(self,
+                    did: str,
+                    siid: Optional[int] = None,
+                    eiid: Optional[int] = None) -> bool:
+>>>>>>> 83899f8 (fomatted code)
         if not isinstance(did, str):
             raise MIoTMipsError('invalid params')
         # Spelling error: event_occured
         topic: str = (
+<<<<<<< HEAD
             f'device/{did}/up/event_occured/'
             f'{"#" if siid is None or eiid is None else f"{siid}/{eiid}"}')
+=======
+            f"device/{did}/up/event_occured/"
+            f"{'#' if siid is None or eiid is None else f'{siid}/{eiid}'}")
+>>>>>>> 83899f8 (fomatted code)
         return self.__unreg_broadcast_external(topic=topic)
 
     @final
@@ -1002,13 +1225,20 @@ class MipsCloudClient(_MipsClient):
             if msg is None or 'device_id' not in msg or 'event' not in msg:
                 self.log_error(f'on_state_msg, recv unknown msg, {payload}')
                 return
+<<<<<<< HEAD
             if msg['device_id'] != did:
                 self.log_error(
                     f'on_state_msg, err msg, {did}!={msg["device_id"]}')
+=======
+            if msg["device_id"] != did:
+                self.log_error(
+                    f"on_state_msg, err msg, {did}!={msg['device_id']}")
+>>>>>>> 83899f8 (fomatted code)
                 return
             if handler:
                 self.log_debug('cloud, device state changed, %s', payload)
                 handler(
+<<<<<<< HEAD
                     did, MIoTDeviceState.ONLINE if msg['event'] == 'online'
                     else MIoTDeviceState.OFFLINE, ctx)
 
@@ -1020,6 +1250,17 @@ class MipsCloudClient(_MipsClient):
             return True
         return self.__reg_broadcast_external(
             topic=topic, handler=on_state_msg, handler_ctx=handler_ctx)
+=======
+                    did,
+                    MIoTDeviceState.ONLINE
+                    if msg["event"] == "online" else MIoTDeviceState.OFFLINE,
+                    ctx,
+                )
+
+        return self.__reg_broadcast_external(topic=topic,
+                                             handler=on_state_msg,
+                                             handler_ctx=handler_ctx)
+>>>>>>> 83899f8 (fomatted code)
 
     @final
     def unsub_device_state(self, did: str) -> bool:
@@ -1028,6 +1269,7 @@ class MipsCloudClient(_MipsClient):
         topic: str = f'device/{did}/state/#'
         return self.__unreg_broadcast_external(topic=topic)
 
+<<<<<<< HEAD
     async def get_dev_list_async(
         self, payload: Optional[str] = None, timeout_ms: int = 10000
     ) -> dict[str, dict]:
@@ -1049,13 +1291,47 @@ class MipsCloudClient(_MipsClient):
         timeout_ms: int = 10000
     ) -> dict:
         raise NotImplementedError('please call in http client')
+=======
+    async def get_dev_list_async(self,
+                                 payload: Optional[str] = None,
+                                 timeout_ms: int = 10000) -> dict[str, dict]:
+        raise NotImplementedError("please call in http client")
+
+    async def get_prop_async(self,
+                             did: str,
+                             siid: int,
+                             piid: int,
+                             timeout_ms: int = 10000) -> Any:
+        raise NotImplementedError("please call in http client")
+
+    async def set_prop_async(self,
+                             did: str,
+                             siid: int,
+                             piid: int,
+                             value: Any,
+                             timeout_ms: int = 10000) -> dict:
+        raise NotImplementedError("please call in http client")
+
+    async def action_async(self,
+                           did: str,
+                           siid: int,
+                           aiid: int,
+                           in_list: list,
+                           timeout_ms: int = 10000) -> dict:
+        raise NotImplementedError("please call in http client")
+>>>>>>> 83899f8 (fomatted code)
 
     def __reg_broadcast_external(
         self, topic: str, handler: Callable[[str, str, Any], None],
         handler_ctx: Any = None
     ) -> bool:
+<<<<<<< HEAD
         self._internal_loop.call_soon_threadsafe(
             self.__reg_broadcast, topic, handler, handler_ctx)
+=======
+        self._internal_loop.call_soon_threadsafe(self.__reg_broadcast, topic,
+                                                 handler, handler_ctx)
+>>>>>>> 83899f8 (fomatted code)
         return True
 
     def __unreg_broadcast_external(self, topic: str) -> bool:
@@ -1068,9 +1344,15 @@ class MipsCloudClient(_MipsClient):
         handler_ctx: Any = None
     ) -> None:
         if not self._msg_matcher.get(topic=topic):
+<<<<<<< HEAD
             sub_bc: _MipsBroadcast = _MipsBroadcast(
                 topic=topic, handler=handler,
                 handler_ctx=handler_ctx)
+=======
+            sub_bc: _MipsBroadcast = _MipsBroadcast(topic=topic,
+                                                    handler=handler,
+                                                    handler_ctx=handler_ctx)
+>>>>>>> 83899f8 (fomatted code)
             self._msg_matcher[topic] = sub_bc
             self._mips_sub_internal(topic=topic)
         else:
@@ -1107,8 +1389,13 @@ class MipsCloudClient(_MipsClient):
             if item.handler is None:
                 continue
             # NOTICE: call threadsafe
+<<<<<<< HEAD
             self.main_loop.call_soon_threadsafe(
                 item.handler, topic, payload_str, item.handler_ctx)
+=======
+            self.main_loop.call_soon_threadsafe(item.handler, topic,
+                                                payload_str, item.handler_ctx)
+>>>>>>> 83899f8 (fomatted code)
 
 
 class MipsLocalClient(_MipsClient):
@@ -1190,6 +1477,7 @@ class MipsLocalClient(_MipsClient):
         handler_ctx: Any = None
     ) -> bool:
         topic: str = (
+<<<<<<< HEAD
             f'appMsg/notify/iot/{did}/property/'
             f'{"#" if siid is None or piid is None else f"{siid}.{piid}"}')
 
@@ -1203,10 +1491,21 @@ class MipsLocalClient(_MipsClient):
                 or 'value' not in msg
             ):
                 self.log_info('unknown prop msg, %s', payload)
+=======
+            f"appMsg/notify/iot/{did}/property/"
+            f"{'#' if siid is None or piid is None else f'{siid}.{piid}'}")
+
+        def on_prop_msg(topic: str, payload: str, ctx: Any):
+            msg: dict = json.loads(payload)
+            if (msg is None or "did" not in msg or "siid" not in msg or
+                    "piid" not in msg or "value" not in msg):
+                # self.log_error(f'on_prop_msg, recv unknown msg, {payload}')
+>>>>>>> 83899f8 (fomatted code)
                 return
             if handler:
                 self.log_debug('local, on properties_changed, %s', payload)
                 handler(msg, ctx)
+<<<<<<< HEAD
         return self.__reg_broadcast_external(
             topic=topic, handler=on_prop_msg, handler_ctx=handler_ctx)
 
@@ -1220,6 +1519,21 @@ class MipsLocalClient(_MipsClient):
         topic: str = (
             f'appMsg/notify/iot/{did}/property/'
             f'{"#" if siid is None or piid is None else f"{siid}.{piid}"}')
+=======
+
+        return self.__reg_broadcast_external(topic=topic,
+                                             handler=on_prop_msg,
+                                             handler_ctx=handler_ctx)
+
+    @final
+    def unsub_prop(self,
+                   did: str,
+                   siid: Optional[int] = None,
+                   piid: Optional[int] = None) -> bool:
+        topic: str = (
+            f"appMsg/notify/iot/{did}/property/"
+            f"{'#' if siid is None or piid is None else f'{siid}.{piid}'}")
+>>>>>>> 83899f8 (fomatted code)
         return self.__unreg_broadcast_external(topic=topic)
 
     @final
@@ -1232,6 +1546,7 @@ class MipsLocalClient(_MipsClient):
         handler_ctx: Any = None
     ) -> bool:
         topic: str = (
+<<<<<<< HEAD
             f'appMsg/notify/iot/{did}/event/'
             f'{"#" if siid is None or eiid is None else f"{siid}.{eiid}"}')
 
@@ -1245,6 +1560,18 @@ class MipsLocalClient(_MipsClient):
                 # or 'arguments' not in msg
             ):
                 self.log_info('unknown event msg, %s', payload)
+=======
+            f"appMsg/notify/iot/{did}/event/"
+            f"{'#' if siid is None or eiid is None else f'{siid}.{eiid}'}")
+
+        def on_event_msg(topic: str, payload: str, ctx: Any):
+            msg: dict = json.loads(payload)
+            if (msg is None or "did" not in msg or "siid" not in msg or
+                    "eiid" not in msg
+                    # or 'arguments' not in msg
+               ):
+                self.log_info("unknown event msg, %s", payload)
+>>>>>>> 83899f8 (fomatted code)
                 return
             if 'arguments' not in msg:
                 self.log_info('wrong event msg, %s', payload)
@@ -1252,6 +1579,7 @@ class MipsLocalClient(_MipsClient):
             if handler:
                 self.log_debug('local, on event_occurred, %s', payload)
                 handler(msg, ctx)
+<<<<<<< HEAD
         return self.__reg_broadcast_external(
             topic=topic, handler=on_event_msg, handler_ctx=handler_ctx)
 
@@ -1265,15 +1593,33 @@ class MipsLocalClient(_MipsClient):
         topic: str = (
             f'appMsg/notify/iot/{did}/event/'
             f'{"#" if siid is None or eiid is None else f"{siid}.{eiid}"}')
+=======
+
+        return self.__reg_broadcast_external(topic=topic,
+                                             handler=on_event_msg,
+                                             handler_ctx=handler_ctx)
+
+    @final
+    def unsub_event(self,
+                    did: str,
+                    siid: Optional[int] = None,
+                    eiid: Optional[int] = None) -> bool:
+        topic: str = (
+            f"appMsg/notify/iot/{did}/event/"
+            f"{'#' if siid is None or eiid is None else f'{siid}.{eiid}'}")
+>>>>>>> 83899f8 (fomatted code)
         return self.__unreg_broadcast_external(topic=topic)
 
     @final
-    async def get_prop_safe_async(
-        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
-    ) -> Any:
+    async def get_prop_safe_async(self,
+                                  did: str,
+                                  siid: int,
+                                  piid: int,
+                                  timeout_ms: int = 10000) -> Any:
         self._get_prop_queue.setdefault(did, [])
         fut: asyncio.Future = self.main_loop.create_future()
         self._get_prop_queue[did].append({
+<<<<<<< HEAD
             'param': json.dumps({
                 'did': did,
                 'siid': siid,
@@ -1287,13 +1633,29 @@ class MipsLocalClient(_MipsClient):
                 0.1,
                 self.main_loop.create_task,
                 self.__get_prop_timer_handle())
+=======
+            "param": json.dumps({
+                "did": did,
+                "siid": siid,
+                "piid": piid
+            }),
+            "fut": fut,
+            "timeout_ms": timeout_ms,
+        })
+        if self._get_prop_timer is None:
+            self._get_prop_timer = self.main_loop.call_later(
+                0.1, self.main_loop.create_task, self.__get_prop_timer_handle())
+>>>>>>> 83899f8 (fomatted code)
         return await fut
 
     @final
-    async def get_prop_async(
-        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
-    ) -> Any:
+    async def get_prop_async(self,
+                             did: str,
+                             siid: int,
+                             piid: int,
+                             timeout_ms: int = 10000) -> Any:
         result_obj = await self.__request_async(
+<<<<<<< HEAD
             topic='proxy/get',
             payload=json.dumps({
                 'did': did,
@@ -1302,10 +1664,22 @@ class MipsLocalClient(_MipsClient):
             }),
             timeout_ms=timeout_ms)
         if not isinstance(result_obj, dict) or 'value' not in result_obj:
+=======
+            topic="proxy/get",
+            payload=json.dumps({
+                "did": did,
+                "siid": siid,
+                "piid": piid
+            }),
+            timeout_ms=timeout_ms,
+        )
+        if not isinstance(result_obj, dict) or "value" not in result_obj:
+>>>>>>> 83899f8 (fomatted code)
             return None
         return result_obj['value']
 
     @final
+<<<<<<< HEAD
     async def set_prop_async(
         self, did: str, siid: int, piid: int, value: Any,
         timeout_ms: int = 10000
@@ -1338,11 +1712,46 @@ class MipsLocalClient(_MipsClient):
                 return result_obj['result'][0]
             if 'error' in result_obj:
                 return result_obj['error']
+=======
+    async def set_prop_async(self,
+                             did: str,
+                             siid: int,
+                             piid: int,
+                             value: Any,
+                             timeout_ms: int = 10000) -> dict:
+        payload_obj: dict = {
+            "did": did,
+            "rpc": {
+                "id":
+                    self.__gen_mips_id,
+                "method":
+                    "set_properties",
+                "params": [{
+                    "did": did,
+                    "siid": siid,
+                    "piid": piid,
+                    "value": value
+                }],
+            },
+        }
+        result_obj = await self.__request_async(topic="proxy/rpcReq",
+                                                payload=json.dumps(payload_obj),
+                                                timeout_ms=timeout_ms)
+        if result_obj:
+            if ("result" in result_obj and len(result_obj["result"]) == 1 and
+                    "did" in result_obj["result"][0] and
+                    result_obj["result"][0]["did"] == did and
+                    "code" in result_obj["result"][0]):
+                return result_obj["result"][0]
+            if "error" in result_obj:
+                return result_obj["error"]
+>>>>>>> 83899f8 (fomatted code)
         return {
             'code': MIoTErrorCode.CODE_INTERNAL_ERROR.value,
             'message': 'Invalid result'}
 
     @final
+<<<<<<< HEAD
     async def set_props_async(
         self, did: str, props_list: List[Dict[str, Any]],
         timeout_ms: int = 10000
@@ -1353,6 +1762,12 @@ class MipsLocalClient(_MipsClient):
                     # 'piid': piid,
                     # 'value': value
                 # }]
+=======
+    async def set_props_async(self,
+                              did: str,
+                              props_list: List[Dict[str, Any]],
+                              timeout_ms: int = 10000) -> dict:
+>>>>>>> 83899f8 (fomatted code)
         payload_obj: dict = {
             "did": did,
             "rpc": {
@@ -1361,17 +1776,21 @@ class MipsLocalClient(_MipsClient):
                 "params": props_list,
             }
         }
+<<<<<<< HEAD
         result_obj = await self.__request_async(
             topic="proxy/rpcReq",
             payload=json.dumps(payload_obj),
             timeout_ms=timeout_ms)
+=======
+        result_obj = await self.__request_async(topic="proxy/rpcReq",
+                                                payload=json.dumps(payload_obj),
+                                                timeout_ms=timeout_ms)
+>>>>>>> 83899f8 (fomatted code)
         if result_obj:
-            if (
-                "result" in result_obj
-                and len(result_obj["result"]) == len(props_list)
-                and result_obj["result"][0].get("did") == did
-                and all("code" in item for item in result_obj["result"])
-            ):
+            if ("result" in result_obj and
+                    len(result_obj["result"]) == len(props_list) and
+                    result_obj["result"][0].get("did") == did and
+                    all("code" in item for item in result_obj["result"])):
                 return result_obj["result"]
             if "error" in result_obj:
                 return result_obj["error"]
@@ -1380,6 +1799,7 @@ class MipsLocalClient(_MipsClient):
             'message': 'Invalid result'}
 
     @final
+<<<<<<< HEAD
     async def action_async(
         self, did: str, siid: int, aiid: int, in_list: list,
         timeout_ms: int = 10000
@@ -1400,6 +1820,30 @@ class MipsLocalClient(_MipsClient):
         result_obj = await self.__request_async(
             topic='proxy/rpcReq', payload=json.dumps(payload_obj),
             timeout_ms=timeout_ms)
+=======
+    async def action_async(self,
+                           did: str,
+                           siid: int,
+                           aiid: int,
+                           in_list: list,
+                           timeout_ms: int = 10000) -> dict:
+        payload_obj: dict = {
+            "did": did,
+            "rpc": {
+                "id": self.__gen_mips_id,
+                "method": "action",
+                "params": {
+                    "did": did,
+                    "siid": siid,
+                    "aiid": aiid,
+                    "in": in_list
+                },
+            },
+        }
+        result_obj = await self.__request_async(topic="proxy/rpcReq",
+                                                payload=json.dumps(payload_obj),
+                                                timeout_ms=timeout_ms)
+>>>>>>> 83899f8 (fomatted code)
         if result_obj:
             if 'result' in result_obj and 'code' in result_obj['result']:
                 return result_obj['result']
@@ -1410,6 +1854,7 @@ class MipsLocalClient(_MipsClient):
             'message': 'Invalid result'}
 
     @final
+<<<<<<< HEAD
     async def get_dev_list_async(
         self, payload: Optional[str] = None, timeout_ms: int = 10000
     ) -> dict[str, dict]:
@@ -1418,6 +1863,16 @@ class MipsLocalClient(_MipsClient):
             timeout_ms=timeout_ms)
         if not result_obj or 'devList' not in result_obj:
             raise MIoTMipsError('invalid result')
+=======
+    async def get_dev_list_async(self,
+                                 payload: Optional[str] = None,
+                                 timeout_ms: int = 10000) -> dict[str, dict]:
+        result_obj = await self.__request_async(topic="proxy/getDevList",
+                                                payload=payload or "{}",
+                                                timeout_ms=timeout_ms)
+        if not result_obj or "devList" not in result_obj:
+            raise MIoTMipsError("invalid result")
+>>>>>>> 83899f8 (fomatted code)
         device_list = {}
         for did, info in result_obj['devList'].items():
             name: str = info.get('name', None)
@@ -1438,6 +1893,7 @@ class MipsLocalClient(_MipsClient):
         return device_list
 
     @final
+<<<<<<< HEAD
     async def get_action_group_list_async(
         self, timeout_ms: int = 10000
     ) -> list[str]:
@@ -1448,11 +1904,22 @@ class MipsLocalClient(_MipsClient):
         if not result_obj or 'result' not in result_obj:
             raise MIoTMipsError('invalid result')
         return result_obj['result']
+=======
+    async def get_action_group_list_async(self,
+                                          timeout_ms: int = 10000) -> list[str]:
+        result_obj = await self.__request_async(
+            topic="proxy/getMijiaActionGroupList",
+            payload="{}",
+            timeout_ms=timeout_ms)
+        if not result_obj or "result" not in result_obj:
+            raise MIoTMipsError("invalid result")
+        return result_obj["result"]
+>>>>>>> 83899f8 (fomatted code)
 
     @final
-    async def exec_action_group_list_async(
-        self, ag_id: str, timeout_ms: int = 10000
-    ) -> dict:
+    async def exec_action_group_list_async(self,
+                                           ag_id: str,
+                                           timeout_ms: int = 10000) -> dict:
         result_obj = await self.__request_async(
             topic='proxy/execMijiaActionGroup',
             payload=f'{{"id":"{ag_id}"}}',
@@ -1469,15 +1936,19 @@ class MipsLocalClient(_MipsClient):
     @final
     @property
     def on_dev_list_changed(
+<<<<<<< HEAD
         self
     ) -> Optional[Callable[[Any, list[str]], Coroutine]]:
+=======
+            self) -> Optional[Callable[[Any, list[str]], Coroutine]]:
+>>>>>>> 83899f8 (fomatted code)
         return self._on_dev_list_changed
 
     @final
     @on_dev_list_changed.setter
     def on_dev_list_changed(
-        self, func: Optional[Callable[[Any, list[str]], Coroutine]]
-    ) -> None:
+            self, func: Optional[Callable[[Any, list[str]],
+                                          Coroutine]]) -> None:
         """run in main loop."""
         self._on_dev_list_changed = func
 
@@ -1490,6 +1961,7 @@ class MipsLocalClient(_MipsClient):
             mid=self.__gen_mips_id,
             on_reply=on_reply,
             on_reply_ctx=on_reply_ctx,
+<<<<<<< HEAD
             timer=None)
         pub_topic: str = f'master/{topic}'
         result = self.__mips_publish(
@@ -1520,6 +1992,37 @@ class MipsLocalClient(_MipsClient):
             sub_bc: _MipsBroadcast = _MipsBroadcast(
                 topic=sub_topic, handler=handler,
                 handler_ctx=handler_ctx)
+=======
+            timer=None,
+        )
+        pub_topic: str = f"master/{topic}"
+        result = self.__mips_publish(topic=pub_topic,
+                                     payload=payload,
+                                     mid=req.mid,
+                                     ret_topic=self._reply_topic)
+        self.log_debug(
+            f"mips local call api, {result}, {req.mid}, {pub_topic}, {payload}")
+
+        def on_request_timeout(req: _MipsRequest):
+            self.log_error(
+                f"on mips request timeout, {req.mid}, {pub_topic}, {payload}")
+            self._request_map.pop(str(req.mid), None)
+            req.on_reply('{"error":{"code":-10006, "message":"timeout"}}',
+                         req.on_reply_ctx)
+
+        req.timer = self._internal_loop.call_later(timeout_ms / 1000,
+                                                   on_request_timeout, req)
+        self._request_map[str(req.mid)] = req
+
+    def __reg_broadcast(self, topic: str, handler: Callable[[str, str, Any],
+                                                            None],
+                        handler_ctx: Any) -> None:
+        sub_topic: str = f"{self._did}/{topic}"
+        if not self._msg_matcher.get(sub_topic):
+            sub_bc: _MipsBroadcast = _MipsBroadcast(topic=sub_topic,
+                                                    handler=handler,
+                                                    handler_ctx=handler_ctx)
+>>>>>>> 83899f8 (fomatted code)
             self._msg_matcher[sub_topic] = sub_bc
             self._mips_sub_internal(topic=f'master/{topic}')
         else:
@@ -1531,7 +2034,11 @@ class MipsLocalClient(_MipsClient):
         if self._msg_matcher.get(unsub_topic):
             del self._msg_matcher[unsub_topic]
             self._mips_unsub_internal(
+<<<<<<< HEAD
                 topic=re.sub(f'^{self._did}', 'master', unsub_topic))
+=======
+                topic=re.sub(f"^{self._did}", "master", unsub_topic))
+>>>>>>> 83899f8 (fomatted code)
 
     @final
     def _on_mips_connect(self, rc: int, props: dict) -> None:
@@ -1545,7 +2052,11 @@ class MipsLocalClient(_MipsClient):
         # Sub broadcast topic
         for topic, _ in list(self._msg_matcher.iter_all_nodes()):
             self._mips_sub_internal(
+<<<<<<< HEAD
                 topic=re.sub(f'^{self._did}', 'master', topic))
+=======
+                topic=re.sub(f"^{self._did}", "master", topic))
+>>>>>>> 83899f8 (fomatted code)
 
     @final
     def _on_mips_disconnect(self, rc: int, props: dict) -> None:
@@ -1558,7 +2069,11 @@ class MipsLocalClient(_MipsClient):
         #     f"mips local client, on_message, {topic} -> {mips_msg}")
         # Reply
         if topic == self._reply_topic:
+<<<<<<< HEAD
             self.log_debug(f'on request reply, {mips_msg}')
+=======
+            self.log_debug(f"on request reply, {mips_msg}")
+>>>>>>> 83899f8 (fomatted code)
             req: Optional[_MipsRequest] = self._request_map.pop(
                 str(mips_msg.mid), None)
             if req:
@@ -1567,20 +2082,37 @@ class MipsLocalClient(_MipsClient):
                     req.timer.cancel()
                 if req.on_reply:
                     self.main_loop.call_soon_threadsafe(
+<<<<<<< HEAD
                         req.on_reply, mips_msg.payload or '{}',
                         req.on_reply_ctx)
             return
         # Broadcast
         bc_list: list[_MipsBroadcast] = list(self._msg_matcher.iter_match(
             topic=topic))
+=======
+                        req.on_reply, mips_msg.payload or "{}",
+                        req.on_reply_ctx)
+            return
+        # Broadcast
+        bc_list: list[_MipsBroadcast] = list(
+            self._msg_matcher.iter_match(topic=topic))
+>>>>>>> 83899f8 (fomatted code)
         if bc_list:
             self.log_debug(f'on broadcast, {topic}, {mips_msg}')
             for item in bc_list or []:
                 if item.handler is None:
                     continue
                 self.main_loop.call_soon_threadsafe(
+<<<<<<< HEAD
                     item.handler, topic[topic.find('/')+1:],
                     mips_msg.payload or '{}', item.handler_ctx)
+=======
+                    item.handler,
+                    topic[topic.find("/") + 1:],
+                    mips_msg.payload or "{}",
+                    item.handler_ctx,
+                )
+>>>>>>> 83899f8 (fomatted code)
             return
         # Device list change
         if topic == self._dev_list_change_topic:
@@ -1600,7 +2132,11 @@ class MipsLocalClient(_MipsClient):
             return
 
         self.log_debug(
+<<<<<<< HEAD
             f'mips local client, recv unknown msg, {topic} -> {mips_msg}')
+=======
+            f"mips local client, recv unknown msg, {topic} -> {mips_msg}")
+>>>>>>> 83899f8 (fomatted code)
 
     @property
     def __gen_mips_id(self) -> int:
@@ -1630,6 +2166,7 @@ class MipsLocalClient(_MipsClient):
             on_reply_ctx: Any = None, timeout_ms: int = 10000
     ) -> bool:
         if topic is None or payload is None or on_reply is None:
+<<<<<<< HEAD
             raise MIoTMipsError('invalid params')
         self._internal_loop.call_soon_threadsafe(
             self.__request, topic, payload, on_reply, on_reply_ctx, timeout_ms)
@@ -1642,6 +2179,19 @@ class MipsLocalClient(_MipsClient):
         self._internal_loop.call_soon_threadsafe(
             self.__reg_broadcast,
             topic, handler, handler_ctx)
+=======
+            raise MIoTMipsError("invalid params")
+        self._internal_loop.call_soon_threadsafe(self.__request, topic, payload,
+                                                 on_reply, on_reply_ctx,
+                                                 timeout_ms)
+        return True
+
+    def __reg_broadcast_external(self, topic: str,
+                                 handler: Callable[[str, str, Any], None],
+                                 handler_ctx: Any) -> bool:
+        self._internal_loop.call_soon_threadsafe(self.__reg_broadcast, topic,
+                                                 handler, handler_ctx)
+>>>>>>> 83899f8 (fomatted code)
         return True
 
     def __unreg_broadcast_external(self, topic) -> bool:
@@ -1650,9 +2200,10 @@ class MipsLocalClient(_MipsClient):
         return True
 
     @final
-    async def __request_async(
-        self, topic: str, payload: str, timeout_ms: int = 10000
-    ) -> dict:
+    async def __request_async(self,
+                              topic: str,
+                              payload: str,
+                              timeout_ms: int = 10000) -> dict:
         fut_handler: asyncio.Future = self.main_loop.create_future()
 
         def on_msg_reply(payload: str, ctx: Any):
@@ -1664,7 +2215,12 @@ class MipsLocalClient(_MipsClient):
                 payload=payload,
                 on_reply=on_msg_reply,
                 on_reply_ctx=fut_handler,
+<<<<<<< HEAD
                 timeout_ms=timeout_ms):
+=======
+                timeout_ms=timeout_ms,
+        ):
+>>>>>>> 83899f8 (fomatted code)
             # Request error
             fut_handler.set_result('internal request error')
 
@@ -1681,11 +2237,19 @@ class MipsLocalClient(_MipsClient):
             item = self._get_prop_queue[did].pop()
             _LOGGER.debug('get prop, %s, %s', did, item)
             result_obj = await self.__request_async(
+<<<<<<< HEAD
                 topic='proxy/get',
                 payload=item['param'],
                 timeout_ms=item['timeout_ms'])
             if result_obj is None or 'value' not in result_obj:
                 item['fut'].set_result(None)
+=======
+                topic="proxy/get",
+                payload=item["param"],
+                timeout_ms=item["timeout_ms"])
+            if result_obj is None or "value" not in result_obj:
+                item["fut"].set_result(None)
+>>>>>>> 83899f8 (fomatted code)
             else:
                 item['fut'].set_result(result_obj['value'])
 
@@ -1694,7 +2258,13 @@ class MipsLocalClient(_MipsClient):
 
         if self._get_prop_queue:
             self._get_prop_timer = self.main_loop.call_later(
+<<<<<<< HEAD
                 0.1, lambda: self.main_loop.create_task(
                     self.__get_prop_timer_handle()))
+=======
+                0.1,
+                lambda: self.main_loop.create_task(self.__get_prop_timer_handle(
+                )))
+>>>>>>> 83899f8 (fomatted code)
         else:
             self._get_prop_timer = None
