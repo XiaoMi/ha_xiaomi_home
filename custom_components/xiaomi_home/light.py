@@ -261,7 +261,7 @@ class Light(MIoTServiceEntity, LightEntity):
         _LOGGER.error(f"select_entity_id {select_entity_id}")
         command_send_mode = self.hass.states.get(select_entity_id)
         _LOGGER.error(f"command_send_mode {command_send_mode}")
-        if command_send_mode and command_send_mode == "Batch Send Command":
+        if command_send_mode and command_send_mode == "Send Batch":
             set_properties_list: List[Dict[str, Any]] = []
             if self._prop_on:
                 value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
