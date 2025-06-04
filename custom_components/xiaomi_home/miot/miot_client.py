@@ -732,7 +732,7 @@ class MIoTClient:
         did_set = {prop["did"] for prop in props_list}
         if len(did_set) > 1:
             raise MIoTClientError(f"more than one did once, {did_set}")
-        did = did_set[0]
+        did = did_set.pop()
         if did not in self._device_list_cache:
             raise MIoTClientError(f"did not exist, {did}")
         # Priority local control
