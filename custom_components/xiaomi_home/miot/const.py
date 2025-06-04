@@ -71,6 +71,7 @@ SUPPORTED_PLATFORMS: list = [
     'button',
     'climate',
     'cover',
+    'device_tracker',
     'event',
     'fan',
     'humidifier',
