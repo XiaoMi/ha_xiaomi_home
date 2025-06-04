@@ -70,7 +70,8 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up a config entry."""
-    device_list: list[MIoTDevice] = hass.data[DOMAIN]["devices"][config_entry.entry_id]
+    device_list: list[MIoTDevice] = hass.data[DOMAIN]["devices"][
+        config_entry.entry_id]
 
     new_entities = []
     for miot_device in device_list:
@@ -85,13 +86,13 @@ async def async_setup_entry(
     for miot_device in device_list:
         if "device:light" in miot_device.spec_instance.urn:
             if miot_device.entity_list.get("light", []):
-                device_id = list(miot_device.device_info.get("identifiers"))[0][1]
+                device_id = list(
+                    miot_device.device_info.get("identifiers"))[0][1]
                 light_entity_id = miot_device.gen_device_entity_id(DOMAIN)
                 new_light_select_entities.append(
-                    LightCommandSendMode(
-                        hass=hass, light_entity_id=light_entity_id, device_id=device_id
-                    )
-                )
+                    LightCommandSendMode(hass=hass,
+                                         light_entity_id=light_entity_id,
+                                         device_id=device_id))
 
     if new_light_select_entities:
         async_add_entities(new_light_select_entities)
@@ -108,7 +109,8 @@ class Select(MIoTPropertyEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        await self.set_property_async(value=self.get_vlist_value(description=option))
+        await self.set_property_async(value=self.get_vlist_value(
+            description=option))
 
     @property
     def current_option(self) -> Optional[str]:
@@ -121,18 +123,20 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     then send other color temperatures and brightness or send them all at the same time.
     The default is to send one by one."""
 
-    def __init__(self, hass: HomeAssistant, light_entity_id: str, device_id: str):
+    def __init__(self, hass: HomeAssistant, light_entity_id: str,
+                 device_id: str):
         super().__init__()
         self.hass = hass
         self._device_id = device_id
         self._attr_name = "Command Send Mode"
         self._attr_unique_id = f"{light_entity_id}_command_send_mode"
-        self._attr_options = ["Send One by One", "Send Turn On First", "Send Together"]
+        self._attr_options = [
+            "Send One by One", "Send Turn On First", "Send Together"
+        ]
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]  # 默认选项
-        self._attr_entity_category = (
-            EntityCategory.CONFIG
-        )  # **重点：告诉 HA 这是配置类实体**
+        self._attr_entity_category = (EntityCategory.CONFIG
+                                     )  # **重点：告诉 HA 这是配置类实体**
 
     async def async_select_option(self, option: str):
         """处理用户选择的选项。"""
@@ -143,9 +147,8 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     async def async_added_to_hass(self):
         """在实体添加到 Home Assistant 时恢复上次的状态。"""
         await super().async_added_to_hass()
-        if (
-            last_state := await self.async_get_last_state()
-        ) and last_state.state in self._attr_options:
+        if (last_state := await self.async_get_last_state()
+           ) and last_state.state in self._attr_options:
             self._attr_current_option = last_state.state
 
     @property
