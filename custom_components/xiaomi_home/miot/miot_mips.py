@@ -1305,7 +1305,6 @@ class MipsLocalClient(_MipsClient):
         result_obj = await self.__request_async(
             topic="proxy/rpcReq", payload=json.dumps(payload_obj), timeout_ms=timeout_ms
         )
-        _LOGGER.error(f"set_prop_async result_obj {result_obj}")
         if result_obj:
             if (
                 "result" in result_obj
@@ -1337,13 +1336,12 @@ class MipsLocalClient(_MipsClient):
         result_obj = await self.__request_async(
             topic="proxy/rpcReq", payload=json.dumps(payload_obj), timeout_ms=timeout_ms
         )
-        _LOGGER.error(f"set_props_async result_obj {result_obj}")
         if result_obj:
             if (
                 "result" in result_obj
                 and len(result_obj["result"]) == len(props_list)
                 and result_obj["result"][0].get("did") == did
-                and all("code" in item for item in result_obj)
+                and all("code" in item for item in result_obj["result"])
             ):
                 return result_obj["result"]
             if "error" in result_obj:

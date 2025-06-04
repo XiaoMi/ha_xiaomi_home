@@ -754,7 +754,6 @@ class MIoTClient:
                 if mips is None:
                     _LOGGER.error("no gw route, %s, try control throw cloud", device_gw)
                 else:
-                    _LOGGER.error(f"send_command did/props_list {did} {props_list}")
                     result = await mips.set_props_async(did=did, props_list=props_list)
                     _LOGGER.error(f"send_command result {result}")
                     rc = {

@@ -870,7 +870,7 @@ class MIoTLan:
                 "result" in result_obj
                 and len(result_obj["result"]) == len(props_list)
                 and result_obj["result"][0].get("did") == did
-                and all("code" in item for item in result_obj)
+                and all("code" in item for item in result_obj["result"])
             ):
                 return result_obj["result"]
             if "error" in result_obj:
