@@ -668,9 +668,14 @@ class MIoTClient:
                 if mips is None:
                     _LOGGER.error("no gw route, %s, try control throw cloud", device_gw)
                 else:
+                    _LOGGER.error(
+                        f"send_command did/siid/piid/value {did} {siid} {piid} {value}"
+                    )
+
                     result = await mips.set_prop_async(
                         did=did, siid=siid, piid=piid, value=value
                     )
+                    _LOGGER.error(f"send_command dan result {result}")
                     rc = (result or {}).get(
                         "code", MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value
                     )
