@@ -257,9 +257,7 @@ class Light(MIoTServiceEntity, LightEntity):
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
         # Determine whether the device sends the light-on properties in batches or one by one
-        select_entity_id = (
-            f"select.{self.miot_device.gen_device_entity_id(DOMAIN)}_command_send_mode"
-        )
+        select_entity_id = f"select.{self.miot_device.gen_device_entity_id(DOMAIN).split('.')[-1]}_command_send_mode"
         _LOGGER.error(f"select_entity_id {select_entity_id}")
         command_send_mode = self.hass.states.get(select_entity_id)
         _LOGGER.error(f"command_send_mode {command_send_mode}")
