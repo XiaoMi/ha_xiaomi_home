@@ -49,7 +49,6 @@ Light entities for Xiaomi Home.
 from __future__ import annotations
 import logging
 from typing import Any, Optional, List, Dict
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -92,16 +91,16 @@ async def async_setup_entry(
                 if light_entity.device_info.get("identifiers")
                 else light_entity.entity_id
             )
-            select_entity = LightCommandSendMode(
-                hass, light_entity.entity_id, device_id
-            )
-            new_select_entities.append(select_entity)
+            # select_entity = LightCommandSendMode(
+            #     hass, light_entity.entity_id, device_id
+            # )
+            # new_select_entities.append(select_entity)
 
     if new_entities:
         async_add_entities(new_entities)
     # Add an extra switch. Since turning on the lights is a batch command or a separate command
-    if new_select_entities:
-        async_add_entities(new_select_entities)
+    # if new_select_entities:
+    #     async_add_entities(new_select_entities)
 
 
 class Light(MIoTServiceEntity, LightEntity):
