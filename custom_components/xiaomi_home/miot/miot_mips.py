@@ -1305,6 +1305,7 @@ class MipsLocalClient(_MipsClient):
         result_obj = await self.__request_async(
             topic="proxy/rpcReq", payload=json.dumps(payload_obj), timeout_ms=timeout_ms
         )
+        _LOGGER.error(f"set_prop_async result_obj {result_obj}")
         if result_obj:
             if (
                 "result" in result_obj
