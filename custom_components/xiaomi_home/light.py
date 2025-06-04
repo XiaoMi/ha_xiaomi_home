@@ -86,11 +86,11 @@ async def async_setup_entry(
         for data in miot_device.entity_list.get("light", []):
             light_entity = Light(miot_device=miot_device, entity_data=data, hass=hass)
             new_entities.append(light_entity)
-            device_id = (
-                list(light_entity.device_info["identifiers"])[0][1]
-                if light_entity.device_info.get("identifiers")
-                else light_entity.entity_id
-            )
+            # device_id = (
+            #     list(light_entity.device_info["identifiers"])[0][1]
+            #     if light_entity.device_info.get("identifiers")
+            #     else light_entity.entity_id
+            # )
             # select_entity = LightCommandSendMode(
             #     hass, light_entity.entity_id, device_id
             # )

@@ -82,14 +82,19 @@ async def async_setup_entry(
 
     new_select_entities = []
     for miot_device in device_list:
-        _LOGGER.error(f"miot_device sadasd {miot_device}")
         for data in miot_device.entity_list.get("light", []):
-            _LOGGER.error(f"data sadasd {data}")
-            # device_id=miot_device.device_info.get("identifiers")[1]
-            # new_select_entities.append(LightCommandSendMode(hass=hass,light_entity_id=?,device_id=device_id))
+            _LOGGER.error(f"miot_device sadasd {miot_device.device_info}")
+            device_id = list(miot_device.device_info.get("identifiers"))[1]
+            _LOGGER.error(f"device_id sadasd {device_id}")
+            light_entity_id = miot_device.gen_device_entity_id(DOMAIN)
+            new_select_entities.append(
+                LightCommandSendMode(
+                    hass=hass, light_entity_id=light_entity_id, device_id=device_id
+                )
+            )
 
-    # if new_select_entities:
-    #     async_add_entities(new_select_entities)
+    if new_select_entities:
+        async_add_entities(new_select_entities)
 
 
 class Select(MIoTPropertyEntity, SelectEntity):
