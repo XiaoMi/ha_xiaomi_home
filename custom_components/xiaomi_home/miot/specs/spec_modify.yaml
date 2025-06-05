@@ -12,6 +12,11 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:1: urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:2: urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3
+urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3:
+  prop.3.5:
+    expr: (src_value*6)
 urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
   prop.2.3:
     name: current-position-a
@@ -53,8 +58,14 @@ urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
 urn:miot-spec-v2:device:fan:0000A005:dmaker-p5:1:
   prop.2.4:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p43:1:
+  prop.2.2:
+    name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
+    name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p69:1:0000D062:
+  prop.2.4:
     name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:zhimi-sa1:3:
   prop.2.2:
@@ -96,6 +107,11 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1:
     - notify
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:2: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:3: urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:1
+urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:1: urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3
+urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:2: urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3
+urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3:
+  prop.3.1:
+    name: on-ventilation
 urn:miot-spec-v2:device:kettle:0000A009:yunmi-r3:1:
   prop.3.1:
     unit: ppm
@@ -120,6 +136,10 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
     - read
     - notify
     unit: mV
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:1: urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2
+urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2:
+  prop.2.8:
+    name: people-number
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:
   prop.2.6:
     unit: cm
@@ -189,6 +209,11 @@ urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
     expr: src_value!=1
+urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm:1:0000D042:
+  prop.27.3:
+    name: light-on
+  prop.27.4:
+    name: light-fan-on
 urn:miot-spec-v2:device:switch:0000A003:lxzn-cbcsmj:1:0000D00D:
   prop.3.1:
     expr: round(src_value/100, 2)

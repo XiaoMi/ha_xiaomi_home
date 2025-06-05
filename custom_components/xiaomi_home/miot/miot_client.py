@@ -629,7 +629,7 @@ class MIoTClient:
                 mips = self._mips_local.get(device_gw['group_id'], None)
                 if mips is None:
                     _LOGGER.error(
-                        'no gw route, %s, try control throw cloud',
+                        'no gw route, %s, try control through cloud',
                         device_gw)
                 else:
                     result = await mips.set_prop_async(
