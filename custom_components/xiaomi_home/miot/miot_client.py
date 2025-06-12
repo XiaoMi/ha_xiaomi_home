@@ -629,11 +629,14 @@ class MIoTClient:
                 mips = self._mips_local.get(device_gw['group_id'], None)
                 if mips is None:
                     _LOGGER.error(
-                        'no gw route, %s, try control through cloud',
+                        'no gateway route, %s, try control through cloud',
                         device_gw)
                 else:
                     result = await mips.set_prop_async(
                         did=did, siid=siid, piid=piid, value=value)
+                    _LOGGER.debug(
+                        'gateway set prop, %s.%d.%d, %s -> %s',
+                        did, siid, piid, value, result)
                     rc = (result or {}).get(
                         'code', MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
                     if rc in [0, 1]:
@@ -663,7 +666,7 @@ class MIoTClient:
                     {'did': did, 'siid': siid, 'piid': piid, 'value': value}
                 ])
             _LOGGER.debug(
-                'set prop response, %s.%d.%d, %s, result, %s',
+                'cloud set prop, %s.%d.%d, %s -> %s',
                 did, siid, piid, value, result)
             if result and len(result) == 1:
                 rc = result[0].get(
