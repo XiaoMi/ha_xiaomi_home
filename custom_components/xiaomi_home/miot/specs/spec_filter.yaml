@@ -44,3 +44,7 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:xiaomi-pir1:
 urn:miot-spec-v2:device:router:0000A036:xiaomi-rd03:
   services:
   - '*'
+urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:
+  services:
+  - '2'
+  - '4'
