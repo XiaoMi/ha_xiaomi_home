@@ -261,6 +261,17 @@
       "service:004:property:007": "минимальная температура цели "
     }
   },
+  "urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01": {
+    "en": {
+      "service:002": "Thermostat",
+      "service:002:property:002": "Air Conditioner Mode",
+      "service:004": "Air Conditioner"
+    },
+    "zh_cn": {
+      "service:002": "地暖",
+      "service:004": "空调"
+    }
+  },
   "urn:miot-spec-v2:device:vacuum:0000A006:ijai-v1": {
     "zh_cn": {
       "service:007:property:005:valuelist:000": "安静",
