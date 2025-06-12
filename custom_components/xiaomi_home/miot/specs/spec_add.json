@@ -23,7 +23,7 @@
     {
       "iid": 2,
       "type": "urn:miot-spec-v2:service:thermostat:0000784A:tofan-wk01:1",
-      "description": "Air Conditioner",
+      "description": "Thermostat",
       "properties": [
         {
           "iid": 1,
