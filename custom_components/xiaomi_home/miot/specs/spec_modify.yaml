@@ -9,6 +9,7 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:5: urn:miot-spec-v2:d
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
   prop.10.6:
     unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:7: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
