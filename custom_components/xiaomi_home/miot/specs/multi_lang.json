@@ -181,6 +181,13 @@
       "service:002:property:003": "光照强度"
     }
   },
+  "urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm": {
+    "en": {
+      "service:027:property:001": "Fan Switch",
+      "service:027:property:003": "Light Switch",
+      "service:027:property:004": "Fan and Light Switch"
+    }
+  },
   "urn:miot-spec-v2:device:switch:0000A003:lumi-acn040": {
     "en": {
       "service:011": "Right Button On and Off",
