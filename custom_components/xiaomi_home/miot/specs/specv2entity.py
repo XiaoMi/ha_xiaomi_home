@@ -321,6 +321,64 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         'optional': {},
         'entity': 'electric-blanket'
     },
+    'speaker': {
+        'required': {
+            'speaker': {
+                'required': {
+                    'properties': {
+                        'volume': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'mute'}
+                }
+            },
+            'play-control': {
+                'required': {
+                    'actions': {'play'}
+                },
+                'optional': {
+                    'properties': {'playing-state'},
+                    'actions': {'pause', 'stop', 'next', 'previous'}
+                }
+            }
+        },
+        'optional': {},
+        'entity': 'wifi-speaker'
+    },
+    'television': {
+        'required': {
+            'speaker': {
+                'required': {
+                    'properties': {
+                        'volume': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'mute'}
+                }
+            },
+            'television': {
+                'required': {
+                    'actions': {'turn-off'}
+                },
+                'optional': {
+                    'properties': {'input-control'},
+                    'actions': {'turn-on'}
+                }
+            }
+        },
+        'optional': {
+            'play-control': {
+                'required': {},
+                'optional': {
+                    'properties': {'playing-state'},
+                    'actions': {'play', 'pause', 'stop', 'next', 'previous'}
+                }
+            }
+        },
+        'entity': 'television'
+    }
 }
 
 """SPEC_SERVICE_TRANS_MAP
