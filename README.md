@@ -376,7 +376,7 @@ Example:
 }
 ```
 
-> If you edit `specv2entity.py`, `spec_filter.json` or `multi_lang.json` in the `custom_components/xiaomi_home/miot/specs` directory in your Home Assistant, you need to update the entity conversion rule in the integration's CONFIGURE page to take effect. Method: [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > CONFIGURE > Update Entity Conversion Rule
+> If you edit any files in the `custom_components/xiaomi_home/miot/specs` directory (`spec_filter.py`, `spec_modify.json`, `multi_lang.json`, etc.) in your Home Assistant, you need to update the entity conversion rule in the integration's CONFIGURE page to take effect. Method: [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > CONFIGURE > Update entity conversion rules
 
 ## Documents
 
