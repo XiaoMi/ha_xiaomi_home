@@ -729,11 +729,14 @@ class MIoTClient:
                     "group_id" in device_gw):
                 mips = self._mips_local.get(device_gw["group_id"], None)
                 if mips is None:
-                    _LOGGER.error("no gw route, %s, try control throw cloud",
-                                  device_gw)
+                    _LOGGER.error(
+                        "no gateway route, %s, try control through cloud",
+                        device_gw)
                 else:
                     result = await mips.set_props_async(did=did,
                                                         props_list=props_list)
+                    _LOGGER.debug("gateway set props, %s -> %s", props_list,
+                                  result)
                     rc = {(r or
                            {}).get("code",
                                    MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
@@ -748,7 +751,7 @@ class MIoTClient:
             if device_lan and device_lan.get("online", False):
                 result = await self._miot_lan.set_props_async(
                     did=did, props_list=props_list)
-                _LOGGER.debug("lan set prop, %s -> %s", props_list, result)
+                _LOGGER.debug("lan set props, %s -> %s", props_list, result)
                 rc = {(r or
                        {}).get("code",
                                MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
@@ -763,7 +766,7 @@ class MIoTClient:
         if device_cloud and device_cloud.get("online", False):
             result = await self._http.set_props_async(params=props_list)
             _LOGGER.debug(
-                "set prop response, %s, result, %s",
+                "cloud set props, %s, result, %s",
                 props_list,
                 result,
             )
@@ -829,7 +832,7 @@ class MIoTClient:
                     "group_id" in device_gw):
                 mips = self._mips_local.get(device_gw["group_id"], None)
                 if mips is None:
-                    _LOGGER.error("no gw route, %s", device_gw)
+                    _LOGGER.error("no gateway route, %s", device_gw)
                 else:
                     return await mips.get_prop_async(did=did,
                                                      siid=siid,
@@ -857,7 +860,7 @@ class MIoTClient:
                     "group_id" in device_gw):
                 mips = self._mips_local.get(device_gw["group_id"], None)
                 if mips is None:
-                    _LOGGER.error("no gw route, %s", device_gw)
+                    _LOGGER.error("no gateway route, %s", device_gw)
                 else:
                     result = await mips.action_async(did=did,
                                                      siid=siid,
