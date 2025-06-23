@@ -60,6 +60,7 @@ from typing import Any, Callable, Optional, final, Coroutine
 
 from paho.mqtt.client import (
     MQTT_ERR_SUCCESS,
+    MQTT_ERR_NO_CONN,
     MQTT_ERR_UNKNOWN,
     Client,
     MQTTv5,
@@ -533,7 +534,7 @@ class _MipsClient(ABC):
             return
         try:
             result, mid = self._mqtt.unsubscribe(topic=topic)
-            if result == MQTT_ERR_SUCCESS:
+            if (result == MQTT_ERR_SUCCESS) or (result == MQTT_ERR_NO_CONN):
                 self.log_debug(
                     f'mips unsub internal success, {result}, {mid}, {topic}')
                 return

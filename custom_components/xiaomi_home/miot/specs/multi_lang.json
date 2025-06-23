@@ -168,7 +168,7 @@
       "service:003:property:1021:valuelist:002": "已上锁(反锁)",
       "service:003:property:1021:valuelist:003": "已上锁(反锁+童锁)",
       "service:003:property:1021:valuelist:004": "已开锁",
-      "service:003:property:1021:valuelist:008": "门未关（门超时未关）",
+      "service:003:property:1021:valuelist:008": "门未关(门超时未关)",
       "service:003:property:1021:valuelist:012": "门虚掩"
     }
   },
@@ -179,6 +179,13 @@
     "zh-Hans": {
       "service:002:property:001": "土壤湿度",
       "service:002:property:003": "光照强度"
+    }
+  },
+  "urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm": {
+    "en": {
+      "service:027:property:001": "Fan Switch",
+      "service:027:property:003": "Light Switch",
+      "service:027:property:004": "Fan and Light Switch"
     }
   },
   "urn:miot-spec-v2:device:switch:0000A003:lumi-acn040": {
@@ -193,6 +200,91 @@
       "service:015:action:001": "左键确认",
       "service:016:action:001": "中键确认",
       "service:017:action:001": "右键确认"
+    }
+  },
+  "urn:miot-spec-v2:device:thermostat:0000A031:cubee-th123e": {
+    "ru": {
+      "service:002": "термостат",
+      "service:002:property:001": "выключатель",
+      "service:002:property:002": "режим нагрузки",
+      "service:002:property:002:valuelist:000": "без подогрева",
+      "service:002:property:002:valuelist:001": "нагрев",
+      "service:002:property:003": "неисправность",
+      "service:002:property:003:valuelist:000": "ошибка датчика",
+      "service:002:property:003:valuelist:001": "без ошибок",
+      "service:002:property:003:valuelist:002": "защита от высоких температур",
+      "service:002:property:003:valuelist:003": "криогенная защита",
+      "service:002:property:004": "режим",
+      "service:002:property:004:valuelist:000": "ручной режим",
+      "service:002:property:004:valuelist:001": "домашний режим",
+      "service:002:property:004:valuelist:002": "режим выхода из дома",
+      "service:002:property:004:valuelist:003": "автоматический режим",
+      "service:002:property:004:valuelist:004": "Режим сна",
+      "service:002:property:005": "температура цели",
+      "service:002:property:007": "текущая температура",
+      "service:004": "Пользовательские услуги",
+      "service:004:property:001": "детский замок",
+      "service:004:property:002": "тип датчика",
+      "service:004:property:002:valuelist:000": "внутренний  датчик",
+      "service:004:property:002:valuelist:001": "выносной датчик",
+      "service:004:property:002:valuelist:002": "встроенный и внешний датчик",
+      "service:004:property:003": "пусковая разность температур",
+      "service:004:property:004": "компенсационная температура",
+      "service:004:property:005": "температура выносного датчика",
+      "service:004:property:006": "максимальная температура цели",
+      "service:004:property:007": "минимальная температура цели "
+    }
+  },
+  "urn:miot-spec-v2:device:thermostat:0000A031:cubee-th123w": {
+    "ru": {
+      "service:002": "термостат",
+      "service:002:property:001": "выключатель",
+      "service:002:property:002": "режим нагрузки",
+      "service:002:property:002:valuelist:000": "нагрев",
+      "service:002:property:002:valuelist:001": "без подогрева",
+      "service:002:property:003": "неисправность",
+      "service:002:property:003:valuelist:000": "без ошибок",
+      "service:002:property:003:valuelist:001": "ошибка датчика",
+      "service:002:property:003:valuelist:002": "защита от высоких температур",
+      "service:002:property:003:valuelist:003": "криогенная защита",
+      "service:002:property:004": "режим",
+      "service:002:property:004:valuelist:000": "ручной режим",
+      "service:002:property:004:valuelist:001": "домашний режим",
+      "service:002:property:004:valuelist:002": "режим выхода из дома",
+      "service:002:property:004:valuelist:003": "автоматический режим",
+      "service:002:property:004:valuelist:004": "Режим сна",
+      "service:002:property:005": "температура цели",
+      "service:002:property:007": "текущая температура",
+      "service:004": "Пользовательские услуги",
+      "service:004:property:001": "детский замок",
+      "service:004:property:002": "тип датчика",
+      "service:004:property:002:valuelist:000": "внутренний  датчик",
+      "service:004:property:002:valuelist:001": "выносной датчик",
+      "service:004:property:002:valuelist:002": "встроенный и внешний датчик",
+      "service:004:property:003": "пусковая разность температур",
+      "service:004:property:004": "компенсационная температура",
+      "service:004:property:005": "температура выносного датчика",
+      "service:004:property:006": "максимальная температура цели",
+      "service:004:property:007": "минимальная температура цели "
+    }
+  },
+  "urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01": {
+    "en": {
+      "service:002": "Thermostat",
+      "service:002:property:002": "Air Conditioner Mode",
+      "service:004": "Air Conditioner"
+    },
+    "zh_cn": {
+      "service:002": "地暖",
+      "service:004": "空调"
+    }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:ijai-v1": {
+    "zh_cn": {
+      "service:007:property:005:valuelist:000": "安静",
+      "service:007:property:005:valuelist:001": "标准",
+      "service:007:property:005:valuelist:002": "中档",
+      "service:007:property:005:valuelist:003": "强力"
     }
   }
 }
