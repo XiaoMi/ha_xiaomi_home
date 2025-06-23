@@ -1,4 +1,18 @@
 # CHANGELOG
+## v0.3.3
+### Changed
+- Change the log level of error "mips unsub internal error, 4, None". [#1135](https://github.com/XiaoMi/ha_xiaomi_home/pull/1135)
+- Add necessary logs for distinguishing the set_properties command source. [#1160](https://github.com/XiaoMi/ha_xiaomi_home/pull/1160)
+
+### Fixed
+- Fix tofan.airrtc.wk01 thermostat and air conditioner service. [#1160](https://github.com/XiaoMi/ha_xiaomi_home/pull/1160)
+- Fix mrbond.airer.m1t closing status. [#1134](https://github.com/XiaoMi/ha_xiaomi_home/pull/1134)
+- Fix the MIoT-Spec-V2 of xiaomi.fan.p69 fan service, ainice.sensor_occupy.3b people number, cykj.hood.jyj22 ventilation switch status, xiaomi.fan.p43 fan level, zhimi.airp.ua1a pm10 density, 090615.switch.x1tpm switch status, dmaker.fan.p33 fan-level. [#1132](https://github.com/XiaoMi/ha_xiaomi_home/pull/1132)
+- Fix cubee.airrtc.th123e and cubee.airrtc.th123w MIoT-Spec-V2 instance descriptions in Russian.
+- Fix ijai.vacuum.v1 suction-state value-list descriptions in Chinese.
+- Fix the misuse of Chinese brackets in multi_lang.json.
+- The unit of the humidity-range property of xiaomi.aircondition.mt0, xiaomi.aircondition.c35, xiaomi.aircondition.c24 and xiaomi.aircondition.c20 is "none". [#1187](https://github.com/XiaoMi/ha_xiaomi_home/pull/1187)
+
 ## v0.3.2
 > Xiaomi Home has been added to the Home Assistant Community Store (HACS) as a default since May 8, 2025.
 ### Added
