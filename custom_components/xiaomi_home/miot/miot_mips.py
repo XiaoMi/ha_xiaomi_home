@@ -641,6 +641,7 @@ class _MipsClient(ABC):
         if not self._mqtt.is_connected():
             return
         self.log_info(f'mips connect, {flags}, {rc}, {props}')
+        self.__reset_reconnect_time()
         self._mqtt_state = True
         self._internal_loop.call_soon(
             self._on_mips_connect, rc, props)
@@ -829,6 +830,9 @@ class _MipsClient(ABC):
                 self._mips_reconnect_interval*2,
                 self.MIPS_RECONNECT_INTERVAL_MAX)
         return self._mips_reconnect_interval
+
+    def __reset_reconnect_time(self) -> None:
+        self._mips_reconnect_interval = 0
 
 
 class MipsCloudClient(_MipsClient):
