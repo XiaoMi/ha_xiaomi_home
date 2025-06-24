@@ -85,6 +85,11 @@ SUPPORTED_PLATFORMS: list = [
     'water_heater',
 ]
 
+UNSUPPORTED_MODELS: list = [
+    'chuangmi.ir.v2',
+    'xiaomi.router.rd03'
+]
+
 DEFAULT_CLOUD_SERVER: str = 'cn'
 CLOUD_SERVERS: dict = {
     'cn': '中国大陆',

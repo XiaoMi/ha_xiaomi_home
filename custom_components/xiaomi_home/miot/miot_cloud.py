@@ -59,6 +59,7 @@ import aiohttp
 # pylint: disable=relative-beyond-top-level
 from .common import calc_group_id
 from .const import (
+    UNSUPPORTED_MODELS,
     DEFAULT_OAUTH2_API_HOST,
     MIHOME_HTTP_API_TIMEOUT,
     OAUTH2_AUTH_URL)
@@ -572,6 +573,10 @@ class MIoTHttpClient:
                 # The miwifi.* routers defined SPEC functions, but none of them
                 # were implemented.
                 _LOGGER.info('ignore miwifi.* device, cloud, %s', did)
+                continue
+            if model in UNSUPPORTED_MODELS:
+                _LOGGER.info('ignore unsupported model %s, cloud, %s',
+                             model, did)
                 continue
             device_infos[did] = {
                 'did': did,

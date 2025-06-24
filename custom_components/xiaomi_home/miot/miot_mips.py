@@ -68,7 +68,7 @@ from paho.mqtt.client import (
 
 # pylint: disable=relative-beyond-top-level
 from .common import MIoTMatcher
-from .const import MIHOME_MQTT_KEEPALIVE
+from .const import UNSUPPORTED_MODELS, MIHOME_MQTT_KEEPALIVE
 from .miot_error import MIoTErrorCode, MIoTMipsError
 
 _LOGGER = logging.getLogger(__name__)
@@ -1360,6 +1360,9 @@ class MipsLocalClient(_MipsClient):
             model: str = info.get('model', None)
             if name is None or urn is None or model is None:
                 self.log_error(f'invalid device info, {did}, {info}')
+                continue
+            if model in UNSUPPORTED_MODELS:
+                self.log_info(f'unsupported model, {model}, {did}')
                 continue
             device_list[did] = {
                 'did': did,
