@@ -295,3 +295,6 @@ urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:curtain:0000A00C:bjkcz-kczble:1:0000D031:
+  prop.2.2:
+    name: status-a
