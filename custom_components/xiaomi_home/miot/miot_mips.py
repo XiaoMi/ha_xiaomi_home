@@ -216,7 +216,7 @@ class _MipsClient(ABC):
     MQTT_INTERVAL_S = 1
     MIPS_QOS: int = 2
     UINT32_MAX: int = 0xFFFFFFFF
-    MIPS_RECONNECT_INTERVAL_MIN: float = 30
+    MIPS_RECONNECT_INTERVAL_MIN: float = 10
     MIPS_RECONNECT_INTERVAL_MAX: float = 600
     MIPS_SUB_PATCH: int = 300
     MIPS_SUB_INTERVAL: float = 1
