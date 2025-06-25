@@ -823,7 +823,7 @@ class _MipsClient(ABC):
         self._internal_loop.stop()
 
     def __get_next_reconnect_time(self) -> float:
-        if self._mips_reconnect_interval == 0:
+        if self._mips_reconnect_interval < self.MIPS_RECONNECT_INTERVAL_MIN:
             self._mips_reconnect_interval = self.MIPS_RECONNECT_INTERVAL_MIN
         else:
             self._mips_reconnect_interval = min(
