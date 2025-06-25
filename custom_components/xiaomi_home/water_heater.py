@@ -145,8 +145,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         if not self._attr_operation_list:
             self._attr_operation_list = [STATE_ON]
         self._attr_operation_list.append(STATE_OFF)
-        self._attr_supported_features |= (
-            WaterHeaterEntityFeature.OPERATION_MODE)
+        self._attr_supported_features |= WaterHeaterEntityFeature.OPERATION_MODE
 
     async def async_turn_on(self) -> None:
         """Turn the water heater on."""
