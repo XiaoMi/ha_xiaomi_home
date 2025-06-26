@@ -983,17 +983,13 @@ class MIoTClient:
                 and self._device_list_lan[did].get('push_available', False)
             ):
                 from_new = 'lan'
+
         if (
             from_new is None
             and did in self._device_list_cloud
+            and self._device_list_cloud[did].get('online', False)
         ):
-            # MIoT cloud service may not publish the online state updating
-            # message for the BLE device.
-            if did.startswith('blt.'):
-                from_new = 'cloud'
-            elif self._device_list_cloud[did].get('online', False):
-                from_new = 'cloud'
-
+            from_new = 'cloud'
         if from_new == from_old:
             # No need to update
             return
@@ -1358,6 +1354,11 @@ class MIoTClient:
         """Update cloud devices.
         NOTICE: This function will operate the cloud_list
         """
+        # MIoT cloud service may not publish the online state updating message
+        # for the BLE device. Assume that all BLE devices are online.
+        for did, info in cloud_list.items():
+            if did.startswith('blt.'):
+                info['online'] = True
         for did, info in self._device_list_cache.items():
             if filter_dids and did not in filter_dids:
                 continue
