@@ -48,3 +48,7 @@ urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:
   services:
   - '2'
   - '4'
+urn:miot-spec-v2:device:fan:00007808:dmaker-p5c:1:
+  properties:
+  - '2.2'
+  - '8.1'

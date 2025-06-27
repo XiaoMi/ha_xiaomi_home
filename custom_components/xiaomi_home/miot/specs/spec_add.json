@@ -217,5 +217,23 @@
         }
       ]
     }
+  ],
+  "urn:miot-spec-v2:device:fan:0000A005:dmaker-p5c:1": [
+    {
+      "iid": 8,
+      "type": "urn:miot-spec-v2:service:fan:00007808:dmaker-p5c:1",
+      "description": "Fan",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:fan-level:00000016:dmaker-p5c:1",
+          "description": "Fan Level",
+          "format": "uint8",
+          "access": ["read", "notify", "write"],
+          "value-range": [1, 100, 1],
+          "gatt-access": []
+        }
+      ]
+    }
   ]
 }
