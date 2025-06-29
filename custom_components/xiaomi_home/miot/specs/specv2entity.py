@@ -321,6 +321,31 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         'optional': {},
         'entity': 'electric-blanket'
     },
+    'watch': {
+        'required': {
+            'watch': {
+                'required': {
+                    'properties': {
+                        'longitude': {'read'},
+                        'latitude': {'read'}
+                    }
+                },
+                'optional': {
+                    'properties': {'area-id'}
+                }
+            }
+        },
+        'optional': {
+            'battery': {
+                'required': {
+                    'properties': {
+                        'battery-level': {'read'}
+                    }
+                }
+            }
+        },
+        'entity': 'device_tracker'
+    }
 }
 
 """SPEC_SERVICE_TRANS_MAP
