@@ -159,7 +159,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
                                   self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {'opening', 'open', 'up'}:
+                    if item.name in {'opening', 'open', 'up', 'rising'}:
                         self._prop_status_opening.append(item.value)
                     elif item.name in {'closing', 'close', 'down', 'dowm'}:
                         self._prop_status_closing.append(item.value)

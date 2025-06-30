@@ -1178,7 +1178,7 @@ class MipsLocalClient(_MipsClient):
                 or 'piid' not in msg
                 or 'value' not in msg
             ):
-                # self.log_error(f'on_prop_msg, recv unknown msg, {payload}')
+                self.log_info('unknown prop msg, %s', payload)
                 return
             if handler:
                 self.log_debug('local, on properties_changed, %s', payload)
