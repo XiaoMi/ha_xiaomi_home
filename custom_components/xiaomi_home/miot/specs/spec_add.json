@@ -44,6 +44,32 @@
       ]
     }
   ],
+  "urn:miot-spec-v2:device:fan:0000A005:dmaker-p5c:1": [
+    {
+      "iid": 8,
+      "type": "urn:miot-spec-v2:service:fan:00007802:dmaker-p5c:1",
+      "description": "Fan",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:fan-level:00000001:dmaker-p5c:1",
+          "description": "Fan Level",
+          "format": "uint8",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ],
+          "value-range": [
+            1,
+            100,
+            1
+          ],
+          "gatt-access": []
+        }
+      ]
+    }
+  ],
   "urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:1:0000C822": [
     {
       "iid": 2,

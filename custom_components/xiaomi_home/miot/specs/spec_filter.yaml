@@ -18,6 +18,9 @@ urn:miot-spec-v2:device:curtain:0000A00C:lumi-hmcn01:
   - '4'
   - '7'
   - '8'
+urn:miot-spec-v2:device:fan:0000A005:dmaker-p5c:1:
+  services:
+  - '8'
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
   events:
   - '2.1'
