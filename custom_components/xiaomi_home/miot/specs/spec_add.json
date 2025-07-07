@@ -1,4 +1,29 @@
 {
+  "urn:miot-spec-v2:device:air-conditioner:0000A004:090615-ktf:1": [
+    {
+      "iid": 4,
+      "type": "urn:miot-spec-v2:service:environment:0000780A:090615-ktf:1",
+      "description": "Environment",
+      "properties": [
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:temperature:00000020:090615-ktf:1",
+          "description": "Temperature",
+          "format": "float",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "unit": "celsius",
+          "value-range": [
+            -30,
+            100,
+            1
+          ]
+        }
+      ]
+    }
+  ],
   "urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1": [
     {
       "iid": 3,

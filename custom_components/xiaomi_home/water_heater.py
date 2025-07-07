@@ -141,12 +141,11 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
                     continue
                 self._mode_map = prop.value_list.to_map()
                 self._attr_operation_list = list(self._mode_map.values())
-                self._attr_supported_features |= (
-                    WaterHeaterEntityFeature.OPERATION_MODE)
                 self._prop_mode = prop
         if not self._attr_operation_list:
             self._attr_operation_list = [STATE_ON]
         self._attr_operation_list.append(STATE_OFF)
+        self._attr_supported_features |= WaterHeaterEntityFeature.OPERATION_MODE
 
     async def async_turn_on(self) -> None:
         """Turn the water heater on."""
@@ -197,5 +196,5 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
             return STATE_OFF
         if not self._prop_mode and self.get_prop_value(prop=self._prop_on):
             return STATE_ON
-        return self.get_map_value(map_=self._mode_map,
-                                  key=self.get_prop_value(prop=self._prop_mode))
+        return (None if self._prop_mode is None else self.get_map_value(
+            map_=self._mode_map, key=self.get_prop_value(prop=self._prop_mode)))

@@ -1,6 +1,18 @@
 urn:miot-spec-v2:device:air-condition-outlet:0000A045:lumi-mcn04:1:
   prop.3.4:
     format: uint8
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
@@ -9,6 +21,11 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:5: urn:miot-spec-v2:d
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6:
   prop.10.6:
     unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:7: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
@@ -58,6 +75,15 @@ urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
 urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
   prop.4.4:
     name: fan-level-ventilation
+urn:miot-spec-v2:device:fan:0000A005:dmaker-p33:1:
+  prop.2.2:
+    name: fan-level-a
+  prop.2.6:
+    name: fan-level
+    access:
+    - read
+    - write
+    - notify
 urn:miot-spec-v2:device:fan:0000A005:dmaker-p5:1:
   prop.2.4:
     name: fan-level-a
