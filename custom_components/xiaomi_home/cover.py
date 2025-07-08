@@ -97,7 +97,6 @@ class Cover(MIoTServiceEntity, CoverEntity):
     _prop_status: Optional[MIoTSpecProperty]
     _prop_status_opening: Optional[list[int]]
     _prop_status_closing: Optional[list[int]]
-    _prop_status_stop: Optional[list[int]]
     _prop_status_closed: Optional[list[int]]
     _prop_current_position: Optional[MIoTSpecProperty]
     _prop_target_position: Optional[MIoTSpecProperty]
@@ -122,7 +121,6 @@ class Cover(MIoTServiceEntity, CoverEntity):
         self._prop_status = None
         self._prop_status_opening = []
         self._prop_status_closing = []
-        self._prop_status_stop = []
         self._prop_status_closed = []
         self._prop_current_position = None
         self._prop_target_position = None
@@ -159,13 +157,19 @@ class Cover(MIoTServiceEntity, CoverEntity):
                                   self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {'opening', 'open', 'up', 'rising'}:
+                    if item.name in {
+                            'opening', 'open', 'up', 'uping', 'rise', 'rising'
+                    }:
                         self._prop_status_opening.append(item.value)
-                    elif item.name in {'closing', 'close', 'down', 'dowm'}:
+                    elif item.name in {
+                            'closing', 'close', 'down', 'dowm', 'falling',
+                            'dropping', 'downing', 'lower'
+                    }:
                         self._prop_status_closing.append(item.value)
-                    elif item.name in {'stop', 'stopped', 'pause'}:
-                        self._prop_status_stop.append(item.value)
-                    elif item.name in {'closed'}:
+                    elif item.name in {
+                            'stopatlowest', 'stoplowerlimit', 'lowerlimitstop',
+                            'floor', 'lowerlimit'
+                    }:
                         self._prop_status_closed.append(item.value)
                 self._prop_status = prop
             elif prop.name == 'current-position':
