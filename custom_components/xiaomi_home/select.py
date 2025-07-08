@@ -125,7 +125,7 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
         self.hass = hass
         self._device_id = device_id
         self._attr_name = "Command Send Mode"
-        self._attr_unique_id = f"light_{device_id}_command_send_mode"
+        self._attr_unique_id = f"{DOMAIN}.light_{device_id}_command_send_mode"
         self._attr_options = [
             "Send One by One", "Send Turn On First", "Send Together"
         ]

@@ -261,17 +261,12 @@ class Light(MIoTServiceEntity, LightEntity):
             device_id = list(
                 self.miot_device.device_info.get("identifiers"))[0][1]
             self._command_send_mode_entity_id = entity_registry.async_get_entity_id(
-                "select", DOMAIN, f"light_{device_id}_command_send_mode")
+                "select", DOMAIN,
+                f"{DOMAIN}.light_{device_id}_command_send_mode")
         command_send_mode = self.hass.states.get(
             self._command_send_mode_entity_id)
         if command_send_mode and command_send_mode.state == "Send Together":
             set_properties_list: List[Dict[str, Any]] = []
-            # Do not send the light on command here. Otherwise,
-            # the light will continue to use the color temperature and brightness of the last time.
-            # if self._prop_on:
-            #     value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
-            #     set_properties_list.append({"prop": self._prop_on, "value": value_on})
-
             # color-temperature
             if ATTR_COLOR_TEMP_KELVIN in kwargs:
                 set_properties_list.append({
@@ -306,6 +301,12 @@ class Light(MIoTServiceEntity, LightEntity):
                     "value":
                         self.get_map_key(map_=self._mode_map,
                                          value=kwargs[ATTR_EFFECT]),
+                })
+            if self._prop_on:
+                value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
+                set_properties_list.append({
+                    "prop": self._prop_on,
+                    "value": value_on
                 })
             await self.set_properties_async(set_properties_list)
             self.async_write_ha_state()
