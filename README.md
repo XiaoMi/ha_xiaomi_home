@@ -155,6 +155,8 @@ In MIoT-Spec-V2 protocol, a product is defined as a device. A device contains se
 
 MIoT-Spec-V2 event is transformed to Event entity in Home Assistant. The event's parameters are also passed to entity's `_trigger_event`.
 
+MIoT-Spec-V2 event's arguments field is the list of parameters of the event. The list elements represent the piid of the property in the same service. For example, the [MIoT-Spec-V2](http://poc.miot-spec.srv/miot-spec-v2/instance?type=urn:miot-spec-v2:device:remote-control:0000A021:xiaomi-mcn002:1:0000D057) of the Xiaomi Wireless Double-key Switch contains the siid=2 Switch Sensor service. The eiid=1014 Long Press event of the service is triggered when a button is long pressed. The debug level log will print `Press and hold, attributes: {'Button Type': 1}`. This is an example log that the button type is 1, which means the right button is long pressed.
+
 - Action
 
 | in        | Entity in Home Assistant |
@@ -313,13 +315,13 @@ urn:miot-spec-v2:device:television:0000A010:xiaomi-rmi1:
     - '*'   # Filter out all services. It is equivalent to completely ignoring the device with such MIoT-Spec-V2.
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
     services:
-    - '3'   # Filter out the service whose iid=3.
+    - '3'   # Filter out the siid=3 service.
     properties:
-    - '4.*' # Filter out all properties in the service whose iid=4.
+    - '4.*' # Filter out all properties in the siid=4 service.
     events:
-    - '4.1' # Filter out the iid=1 event in the iid=4 service.
+    - '4.1' # Filter out the eiid=1 event in the siid=4 service.
     actions:
-    - '4.1' # Filter out the iid=1 action in the iid=4 service.
+    - '4.1' # Filter out the aiid=1 action in the siid=4 service.
 ```
 
 Device information service (urn:miot-spec-v2:service:device-information:00007801) of all devices will never be converted to Home Assistant entity.

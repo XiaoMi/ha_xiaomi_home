@@ -157,6 +157,8 @@ git checkout v1.0.0
 
 转换后的实体为 Event，事件参数同时传递给实体的 `_trigger_event` 。
 
+MIoT-Spec-V2 事件的 arguments 字段是事件的参数列表，列表元素代表同服务下属性的 piid 。例如，小米智能无线开关（双开）的 [MIoT-Spec-V2](http://poc.miot-spec.srv/miot-spec-v2/instance?type=urn:miot-spec-v2:device:remote-control:0000A021:xiaomi-mcn002:1:0000D057)的 siid=2 无线开关服务下包含 eiid=1014 长按事件，该事件触发时会携带一个 piid=2 的按键类型属性作为事件参数， debug 等级日志会打印 `长按, attributes: {'按键类型': 1}` (日志示例，按键类型为 1 表示右键触发了长按事件)。
+
 - 方法（Action）
 
 | in（输入参数列表） | 转换后的实体 |
@@ -315,13 +317,13 @@ urn:miot-spec-v2:device:television:0000A010:xiaomi-rmi1:
     - '*'   # 排除所有服务，相当于排除拥有该 MIoT-Spec-V2 的设备。
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
     services:
-    - '3'   # 排除 iid=3 的服务
+    - '3'   # 排除 siid=3 的服务
     properties:
-    - '4.*' # 排除 iid=4 服务的所有属性
+    - '4.*' # 排除 siid=4 服务的所有属性
     events:
-    - '4.1' # 排除 iid=4 服务的 iid=1 的事件
+    - '4.1' # 排除 siid=4 服务的 eiid=1 的事件
     actions:
-    - '4.1' # 排除 iid=4 服务的 iid=1 的方法
+    - '4.1' # 排除 siid=4 服务的 aiid=1 的方法
 ```
 
 所有设备的设备信息服务（ urn:miot-spec-v2:service:device-information:00007801 ）均不会生成 Home Assistant 实体。
