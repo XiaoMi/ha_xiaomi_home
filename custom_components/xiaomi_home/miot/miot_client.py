@@ -63,7 +63,8 @@ from .common import MIoTMatcher, slugify_did
 from .const import (
     DEFAULT_CTRL_MODE, DEFAULT_INTEGRATION_LANGUAGE, DEFAULT_NICK_NAME, DOMAIN,
     MIHOME_CERT_EXPIRE_MARGIN, NETWORK_REFRESH_INTERVAL,
-    OAUTH2_CLIENT_ID, SUPPORT_CENTRAL_GATEWAY_CTRL)
+    OAUTH2_CLIENT_ID, SUPPORT_CENTRAL_GATEWAY_CTRL,
+    DEFAULT_COVER_CLOSED_POSITION)
 from .miot_cloud import MIoTHttpClient, MIoTOauthClient
 from .miot_error import MIoTClientError, MIoTErrorCode
 from .miot_mips import (
@@ -485,6 +486,11 @@ class MIoTClient:
     @property
     def display_binary_bool(self) -> bool:
         return self._display_binary_bool
+
+    @property
+    def cover_closed_position(self) -> int:
+        return self._entry_data.get('cover_closed_position',
+                                    DEFAULT_COVER_CLOSED_POSITION)
 
     @display_devices_changed_notify.setter
     def display_devices_changed_notify(self, value: list[str]) -> None:
