@@ -88,11 +88,8 @@ async def async_setup_entry(
             if miot_device.entity_list.get("light", []):
                 device_id = list(
                     miot_device.device_info.get("identifiers"))[0][1]
-                light_entity_id = miot_device.gen_device_entity_id(DOMAIN)
                 new_light_select_entities.append(
-                    LightCommandSendMode(hass=hass,
-                                         light_entity_id=light_entity_id,
-                                         device_id=device_id))
+                    LightCommandSendMode(hass=hass, device_id=device_id))
 
     if new_light_select_entities:
         async_add_entities(new_light_select_entities)
@@ -123,16 +120,16 @@ class LightCommandSendMode(SelectEntity, RestoreEntity):
     then send other color temperatures and brightness or send them all at the same time.
     The default is to send one by one."""
 
-    def __init__(self, hass: HomeAssistant, light_entity_id: str,
-                 device_id: str):
+    def __init__(self, hass: HomeAssistant, device_id: str):
         super().__init__()
         self.hass = hass
         self._device_id = device_id
         self._attr_name = "Command Send Mode"
-        self._attr_unique_id = f"{light_entity_id}_command_send_mode"
+        self._attr_unique_id = f"light_{device_id}_command_send_mode"
         self._attr_options = [
             "Send One by One", "Send Turn On First", "Send Together"
         ]
+
         self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]
         self._attr_entity_category = EntityCategory.CONFIG

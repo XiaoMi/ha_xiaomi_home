@@ -48,11 +48,13 @@ Light entities for Xiaomi Home.
 
 from __future__ import annotations
 import logging
+from tkinter import N
 from typing import Any, Optional, List, Dict
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_COLOR_TEMP_KELVIN,
@@ -123,6 +125,7 @@ class Light(MIoTServiceEntity, LightEntity):
         self._prop_mode = None
         self._brightness_scale = None
         self._mode_map = None
+        self._command_send_mode_entity_id = None
 
         # properties
         for prop in entity_data.props:
@@ -252,8 +255,15 @@ class Light(MIoTServiceEntity, LightEntity):
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
         # Determine whether the device sends the light-on properties in batches or one by one
-        select_entity_id = f"select.{self.miot_device.gen_device_entity_id(DOMAIN).split('.')[-1]}_command_send_mode"
-        command_send_mode = self.hass.states.get(select_entity_id)
+        # Search entityid through unique_id to avoid the user modifying entityid and causing command_send_mode to not match
+        if self._command_send_mode_entity_id is None:
+            entity_registry = async_get_entity_registry(self.hass)
+            device_id = list(
+                self.miot_device.device_info.get("identifiers"))[0][1]
+            self._command_send_mode_entity_id = entity_registry.async_get_entity_id(
+                "select", DOMAIN, f"light_{device_id}_command_send_mode")
+        command_send_mode = self.hass.states.get(
+            self._command_send_mode_entity_id)
         if command_send_mode and command_send_mode.state == "Send Together":
             set_properties_list: List[Dict[str, Any]] = []
             # Do not send the light on command here. Otherwise,
