@@ -48,7 +48,6 @@ Light entities for Xiaomi Home.
 
 from __future__ import annotations
 import logging
-from tkinter import N
 from typing import Any, Optional, List, Dict
 
 from homeassistant.config_entries import ConfigEntry
