@@ -75,6 +75,9 @@ urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
 urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
   prop.4.4:
     name: fan-level-ventilation
+urn:miot-spec-v2:device:curtain:0000A00C:bjkcz-kczble:1:0000D031:
+  prop.2.2:
+    name: status-a
 urn:miot-spec-v2:device:fan:0000A005:dmaker-p33:1:
   prop.2.2:
     name: fan-level-a
@@ -209,6 +212,9 @@ urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:
     unit: mV
   prop.3.4:
     unit: mA
+urn:miot-spec-v2:device:outlet:0000A002:yutai-fsov8m:1:0000C816:
+  prop.4.1:
+    expr: round(src_value/10000, 2)
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:1:0000C816: urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:

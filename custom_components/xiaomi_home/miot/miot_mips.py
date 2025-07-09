@@ -1219,9 +1219,9 @@ class MipsLocalClient(_MipsClient):
 
         def on_prop_msg(topic: str, payload: str, ctx: Any):
             msg: dict = json.loads(payload)
-            if (msg is None or "did" not in msg or "siid" not in msg or
-                    "piid" not in msg or "value" not in msg):
-                # self.log_error(f'on_prop_msg, recv unknown msg, {payload}')
+            if (msg is None or 'did' not in msg or 'siid' not in msg or
+                    'piid' not in msg or 'value' not in msg):
+                self.log_info('unknown prop msg, %s', payload)
                 return
             if handler:
                 self.log_debug("local, on properties_changed, %s", payload)

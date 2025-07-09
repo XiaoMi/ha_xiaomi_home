@@ -1,9 +1,23 @@
 # CHANGELOG
+## v0.3.4
+### Added
+- Exclude the unsupported device models. [#1205](https://github.com/XiaoMi/ha_xiaomi_home/pull/1205)
+### Changed
+- Subscribe the BLE device upstream messages even though the device is offline. [#1207](https://github.com/XiaoMi/ha_xiaomi_home/pull/1207)
+- Record "opening", "closing" and "closed" status of the airer service that occur frequently and do not record "stop" status for the cover entity. [#1235](https://github.com/XiaoMi/ha_xiaomi_home/pull/1235)
+- Modify README about spec_filter.yaml and the event attributes. [#1237](https://github.com/XiaoMi/ha_xiaomi_home/pull/1237)
+### Fixed
+- Fix the reconnect delay time to be reset when the client is connected to the broker. [#1200](https://github.com/XiaoMi/ha_xiaomi_home/pull/1200)
+- Fix the HA warning in the logs related to vacuum state setting. [#694](https://github.com/XiaoMi/ha_xiaomi_home/pull/694)
+- Fix the operation mode when the device does not have a mode property. [#1199](https://github.com/XiaoMi/ha_xiaomi_home/pull/1199)
+- Fix 090615.aircondition.ktf environment temperature. [#1210](https://github.com/XiaoMi/ha_xiaomi_home/pull/1210)
+- Fix a missing variable in translation it.json. [#1215](https://github.com/XiaoMi/ha_xiaomi_home/pull/1215)
+- Fix yutai.plug.fsov8m power consumption and ignore bjkcz.curtain.kczble curtain status. [#1236](https://github.com/XiaoMi/ha_xiaomi_home/pull/1236)
+
 ## v0.3.3
 ### Changed
 - Change the log level of error "mips unsub internal error, 4, None". [#1135](https://github.com/XiaoMi/ha_xiaomi_home/pull/1135)
 - Add necessary logs for distinguishing the set_properties command source. [#1160](https://github.com/XiaoMi/ha_xiaomi_home/pull/1160)
-
 ### Fixed
 - Fix tofan.airrtc.wk01 thermostat and air conditioner service. [#1160](https://github.com/XiaoMi/ha_xiaomi_home/pull/1160)
 - Fix mrbond.airer.m1t closing status. [#1134](https://github.com/XiaoMi/ha_xiaomi_home/pull/1134)
