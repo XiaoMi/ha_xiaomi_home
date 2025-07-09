@@ -46,8 +46,9 @@ off Xiaomi or its affiliates' products.
 Cover entities for Xiaomi Home.
 """
 from __future__ import annotations
-import logging
 from typing import Any, Optional
+import re
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -157,16 +158,18 @@ class Cover(MIoTServiceEntity, CoverEntity):
                                   self.entity_id)
                     continue
                 for item in prop.value_list.items:
-                    if item.name in {
+                    item_str: str = item.name
+                    item_name: str = re.sub(r'[^a-z]', '', item_str)
+                    if item_name in {
                             'opening', 'open', 'up', 'uping', 'rise', 'rising'
                     }:
                         self._prop_status_opening.append(item.value)
-                    elif item.name in {
+                    elif item_name in {
                             'closing', 'close', 'down', 'dowm', 'falling',
                             'dropping', 'downing', 'lower'
                     }:
                         self._prop_status_closing.append(item.value)
-                    elif item.name in {
+                    elif item_name in {
                             'stopatlowest', 'stoplowerlimit', 'lowerlimitstop',
                             'floor', 'lowerlimit'
                     }:
