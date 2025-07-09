@@ -84,12 +84,12 @@ async def async_setup_entry(
     # create select for light
     new_light_select_entities = []
     for miot_device in device_list:
-        if "device:light" in miot_device.spec_instance.urn:
-            if miot_device.entity_list.get("light", []):
-                device_id = list(
-                    miot_device.device_info.get("identifiers"))[0][1]
-                new_light_select_entities.append(
-                    LightCommandSendMode(hass=hass, device_id=device_id))
+        # Add it to all devices with light entities, because some bathroom heaters and clothes drying racks also have lights.
+        # if "device:light" in miot_device.spec_instance.urn:
+        if miot_device.entity_list.get("light", []):
+            device_id = list(miot_device.device_info.get("identifiers"))[0][1]
+            new_light_select_entities.append(
+                LightCommandSendMode(hass=hass, device_id=device_id))
 
     if new_light_select_entities:
         async_add_entities(new_light_select_entities)

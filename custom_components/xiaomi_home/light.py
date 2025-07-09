@@ -263,10 +263,25 @@ class Light(MIoTServiceEntity, LightEntity):
             self._command_send_mode_entity_id = entity_registry.async_get_entity_id(
                 "select", DOMAIN,
                 f"{DOMAIN}.light_{device_id}_command_send_mode")
+        if self._command_send_mode_entity_id is None:
+            _LOGGER.error(
+                "light command_send_mode not found, %s",
+                self.entity_id,
+            )
+            return
         command_send_mode = self.hass.states.get(
             self._command_send_mode_entity_id)
         if command_send_mode and command_send_mode.state == "Send Together":
             set_properties_list: List[Dict[str, Any]] = []
+            # mode
+            if ATTR_EFFECT in kwargs:
+                set_properties_list.append({
+                    "prop":
+                        self._prop_mode,
+                    "value":
+                        self.get_map_key(map_=self._mode_map,
+                                         value=kwargs[ATTR_EFFECT]),
+                })
             # color-temperature
             if ATTR_COLOR_TEMP_KELVIN in kwargs:
                 set_properties_list.append({
@@ -293,15 +308,7 @@ class Light(MIoTServiceEntity, LightEntity):
                     "prop": self._prop_brightness,
                     "value": brightness
                 })
-            # mode
-            if ATTR_EFFECT in kwargs:
-                set_properties_list.append({
-                    "prop":
-                        self._prop_mode,
-                    "value":
-                        self.get_map_key(map_=self._mode_map,
-                                         value=kwargs[ATTR_EFFECT]),
-                })
+
             if self._prop_on:
                 value_on = True if self._prop_on.format_ == bool else 1  # noqa: E721
                 set_properties_list.append({
@@ -318,6 +325,15 @@ class Light(MIoTServiceEntity, LightEntity):
                     "prop": self._prop_on,
                     "value": value_on
                 })
+            # mode
+            if ATTR_EFFECT in kwargs:
+                set_properties_list.append({
+                    "prop":
+                        self._prop_mode,
+                    "value":
+                        self.get_map_key(map_=self._mode_map,
+                                         value=kwargs[ATTR_EFFECT]),
+                })
             # color-temperature
             if ATTR_COLOR_TEMP_KELVIN in kwargs:
                 set_properties_list.append({
@@ -344,15 +360,7 @@ class Light(MIoTServiceEntity, LightEntity):
                     "prop": self._prop_brightness,
                     "value": brightness
                 })
-            # mode
-            if ATTR_EFFECT in kwargs:
-                set_properties_list.append({
-                    "prop":
-                        self._prop_mode,
-                    "value":
-                        self.get_map_key(map_=self._mode_map,
-                                         value=kwargs[ATTR_EFFECT]),
-                })
+
             await self.set_properties_async(set_properties_list)
             self.async_write_ha_state()
 
