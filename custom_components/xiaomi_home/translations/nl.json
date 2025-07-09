@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Apparaatstatuswijzigingen weergeven",
                     "update_trans_rules": "Werk entiteitsconversieregels bij",
                     "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij",
-                    "network_detect_config": "Geïntegreerde Netwerkconfiguratie"
+                    "network_detect_config": "Geïntegreerde Netwerkconfiguratie",
+                    "cover_closed_position": "De positie van de gesloten gordijnen"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Bevestig Configuratie",
-                "description": "Hallo **{nick_name}**, bevestig alstublieft de nieuwste configuratie-informatie en klik vervolgens op INDENKEN.\r\nDe integratie zal opnieuw laden met de bijgewerkte configuratie.\r\n\r\nIntegratietaal: \t{lang_new}\r\nBijnaam: \t{nick_name_new}\r\nDebugmodus voor actie: \t{action_debug}\r\nVerberg niet-standaard gemaakte entiteiten: \t{hide_non_standard_entities}\r\nApparaatstatuswijzigingen weergeven:\t{display_devices_changed_notify}\r\nWijzigingen in apparaten: \tVoeg **{devices_add}** apparaten toe, Verwijder **{devices_remove}** apparaten\r\nWijzigingen in transformateregels: \tEr zijn in totaal **{trans_rules_count}** regels, en **{trans_rules_count_success}** regels zijn bijgewerkt",
+                "description": "Hallo **{nick_name}**, bevestig alstublieft de nieuwste configuratie-informatie en klik vervolgens op INDENKEN.\r\nDe integratie zal opnieuw laden met de bijgewerkte configuratie.\r\n\r\nIntegratietaal:\t{lang_new}\r\nBijnaam:\t{nick_name_new}\r\nDebugmodus voor actie:\t{action_debug}\r\nVerberg niet-standaard gemaakte entiteiten:\t{hide_non_standard_entities}\r\nDe positie van de gesloten gordijnen:\t{cover_pos_new}\r\nApparaatstatuswijzigingen weergeven:\t{display_devices_changed_notify}\r\nWijzigingen in apparaten:\tVoeg **{devices_add}** apparaten toe, Verwijder **{devices_remove}** apparaten\r\nWijzigingen in transformateregels:\tEr zijn in totaal **{trans_rules_count}** regels, en **{trans_rules_count_success}** regels zijn bijgewerkt",
                 "data": {
                     "confirm": "Bevestig de wijziging"
                 }

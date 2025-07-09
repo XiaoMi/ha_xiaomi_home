@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "デバイスの状態変化通知を表示",
                     "update_trans_rules": "エンティティ変換ルールを更新する",
                     "update_lan_ctrl_config": "LAN制御構成を更新する",
-                    "network_detect_config": "統合ネットワーク構成"
+                    "network_detect_config": "統合ネットワーク構成",
+                    "cover_closed_position": "カーテンを閉じた位置"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "構成を確認する",
-                "description": "**{nick_name}** さん、こんにちは！ 最新の構成情報を確認してください。[送信] をクリックして、更新された構成を使用して再度読み込みます。\r\n\r\n統合言語：\t{lang_new}\r\nユーザー名：\t{nick_name_new}\r\nAction デバッグモード：\t{action_debug}\r\n非標準生成エンティティを非表示にする：\t{hide_non_standard_entities}\r\nデバイスの状態変化通知を表示:\t{display_devices_changed_notify}\r\nデバイス変更：\t追加 **{devices_add}** 個のデバイス、削除 **{devices_remove}** 個のデバイス\r\n変換ルール変更：\t合計 **{trans_rules_count}** 個の規則、更新 **{trans_rules_count_success}** 個の規則",
+                "description": "**{nick_name}** さん、こんにちは！ 最新の構成情報を確認してください。[送信] をクリックして、更新された構成を使用して再度読み込みます。\r\n\r\n統合言語：\t{lang_new}\r\nユーザー名：\t{nick_name_new}\r\nAction デバッグモード：\t{action_debug}\r\n非標準生成エンティティを非表示にする：\t{hide_non_standard_entities}\r\nカーテンを閉じた位置：\t{cover_pos_new}\r\nデバイスの状態変化通知を表示:\t{display_devices_changed_notify}\r\nデバイス変更：\t追加 **{devices_add}** 個のデバイス、削除 **{devices_remove}** 個のデバイス\r\n変換ルール変更：\t合計 **{trans_rules_count}** 個の規則、更新 **{trans_rules_count_success}** 個の規則",
                 "data": {
                     "confirm": "変更を確認する"
                 }
