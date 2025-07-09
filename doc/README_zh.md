@@ -317,13 +317,13 @@ urn:miot-spec-v2:device:television:0000A010:xiaomi-rmi1:
     - '*'   # 排除所有服务，相当于排除拥有该 MIoT-Spec-V2 的设备。
 urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
     services:
-    - '3'   # 排除 siid=3 的服务
+    - '3'   # 排除 siid=3 的服务。
     properties:
-    - '4.*' # 排除 siid=4 服务的所有属性
+    - '4.*' # 排除 siid=4 服务的所有属性。
     events:
-    - '4.1' # 排除 siid=4 服务的 eiid=1 的事件
+    - '4.1' # 排除 siid=4 服务的 eiid=1 的事件。
     actions:
-    - '4.1' # 排除 siid=4 服务的 aiid=1 的方法
+    - '4.1' # 排除 siid=4 服务的 aiid=1 的方法。
 ```
 
 所有设备的设备信息服务（ urn:miot-spec-v2:service:device-information:00007801 ）均不会生成 Home Assistant 实体。
