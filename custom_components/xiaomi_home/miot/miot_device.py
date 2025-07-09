@@ -345,6 +345,11 @@ class MIoTDevice:
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
             f'{self._model_strs[-1][:20]}')
 
+    def gen_service_entity_id_v1(self, ha_domain: str, siid: int) -> str:
+        return (
+            f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
+            f'{self._model_strs[-1][:20]}_s_{siid}')
+
     def gen_service_entity_id(self, ha_domain: str, siid: int,
                               description: str) -> str:
         return (
