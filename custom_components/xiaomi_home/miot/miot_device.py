@@ -1028,8 +1028,8 @@ class MIoTServiceEntity(Entity):
         write_ha_state: bool = True,
     ) -> bool:
         set_properties_list = [{"prop": prop, "value": value}]
-        return self.set_properties_async(set_properties_list, update_value,
-                                         write_ha_state)
+        return await self.set_properties_async(set_properties_list,
+                                               update_value, write_ha_state)
         # if not prop:
         #     raise RuntimeError(
         #         f"set property failed, property is None, {self.entity_id}, {self.name}"
