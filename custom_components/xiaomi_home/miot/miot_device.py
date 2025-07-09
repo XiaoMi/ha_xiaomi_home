@@ -1207,10 +1207,9 @@ class MIoTPropertyEntity(Entity):
         self._attr_available = miot_device.online
 
         _LOGGER.info(
-            'new miot property entity, %s, %s, %s, %s, %s, %s, %s',
+            'new miot property entity, %s, %s, %s, %s, %s',
             self.miot_device.name, self._attr_name, spec.platform,
-            spec.device_class, self.entity_id, self._value_range,
-            self._value_list)
+            spec.device_class, self.entity_id)
 
     @property
     def device_info(self) -> Optional[DeviceInfo]:

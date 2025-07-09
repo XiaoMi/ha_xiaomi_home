@@ -1354,6 +1354,11 @@ class MIoTClient:
         """Update cloud devices.
         NOTICE: This function will operate the cloud_list
         """
+        # MIoT cloud service may not publish the online state updating message
+        # for the BLE device. Assume that all BLE devices are online.
+        for did, info in cloud_list.items():
+            if did.startswith('blt.'):
+                info['online'] = True
         for did, info in self._device_list_cache.items():
             if filter_dids and did not in filter_dids:
                 continue

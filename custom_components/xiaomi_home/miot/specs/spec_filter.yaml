@@ -1,3 +1,6 @@
+urn:miot-spec-v2:device:air-conditioner:0000A004:090615-ktf:
+  services:
+  - '4'
 urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ma4:
   properties:
   - 9.*
@@ -41,9 +44,6 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:xiaomi-pir1:
   services:
   - '1'
   - '5'
-urn:miot-spec-v2:device:router:0000A036:xiaomi-rd03:
-  services:
-  - '*'
 urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:
   services:
   - '2'

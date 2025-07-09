@@ -157,6 +157,8 @@ git checkout v1.0.0
 
 转换后的实体为 Event，事件参数同时传递给实体的 `_trigger_event` 。
 
+MIoT-Spec-V2 事件的 arguments 字段是事件的参数列表，列表元素代表同服务下属性的 piid 。例如，小米智能无线开关（双开）的 [MIoT-Spec-V2](http://poc.miot-spec.srv/miot-spec-v2/instance?type=urn:miot-spec-v2:device:remote-control:0000A021:xiaomi-mcn002:1:0000D057)的 siid=2 无线开关服务下包含 eiid=1014 长按事件，该事件触发时会携带一个 piid=2 的按键类型属性作为事件参数， debug 等级日志会打印 `长按, attributes: {'按键类型': 1}` (日志示例，按键类型为 1 表示右键触发了长按事件)。
+
 - 方法（Action）
 
 | in（输入参数列表） | 转换后的实体 |
@@ -291,39 +293,37 @@ event instance name 下的值表示转换后实体所用的 `_attr_device_class`
 
 ### MIoT-Spec-V2 过滤规则
 
-`spec_filter.json` 用于过滤掉不需要的 MIoT-Spec-V2 实例，过滤掉的实例不会转换成 Home Assistant 实体。
+`spec_filter.yaml` 用于过滤掉不需要的 MIoT-Spec-V2 实例，过滤掉的实例不会转换成 Home Assistant 实体。
 
-`spec_filter.json`的格式如下：
+`spec_filter.yaml`的格式如下：
 
-```
-{
-    "<MIoT-Spec-V2 device instance>":{
-        "services": list<service_iid: str>,
-        "properties": list<service_iid.property_iid: str>,
-        "events": list<service_iid.event_iid: str>,
-        "actions": list<service_iid.action_iid: str>,
-    }
-}
+```yaml
+<MIoT-Spec-V2 device instance urn without the version field>:
+    services: list<service_iid: str>
+    properties: list<service_iid.property_iid: str>
+    events: list<service_iid.event_iid: str>
+    actions: list<service_iid.action_iid: str>
 ```
 
-`spec_filter.json` 的键值为 MIoT-Spec-V2 设备实例的 urn （不含版本号“version”字段）。一个产品的不同版本的固件可能会关联不同版本的 MIoT-Spec-V2 设备实例。 MIoT 平台要求厂商定义产品的 MIoT-Spec-V2 时，高版本的 MIoT-Spec-V2 实例必须包含全部低版本的 MIoT-Spec-V2 实例。因此， `spec_filter.json` 的键值不需要指定设备实例的版本号。
+`spec_filter.yaml` 的键值为 MIoT-Spec-V2 设备实例的 urn （不含版本号“version”字段）。一个产品的不同版本的固件可能会关联不同版本的 MIoT-Spec-V2 设备实例。 MIoT 平台要求厂商定义产品的 MIoT-Spec-V2 时，高版本的 MIoT-Spec-V2 实例必须包含全部低版本的 MIoT-Spec-V2 实例。因此， `spec_filter.yaml` 的键值不需要指定设备实例的版本号。
 
 设备实例下的 services 、 properties 、 events 、 actions 域的值表示需要过滤掉的服务、属性、事件、方法的实例号（ iid ，即 instance id ）。支持通配符匹配。
 
 示例：
 
-```
-{
-    "urn:miot-spec-v2:device:television:0000A010:xiaomi-rmi1":{
-        "services": ["*"]   # Filter out all services. It is equivalent to completely ignoring the device with such MIoT-Spec-V2 device instance.
-    },
-    "urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1": {
-        "services": ["3"],  # Filter out the service whose iid=3.
-        "properties": ["4.*"]   # Filter out all properties in the service whose iid=4.
-        "events": ["4.1"],  # Filter out the iid=1 event in the iid=4 service.
-        "actions": ["4.1"]  # Filter out the iid=1 action in the iid=4 service.
-    }
-}
+```yaml
+urn:miot-spec-v2:device:television:0000A010:xiaomi-rmi1:
+    services:
+    - '*'   # 排除所有服务，相当于排除拥有该 MIoT-Spec-V2 的设备。
+urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
+    services:
+    - '3'   # 排除 siid=3 的服务。
+    properties:
+    - '4.*' # 排除 siid=4 服务的所有属性。
+    events:
+    - '4.1' # 排除 siid=4 服务的 eiid=1 的事件。
+    actions:
+    - '4.1' # 排除 siid=4 服务的 aiid=1 的方法。
 ```
 
 所有设备的设备信息服务（ urn:miot-spec-v2:service:device-information:00007801 ）均不会生成 Home Assistant 实体。
@@ -378,7 +378,7 @@ siid、piid、eiid、aiid、value 均为十进制三位整数。
 }
 ```
 
-> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/miot/specs` 路径下的任何文件（`spec_filter.py`、`spec_modify.json`、`multi_lang.json`等），需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
+> 在 Home Assistant 中修改了 `custom_components/xiaomi_home/miot/specs` 路径下的任何文件（`spec_filter.yaml`、`spec_modify.yaml`、`multi_lang.json`等），需要在集成配置中更新实体转换规则才能生效。方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新实体转换规则
 
 ## 文档
 

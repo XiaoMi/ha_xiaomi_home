@@ -76,6 +76,7 @@ SUPPORTED_PLATFORMS: list = [
     'fan',
     'humidifier',
     'light',
+    'media_player',
     'notify',
     'number',
     'select',
@@ -84,6 +85,11 @@ SUPPORTED_PLATFORMS: list = [
     'text',
     'vacuum',
     'water_heater',
+]
+
+UNSUPPORTED_MODELS: list = [
+    'chuangmi.ir.v2',
+    'xiaomi.router.rd03'
 ]
 
 DEFAULT_CLOUD_SERVER: str = 'cn'
