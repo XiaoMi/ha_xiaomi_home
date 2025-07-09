@@ -1027,32 +1027,35 @@ class MIoTServiceEntity(Entity):
         update_value: bool = True,
         write_ha_state: bool = True,
     ) -> bool:
-        if not prop:
-            raise RuntimeError(
-                f"set property failed, property is None, {self.entity_id}, {self.name}"
-            )
-        value = prop.value_format(value)
-        if prop not in self.entity_data.props:
-            raise RuntimeError(f"set property failed, unknown property, "
-                               f"{self.entity_id}, {self.name}, {prop.name}")
-        if not prop.writable:
-            raise RuntimeError(f"set property failed, not writable, "
-                               f"{self.entity_id}, {self.name}, {prop.name}")
-        try:
-            await self.miot_device.miot_client.set_prop_async(
-                did=self.miot_device.did,
-                siid=prop.service.iid,
-                piid=prop.iid,
-                value=value,
-            )
-        except MIoTClientError as e:
-            raise RuntimeError(
-                f"{e}, {self.entity_id}, {self.name}, {prop.name}") from e
-        if update_value:
-            self._prop_value_map[prop] = value
-        if write_ha_state:
-            self.async_write_ha_state()
-        return True
+        set_properties_list = [{"prop": prop, "value": value}]
+        return self.set_properties_async(set_properties_list, update_value,
+                                         write_ha_state)
+        # if not prop:
+        #     raise RuntimeError(
+        #         f"set property failed, property is None, {self.entity_id}, {self.name}"
+        #     )
+        # value = prop.value_format(value)
+        # if prop not in self.entity_data.props:
+        #     raise RuntimeError(f"set property failed, unknown property, "
+        #                        f"{self.entity_id}, {self.name}, {prop.name}")
+        # if not prop.writable:
+        #     raise RuntimeError(f"set property failed, not writable, "
+        #                        f"{self.entity_id}, {self.name}, {prop.name}")
+        # try:
+        #     await self.miot_device.miot_client.set_prop_async(
+        #         did=self.miot_device.did,
+        #         siid=prop.service.iid,
+        #         piid=prop.iid,
+        #         value=value,
+        #     )
+        # except MIoTClientError as e:
+        #     raise RuntimeError(
+        #         f"{e}, {self.entity_id}, {self.name}, {prop.name}") from e
+        # if update_value:
+        #     self._prop_value_map[prop] = value
+        # if write_ha_state:
+        #     self.async_write_ha_state()
+        # return True
 
     async def set_properties_async(
         self,
@@ -1301,12 +1304,19 @@ class MIoTPropertyEntity(Entity):
             )
         value = self.spec.value_format(value)
         try:
-            await self.miot_device.miot_client.set_prop_async(
-                did=self.miot_device.did,
-                siid=self.spec.service.iid,
-                piid=self.spec.iid,
-                value=value,
-            )
+            await self.miot_device.miot_client.set_props_async([{
+                "did": self.miot_device.did,
+                "siid": self.spec.service.iid,
+                "piid": self.spec.iid,
+                "value": value,
+            }])
+            # await self.miot_device.miot_client.set_prop_async(
+            #     did=self.miot_device.did,
+            #     siid=self.spec.service.iid,
+            #     piid=self.spec.iid,
+            #     value=value,
+            # )
+
         except MIoTClientError as e:
             raise RuntimeError(f"{e}, {self.entity_id}, {self.name}") from e
         self._value = value

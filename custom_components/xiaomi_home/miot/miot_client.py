@@ -636,79 +636,79 @@ class MIoTClient:
                           traceback.format_exc())
         return False
 
-    async def set_prop_async(self, did: str, siid: int, piid: int,
-                             value: Any) -> bool:
-        if did not in self._device_list_cache:
-            raise MIoTClientError(f"did not exist, {did}")
-        # Priority local control
-        if self._ctrl_mode == CtrlMode.AUTO:
-            # Gateway control
-            device_gw = self._device_list_gateway.get(did, None)
-            if (device_gw and device_gw.get("online", False) and
-                    device_gw.get("specv2_access", False) and
-                    "group_id" in device_gw):
-                mips = self._mips_local.get(device_gw["group_id"], None)
-                if mips is None:
-                    _LOGGER.error(
-                        'no gateway route, %s, try control through cloud',
-                        device_gw)
-                else:
-                    result = await mips.set_prop_async(did=did,
-                                                       siid=siid,
-                                                       piid=piid,
-                                                       value=value)
-                    _LOGGER.debug('gateway set prop, %s.%d.%d, %s -> %s', did,
-                                  siid, piid, value, result)
-                    rc = (result or
-                          {}).get('code',
-                                  MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
-                    if rc in [0, 1]:
-                        return True
-                    raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
-            # Lan control
-            device_lan = self._device_list_lan.get(did, None)
-            if device_lan and device_lan.get("online", False):
-                result = await self._miot_lan.set_prop_async(did=did,
-                                                             siid=siid,
-                                                             piid=piid,
-                                                             value=value)
-                _LOGGER.debug("lan set prop, %s.%d.%d, %s -> %s", did, siid,
-                              piid, value, result)
-                rc = (result or
-                      {}).get("code",
-                              MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
-                if rc in [0, 1]:
-                    return True
-                raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
+    # async def set_prop_async(self, did: str, siid: int, piid: int,
+    #                          value: Any) -> bool:
+    #     if did not in self._device_list_cache:
+    #         raise MIoTClientError(f"did not exist, {did}")
+    #     # Priority local control
+    #     if self._ctrl_mode == CtrlMode.AUTO:
+    #         # Gateway control
+    #         device_gw = self._device_list_gateway.get(did, None)
+    #         if (device_gw and device_gw.get("online", False) and
+    #                 device_gw.get("specv2_access", False) and
+    #                 "group_id" in device_gw):
+    #             mips = self._mips_local.get(device_gw["group_id"], None)
+    #             if mips is None:
+    #                 _LOGGER.error(
+    #                     'no gateway route, %s, try control through cloud',
+    #                     device_gw)
+    #             else:
+    #                 result = await mips.set_prop_async(did=did,
+    #                                                    siid=siid,
+    #                                                    piid=piid,
+    #                                                    value=value)
+    #                 _LOGGER.debug('gateway set prop, %s.%d.%d, %s -> %s', did,
+    #                               siid, piid, value, result)
+    #                 rc = (result or
+    #                       {}).get('code',
+    #                               MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
+    #                 if rc in [0, 1]:
+    #                     return True
+    #                 raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
+    #         # Lan control
+    #         device_lan = self._device_list_lan.get(did, None)
+    #         if device_lan and device_lan.get("online", False):
+    #             result = await self._miot_lan.set_prop_async(did=did,
+    #                                                          siid=siid,
+    #                                                          piid=piid,
+    #                                                          value=value)
+    #             _LOGGER.debug("lan set prop, %s.%d.%d, %s -> %s", did, siid,
+    #                           piid, value, result)
+    #             rc = (result or
+    #                   {}).get("code",
+    #                           MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
+    #             if rc in [0, 1]:
+    #                 return True
+    #             raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
 
-        # Cloud control
-        device_cloud = self._device_list_cloud.get(did, None)
-        if device_cloud and device_cloud.get("online", False):
-            result = await self._http.set_prop_async(params=[{
-                "did": did,
-                "siid": siid,
-                "piid": piid,
-                "value": value
-            }])
-            _LOGGER.debug('cloud set prop, %s.%d.%d, %s -> %s', did, siid, piid,
-                          value, result)
-            if result and len(result) == 1:
-                rc = result[0].get("code",
-                                   MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
-                if rc in [0, 1]:
-                    return True
-                if rc in [-704010000, -704042011]:
-                    # Device remove or offline
-                    _LOGGER.error("device may be removed or offline, %s", did)
-                    self._main_loop.create_task(
-                        await
-                        self.__refresh_cloud_device_with_dids_async(dids=[did]))
-                raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
+    #     # Cloud control
+    #     device_cloud = self._device_list_cloud.get(did, None)
+    #     if device_cloud and device_cloud.get("online", False):
+    #         result = await self._http.set_prop_async(params=[{
+    #             "did": did,
+    #             "siid": siid,
+    #             "piid": piid,
+    #             "value": value
+    #         }])
+    #         _LOGGER.debug('cloud set prop, %s.%d.%d, %s -> %s', did, siid, piid,
+    #                       value, result)
+    #         if result and len(result) == 1:
+    #             rc = result[0].get("code",
+    #                                MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
+    #             if rc in [0, 1]:
+    #                 return True
+    #             if rc in [-704010000, -704042011]:
+    #                 # Device remove or offline
+    #                 _LOGGER.error("device may be removed or offline, %s", did)
+    #                 self._main_loop.create_task(
+    #                     await
+    #                     self.__refresh_cloud_device_with_dids_async(dids=[did]))
+    #             raise MIoTClientError(self.__get_exec_error_with_rc(rc=rc))
 
-        # Show error message
-        raise MIoTClientError(
-            f"{self._i18n.translate('miot.client.device_exec_error')}, "
-            f"{self._i18n.translate('error.common.-10007')}")
+    #     # Show error message
+    #     raise MIoTClientError(
+    #         f"{self._i18n.translate('miot.client.device_exec_error')}, "
+    #         f"{self._i18n.translate('error.common.-10007')}")
 
     async def set_props_async(
         self,
