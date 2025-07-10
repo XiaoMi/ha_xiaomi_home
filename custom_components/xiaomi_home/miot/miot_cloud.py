@@ -543,6 +543,7 @@ class MIoTHttpClient:
         req_data: dict = {
             'limit': 200,
             'get_split_device': True,
+            'get_third_device': True,
             'dids': dids
         }
         if start_did:
