@@ -110,7 +110,6 @@ class MipsServiceData:
             version=IPVersion.V4Only)
         if not self.addresses:
             raise MipsServiceError('invalid addresses')
-        self.addresses.sort()
         if not service_info.port:
             raise MipsServiceError('invalid port')
         self.port = service_info.port
@@ -226,7 +225,7 @@ class MipsService:
             state_change: ServiceStateChange
     ) -> None:
         _LOGGER.debug(
-            'mips service state changed, %s, %s, %s',
+            'mdns discovery changed, %s, %s, %s',
             state_change, name, service_type)
 
         if state_change is ServiceStateChange.Removed:
