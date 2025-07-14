@@ -91,6 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
 class Cover(MIoTServiceEntity, CoverEntity):
     """Cover entities for Xiaomi Home."""
     # pylint: disable=unused-argument
+    _cover_closed_position: int
     _prop_motor_control: Optional[MIoTSpecProperty]
     _prop_motor_value_open: Optional[int]
     _prop_motor_value_close: Optional[int]
@@ -114,6 +115,9 @@ class Cover(MIoTServiceEntity, CoverEntity):
         self._attr_device_class = entity_data.spec.device_class
         self._attr_supported_color_modes = set()
         self._attr_supported_features = CoverEntityFeature(0)
+
+        self._cover_closed_position = (
+            miot_device.miot_client.cover_closed_position)
 
         self._prop_motor_control = None
         self._prop_motor_value_open = None
@@ -297,7 +301,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
     def is_closed(self) -> Optional[bool]:
         """Return if the cover is closed."""
         if self.current_cover_position is not None:
-            return self.current_cover_position == 0
+            return self.current_cover_position <= self._cover_closed_position
         # The current position is prior to the status when determining
         # whether the cover is closed.
         if self._prop_status and self._prop_status_closed:

@@ -293,7 +293,7 @@ The value of the event instance name indicates `_attr_device_class` of the Home 
 
 `spec_filter.yaml` is used to filter out the MIoT-Spec-V2 instance that will not be converted to Home Assistant entity.
 
-The format of `spec_filter.json` is as follows.
+The format of `spec_filter.yaml` is as follows.
 
 ```yaml
 <MIoT-Spec-V2 device instance urn without the version field>:

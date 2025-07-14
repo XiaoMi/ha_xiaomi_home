@@ -4,7 +4,7 @@
         "step": {
             "eula": {
                 "title": "Aviso de riesgo",
-                "description": "1. Su **información de usuario de Xiaomi e información del dispositivo** se almacenará en su sistema Home Assistant. **Xiaomi no puede garantizar la seguridad del mecanismo de almacenamiento de Home Assistant**. Usted es responsable de evitar que su información sea robada.\r\n2. Esta integración es mantenida por la comunidad de código abierto y puede haber problemas de estabilidad u otros problemas. Cuando tenga problemas relacionados con el uso de esta integración, **busque ayuda en la comunidad de código abierto en lugar de contactar al servicio al cliente de Xiaomi**.\r\n3. Es necesario tener ciertas habilidades técnicas para mantener su entorno de ejecución local, esta integración no es amigable para los usuarios novatos.\r\n4. Antes de utilizar esta integración, por favor **lea detenidamente el archivo README**. \r\n5. Para garantizar el uso estable de la integración y prevenir el abuso de la interfaz, **esta integración solo está permitida en Home Assistant. Para más detalles, consulte la LICENSE**.",
+                "description": "1. Su **información de usuario de Xiaomi e información del dispositivo** se almacenará en su sistema Home Assistant. **Xiaomi no puede garantizar la seguridad del mecanismo de almacenamiento de Home Assistant**. Usted es responsable de evitar que su información sea robada.\r\n2. Esta integración es mantenida por la comunidad de código abierto y puede haber problemas de estabilidad u otros problemas. Cuando tenga problemas relacionados con el uso de esta integración, **busque ayuda en la comunidad de código abierto en lugar de contactar al servicio al cliente de Xiaomi**.\r\n3. Es necesario tener ciertas habilidades técnicas para mantener su entorno de ejecución local, esta integración no es amigable para los usuarios novatos.\r\n4. Antes de utilizar esta integración, por favor **lea detenidamente el archivo README**.\r\n5. Para garantizar el uso estable de la integración y prevenir el abuso de la interfaz, **esta integración solo está permitida en Home Assistant. Para más detalles, consulte la LICENSE**.",
                 "data": {
                     "eula": "He leído y entiendo los riesgos anteriores, y estoy dispuesto a asumir cualquier riesgo relacionado con el uso de esta integración."
                 }
@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Mostrar notificaciones de cambio de estado del dispositivo",
                     "update_trans_rules": "Actualizar reglas de conversión de entidad",
                     "update_lan_ctrl_config": "Actualizar configuración de control LAN",
-                    "network_detect_config": "Configuración de Red Integrada"
+                    "network_detect_config": "Configuración de Red Integrada",
+                    "cover_closed_position": "La posición de las cortinas cerradas"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Confirmar configuración",
-                "description": "¡Hola, **{nick_name}**! Por favor, confirme la última información de configuración y haga clic en \"Enviar\" para finalizar la configuración.\r\nLa integración se volverá a cargar con la nueva configuración.\r\n\r\nIdioma de la integración:\t{lang_new}\r\nApodo de usuario:\t{nick_name_new}\r\nModo de depuración de Action:\t{action_debug}\r\nOcultar entidades generadas no estándar:\t{hide_non_standard_entities}\r\nMostrar notificaciones de cambio de estado del dispositivo:\t{display_devices_changed_notify}\r\nCambios de dispositivos:\t{devices_add} dispositivos agregados, {devices_remove} dispositivos eliminados\r\nCambios en las reglas de conversión:\t{trans_rules_count} reglas en total, {trans_rules_count_success} reglas actualizadas",
+                "description": "¡Hola, **{nick_name}**! Por favor, confirme la última información de configuración y haga clic en \"Enviar\" para finalizar la configuración.\r\nLa integración se volverá a cargar con la nueva configuración.\r\n\r\nIdioma de la integración:\t{lang_new}\r\nApodo de usuario:\t{nick_name_new}\r\nModo de depuración de Action:\t{action_debug}\r\nOcultar entidades generadas no estándar:\t{hide_non_standard_entities}\r\nLa posición de las cortinas cerradas:\t{cover_pos_new}\r\nMostrar notificaciones de cambio de estado del dispositivo:\t{display_devices_changed_notify}\r\nCambios de dispositivos:\t{devices_add} dispositivos agregados, {devices_remove} dispositivos eliminados\r\nCambios en las reglas de conversión:\t{trans_rules_count} reglas en total, {trans_rules_count_success} reglas actualizadas",
                 "data": {
                     "confirm": "Confirmar modificación"
                 }

@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Display device status change notifications",
                     "update_trans_rules": "Update entity conversion rules",
                     "update_lan_ctrl_config": "Update LAN control configuration",
-                    "network_detect_config": "Integrated Network Configuration"
+                    "network_detect_config": "Integrated network configuration",
+                    "cover_closed_position": "Cover closed position"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Confirm Configuration",
-                "description": "Hello **{nick_name}**, please confirm the latest configuration information and then Click SUBMIT.\r\nThe integration will reload using the updated configuration.\r\n\r\nIntegration Language: \t{lang_new}\r\nNickname: \t{nick_name_new}\r\nDebug mode for action: \t{action_debug}\r\nHide non-standard created entities: \t{hide_non_standard_entities}\r\nDisplay device status change notifications:\t{display_devices_changed_notify}\r\nDevice Changes: \tAdd **{devices_add}** devices, Remove **{devices_remove}** devices\r\nTransformation rules change: \tThere are a total of **{trans_rules_count}** rules, and updated **{trans_rules_count_success}** rules",
+                "description": "Hello **{nick_name}**, please confirm the latest configuration information and then Click SUBMIT.\r\nThe integration will reload using the updated configuration.\r\n\r\nIntegration Language:\t{lang_new}\r\nNickname:\t{nick_name_new}\r\nDebug mode for action:\t{action_debug}\r\nHide non-standard created entities:\t{hide_non_standard_entities}\r\nCover closed position:\t{cover_pos_new}\r\nDisplay device status change notifications:\t{display_devices_changed_notify}\r\nDevice Changes:\tAdd **{devices_add}** devices, Remove **{devices_remove}** devices\r\nTransformation rules change:\tThere are a total of **{trans_rules_count}** rules, and updated **{trans_rules_count_success}** rules",
                 "data": {
                     "confirm": "Confirm the change"
                 }

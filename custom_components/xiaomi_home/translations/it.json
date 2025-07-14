@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Mostra notifiche di cambio stato del dispositivo",
                     "update_trans_rules": "Aggiorna le regole di conversione delle entità",
                     "update_lan_ctrl_config": "Aggiorna configurazione del controllo LAN",
-                    "network_detect_config": "Configurazione di Rete Integrata"
+                    "network_detect_config": "Configurazione di Rete Integrata",
+                    "cover_closed_position": "La posizione delle tende chiuse"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Conferma Configurazione",
-                "description": "Ciao **{nick_name}**, si prega di confermare le informazioni di configurazione più recenti e poi fare clic su INVIA.\r\nL'integrazione verrà ricaricata utilizzando la configurazione aggiornata.\r\n\r\nLingua dell'Integrazione: \t{lang_new}\r\nSoprannome: \t{nick_name_new}\r\nModalità di debug per azione: \t{action_debug}\r\nNascondi entità create non standard: \t{hide_non_standard_entities}\r\nMostra notifiche di cambio stato del dispositivo:\t{display_devices_changed_notify}\r\nCambiamenti del Dispositivo: \tAggiungi **{devices_add}** dispositivi, Rimuovi **{devices_remove}** dispositivi\r\nCambiamenti delle regole di trasformazione: \tCi sono un totale di **{trans_rules_count}** regole, e aggiornate **{trans_rules_count_success}** regole",
+                "description": "Ciao **{nick_name}**, si prega di confermare le informazioni di configurazione più recenti e poi fare clic su INVIA.\r\nL'integrazione verrà ricaricata utilizzando la configurazione aggiornata.\r\n\r\nLingua dell'Integrazione:\t{lang_new}\r\nSoprannome:\t{nick_name_new}\r\nModalità di debug per azione:\t{action_debug}\r\nNascondi entità create non standard:\t{hide_non_standard_entities}\r\nLa posizione delle tende chiuse:\t{cover_pos_new}\r\nMostra notifiche di cambio stato del dispositivo:\t{display_devices_changed_notify}\r\nCambiamenti del Dispositivo:\tAggiungi **{devices_add}** dispositivi, Rimuovi **{devices_remove}** dispositivi\r\nCambiamenti delle regole di trasformazione:\tCi sono un totale di **{trans_rules_count}** regole, e aggiornate **{trans_rules_count_success}** regole",
                 "data": {
                     "confirm": "Conferma la modifica"
                 }

@@ -120,6 +120,10 @@ INTEGRATION_LANGUAGES = {
     'zh-Hant': '繁體中文'
 }
 
+DEFAULT_COVER_CLOSED_POSITION: int = 0
+MIN_COVER_CLOSED_POSITION: int = 0
+MAX_COVER_CLOSED_POSITION: int = 5
+
 DEFAULT_CTRL_MODE: str = 'auto'
 
 # Registered in Xiaomi OAuth 2.0 Service

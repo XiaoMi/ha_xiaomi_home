@@ -4,7 +4,7 @@
         "step": {
             "eula": {
                 "title": "Risikohinweis",
-                "description": "1. Ihre **Xiaomi-Benutzerinformationen und Geräteinformationen** werden in Ihrem Home Assistant-System gespeichert. **Xiaomi kann die Sicherheit des Home Assistant-Speichermechanismus nicht garantieren**. Sie sind dafür verantwortlich, Ihre Informationen vor Diebstahl zu schützen.\r\n2. Diese Integration wird von der Open-Source-Community unterstützt und gewartet. Es können jedoch Stabilitätsprobleme oder andere Probleme auftreten. Wenn Sie auf ein Problem stoßen, das mit dieser Integration zusammenhängt, sollten Sie **die Open-Source-Community um Hilfe bitten, anstatt sich an den Xiaomi Home Kundendienst zu wenden**.\r\n3. Sie benötigen bestimmte technische Fähigkeiten, um Ihre lokale Laufzeitumgebung zu warten. Diese Integration ist für Anfänger nicht geeignet. \r\n4. Bevor Sie diese Integration verwenden, lesen Sie bitte die **README-Datei sorgfältig durch**.\r\n5. Um eine stabile Nutzung der Integration zu gewährleisten und Missbrauch der Schnittstelle zu verhindern, **darf diese Integration nur in Home Assistant verwendet werden. Weitere Informationen finden Sie in der LICENSE**.",
+                "description": "1. Ihre **Xiaomi-Benutzerinformationen und Geräteinformationen** werden in Ihrem Home Assistant-System gespeichert. **Xiaomi kann die Sicherheit des Home Assistant-Speichermechanismus nicht garantieren**. Sie sind dafür verantwortlich, Ihre Informationen vor Diebstahl zu schützen.\r\n2. Diese Integration wird von der Open-Source-Community unterstützt und gewartet. Es können jedoch Stabilitätsprobleme oder andere Probleme auftreten. Wenn Sie auf ein Problem stoßen, das mit dieser Integration zusammenhängt, sollten Sie **die Open-Source-Community um Hilfe bitten, anstatt sich an den Xiaomi Home Kundendienst zu wenden**.\r\n3. Sie benötigen bestimmte technische Fähigkeiten, um Ihre lokale Laufzeitumgebung zu warten. Diese Integration ist für Anfänger nicht geeignet.\r\n4. Bevor Sie diese Integration verwenden, lesen Sie bitte die **README-Datei sorgfältig durch**.\r\n5. Um eine stabile Nutzung der Integration zu gewährleisten und Missbrauch der Schnittstelle zu verhindern, **darf diese Integration nur in Home Assistant verwendet werden. Weitere Informationen finden Sie in der LICENSE**.",
                 "data": {
                     "eula": "Ich habe das oben genannte Risiko zur Kenntnis genommen und übernehme freiwillig die damit verbundenen Risiken durch die Verwendung der Integration."
                 }
@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Gerätestatusänderungen anzeigen",
                     "update_trans_rules": "Entitätskonvertierungsregeln aktualisieren",
                     "update_lan_ctrl_config": "LAN-Steuerungskonfiguration aktualisieren",
-                    "network_detect_config": "Integrierte Netzwerkkonfiguration"
+                    "network_detect_config": "Integrierte Netzwerkkonfiguration",
+                    "cover_closed_position": "Die Position der geschlossenen Vorhänge"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Bestätigen Sie die Konfiguration",
-                "description": "**{nick_name}**, bitte bestätigen Sie die neuesten Konfigurationsinformationen und klicken Sie dann auf \"Senden\". Die Integration wird mit den aktualisierten Konfigurationen erneut geladen.\r\n\r\nIntegrationsprache:\t{lang_new}\r\nBenutzername:\t{nick_name_new}\r\nAction-Debug-Modus:\t{action_debug}\r\nVerstecke Nicht-Standard-Entitäten:\t{hide_non_standard_entities}\r\nGerätestatusänderungen anzeigen:\t{display_devices_changed_notify}\r\nGeräteänderungen:\t{devices_add} neue Geräte hinzufügen, {devices_remove} Geräte entfernen\r\nKonvertierungsregeländerungen:\tInsgesamt {trans_rules_count} Regeln, aktualisiert {trans_rules_count_success} Regeln",
+                "description": "**{nick_name}**, bitte bestätigen Sie die neuesten Konfigurationsinformationen und klicken Sie dann auf \"Senden\". Die Integration wird mit den aktualisierten Konfigurationen erneut geladen.\r\n\r\nIntegrationsprache:\t{lang_new}\r\nBenutzername:\t{nick_name_new}\r\nAction-Debug-Modus:\t{action_debug}\r\nVerstecke Nicht-Standard-Entitäten:\t{hide_non_standard_entities}\r\nDie Position der geschlossenen Vorhänge:\t{cover_pos_new}\r\nGerätestatusänderungen anzeigen:\t{display_devices_changed_notify}\r\nGeräteänderungen:\t{devices_add} neue Geräte hinzufügen, {devices_remove} Geräte entfernen\r\nKonvertierungsregeländerungen:\tInsgesamt {trans_rules_count} Regeln, aktualisiert {trans_rules_count_success} Regeln",
                 "data": {
                     "confirm": "Änderungen bestätigen"
                 }
