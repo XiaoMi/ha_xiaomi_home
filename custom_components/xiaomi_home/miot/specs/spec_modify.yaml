@@ -6,6 +6,8 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1:
+  prop.8.6:
+    unit: kWh
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1
