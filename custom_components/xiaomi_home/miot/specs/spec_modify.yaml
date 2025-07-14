@@ -170,6 +170,9 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
     - read
     - notify
     unit: mV
+urn:miot-spec-v2:device:motor-controller:0000A01D:adp-adswb4:1:0000C837:
+  prop.2.1:
+    name: motor-switch
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:1: urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2:
   prop.2.8:
