@@ -996,7 +996,7 @@ class MIoTClient:
             and self._device_list_cloud[did].get('online', False)
         ):
             from_new = 'cloud'
-        if from_new == from_old:
+        if (from_new == from_old) and (from_new=='cloud' or from_new=='lan'):
             # No need to update
             return
         # Unsub old
@@ -1492,8 +1492,6 @@ class MIoTClient:
             if did not in filter_dids:
                 continue
             device_old = self._device_list_gateway.get(did, None)
-            gw_state_old = device_old.get(
-                'online', False) if device_old else False
             gw_state_new: bool = False
             device_new = gw_list.pop(did, None)
             if device_new:
@@ -1507,7 +1505,7 @@ class MIoTClient:
                     device_old['online'] = False
             # Update cache group_id
             info['group_id'] = group_id
-            if gw_state_old == gw_state_new:
+            if not gw_state_new:
                 continue
             self.__update_device_msg_sub(did=did)
             state_old: Optional[bool] = info.get('online', None)
