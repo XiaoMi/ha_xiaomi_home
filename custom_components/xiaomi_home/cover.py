@@ -170,12 +170,13 @@ class Cover(MIoTServiceEntity, CoverEntity):
                         self._prop_status_opening.append(item.value)
                     elif item_name in {
                             'closing', 'close', 'down', 'dowm', 'falling',
-                            'dropping', 'downing', 'lower'
+                            'fallin', 'dropping', 'downing', 'lower'
                     }:
                         self._prop_status_closing.append(item.value)
                     elif item_name in {
-                            'stopatlowest', 'stoplowerlimit', 'lowerlimitstop',
-                            'floor', 'lowerlimit'
+                            'closed', 'closeover', 'stopatlowest',
+                            'stoplowerlimit', 'lowerlimitstop', 'floor',
+                            'lowerlimit'
                     }:
                         self._prop_status_closed.append(item.value)
                 self._prop_status = prop
