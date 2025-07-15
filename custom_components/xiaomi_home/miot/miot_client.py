@@ -1150,6 +1150,7 @@ class MIoTClient:
                 if sub and sub.handler:
                     sub.handler(did, MIoTDeviceState.OFFLINE, sub.handler_ctx)
             self.__request_show_devices_changed_notify()
+        self.__show_central_state_changed_notify(state)
 
     @final
     async def __on_miot_lan_state_change(self, state: bool) -> None:
@@ -1917,6 +1918,23 @@ class MIoTClient:
         self._show_devices_changed_notify_timer = self._main_loop.call_later(
             delay_sec, self.__show_devices_changed_notify)
 
+    @final
+    def __show_central_state_changed_notify(self, connected: bool) -> None:
+        conn_status: str = (
+            self._i18n.translate('miot.client.central_state_connected')
+            if connected else
+            self._i18n.translate('miot.client.central_state_disconnected'))
+        self._persistence_notify(
+            self.__gen_notify_key('central_state_changed'),
+            self._i18n.translate('miot.client.central_state_changed_title'),
+            self._i18n.translate(key='miot.client.central_state_changed',
+                replace={
+                    'nick_name': self._entry_data.get(
+                                'nick_name', DEFAULT_NICK_NAME),
+                    'uid': self._uid,
+                    'cloud_server': self._cloud_server,
+                    'conn_status': conn_status
+                }))
 
 @staticmethod
 async def get_miot_instance_async(

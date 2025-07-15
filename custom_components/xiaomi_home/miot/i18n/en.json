@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} devices offline:** \n{message}",
             "network_status_online": "Online",
             "network_status_offline": "Offline",
+            "central_state_changed_title": "Central Hub Gateway Connection Status",
+            "central_state_changed":"**{nick_name}({uid}, {cloud_server})** local connection to Xiaomi central hub gateway: {conn_status}",
+            "central_state_connected": "Connected",
+            "central_state_disconnected": "Disconnected",
             "device_exec_error": "Execution error"
         }
     },
