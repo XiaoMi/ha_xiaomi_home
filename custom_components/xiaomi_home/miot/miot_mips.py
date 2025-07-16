@@ -994,6 +994,11 @@ class MipsCloudClient(_MipsClient):
                 handler(
                     did, MIoTDeviceState.ONLINE if msg['event'] == 'online'
                     else MIoTDeviceState.OFFLINE, ctx)
+
+        if did.startswith('blt.'):
+        # MIoT cloud may not publish BLE device online/offline state message.
+        # Do not subscribe BLE device online/offline state.
+            return True
         return self.__reg_broadcast_external(
             topic=topic, handler=on_state_msg, handler_ctx=handler_ctx)
 
