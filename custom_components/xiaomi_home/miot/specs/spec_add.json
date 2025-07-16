@@ -203,6 +203,26 @@
       ]
     }
   ],
+  "urn:miot-spec-v2:device:water-heater:0000A02A:viomi-m1:2": [
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:switch:0000780C:viomi-m1:1",
+      "description": "Water Heater",
+      "properties": [
+        {
+          "iid": 6,
+          "type": "urn:miot-spec-v2:property:on:00000006:viomi-m1:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        }
+      ]
+    }
+  ],
   "urn:miot-spec-v2:device:water-heater:0000A02A:xiaomi-yms2:1": [
     {
       "iid": 2,
