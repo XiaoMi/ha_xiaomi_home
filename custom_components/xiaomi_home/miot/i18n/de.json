@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} Geräte offline:** \n{message}",
             "network_status_online": "Online",
             "network_status_offline": "Offline",
+            "central_state_changed_title": "Verbindungsstatus des Zentral-Gateways",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** Lokale Verbindungsstrecke des Zentral-Gateways: {conn_status}",
+            "central_state_connected": "verbunden",
+            "central_state_disconnected": "getrennt",
             "device_exec_error": "Fehler bei der Ausführung"
         }
     },

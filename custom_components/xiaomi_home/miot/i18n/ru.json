@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} устройств недоступно:** \n{message}",
             "network_status_online": "В сети",
             "network_status_offline": "Не в сети",
+            "central_state_changed_title": "Статус подключения центрального шлюза",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** локальное подключение центрального шлюза: {conn_status}",
+            "central_state_connected": "подключено",
+            "central_state_disconnected": "разъединено",
             "device_exec_error": "Ошибка выполнения"
         }
     },

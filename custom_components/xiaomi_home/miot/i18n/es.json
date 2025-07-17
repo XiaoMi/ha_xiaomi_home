@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} dispositivos sin conexión:** \n{message}",
             "network_status_online": "En línea",
             "network_status_offline": "Desconectado",
+            "central_state_changed_title": "Estado de conexión de la puerta de enlace central",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** enlace de conexión local de la puerta de enlace central: {conn_status}",
+            "central_state_connected": "conectado",
+            "central_state_disconnected": "desconectado",
             "device_exec_error": "Error de ejecución"
         }
     },
