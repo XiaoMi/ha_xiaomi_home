@@ -1115,8 +1115,10 @@ class MIoTClient:
         _LOGGER.info('local mips state changed, %s, %s', group_id, state)
         mips = self._mips_local.get(group_id, None)
         if not mips:
-            _LOGGER.error(
+            _LOGGER.info(
                 'local mips state changed, mips not exist, %s', group_id)
+            # The connection to the central hub gateway is definitely broken.
+            self.__show_central_state_changed_notify(False)
             return
         if state:
             # Connected
