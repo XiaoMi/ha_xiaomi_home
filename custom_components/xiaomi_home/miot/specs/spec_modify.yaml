@@ -33,7 +33,7 @@ urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
     value-range:
     - -30
     - 100
-    - 0.01
+    - 0.1
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
@@ -161,6 +161,9 @@ urn:miot-spec-v2:device:light:0000A001:shhf-sfla10:1:
 urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
   prop.8.11:
     name: on-a
+urn:miot-spec-v2:device:light:0000A001:shhf-sflt11:1:0000C802:
+  prop.11.14:
+    name: on-power
 urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:
   prop.2.1004:
     name: contact-state
