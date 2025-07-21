@@ -1,4 +1,20 @@
 # CHANGELOG
+## v0.4.0
+### Added
+- Add the watch as the device tracker entity. [#1189](https://github.com/XiaoMi/ha_xiaomi_home/pull/1189)
+- Add the wifi speaker and the television as the media player entity. [#706](https://github.com/XiaoMi/ha_xiaomi_home/pull/706)
+- Add an option in CONFIGURE to set the cover closed position. [#1242](https://github.com/XiaoMi/ha_xiaomi_home/pull/1242)
+- Add notifications to show the status of the local connection to the central hub gateway. [#1280](https://github.com/XiaoMi/ha_xiaomi_home/pull/1280)
+- Import the device from the third party cloud. [#1258](https://github.com/XiaoMi/ha_xiaomi_home/pull/1258)
+### Changed
+- Add an alongside switch entity for viomi.waterheater.m1. [#1255](https://github.com/XiaoMi/ha_xiaomi_home/pull/1255)
+- Do not subscribe BLE device online/offline state message. [#1264](https://github.com/XiaoMi/ha_xiaomi_home/pull/1264)
+### Fixed
+- Keep the first element of the discovered ip address list as the recently added address when getting mdns result. [#1250](https://github.com/XiaoMi/ha_xiaomi_home/pull/1250)
+- Subscribe local topics every time when connected to the central hub gateway. [#1266](https://github.com/XiaoMi/ha_xiaomi_home/pull/1266)
+- Record the "closing" and "closed" status that occur frequently in the motor-controller, the window-opener and the curtain service. [#1262](https://github.com/XiaoMi/ha_xiaomi_home/pull/1262)
+- Fix xiaomi.aircondition.c24 total power consumption unit, adp.motor.adswb4 motor switch, cgllc.airm.cgd1st environment temperature, and shhf.light.sflt11 fan switch status. [#1256](https://github.com/XiaoMi/ha_xiaomi_home/pull/1256)
+
 ## v0.3.4
 ### Added
 - Exclude the unsupported device models. [#1205](https://github.com/XiaoMi/ha_xiaomi_home/pull/1205)
