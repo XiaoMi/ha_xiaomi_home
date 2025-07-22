@@ -172,7 +172,7 @@ urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:
       description: open
     - value: 1
       description: closed
-    expr: src_value!=1
+    expr: (src_value!=1)
 urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
   prop.3.2:
     access:
@@ -213,6 +213,9 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
     unit: mA
   prop.3.2:
     expr: round(src_value/10, 1)
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2d:1:
+  prop.3.2:
+    expr: round(src_value/1000, 2)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
   prop.11.1:
     name: power-consumption
@@ -257,7 +260,7 @@ urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
 urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
-    expr: src_value!=1
+    expr: (src_value!=1)
 urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm:1:0000D042:
   prop.27.3:
     name: light-on
