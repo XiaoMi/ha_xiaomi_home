@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Afficher les notifications de changement d'état de l'appareil",
                     "update_trans_rules": "Mettre à jour les règles de conversion d'entités",
                     "update_lan_ctrl_config": "Mettre à jour la configuration de contrôle LAN",
-                    "network_detect_config": "Configuration Réseau Intégrée"
+                    "network_detect_config": "Configuration Réseau Intégrée",
+                    "cover_closed_position": "La position des rideaux fermés"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Confirmer la configuration",
-                "description": "**{nick_name}** Bonjour ! Veuillez confirmer les dernières informations de configuration et cliquer sur \"Soumettre\".\r\nL'intégration rechargera avec la nouvelle configuration.\r\n\r\nLangue d'intégration : {lang_new}\r\nPseudo utilisateur : {nick_name_new}\r\nMode de débogage d'action : {action_debug}\r\nMasquer les entités générées non standard : {hide_non_standard_entities}\r\nAfficher les notifications de changement d'état de l'appareil:\t{display_devices_changed_notify}\r\nModifications des appareils : Ajouter **{devices_add}** appareils, supprimer **{devices_remove}** appareils\r\nModifications des règles de conversion : **{trans_rules_count}** règles au total, mise à jour de **{trans_rules_count_success}** règles",
+                "description": "**{nick_name}** Bonjour ! Veuillez confirmer les dernières informations de configuration et cliquer sur \"Soumettre\".\r\nL'intégration rechargera avec la nouvelle configuration.\r\n\r\nLangue d'intégration : {lang_new}\r\nPseudo utilisateur : {nick_name_new}\r\nMode de débogage d'action : {action_debug}\r\nMasquer les entités générées non standard : {hide_non_standard_entities}\r\nLa position des rideaux fermés:\t{cover_pos_new}\r\nAfficher les notifications de changement d'état de l'appareil:\t{display_devices_changed_notify}\r\nModifications des appareils : Ajouter **{devices_add}** appareils, supprimer **{devices_remove}** appareils\r\nModifications des règles de conversion : **{trans_rules_count}** règles au total, mise à jour de **{trans_rules_count_success}** règles",
                 "data": {
                     "confirm": "Confirmer la modification"
                 }

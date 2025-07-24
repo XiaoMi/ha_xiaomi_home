@@ -61,16 +61,10 @@ from homeassistant.components import zeroconf
 
 # pylint: disable=relative-beyond-top-level
 from .common import MIoTMatcher, slugify_did
-from .const import (
-    DEFAULT_CTRL_MODE,
-    DEFAULT_INTEGRATION_LANGUAGE,
-    DEFAULT_NICK_NAME,
-    DOMAIN,
-    MIHOME_CERT_EXPIRE_MARGIN,
-    NETWORK_REFRESH_INTERVAL,
-    OAUTH2_CLIENT_ID,
-    SUPPORT_CENTRAL_GATEWAY_CTRL,
-)
+from .const import (DEFAULT_CTRL_MODE, DEFAULT_INTEGRATION_LANGUAGE,
+                    DEFAULT_NICK_NAME, DOMAIN, MIHOME_CERT_EXPIRE_MARGIN,
+                    NETWORK_REFRESH_INTERVAL, OAUTH2_CLIENT_ID,
+                    SUPPORT_CENTRAL_GATEWAY_CTRL, DEFAULT_COVER_CLOSED_POSITION)
 from .miot_cloud import MIoTHttpClient, MIoTOauthClient
 from .miot_error import MIoTClientError, MIoTErrorCode
 from .miot_mips import (
@@ -501,6 +495,11 @@ class MIoTClient:
     @property
     def display_binary_bool(self) -> bool:
         return self._display_binary_bool
+
+    @property
+    def cover_closed_position(self) -> int:
+        return self._entry_data.get('cover_closed_position',
+                                    DEFAULT_COVER_CLOSED_POSITION)
 
     @display_devices_changed_notify.setter
     def display_devices_changed_notify(self, value: list[str]) -> None:
@@ -1094,8 +1093,8 @@ class MIoTClient:
                 from_new = "lan"
 
         if (from_new is None and did in self._device_list_cloud and
-                self._device_list_cloud[did].get("online", False)):
-            from_new = "cloud"
+                self._device_list_cloud[did].get('online', False)):
+            from_new = 'cloud'
         if from_new == from_old:
             # No need to update
             return
@@ -1212,7 +1211,7 @@ class MIoTClient:
         _LOGGER.info("local mips state changed, %s, %s", group_id, state)
         mips = self._mips_local.get(group_id, None)
         if not mips:
-            _LOGGER.error("local mips state changed, mips not exist, %s",
+            _LOGGER.error('local mips state changed, mips not exist, %s',
                           group_id)
             return
         if state:
@@ -1248,6 +1247,7 @@ class MIoTClient:
                 if sub and sub.handler:
                     sub.handler(did, MIoTDeviceState.OFFLINE, sub.handler_ctx)
             self.__request_show_devices_changed_notify()
+        self.__show_central_state_changed_notify(state)
 
     @final
     async def __on_miot_lan_state_change(self, state: bool) -> None:
@@ -1606,7 +1606,7 @@ class MIoTClient:
             if did not in filter_dids:
                 continue
             device_old = self._device_list_gateway.get(did, None)
-            gw_state_old = device_old.get("online",
+            gw_state_old = device_old.get('online',
                                           False) if device_old else False
             gw_state_new: bool = False
             device_new = gw_list.pop(did, None)
@@ -1621,7 +1621,7 @@ class MIoTClient:
                 if device_old:
                     device_old["online"] = False
             # Update cache group_id
-            info["group_id"] = group_id
+            info['group_id'] = group_id
             if gw_state_old == gw_state_new:
                 continue
             self.__update_device_msg_sub(did=did)
@@ -2064,6 +2064,28 @@ class MIoTClient:
             self._show_devices_changed_notify_timer.cancel()
         self._show_devices_changed_notify_timer = self._main_loop.call_later(
             delay_sec, self.__show_devices_changed_notify)
+
+    @final
+    def __show_central_state_changed_notify(self, connected: bool) -> None:
+        conn_status: str = (
+            self._i18n.translate('miot.client.central_state_connected')
+            if connected else
+            self._i18n.translate('miot.client.central_state_disconnected'))
+        self._persistence_notify(
+            self.__gen_notify_key('central_state_changed'),
+            self._i18n.translate('miot.client.central_state_changed_title'),
+            self._i18n.translate(key='miot.client.central_state_changed',
+                                 replace={
+                                     'nick_name':
+                                         self._entry_data.get(
+                                             'nick_name', DEFAULT_NICK_NAME),
+                                     'uid':
+                                         self._uid,
+                                     'cloud_server':
+                                         self._cloud_server,
+                                     'conn_status':
+                                         conn_status
+                                 }))
 
 
 @staticmethod

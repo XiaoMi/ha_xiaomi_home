@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} デバイスがオフライン:** \n{message}",
             "network_status_online": "オンライン",
             "network_status_offline": "オフライン",
+            "central_state_changed_title": "中枢ゲートウェイ接続ステータス",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** 中枢ゲートウェイのローカル接続リンク: {conn_status}",
+            "central_state_connected": "接続済み",
+            "central_state_disconnected": "切断されました",
             "device_exec_error": "実行エラー"
         }
     },

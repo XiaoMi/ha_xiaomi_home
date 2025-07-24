@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "显示设备状态变化通知",
                     "update_trans_rules": "更新实体转换规则",
                     "update_lan_ctrl_config": "更新局域网控制配置",
-                    "network_detect_config": "集成网络配置"
+                    "network_detect_config": "集成网络配置",
+                    "cover_closed_position": "窗帘关闭位置"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "确认配置",
-                "description": "**{nick_name}** 您好！请确认最新的配置信息，然后点击“提交”。\r\n集成将会使用更新后的配置重新载入。\r\n\r\n集成语言：\t{lang_new}\r\n用户昵称：\t{nick_name_new}\r\nAction 调试模式：\t{action_debug}\r\n隐藏非标准生成实体：\t{hide_non_standard_entities}\r\n显示设备状态变化通知：\t{display_devices_changed_notify}\r\n设备变化：\t新增 **{devices_add}** 个设备，移除 **{devices_remove}** 个设备\r\n转换规则变化：\t共条 **{trans_rules_count}** 规则，更新 **{trans_rules_count_success}** 条规则",
+                "description": "**{nick_name}** 您好！请确认最新的配置信息，然后点击“提交”。\r\n集成将会使用更新后的配置重新载入。\r\n\r\n集成语言：\t{lang_new}\r\n用户昵称：\t{nick_name_new}\r\nAction 调试模式：\t{action_debug}\r\n隐藏非标准生成实体：\t{hide_non_standard_entities}\r\n窗帘关闭位置：\t{cover_pos_new}\r\n显示设备状态变化通知：\t{display_devices_changed_notify}\r\n设备变化：\t新增 **{devices_add}** 个设备，移除 **{devices_remove}** 个设备\r\n转换规则变化：\t共条 **{trans_rules_count}** 规则，更新 **{trans_rules_count_success}** 条规则",
                 "data": {
                     "confirm": "确认修改"
                 }

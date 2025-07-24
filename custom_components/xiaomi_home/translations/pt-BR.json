@@ -124,7 +124,8 @@
                     "display_devices_changed_notify": "Exibir notificações de mudança de status do dispositivo",
                     "update_trans_rules": "Atualizar regras de conversão de entidades",
                     "update_lan_ctrl_config": "Atualizar configuração de controle LAN",
-                    "network_detect_config": "Configuração de Rede Integrada"
+                    "network_detect_config": "Configuração de Rede Integrada",
+                    "cover_closed_position": "A posição das cortinas fechadas"
                 }
             },
             "update_user_info": {
@@ -183,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Confirmar Configuração",
-                "description": "Olá **{nick_name}**, confirme as informações da configuração mais recente e depois clique em ENVIAR.\r\nA integração será recarregada com a configuração atualizada.\r\n\r\nIdioma da Integração:\t{lang_new}\r\nApelido:\t{nick_name_new}\r\nModo de depuração para ação:\t{action_debug}\r\nOcultar entidades não padrão criadas:\t{hide_non_standard_entities}\r\nExibir notificações de mudança de status do dispositivo:\t{display_devices_changed_notify}\r\nAlterações de Dispositivos:\tAdicionar **{devices_add}** dispositivos, Remover **{devices_remove}** dispositivos\r\nAlteração nas Regras de Transformação:\tUm total de **{trans_rules_count}** regras, e **{trans_rules_count_success}** regras atualizadas",
+                "description": "Olá **{nick_name}**, confirme as informações da configuração mais recente e depois clique em ENVIAR.\r\nA integração será recarregada com a configuração atualizada.\r\n\r\nIdioma da Integração:\t{lang_new}\r\nApelido:\t{nick_name_new}\r\nModo de depuração para ação:\t{action_debug}\r\nOcultar entidades não padrão criadas:\t{hide_non_standard_entities}\r\nA posição das cortinas fechadas:\t{cover_pos_new}\r\nExibir notificações de mudança de status do dispositivo:\t{display_devices_changed_notify}\r\nAlterações de Dispositivos:\tAdicionar **{devices_add}** dispositivos, Remover **{devices_remove}** dispositivos\r\nAlteração nas Regras de Transformação:\tUm total de **{trans_rules_count}** regras, e **{trans_rules_count_success}** regras atualizadas",
                 "data": {
                     "confirm": "Confirmar a mudança"
                 }

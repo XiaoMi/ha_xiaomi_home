@@ -6,6 +6,8 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1:
+  prop.8.6:
+    unit: kWh
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1
@@ -26,6 +28,12 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1
+urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
+  prop.3.7:
+    value-range:
+    - -30
+    - 100
+    - 0.1
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
@@ -153,6 +161,9 @@ urn:miot-spec-v2:device:light:0000A001:shhf-sfla10:1:
 urn:miot-spec-v2:device:light:0000A001:shhf-sfla12:1:
   prop.8.11:
     name: on-a
+urn:miot-spec-v2:device:light:0000A001:shhf-sflt11:1:0000C802:
+  prop.11.14:
+    name: on-power
 urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:
   prop.2.1004:
     name: contact-state
@@ -168,6 +179,9 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
     - read
     - notify
     unit: mV
+urn:miot-spec-v2:device:motor-controller:0000A01D:adp-adswb4:1:0000C837:
+  prop.2.1:
+    name: motor-switch
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:1: urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2:
   prop.2.8:

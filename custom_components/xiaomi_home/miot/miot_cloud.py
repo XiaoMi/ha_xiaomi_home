@@ -542,7 +542,12 @@ class MIoTHttpClient:
             self,
             dids: list[str],
             start_did: Optional[str] = None) -> dict[str, dict]:
-        req_data: dict = {"limit": 200, "get_split_device": True, "dids": dids}
+        req_data: dict = {
+            'limit': 200,
+            'get_split_device': True,
+            'get_third_device': True,
+            'dids': dids
+        }
         if start_did:
             req_data["start_did"] = start_did
         device_infos: dict = {}

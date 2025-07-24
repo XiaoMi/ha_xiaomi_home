@@ -50,18 +50,11 @@ from homeassistant.components.sensor import SensorStateClass
 from homeassistant.components.event import EventDeviceClass
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
-from homeassistant.const import (
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    EntityCategory,
-    LIGHT_LUX,
-    UnitOfEnergy,
-    UnitOfPower,
-    UnitOfElectricCurrent,
-    UnitOfElectricPotential,
-    UnitOfTemperature,
-    UnitOfPressure,
-    PERCENTAGE
-)
+from homeassistant.const import (CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+                                 EntityCategory, LIGHT_LUX, UnitOfEnergy,
+                                 UnitOfPower, UnitOfElectricCurrent,
+                                 UnitOfElectricPotential, UnitOfTemperature,
+                                 UnitOfPressure, PERCENTAGE)
 
 # pylint: disable=pointless-string-statement
 """SPEC_DEVICE_TRANS_MAP
@@ -107,7 +100,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
     'humidifier': {
         'required': {
             'humidifier': {
-                'required':  {
+                'required': {
                     'properties': {
                         'on': {'read', 'write'}
                     }
@@ -119,7 +112,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         },
         'optional': {
             'environment': {
-                'required':  {
+                'required': {
                     'properties': {
                         'relative-humidity': {'read'}
                     }
@@ -131,7 +124,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
     'dehumidifier': {
         'required': {
             'dehumidifier': {
-                'required':  {
+                'required': {
                     'properties': {
                         'on': {'read', 'write'}
                     }
@@ -143,7 +136,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         },
         'optional': {
             'environment': {
-                'required':  {
+                'required': {
                     'properties': {
                         'relative-humidity': {'read'}
                     }
@@ -155,15 +148,13 @@ SPEC_DEVICE_TRANS_MAP: dict = {
     'vacuum': {
         'required': {
             'vacuum': {
-                'required':  {
+                'required': {
                     'actions': {'start-sweep', 'stop-sweeping'},
                 },
                 'optional': {
                     'properties': {'status', 'fan-level'},
                     'actions': {
-                        'pause-sweeping',
-                        'continue-sweep',
-                        'stop-and-gocharge'
+                        'pause-sweeping', 'continue-sweep', 'stop-and-gocharge'
                     }
                 }
             }
@@ -171,7 +162,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         'optional': {
             'identify': {
                 'required': {
-                    'actions':  {'identify'}
+                    'actions': {'identify'}
                 }
             },
             'battery': {
@@ -204,10 +195,9 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'required': {},
                 'optional': {
                     'properties': {
-                        'on',
-                        'fan-level',
-                        'horizontal-swing',
-                        'vertical-swing'}}
+                        'on', 'fan-level', 'horizontal-swing', 'vertical-swing'
+                    }
+                }
             },
             'environment': {
                 'required': {},
@@ -235,8 +225,8 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 },
                 'optional': {
                     'properties': {
-                        'target-temperature', 'mode', 'fan-level',
-                        'temperature'}
+                        'target-temperature', 'mode', 'fan-level', 'temperature'
+                    }
                 }
             }
         },
@@ -278,7 +268,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             'ptc-bath-heater': {
                 'required': {
                     'properties': {
-                        'mode':{'read', 'write'}
+                        'mode': {'read', 'write'}
                     }
                 },
                 'optional': {
@@ -321,6 +311,89 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         'optional': {},
         'entity': 'electric-blanket'
     },
+    'speaker': {
+        'required': {
+            'speaker': {
+                'required': {
+                    'properties': {
+                        'volume': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'mute'}
+                }
+            },
+            'play-control': {
+                'required': {
+                    'actions': {'play'}
+                },
+                'optional': {
+                    'properties': {'playing-state'},
+                    'actions': {'pause', 'stop', 'next', 'previous'}
+                }
+            }
+        },
+        'optional': {},
+        'entity': 'wifi-speaker'
+    },
+    'television': {
+        'required': {
+            'speaker': {
+                'required': {
+                    'properties': {
+                        'volume': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'mute'}
+                }
+            },
+            'television': {
+                'required': {
+                    'actions': {'turn-off'}
+                },
+                'optional': {
+                    'properties': {'input-control'},
+                    'actions': {'turn-on'}
+                }
+            }
+        },
+        'optional': {
+            'play-control': {
+                'required': {},
+                'optional': {
+                    'properties': {'playing-state'},
+                    'actions': {'play', 'pause', 'stop', 'next', 'previous'}
+                }
+            }
+        },
+        'entity': 'television'
+    },
+    'watch': {
+        'required': {
+            'watch': {
+                'required': {
+                    'properties': {
+                        'longitude': {'read'},
+                        'latitude': {'read'}
+                    }
+                },
+                'optional': {
+                    'properties': {'area-id'}
+                }
+            }
+        },
+        'optional': {
+            'battery': {
+                'required': {
+                    'properties': {
+                        'battery-level': {'read'}
+                    }
+                }
+            }
+        },
+        'entity': 'device_tracker'
+    }
 }
 
 """SPEC_SERVICE_TRANS_MAP
@@ -351,9 +424,7 @@ SPEC_SERVICE_TRANS_MAP: dict = {
             }
         },
         'optional': {
-            'properties': {
-                'mode', 'brightness', 'color', 'color-temperature'
-            }
+            'properties': {'mode', 'brightness', 'color', 'color-temperature'}
         },
         'entity': 'light'
     },
@@ -368,7 +439,8 @@ SPEC_SERVICE_TRANS_MAP: dict = {
         },
         'optional': {
             'properties': {
-                'mode', 'brightness',
+                'mode',
+                'brightness',
             }
         },
         'entity': 'light',
@@ -401,16 +473,14 @@ SPEC_SERVICE_TRANS_MAP: dict = {
         },
         'entity': 'water_heater'
     },
-    'curtain':  {
+    'curtain': {
         'required': {
             'properties': {
                 'motor-control': {'write'}
             }
         },
         'optional': {
-            'properties': {
-                'status', 'current-position', 'target-position'
-            }
+            'properties': {'status', 'current-position', 'target-position'}
         },
         'entity': 'cover'
     },
@@ -600,6 +670,4 @@ SPEC_EVENT_TRANS_MAP: dict[str, str] = {
     'doorbell-ring': EventDeviceClass.DOORBELL
 }
 
-SPEC_ACTION_TRANS_MAP = {
-
-}
+SPEC_ACTION_TRANS_MAP = {}

@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} 個設備離線:** \n{message}",
             "network_status_online": "在線",
             "network_status_offline": "離線",
+            "central_state_changed_title": "中枢網關連接狀態",
+            "central_state_changed":"**{nick_name}({uid}, {cloud_server})** 中枢網關本地連接鏈路: {conn_status}",
+            "central_state_connected": "已連接",
+            "central_state_disconnected": "断連",
             "device_exec_error": "執行錯誤"
         }
     },

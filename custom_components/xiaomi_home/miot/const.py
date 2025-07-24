@@ -71,10 +71,12 @@ SUPPORTED_PLATFORMS: list = [
     'button',
     'climate',
     'cover',
+    'device_tracker',
     'event',
     'fan',
     'humidifier',
     'light',
+    'media_player',
     'notify',
     'number',
     'select',
@@ -117,6 +119,10 @@ INTEGRATION_LANGUAGES = {
     'zh-Hans': '简体中文',
     'zh-Hant': '繁體中文'
 }
+
+DEFAULT_COVER_CLOSED_POSITION: int = 0
+MIN_COVER_CLOSED_POSITION: int = 0
+MAX_COVER_CLOSED_POSITION: int = 5
 
 DEFAULT_CTRL_MODE: str = 'auto'
 

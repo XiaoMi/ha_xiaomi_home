@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} appareils hors ligne :** \n{message}",
             "network_status_online": "En ligne",
             "network_status_offline": "Hors ligne",
+            "central_state_changed_title": "État de connexion de la passerelle centrale",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** liaison de connexion locale de la passerelle centrale : {conn_status}",
+            "central_state_connected": "connecté",
+            "central_state_disconnected": "déconnecté",
             "device_exec_error": "Erreur d'exécution"
         }
     },

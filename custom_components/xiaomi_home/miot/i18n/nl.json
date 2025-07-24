@@ -99,6 +99,10 @@
             "device_list_offline": "\n**{count} apparaten offline:** \n{message}",
             "network_status_online": "Online",
             "network_status_offline": "Offline",
+            "central_state_changed_title": "Verbindingsstatus van centrale gateway",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** Lokale verbinding van centrale gateway: {conn_status}",
+            "central_state_connected": "verbonden",
+            "central_state_disconnected": "verbinding verbroken",
             "device_exec_error": "Uitvoeringsfout"
         }
     },
