@@ -546,7 +546,7 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
                                    f'{self.entity_id}')
             return
         # set the device on
-        if self.get_prop_value(prop=self._prop_on) is False:
+        if self.get_prop_value(prop=self._prop_on) is not True:
             await self.set_property_async(prop=self._prop_on,
                                           value=True,
                                           write_ha_state=False)
