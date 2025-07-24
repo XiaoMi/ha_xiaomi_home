@@ -91,7 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
 class Cover(MIoTServiceEntity, CoverEntity):
     """Cover entities for Xiaomi Home."""
     # pylint: disable=unused-argument
-    _cover_closed_position: int
+    _cover_dead_zone_width: int
     _prop_motor_control: Optional[MIoTSpecProperty]
     _prop_motor_value_open: Optional[int]
     _prop_motor_value_close: Optional[int]
@@ -116,8 +116,8 @@ class Cover(MIoTServiceEntity, CoverEntity):
         self._attr_supported_color_modes = set()
         self._attr_supported_features = CoverEntityFeature(0)
 
-        self._cover_closed_position = (
-            miot_device.miot_client.cover_closed_position)
+        self._cover_dead_zone_width = (
+            miot_device.miot_client.cover_dead_zone_width)
 
         self._prop_motor_control = None
         self._prop_motor_value_open = None
@@ -275,8 +275,14 @@ class Cover(MIoTServiceEntity, CoverEntity):
             self._prop_pos_closing = False
             return self.get_prop_value(prop=self._prop_target_position)
         pos = self.get_prop_value(prop=self._prop_current_position)
-        return None if pos is None else round(pos * 100 /
-                                              self._prop_position_value_range)
+        if pos is None:
+            return None
+        pos = round(pos*100/self._prop_position_value_range)
+        if pos <= self._cover_dead_zone_width:
+            pos = 0
+        elif pos >= (100 - self._cover_dead_zone_width):
+            pos = 100
+        return pos
 
     @property
     def is_opening(self) -> Optional[bool]:
@@ -302,7 +308,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
     def is_closed(self) -> Optional[bool]:
         """Return if the cover is closed."""
         if self.current_cover_position is not None:
-            return self.current_cover_position <= self._cover_closed_position
+            return self.current_cover_position == 0
         # The current position is prior to the status when determining
         # whether the cover is closed.
         if self._prop_status and self._prop_status_closed:
