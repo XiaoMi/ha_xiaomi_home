@@ -60,6 +60,12 @@ from .miot.const import DOMAIN
 from .miot.miot_device import MIoTDevice, MIoTServiceEntity, MIoTEntityData
 from .miot.miot_spec import (MIoTSpecAction, MIoTSpecProperty)
 
+try:  # VacuumActivity is introduced in HA core 2025.1.0
+    from homeassistant.components.vacuum import VacuumActivity
+    HA_CORE_HAS_ACTIVITY = True
+except ImportError:
+    HA_CORE_HAS_ACTIVITY = False
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -85,6 +91,11 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     _prop_status: Optional[MIoTSpecProperty]
     _prop_fan_level: Optional[MIoTSpecProperty]
     _prop_battery_level: Optional[MIoTSpecProperty]
+    _prop_status_cleaning: Optional[list[int]]
+    _prop_status_docked: Optional[list[int]]
+    _prop_status_paused: Optional[list[int]]
+    _prop_status_returning: Optional[list[int]]
+    _prop_status_error: Optional[list[int]]
 
     _action_start_sweep: Optional[MIoTSpecAction]
     _action_stop_sweeping: Optional[MIoTSpecAction]
@@ -107,6 +118,11 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         self._prop_status = None
         self._prop_fan_level = None
         self._prop_battery_level = None
+        self._prop_status_cleaning = []
+        self._prop_status_docked = []
+        self._prop_status_paused = []
+        self._prop_status_returning = []
+        self._prop_status_error = []
         self._action_start_sweep = None
         self._action_stop_sweeping = None
         self._action_pause_sweeping = None
@@ -126,6 +142,35 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                 self._status_map = prop.value_list.to_map()
                 self._attr_supported_features |= VacuumEntityFeature.STATE
                 self._prop_status = prop
+                for item in prop.value_list.items:
+                    item_str: str = item.name
+                    item_name: str = re.sub(r'[^a-z]', '', item_str)
+                    if item_name in {
+                            'charging', 'charged', 'chargingcompleted',
+                            'fullcharge', 'fullpower', 'findchargerpause',
+                            'drying', 'washing', 'wash', 'inthewash',
+                            'inthedry', 'stationworking', 'dustcollecting',
+                            'upgrade', 'upgrading', 'updating'
+                    }:
+                        self._prop_status_docked.append(item.value)
+                    elif item_name in {'paused', 'pause'}:
+                        self._prop_status_paused.append(item.value)
+                    elif item_name in {
+                            'gocharging', 'cleancompletegocharging',
+                            'findchargewash', 'backtowashmop', 'gowash',
+                            'gowashing', 'summon'
+                    }:
+                        self._prop_status_returning.append(item.value)
+                    elif item_name in {
+                            'error', 'breakcharging', 'gochargebreak'
+                    }:
+                        self._prop_status_error.append(item.value)
+                    elif (item_name.find('sweeping') != -1) or (
+                            item_name.find('mopping') != -1) or (item_name in {
+                                'cleaning', 'remoteclean', 'continuesweep',
+                                'busy', 'building', 'buildingmap', 'mapping'
+                            }):
+                        self._prop_status_cleaning.append(item.value)
             elif prop.name == 'fan-level':
                 if not prop.value_list:
                     _LOGGER.error('invalid fan-level value_list, %s',
@@ -160,16 +205,10 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
 
     async def async_start(self) -> None:
         """Start or resume the cleaning task."""
-        try:  # VacuumActivity is introduced in HA core 2025.1.0
-            # pylint: disable=import-outside-toplevel
-            from homeassistant.components.vacuum import VacuumActivity
-            if (self.activity
-                    == VacuumActivity.PAUSED) and self._action_continue_sweep:
-                await self.action_async(action=self._action_continue_sweep)
-                return
-        except ImportError:
-            if self.state and (self.state in {'paused', 'pause'
-                                             }) and self._action_continue_sweep:
+        if self._prop_status is not None:
+            status = self.get_prop_value(prop=self._prop_status)
+            if (status in self._prop_status_paused
+               ) and self._action_continue_sweep:
                 await self.action_async(action=self._action_continue_sweep)
                 return
         await self.action_async(action=self._action_start_sweep)
@@ -203,9 +242,22 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         return self._device_name
 
     @property
-    def state(self) -> Optional[str]:
-        """Return the current state of the vacuum cleaner.
+    def battery_level(self) -> Optional[int]:
+        """The current battery level of the vacuum cleaner."""
+        return self.get_prop_value(prop=self._prop_battery_level)
 
+    @property
+    def fan_speed(self) -> Optional[str]:
+        """The current fan speed of the vacuum cleaner."""
+        return self.get_map_value(
+            map_=self._fan_level_map,
+            key=self.get_prop_value(prop=self._prop_fan_level))
+
+    if HA_CORE_HAS_ACTIVITY:
+
+        @property
+        def activity(self) -> Optional[str]:
+            """The current vacuum activity.
         To fix the HA warning below:
             Detected that custom integration 'xiaomi_home' is setting state
             directly.Entity XXX(<class 'custom_components.xiaomi_home.vacuum
@@ -220,58 +272,27 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         more constants, try get matching VacuumActivity enum first, return state
         string as before if there is no match. In Home Assistant 2026.1, every
         state should map to a VacuumActivity enum.
-        """
-        return self.activity
-
-    @property
-    def activity(self) -> Optional[str]:
-        """The current vacuum activity."""
-        status = self.get_prop_value(prop=self._prop_status)
-        if status is None:
-            return None
-        status_value = self.get_map_value(map_=self._status_map, key=status)
-        if status_value is None:
-            return None
-        try:
-            # pylint: disable=import-outside-toplevel
-            from homeassistant.components.vacuum import VacuumActivity
-            status_value = status_value.lower()
-            status_str = re.sub(r'[^a-z]', '', status_value)
-            if status_str in {
-                    'charging', 'charged', 'chargingcompleted', 'fullcharge',
-                    'fullpower', 'findchargerpause', 'drying', 'washing',
-                    'wash', 'inthewash', 'inthedry', 'stationworking',
-                    'dustcollecting', 'upgrade', 'upgrading', 'updating'
-            }:
-                return VacuumActivity.DOCKED
-            if status_str in {'paused', 'pause'}:
-                return VacuumActivity.PAUSED
-            if status_str in {
-                    'gocharging', 'cleancompletegocharging', 'findchargewash',
-                    'backtowashmop', 'gowash', 'gowashing', 'summon'
-            }:
-                return VacuumActivity.RETURNING
-            if (status_str.find('sweeping')
-                    != -1) or (status_str.find('mopping')
-                               != -1) or (status_str in {
-                                   'cleaning', 'remoteclean', 'continuesweep',
-                                   'busy', 'building', 'buildingmap', 'mapping'
-                               }):
+            """
+            status = self.get_prop_value(prop=self._prop_status)
+            if status is None:
+                return None
+            if status in self._prop_status_cleaning:
                 return VacuumActivity.CLEANING
-            if status_str in {'error', 'breakcharging', 'gochargebreak'}:
+            if status in self._prop_status_docked:
+                return VacuumActivity.DOCKED
+            if status in self._prop_status_paused:
+                return VacuumActivity.PAUSED
+            if status in self._prop_status_returning:
+                return VacuumActivity.RETURNING
+            if status in self._prop_status_error:
                 return VacuumActivity.ERROR
             return VacuumActivity.IDLE
-        except ImportError:
-            return status_value
 
-    @property
-    def battery_level(self) -> Optional[int]:
-        """The current battery level of the vacuum cleaner."""
-        return self.get_prop_value(prop=self._prop_battery_level)
+    else:
 
-    @property
-    def fan_speed(self) -> Optional[str]:
-        """The current fan speed of the vacuum cleaner."""
-        return self.get_map_value(
-            map_=self._fan_level_map,
-            key=self.get_prop_value(prop=self._prop_fan_level))
+        @property
+        def state(self) -> Optional[str]:
+            """The current state of the vacuum."""
+            status = self.get_prop_value(prop=self._prop_status)
+            return None if (status is None) else self.get_map_value(
+                map_=self._status_map, key=status)
