@@ -85,6 +85,11 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     _prop_status: Optional[MIoTSpecProperty]
     _prop_fan_level: Optional[MIoTSpecProperty]
     _prop_battery_level: Optional[MIoTSpecProperty]
+    _prop_status_cleaning: Optional[list[int]]
+    _prop_status_docked: Optional[list[int]]
+    _prop_status_paused: Optional[list[int]]
+    _prop_status_returning: Optional[list[int]]
+    _prop_status_error: Optional[list[int]]
 
     _action_start_sweep: Optional[MIoTSpecAction]
     _action_stop_sweeping: Optional[MIoTSpecAction]
@@ -107,6 +112,11 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         self._prop_status = None
         self._prop_fan_level = None
         self._prop_battery_level = None
+        self._prop_status_cleaning = []
+        self._prop_status_docked = []
+        self._prop_status_paused = []
+        self._prop_status_returning = []
+        self._prop_status_error = []
         self._action_start_sweep = None
         self._action_stop_sweeping = None
         self._action_pause_sweeping = None
@@ -126,6 +136,36 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                 self._status_map = prop.value_list.to_map()
                 self._attr_supported_features |= VacuumEntityFeature.STATE
                 self._prop_status = prop
+                for item in prop.value_list.items:
+                    item_str: str = item.name
+                    item_name: str = re.sub(r'[^a-z]', '', item_str)
+                    if item_name in {
+                            'charging', 'charged', 'chargingcompleted',
+                            'fullcharge', 'fullpower', 'findchargerpause',
+                            'drying', 'washing', 'wash', 'inthewash',
+                            'inthedry', 'stationworking', 'dustcollecting',
+                            'upgrade', 'upgrading', 'updating'
+                    }:
+                        self._prop_status_docked.append(item.value)
+                    elif item_name in {'paused', 'pause'}:
+                        self._prop_status_paused.append(item.value)
+                    elif item_name in {
+                            'gocharging', 'cleancompletegocharging',
+                            'findchargewash', 'backtowashmop', 'gowash',
+                            'gowashing', 'summon'
+                    }:
+                        self._prop_status_returning.append(item.value)
+                    elif item_name in {
+                            'error', 'breakcharging', 'gochargebreak'
+                    }:
+                        self._prop_status_error.append(item.value)
+                    elif (item_name.find('sweeping') != -1) or (
+                          item_name.find('mopping') != -1) or (
+                          item_name in {
+                            'cleaning', 'remoteclean', 'continuesweep',
+                            'busy', 'building', 'buildingmap', 'mapping'
+                          }):
+                        self._prop_status_cleaning.append(item.value)
             elif prop.name == 'fan-level':
                 if not prop.value_list:
                     _LOGGER.error('invalid fan-level value_list, %s',
@@ -229,40 +269,22 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         status = self.get_prop_value(prop=self._prop_status)
         if status is None:
             return None
-        status_value = self.get_map_value(map_=self._status_map, key=status)
-        if status_value is None:
-            return None
         try:
             # pylint: disable=import-outside-toplevel
             from homeassistant.components.vacuum import VacuumActivity
-            status_value = status_value.lower()
-            status_str = re.sub(r'[^a-z]', '', status_value)
-            if status_str in {
-                    'charging', 'charged', 'chargingcompleted', 'fullcharge',
-                    'fullpower', 'findchargerpause', 'drying', 'washing',
-                    'wash', 'inthewash', 'inthedry', 'stationworking',
-                    'dustcollecting', 'upgrade', 'upgrading', 'updating'
-            }:
-                return VacuumActivity.DOCKED
-            if status_str in {'paused', 'pause'}:
-                return VacuumActivity.PAUSED
-            if status_str in {
-                    'gocharging', 'cleancompletegocharging', 'findchargewash',
-                    'backtowashmop', 'gowash', 'gowashing', 'summon'
-            }:
-                return VacuumActivity.RETURNING
-            if (status_str.find('sweeping')
-                    != -1) or (status_str.find('mopping')
-                               != -1) or (status_str in {
-                                   'cleaning', 'remoteclean', 'continuesweep',
-                                   'busy', 'building', 'buildingmap', 'mapping'
-                               }):
+            if status in self._prop_status_cleaning:
                 return VacuumActivity.CLEANING
-            if status_str in {'error', 'breakcharging', 'gochargebreak'}:
+            if status in self._prop_status_docked:
+                return VacuumActivity.DOCKED
+            if status in self._prop_status_paused:
+                return VacuumActivity.PAUSED
+            if status in self._prop_status_returning:
+                return VacuumActivity.RETURNING
+            if status in self._prop_status_error:
                 return VacuumActivity.ERROR
             return VacuumActivity.IDLE
         except ImportError:
-            return status_value
+            return self.get_map_value(map_=self._status_map, key=status)
 
     @property
     def battery_level(self) -> Optional[int]:
