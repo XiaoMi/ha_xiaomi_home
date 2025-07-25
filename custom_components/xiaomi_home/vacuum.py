@@ -164,7 +164,7 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                           item_name in {
                             'cleaning', 'remoteclean', 'continuesweep',
                             'busy', 'building', 'buildingmap', 'mapping'
-                          }):
+                    }):
                         self._prop_status_cleaning.append(item.value)
             elif prop.name == 'fan-level':
                 if not prop.value_list:
@@ -200,16 +200,10 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
 
     async def async_start(self) -> None:
         """Start or resume the cleaning task."""
-        try:  # VacuumActivity is introduced in HA core 2025.1.0
-            # pylint: disable=import-outside-toplevel
-            from homeassistant.components.vacuum import VacuumActivity
-            if (self.activity
-                    == VacuumActivity.PAUSED) and self._action_continue_sweep:
-                await self.action_async(action=self._action_continue_sweep)
-                return
-        except ImportError:
-            if self.state and (self.state in {'paused', 'pause'
-                                             }) and self._action_continue_sweep:
+        if self._prop_status is not None:
+            status = self.get_prop_value(prop=self._prop_status)
+            if (status in self._prop_status_paused
+               ) and self._action_continue_sweep:
                 await self.action_async(action=self._action_continue_sweep)
                 return
         await self.action_async(action=self._action_start_sweep)
@@ -269,7 +263,7 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         status = self.get_prop_value(prop=self._prop_status)
         if status is None:
             return None
-        try:
+        try:  # VacuumActivity is introduced in HA core 2025.1.0
             # pylint: disable=import-outside-toplevel
             from homeassistant.components.vacuum import VacuumActivity
             if status in self._prop_status_cleaning:
