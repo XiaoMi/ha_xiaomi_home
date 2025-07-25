@@ -60,6 +60,12 @@ from .miot.const import DOMAIN
 from .miot.miot_device import MIoTDevice, MIoTServiceEntity, MIoTEntityData
 from .miot.miot_spec import (MIoTSpecAction, MIoTSpecProperty)
 
+try:  # VacuumActivity is introduced in HA core 2025.1.0
+    from homeassistant.components.vacuum import VacuumActivity
+    HA_CORE_HAS_ACTIVITY = True
+except ImportError:
+    HA_CORE_HAS_ACTIVITY = False
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -160,11 +166,10 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                     }:
                         self._prop_status_error.append(item.value)
                     elif (item_name.find('sweeping') != -1) or (
-                          item_name.find('mopping') != -1) or (
-                          item_name in {
-                            'cleaning', 'remoteclean', 'continuesweep',
-                            'busy', 'building', 'buildingmap', 'mapping'
-                    }):
+                            item_name.find('mopping') != -1) or (item_name in {
+                                'cleaning', 'remoteclean', 'continuesweep',
+                                'busy', 'building', 'buildingmap', 'mapping'
+                            }):
                         self._prop_status_cleaning.append(item.value)
             elif prop.name == 'fan-level':
                 if not prop.value_list:
@@ -237,9 +242,22 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         return self._device_name
 
     @property
-    def state(self) -> Optional[str]:
-        """Return the current state of the vacuum cleaner.
+    def battery_level(self) -> Optional[int]:
+        """The current battery level of the vacuum cleaner."""
+        return self.get_prop_value(prop=self._prop_battery_level)
 
+    @property
+    def fan_speed(self) -> Optional[str]:
+        """The current fan speed of the vacuum cleaner."""
+        return self.get_map_value(
+            map_=self._fan_level_map,
+            key=self.get_prop_value(prop=self._prop_fan_level))
+
+    if HA_CORE_HAS_ACTIVITY:
+
+        @property
+        def activity(self) -> Optional[str]:
+            """The current vacuum activity.
         To fix the HA warning below:
             Detected that custom integration 'xiaomi_home' is setting state
             directly.Entity XXX(<class 'custom_components.xiaomi_home.vacuum
@@ -254,18 +272,10 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         more constants, try get matching VacuumActivity enum first, return state
         string as before if there is no match. In Home Assistant 2026.1, every
         state should map to a VacuumActivity enum.
-        """
-        return self.activity
-
-    @property
-    def activity(self) -> Optional[str]:
-        """The current vacuum activity."""
-        status = self.get_prop_value(prop=self._prop_status)
-        if status is None:
-            return None
-        try:  # VacuumActivity is introduced in HA core 2025.1.0
-            # pylint: disable=import-outside-toplevel
-            from homeassistant.components.vacuum import VacuumActivity
+            """
+            status = self.get_prop_value(prop=self._prop_status)
+            if status is None:
+                return None
             if status in self._prop_status_cleaning:
                 return VacuumActivity.CLEANING
             if status in self._prop_status_docked:
@@ -277,17 +287,12 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
             if status in self._prop_status_error:
                 return VacuumActivity.ERROR
             return VacuumActivity.IDLE
-        except ImportError:
-            return self.get_map_value(map_=self._status_map, key=status)
 
-    @property
-    def battery_level(self) -> Optional[int]:
-        """The current battery level of the vacuum cleaner."""
-        return self.get_prop_value(prop=self._prop_battery_level)
+    else:
 
-    @property
-    def fan_speed(self) -> Optional[str]:
-        """The current fan speed of the vacuum cleaner."""
-        return self.get_map_value(
-            map_=self._fan_level_map,
-            key=self.get_prop_value(prop=self._prop_fan_level))
+        @property
+        def state(self) -> Optional[str]:
+            """The current state of the vacuum."""
+            status = self.get_prop_value(prop=self._prop_status)
+            return None if (status is None) else self.get_map_value(
+                map_=self._status_map, key=status)
