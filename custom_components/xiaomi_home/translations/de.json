@@ -184,7 +184,7 @@
             },
             "config_confirm": {
                 "title": "Bestätigen Sie die Konfiguration",
-                "description": "**{nick_name}**, bitte bestätigen Sie die neuesten Konfigurationsinformationen und klicken Sie dann auf \"Senden\". Die Integration wird mit den aktualisierten Konfigurationen erneut geladen.\r\n\r\nIntegrationsprache:\t{lang_new}\r\nBenutzername:\t{nick_name_new}\r\nAction-Debug-Modus:\t{action_debug}\r\nVerstecke Nicht-Standard-Entitäten:\t{hide_non_standard_entities}\r\nDie Position der geschlossenen Vorhänge:\t{cover_width_new}\r\nGerätestatusänderungen anzeigen:\t{display_devices_changed_notify}\r\nGeräteänderungen:\t{devices_add} neue Geräte hinzufügen, {devices_remove} Geräte entfernen\r\nKonvertierungsregeländerungen:\tInsgesamt {trans_rules_count} Regeln, aktualisiert {trans_rules_count_success} Regeln",
+                "description": "**{nick_name}**, bitte bestätigen Sie die neuesten Konfigurationsinformationen und klicken Sie dann auf \"Senden\". Die Integration wird mit den aktualisierten Konfigurationen erneut geladen.\r\n\r\nIntegrationsprache:\t{lang_new}\r\nBenutzername:\t{nick_name_new}\r\nAction-Debug-Modus:\t{action_debug}\r\nVerstecke Nicht-Standard-Entitäten:\t{hide_non_standard_entities}\r\nDie Breite des toten Winkels des Vorhangs:\t{cover_width_new}\r\nGerätestatusänderungen anzeigen:\t{display_devices_changed_notify}\r\nGeräteänderungen:\t{devices_add} neue Geräte hinzufügen, {devices_remove} Geräte entfernen\r\nKonvertierungsregeländerungen:\tInsgesamt {trans_rules_count} Regeln, aktualisiert {trans_rules_count_success} Regeln",
                 "data": {
                     "confirm": "Änderungen bestätigen"
                 }
