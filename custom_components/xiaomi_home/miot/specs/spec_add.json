@@ -42,6 +42,26 @@
       ]
     }
   ],
+  "urn:miot-spec-v2:device:air-conditioner:0000A004:juhl-hvac:1": [
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:switch:0000780C:juhl-hvac:1",
+      "description": "AC Switch",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000006:juhl-hvac:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        }
+      ]
+    }
+  ],
   "urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1": [
     {
       "iid": 3,
