@@ -253,7 +253,18 @@ class MIoTClient:
         if not self._user_config:
             # Integration need to be add again
             raise MIoTClientError('load_user_config_async error')
-        _LOGGER.debug('user config, %s', json.dumps(self._user_config))
+        # Hide sensitive info in printing
+        p_user_config: dict = deepcopy(self._user_config)
+        p_access_token: str = p_user_config['auth_info']['access_token']
+        p_refresh_token: str = p_user_config['auth_info']['refresh_token']
+        p_mac_key: str = p_user_config['auth_info']['mac_key']
+        p_user_config['auth_info'][
+            'access_token'] = f"{p_access_token[:5]}***{p_access_token[-5:]}"
+        p_user_config['auth_info'][
+            'refresh_token'] = f"{p_refresh_token[:5]}***{p_refresh_token[-5:]}"
+        p_user_config['auth_info'][
+            'mac_key'] = f"{p_mac_key[:5]}***{p_mac_key[-5:]}"
+        _LOGGER.debug('user config, %s', json.dumps(p_user_config))
         # MIoT i18n client
         self._i18n = MIoTI18n(
             lang=self._entry_data.get(
