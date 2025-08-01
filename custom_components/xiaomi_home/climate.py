@@ -224,6 +224,15 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
     _prop_fan_level: Optional[MIoTSpecProperty]
     _fan_mode_map: Optional[dict[int, str]]
 
+    # HomeKit Bridge: fan_modes must be "auto"、"low"、"medium"、"high" 
+    _fan_mode_translation_map = {
+        "自动": "auto",
+        "低风": "low",
+        "中风": "medium",
+        "高风": "high",
+    }
+    _fan_mode_translation_map_rev = {v: k for k, v in _fan_mode_translation_map.items()}
+
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
         """Initialize the feature class."""
@@ -243,7 +252,13 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
                                   self.entity_id)
                     continue
                 self._fan_mode_map = prop.value_list.to_map()
-                self._attr_fan_modes = prop.value_list.descriptions
+                # save org fan speed
+                self._raw_fan_modes = prop.value_list.descriptions             
+                self._attr_fan_modes = [
+                    self._fan_mode_translation_map.get(mode, mode)
+                    for mode in self._raw_fan_modes
+                ]
+
                 self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
                 self._prop_fan_level = prop
             elif prop.name == 'on' and prop.service.name == 'fan-control':
@@ -264,7 +279,11 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
         if fan_mode == FAN_ON:
             await self.set_property_async(prop=self._prop_fan_on, value=True)
             return
-        mode_value = self.get_map_key(map_=self._fan_mode_map, value=fan_mode)
+        
+        chinese_fan_mode = self._fan_mode_translation_map_rev.get(fan_mode, fan_mode)
+                
+        mode_value = self.get_map_key(map_=self._fan_mode_map, value=chinese_fan_mode)
+
         if mode_value is None or not await self.set_property_async(
                 prop=self._prop_fan_level, value=mode_value):
             raise RuntimeError(f'set climate prop.fan_mode failed, {fan_mode}, '
@@ -278,9 +297,15 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
         if self._prop_fan_level is None and self._prop_fan_on:
             return (FAN_ON if self.get_prop_value(
                 prop=self._prop_fan_on) else FAN_OFF)
-        return self.get_map_value(
+
+        current_chinese_mode = self.get_map_value(
             map_=self._fan_mode_map,
             key=self.get_prop_value(prop=self._prop_fan_level))
+        
+        if current_chinese_mode is None:
+            return None
+
+        return self._fan_mode_translation_map.get(current_chinese_mode, current_chinese_mode)
 
 
 class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
