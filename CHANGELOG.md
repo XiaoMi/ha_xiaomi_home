@@ -1,4 +1,14 @@
 # CHANGELOG
+## v0.4.1
+### Changed
+- The setting option "Cover closed position" in CONFIGURE is changed to "Cover dead zone width". [#1301](https://github.com/XiaoMi/ha_xiaomi_home/pull/1301)
+- Add an alongside switch entity for 090615.aircondition.ktf and juhl.aircondition.hvac. [#1303](https://github.com/XiaoMi/ha_xiaomi_home/pull/1303)
+### Fixed
+- Fix the vacuum status so that the vacuum activity will not always be idle. [#1299](https://github.com/XiaoMi/ha_xiaomi_home/pull/1299)
+- Set the device on when the switch status is False or None. [#1303](https://github.com/XiaoMi/ha_xiaomi_home/pull/1303)
+- Hide sensitive info in printing logs. [#1328](https://github.com/XiaoMi/ha_xiaomi_home/pull/1328)
+- Fix the MIoT-Spec-V2 of cuco.plug.cp2d electric current, xiaomi.fan.p45 fan level, sanmei.valve.s1 power consumption, current and voltage, xiaomi.aircondition.c17, xiaomi.aircondition.m16 and xiaomi.airc.h40h00 humidity-range unit. [#1329](https://github.com/XiaoMi/ha_xiaomi_home/pull/1329)
+
 ## v0.4.0
 ### Added
 - Add the watch as the device tracker entity. [#1189](https://github.com/XiaoMi/ha_xiaomi_home/pull/1189)
