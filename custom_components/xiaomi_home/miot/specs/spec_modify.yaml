@@ -133,6 +133,9 @@ urn:miot-spec-v2:device:fan:0000A005:xiaomi-p69:1:0000D062:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p70:1:0000D062:
   prop.2.4:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p76:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:zhimi-sa1:3:
   prop.2.2:
     name: fan-level-a
