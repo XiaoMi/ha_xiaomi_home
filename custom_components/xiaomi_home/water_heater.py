@@ -168,7 +168,7 @@ class WaterHeater(MIoTServiceEntity, WaterHeaterEntity):
         if operation_mode == STATE_ON:
             await self.set_property_async(prop=self._prop_on, value=True)
             return
-        if self.get_prop_value(prop=self._prop_on) is False:
+        if self.get_prop_value(prop=self._prop_on) is not True:
             await self.set_property_async(prop=self._prop_on,
                                           value=True,
                                           write_ha_state=False)

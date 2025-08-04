@@ -1,6 +1,24 @@
 {
   "urn:miot-spec-v2:device:air-conditioner:0000A004:090615-ktf:1": [
     {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:switch:0000780C:090615-ktf:1",
+      "description": "AC Switch",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000006:090615-ktf:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        }
+      ]
+    },
+    {
       "iid": 4,
       "type": "urn:miot-spec-v2:service:environment:0000780A:090615-ktf:1",
       "description": "Environment",
@@ -19,6 +37,26 @@
             -30,
             100,
             1
+          ]
+        }
+      ]
+    }
+  ],
+  "urn:miot-spec-v2:device:air-conditioner:0000A004:juhl-hvac:1": [
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:switch:0000780C:juhl-hvac:1",
+      "description": "AC Switch",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000006:juhl-hvac:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
           ]
         }
       ]
