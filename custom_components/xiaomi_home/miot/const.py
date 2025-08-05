@@ -89,6 +89,7 @@ SUPPORTED_PLATFORMS: list = [
 
 UNSUPPORTED_MODELS: list = [
     'chuangmi.ir.v2',
+    'hmpace.motion.v6nfc',
     'xiaomi.router.rd03'
 ]
 
