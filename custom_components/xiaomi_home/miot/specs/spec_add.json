@@ -300,5 +300,61 @@
         }
       ]
     }
+  ],
+  "urn:miot-spec-v2:device:outlet:0000A002:cuco-cp3a:2": [
+    {
+      "iid": 3,
+      "type": "urn:miot-spec-v2:service:switch:00007801:cuco-cp3a:1",
+      "description": "left switch",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000001:cuco-cp3a:1",
+          "description": "on",
+          "format": "bool",
+          "access": [
+            "read",
+            "notify",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "iid": 4,
+      "type": "urn:miot-spec-v2:service:switch:00007801:cuco-cp3a:1",
+      "description": "mid switch",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000001:cuco-cp3a:1",
+          "description": "on",
+          "format": "bool",
+          "access": [
+            "read",
+            "notify",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "iid": 5,
+      "type": "urn:miot-spec-v2:service:switch:00007801:cuco-cp3a:1",
+      "description": "right switch",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000001:cuco-cp3a:1",
+          "description": "on",
+          "format": "bool",
+          "access": [
+            "read",
+            "notify",
+            "write"
+          ]
+        }
+      ]
+    }
   ]
 }
