@@ -160,6 +160,13 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             }
         },
         'optional': {
+            'vacuum-extend': {
+                'optional': {
+                    'actions': {
+                        'stop-and-gocharge'
+                    }
+                }
+            },
             'identify': {
                 'required': {
                     'actions': {'identify'}
