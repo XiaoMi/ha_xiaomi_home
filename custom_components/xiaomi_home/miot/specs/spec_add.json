@@ -241,6 +241,1425 @@
       ]
     }
   ],
+  "urn:miot-spec-v2:device:vacuum:0000A006:narwa-001:1": [
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:vacuum:00007810:narwa-001:1",
+      "description": "Robot Cleaner",
+      "properties": [
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:status:00000007:narwa-001:1",
+          "description": "Status",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Idle"
+            },
+            {
+              "value": 2,
+              "description": "Charging"
+            },
+            {
+              "value": 3,
+              "description": "BreakCharging"
+            },
+            {
+              "value": 4,
+              "description": "Sweeping"
+            },
+            {
+              "value": 5,
+              "description": "Paused"
+            },
+            {
+              "value": 6,
+              "description": "Go Charging"
+            },
+            {
+              "value": 7,
+              "description": "GoWash"
+            },
+            {
+              "value": 8,
+              "description": "Remote"
+            },
+            {
+              "value": 9,
+              "description": "Charging"
+            },
+            {
+              "value": 10,
+              "description": "BuildingMap"
+            },
+            {
+              "value": 11,
+              "description": "Updating"
+            },
+            {
+              "value": 12,
+              "description": "Sleeping"
+            },
+            {
+              "value": 13,
+              "description": "Relocation"
+            },
+            {
+              "value": 14,
+              "description": "StationWorking"
+            },
+            {
+              "value": 15,
+              "description": "Error"
+            },
+            {
+              "value": 16,
+              "description": "Sweeping and Mopping"
+            },
+            {
+              "value": 17,
+              "description": "Mopping"
+            },
+            {
+              "value": 18,
+              "description": "Paused"
+            },
+            {
+              "value": 19,
+              "description": "GoChargeBreak"
+            },
+            {
+              "value": 20,
+              "description": "WashBreak"
+            },
+            {
+              "value": 21,
+              "description": "IdleInOutside"
+            }
+          ]
+        },
+        {
+          "iid": 3,
+          "type": "urn:miot-spec-v2:property:fault:00000009:narwa-001:1",
+          "description": "Device Fault",
+          "format": "uint32",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "No Faults"
+            },
+            {
+              "value": 16777248,
+              "description": "16777248"
+            },
+            {
+              "value": 34603008,
+              "description": "34603008"
+            },
+            {
+              "value": 34668608,
+              "description": "34668608"
+            },
+            {
+              "value": 16842848,
+              "description": "16842848"
+            },
+            {
+              "value": 16842849,
+              "description": "16842849"
+            },
+            {
+              "value": 16842850,
+              "description": "16842850"
+            },
+            {
+              "value": 16842851,
+              "description": "16842851"
+            },
+            {
+              "value": 33751106,
+              "description": "33751106"
+            },
+            {
+              "value": 16842852,
+              "description": "16842852"
+            },
+            {
+              "value": 33751105,
+              "description": "33751105"
+            },
+            {
+              "value": 16842853,
+              "description": "16842853"
+            },
+            {
+              "value": 33751104,
+              "description": "33751104"
+            },
+            {
+              "value": 34603121,
+              "description": "34603121"
+            },
+            {
+              "value": 34603120,
+              "description": "34603120"
+            },
+            {
+              "value": 34603123,
+              "description": "34603123"
+            },
+            {
+              "value": 34603122,
+              "description": "34603122"
+            },
+            {
+              "value": 33685523,
+              "description": "33685523"
+            },
+            {
+              "value": 34603125,
+              "description": "34603125"
+            },
+            {
+              "value": 33685524,
+              "description": "33685524"
+            },
+            {
+              "value": 34603124,
+              "description": "34603124"
+            },
+            {
+              "value": 34668592,
+              "description": "34668592"
+            },
+            {
+              "value": 36765959,
+              "description": "36765959"
+            },
+            {
+              "value": 34603126,
+              "description": "34603126"
+            },
+            {
+              "value": 36765952,
+              "description": "36765952"
+            },
+            {
+              "value": 36765954,
+              "description": "36765954"
+            },
+            {
+              "value": 36765953,
+              "description": "36765953"
+            },
+            {
+              "value": 36765956,
+              "description": "36765956"
+            },
+            {
+              "value": 36765955,
+              "description": "36765955"
+            },
+            {
+              "value": 36765958,
+              "description": "36765958"
+            },
+            {
+              "value": 36765957,
+              "description": "36765957"
+            },
+            {
+              "value": 33685525,
+              "description": "33685525"
+            },
+            {
+              "value": 16843026,
+              "description": "16843026"
+            },
+            {
+              "value": 33751122,
+              "description": "33751122"
+            },
+            {
+              "value": 33751121,
+              "description": "33751121"
+            },
+            {
+              "value": 16843024,
+              "description": "16843024"
+            },
+            {
+              "value": 33751120,
+              "description": "33751120"
+            },
+            {
+              "value": 16843025,
+              "description": "16843025"
+            },
+            {
+              "value": 33685602,
+              "description": "33685602"
+            },
+            {
+              "value": 34603104,
+              "description": "34603104"
+            },
+            {
+              "value": 34603105,
+              "description": "34603105"
+            },
+            {
+              "value": 33751078,
+              "description": "33751078"
+            },
+            {
+              "value": 34668576,
+              "description": "34668576"
+            },
+            {
+              "value": 34603107,
+              "description": "34603107"
+            },
+            {
+              "value": 33685600,
+              "description": "33685600"
+            },
+            {
+              "value": 33685601,
+              "description": "33685601"
+            },
+            {
+              "value": 33751076,
+              "description": "33751076"
+            },
+            {
+              "value": 33751075,
+              "description": "33751075"
+            },
+            {
+              "value": 33751073,
+              "description": "33751073"
+            },
+            {
+              "value": 36765745,
+              "description": "36765745"
+            },
+            {
+              "value": 34603089,
+              "description": "34603089"
+            },
+            {
+              "value": 34603088,
+              "description": "34603088"
+            },
+            {
+              "value": 34603090,
+              "description": "34603090"
+            },
+            {
+              "value": 16842832,
+              "description": "16842832"
+            },
+            {
+              "value": 16842833,
+              "description": "16842833"
+            },
+            {
+              "value": 16842834,
+              "description": "16842834"
+            },
+            {
+              "value": 16842841,
+              "description": "16842841"
+            },
+            {
+              "value": 16842835,
+              "description": "16842835"
+            },
+            {
+              "value": 16842836,
+              "description": "16842836"
+            },
+            {
+              "value": 33685568,
+              "description": "33685568"
+            },
+            {
+              "value": 36765995,
+              "description": "36765995"
+            },
+            {
+              "value": 33685569,
+              "description": "33685569"
+            },
+            {
+              "value": 36765994,
+              "description": "36765994"
+            },
+            {
+              "value": 33685570,
+              "description": "33685570"
+            },
+            {
+              "value": 34668545,
+              "description": "34668545"
+            },
+            {
+              "value": 34668544,
+              "description": "34668544"
+            },
+            {
+              "value": 33685585,
+              "description": "33685585"
+            },
+            {
+              "value": 34799648,
+              "description": "34799648"
+            },
+            {
+              "value": 33685586,
+              "description": "33685586"
+            },
+            {
+              "value": 33685584,
+              "description": "33685584"
+            },
+            {
+              "value": 36765733,
+              "description": "36765733"
+            },
+            {
+              "value": 36765735,
+              "description": "36765735"
+            },
+            {
+              "value": 36765734,
+              "description": "36765734"
+            },
+            {
+              "value": 36765736,
+              "description": "36765736"
+            },
+            {
+              "value": 16842805,
+              "description": "16842805"
+            },
+            {
+              "value": 16842806,
+              "description": "16842806"
+            },
+            {
+              "value": 16842801,
+              "description": "16842801"
+            },
+            {
+              "value": 36766016,
+              "description": "36766016"
+            },
+            {
+              "value": 16842802,
+              "description": "16842802"
+            },
+            {
+              "value": 16842804,
+              "description": "16842804"
+            },
+            {
+              "value": 34603040,
+              "description": "34603040"
+            },
+            {
+              "value": 34603042,
+              "description": "34603042"
+            },
+            {
+              "value": 34603041,
+              "description": "34603041"
+            },
+            {
+              "value": 34603044,
+              "description": "34603044"
+            },
+            {
+              "value": 34668641,
+              "description": "34668641"
+            },
+            {
+              "value": 34603043,
+              "description": "34603043"
+            },
+            {
+              "value": 34668640,
+              "description": "34668640"
+            },
+            {
+              "value": 34603045,
+              "description": "34603045"
+            },
+            {
+              "value": 36765969,
+              "description": "36765969"
+            },
+            {
+              "value": 36765968,
+              "description": "36765968"
+            },
+            {
+              "value": 33685544,
+              "description": "33685544"
+            },
+            {
+              "value": 33685545,
+              "description": "33685545"
+            },
+            {
+              "value": 33685552,
+              "description": "33685552"
+            },
+            {
+              "value": 33685553,
+              "description": "33685553"
+            },
+            {
+              "value": 33685554,
+              "description": "33685554"
+            },
+            {
+              "value": 36765996,
+              "description": "36765996"
+            },
+            {
+              "value": 33685555,
+              "description": "33685555"
+            },
+            {
+              "value": 33685556,
+              "description": "33685556"
+            },
+            {
+              "value": 36765993,
+              "description": "36765993"
+            },
+            {
+              "value": 34603029,
+              "description": "34603029"
+            },
+            {
+              "value": 34603031,
+              "description": "34603031"
+            },
+            {
+              "value": 34603030,
+              "description": "34603030"
+            },
+            {
+              "value": 34603033,
+              "description": "34603033"
+            },
+            {
+              "value": 16842899,
+              "description": "16842899"
+            },
+            {
+              "value": 34603032,
+              "description": "34603032"
+            },
+            {
+              "value": 36765696,
+              "description": "36765696"
+            },
+            {
+              "value": 16842897,
+              "description": "16842897"
+            },
+            {
+              "value": 36765992,
+              "description": "36765992"
+            },
+            {
+              "value": 16842771,
+              "description": "16842771"
+            },
+            {
+              "value": 16842769,
+              "description": "16842769"
+            },
+            {
+              "value": 16842770,
+              "description": "16842770"
+            }
+          ]
+        },
+        {
+          "iid": 17,
+          "type": "urn:miot-spec-v2:property:last-clean-time:00000280:narwa-001:1",
+          "description": "Last Clean Time",
+          "format": "uint32",
+          "access": [
+            "notify",
+            "read"
+          ],
+          "value-range": [
+            0,
+            4294967295,
+            1
+          ]
+        },
+        {
+          "iid": 18,
+          "type": "urn:miot-spec-v2:property:base-station-working-status:00000281:narwa-001:1",
+          "description": "Base Station Working Status",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "NULL"
+            },
+            {
+              "value": 1,
+              "description": "Mop Clean"
+            },
+            {
+              "value": 2,
+              "description": "Mop Air Dry"
+            }
+          ]
+        },
+        {
+          "iid": 71,
+          "type": "urn:miot-spec-v2:property:on:00000006:narwa-001:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:action:start-sweep:00002804:narwa-001:1",
+          "description": "Start Sweep",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:action:stop-sweeping:00002805:narwa-001:1",
+          "description": "Stop Sweeping",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 3,
+          "type": "urn:miot-spec-v2:action:stop-and-gocharge:000028B4:narwa-001:1",
+          "description": "Stop And Gocharge",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 7,
+          "type": "urn:miot-spec-v2:action:pause-sweeping:00002863:narwa-001:1",
+          "description": "Pause Sweeping",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 8,
+          "type": "urn:miot-spec-v2:action:continue-sweep:000028AA:narwa-001:1",
+          "description": "Continue Sweep",
+          "in": [],
+          "out": []
+        }
+      ]
+    },
+    {
+      "iid": 11,
+      "type": "urn:miot-spec-v2:service:battery:00007805:narwa-001:1",
+      "description": "Battery",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:battery-level:00000014:narwa-001:1",
+          "description": "Battery Level",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "unit": "percentage",
+          "value-range": [
+            0,
+            100,
+            1
+          ]
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:charging-state:00000015:narwa-001:1",
+          "description": "Charging State",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Charging"
+            },
+            {
+              "value": 2,
+              "description": "Not Charging"
+            },
+            {
+              "value": 3,
+              "description": "Not Chargeable"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "urn:miot-spec-v2:device:vacuum:0000A006:narwa-ax11:1": [
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:vacuum:00007810:narwa-ax11:1",
+      "description": "Robot Cleaner",
+      "properties": [
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:status:00000007:narwa-ax11:1",
+          "description": "Status",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Idle"
+            },
+            {
+              "value": 2,
+              "description": "Charging"
+            },
+            {
+              "value": 3,
+              "description": "BreakCharging"
+            },
+            {
+              "value": 4,
+              "description": "Sweeping"
+            },
+            {
+              "value": 5,
+              "description": "Paused"
+            },
+            {
+              "value": 6,
+              "description": "Go Charging"
+            },
+            {
+              "value": 7,
+              "description": "GoWash"
+            },
+            {
+              "value": 8,
+              "description": "Remote"
+            },
+            {
+              "value": 9,
+              "description": "Charging"
+            },
+            {
+              "value": 10,
+              "description": "BuildingMap"
+            },
+            {
+              "value": 11,
+              "description": "Updating"
+            },
+            {
+              "value": 12,
+              "description": "Sleeping"
+            },
+            {
+              "value": 13,
+              "description": "Relocation"
+            },
+            {
+              "value": 14,
+              "description": "StationWorking"
+            },
+            {
+              "value": 15,
+              "description": "Error"
+            },
+            {
+              "value": 16,
+              "description": "Sweeping and Mopping"
+            },
+            {
+              "value": 17,
+              "description": "Mopping"
+            },
+            {
+              "value": 18,
+              "description": "Paused"
+            },
+            {
+              "value": 19,
+              "description": "GoChargeBreak"
+            },
+            {
+              "value": 20,
+              "description": "WashBreak"
+            },
+            {
+              "value": 21,
+              "description": "IdleInOutside"
+            }
+          ]
+        },
+        {
+          "iid": 3,
+          "type": "urn:miot-spec-v2:property:fault:00000009:narwa-ax11:1",
+          "description": "Device Fault",
+          "format": "uint32",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "No Faults"
+            },
+            {
+              "value": 16777248,
+              "description": "16777248"
+            },
+            {
+              "value": 34603008,
+              "description": "34603008"
+            },
+            {
+              "value": 34668608,
+              "description": "34668608"
+            },
+            {
+              "value": 16842848,
+              "description": "16842848"
+            },
+            {
+              "value": 16842849,
+              "description": "16842849"
+            },
+            {
+              "value": 16842850,
+              "description": "16842850"
+            },
+            {
+              "value": 16842851,
+              "description": "16842851"
+            },
+            {
+              "value": 33751106,
+              "description": "33751106"
+            },
+            {
+              "value": 16842852,
+              "description": "16842852"
+            },
+            {
+              "value": 33751105,
+              "description": "33751105"
+            },
+            {
+              "value": 16842853,
+              "description": "16842853"
+            },
+            {
+              "value": 33751104,
+              "description": "33751104"
+            },
+            {
+              "value": 34603121,
+              "description": "34603121"
+            },
+            {
+              "value": 34603120,
+              "description": "34603120"
+            },
+            {
+              "value": 34603123,
+              "description": "34603123"
+            },
+            {
+              "value": 34603122,
+              "description": "34603122"
+            },
+            {
+              "value": 33685523,
+              "description": "33685523"
+            },
+            {
+              "value": 34603125,
+              "description": "34603125"
+            },
+            {
+              "value": 33685524,
+              "description": "33685524"
+            },
+            {
+              "value": 34603124,
+              "description": "34603124"
+            },
+            {
+              "value": 34668592,
+              "description": "34668592"
+            },
+            {
+              "value": 36765959,
+              "description": "36765959"
+            },
+            {
+              "value": 34603126,
+              "description": "34603126"
+            },
+            {
+              "value": 36765952,
+              "description": "36765952"
+            },
+            {
+              "value": 36765954,
+              "description": "36765954"
+            },
+            {
+              "value": 36765953,
+              "description": "36765953"
+            },
+            {
+              "value": 36765956,
+              "description": "36765956"
+            },
+            {
+              "value": 36765955,
+              "description": "36765955"
+            },
+            {
+              "value": 36765958,
+              "description": "36765958"
+            },
+            {
+              "value": 36765957,
+              "description": "36765957"
+            },
+            {
+              "value": 33685525,
+              "description": "33685525"
+            },
+            {
+              "value": 16843026,
+              "description": "16843026"
+            },
+            {
+              "value": 33751122,
+              "description": "33751122"
+            },
+            {
+              "value": 33751121,
+              "description": "33751121"
+            },
+            {
+              "value": 16843024,
+              "description": "16843024"
+            },
+            {
+              "value": 33751120,
+              "description": "33751120"
+            },
+            {
+              "value": 16843025,
+              "description": "16843025"
+            },
+            {
+              "value": 33685602,
+              "description": "33685602"
+            },
+            {
+              "value": 34603104,
+              "description": "34603104"
+            },
+            {
+              "value": 34603105,
+              "description": "34603105"
+            },
+            {
+              "value": 33751078,
+              "description": "33751078"
+            },
+            {
+              "value": 34668576,
+              "description": "34668576"
+            },
+            {
+              "value": 34603107,
+              "description": "34603107"
+            },
+            {
+              "value": 33685600,
+              "description": "33685600"
+            },
+            {
+              "value": 33685601,
+              "description": "33685601"
+            },
+            {
+              "value": 33751076,
+              "description": "33751076"
+            },
+            {
+              "value": 33751075,
+              "description": "33751075"
+            },
+            {
+              "value": 33751073,
+              "description": "33751073"
+            },
+            {
+              "value": 36765745,
+              "description": "36765745"
+            },
+            {
+              "value": 34603089,
+              "description": "34603089"
+            },
+            {
+              "value": 34603088,
+              "description": "34603088"
+            },
+            {
+              "value": 34603090,
+              "description": "34603090"
+            },
+            {
+              "value": 16842832,
+              "description": "16842832"
+            },
+            {
+              "value": 16842833,
+              "description": "16842833"
+            },
+            {
+              "value": 16842834,
+              "description": "16842834"
+            },
+            {
+              "value": 16842841,
+              "description": "16842841"
+            },
+            {
+              "value": 16842835,
+              "description": "16842835"
+            },
+            {
+              "value": 16842836,
+              "description": "16842836"
+            },
+            {
+              "value": 33685568,
+              "description": "33685568"
+            },
+            {
+              "value": 36765995,
+              "description": "36765995"
+            },
+            {
+              "value": 33685569,
+              "description": "33685569"
+            },
+            {
+              "value": 36765994,
+              "description": "36765994"
+            },
+            {
+              "value": 33685570,
+              "description": "33685570"
+            },
+            {
+              "value": 34668545,
+              "description": "34668545"
+            },
+            {
+              "value": 34668544,
+              "description": "34668544"
+            },
+            {
+              "value": 33685585,
+              "description": "33685585"
+            },
+            {
+              "value": 34799648,
+              "description": "34799648"
+            },
+            {
+              "value": 33685586,
+              "description": "33685586"
+            },
+            {
+              "value": 33685584,
+              "description": "33685584"
+            },
+            {
+              "value": 36765733,
+              "description": "36765733"
+            },
+            {
+              "value": 36765735,
+              "description": "36765735"
+            },
+            {
+              "value": 36765734,
+              "description": "36765734"
+            },
+            {
+              "value": 36765736,
+              "description": "36765736"
+            },
+            {
+              "value": 16842805,
+              "description": "16842805"
+            },
+            {
+              "value": 16842806,
+              "description": "16842806"
+            },
+            {
+              "value": 16842801,
+              "description": "16842801"
+            },
+            {
+              "value": 36766016,
+              "description": "36766016"
+            },
+            {
+              "value": 16842802,
+              "description": "16842802"
+            },
+            {
+              "value": 16842804,
+              "description": "16842804"
+            },
+            {
+              "value": 34603040,
+              "description": "34603040"
+            },
+            {
+              "value": 34603042,
+              "description": "34603042"
+            },
+            {
+              "value": 34603041,
+              "description": "34603041"
+            },
+            {
+              "value": 34603044,
+              "description": "34603044"
+            },
+            {
+              "value": 34668641,
+              "description": "34668641"
+            },
+            {
+              "value": 34603043,
+              "description": "34603043"
+            },
+            {
+              "value": 34668640,
+              "description": "34668640"
+            },
+            {
+              "value": 34603045,
+              "description": "34603045"
+            },
+            {
+              "value": 36765969,
+              "description": "36765969"
+            },
+            {
+              "value": 36765968,
+              "description": "36765968"
+            },
+            {
+              "value": 33685544,
+              "description": "33685544"
+            },
+            {
+              "value": 33685545,
+              "description": "33685545"
+            },
+            {
+              "value": 33685552,
+              "description": "33685552"
+            },
+            {
+              "value": 33685553,
+              "description": "33685553"
+            },
+            {
+              "value": 33685554,
+              "description": "33685554"
+            },
+            {
+              "value": 36765996,
+              "description": "36765996"
+            },
+            {
+              "value": 33685555,
+              "description": "33685555"
+            },
+            {
+              "value": 33685556,
+              "description": "33685556"
+            },
+            {
+              "value": 36765993,
+              "description": "36765993"
+            },
+            {
+              "value": 34603029,
+              "description": "34603029"
+            },
+            {
+              "value": 34603031,
+              "description": "34603031"
+            },
+            {
+              "value": 34603030,
+              "description": "34603030"
+            },
+            {
+              "value": 34603033,
+              "description": "34603033"
+            },
+            {
+              "value": 16842899,
+              "description": "16842899"
+            },
+            {
+              "value": 34603032,
+              "description": "34603032"
+            },
+            {
+              "value": 36765696,
+              "description": "36765696"
+            },
+            {
+              "value": 16842897,
+              "description": "16842897"
+            },
+            {
+              "value": 36765992,
+              "description": "36765992"
+            },
+            {
+              "value": 16842771,
+              "description": "16842771"
+            },
+            {
+              "value": 16842769,
+              "description": "16842769"
+            },
+            {
+              "value": 16842770,
+              "description": "16842770"
+            }
+          ]
+        },
+        {
+          "iid": 4,
+          "type": "urn:miot-spec-v2:property:sweep-mop-type:00000135:narwa-ax11:1",
+          "description": "Sweep Mop Type",
+          "format": "uint8",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Sweep"
+            },
+            {
+              "value": 2,
+              "description": "Mop"
+            },
+            {
+              "value": 3,
+              "description": "Sweep Mop"
+            },
+            {
+              "value": 4,
+              "description": "Sweep Before Mopping"
+            }
+          ]
+        },
+        {
+          "iid": 17,
+          "type": "urn:miot-spec-v2:property:last-clean-time:00000280:narwa-ax11:1",
+          "description": "Last Clean Time",
+          "format": "uint32",
+          "access": [
+            "notify",
+            "read"
+          ],
+          "value-range": [
+            0,
+            4294967295,
+            1
+          ]
+        },
+        {
+          "iid": 18,
+          "type": "urn:miot-spec-v2:property:base-station-working-status:00000281:narwa-ax11:1",
+          "description": "Base Station Working Status",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "NULL"
+            },
+            {
+              "value": 1,
+              "description": "Mop Clean"
+            },
+            {
+              "value": 2,
+              "description": "Mop Air Dry"
+            }
+          ]
+        },
+        {
+          "iid": 71,
+          "type": "urn:miot-spec-v2:property:on:00000006:narwa-ax11:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:action:start-sweep:00002804:narwa-ax11:1",
+          "description": "Start Sweep",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:action:stop-sweeping:00002805:narwa-ax11:1",
+          "description": "Stop Sweeping",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 3,
+          "type": "urn:miot-spec-v2:action:stop-and-gocharge:000028B4:narwa-ax11:1",
+          "description": "Stop And Gocharge",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 7,
+          "type": "urn:miot-spec-v2:action:pause-sweeping:00002863:narwa-ax11:1",
+          "description": "Pause Sweeping",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 8,
+          "type": "urn:miot-spec-v2:action:continue-sweep:000028AA:narwa-ax11:1",
+          "description": "Continue Sweep",
+          "in": [],
+          "out": []
+        }
+      ]
+    },
+    {
+      "iid": 11,
+      "type": "urn:miot-spec-v2:service:battery:00007805:narwa-ax11:1",
+      "description": "Battery",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:battery-level:00000014:narwa-ax11:1",
+          "description": "Battery Level",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "unit": "percentage",
+          "value-range": [
+            0,
+            100,
+            1
+          ]
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:charging-state:00000015:narwa-ax11:1",
+          "description": "Charging State",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Charging"
+            },
+            {
+              "value": 2,
+              "description": "Not Charging"
+            },
+            {
+              "value": 3,
+              "description": "Not Chargeable"
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "urn:miot-spec-v2:device:water-heater:0000A02A:viomi-m1:2": [
     {
       "iid": 2,
