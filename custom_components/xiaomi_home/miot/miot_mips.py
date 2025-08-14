@@ -513,6 +513,7 @@ class _MipsClient(ABC):
         """
         self.__thread_check()
         if not self._mqtt or not self._mqtt.is_connected():
+            self.log_error(f'mips sub when not connected, {topic}')
             return
         try:
             if topic not in self._mips_sub_pending_map:
@@ -531,6 +532,7 @@ class _MipsClient(ABC):
         """
         self.__thread_check()
         if not self._mqtt or not self._mqtt.is_connected():
+            self.log_debug(f'mips unsub when not connected, {topic}')
             return
         try:
             result, mid = self._mqtt.unsubscribe(topic=topic)
@@ -639,6 +641,7 @@ class _MipsClient(ABC):
             _LOGGER.error('__on_connect, but mqtt is None')
             return
         if not self._mqtt.is_connected():
+            _LOGGER.error('__on_connect, but mqtt is disconnected')
             return
         self.log_info(f'mips connect, {flags}, {rc}, {props}')
         self.__reset_reconnect_time()
