@@ -160,13 +160,6 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             }
         },
         'optional': {
-            'vacuum-extend': {
-                'optional': {
-                    'actions': {
-                        'stop-and-gocharge'
-                    }
-                }
-            },
             'identify': {
                 'required': {
                     'actions': {'identify'}
@@ -176,6 +169,11 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                 'required': {
                     'properties': {
                         'battery-level': {'read'}
+                    }
+                },
+                'optional': {
+                    'actions': {
+                        'start-charge'
                     }
                 }
             }
