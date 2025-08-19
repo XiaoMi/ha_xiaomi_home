@@ -191,6 +191,10 @@ urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:2: urn:miot-spec-v2:device:hood
 urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3:
   prop.3.1:
     name: on-ventilation
+urn:miot-spec-v2:device:humidifier:0000A00E:zhimi-ca4:2:
+  prop.2.7:
+    unit: percentage
+    expr: round(src_value*0.83)
 urn:miot-spec-v2:device:kettle:0000A009:yunmi-r3:1:
   prop.3.1:
     unit: ppm
