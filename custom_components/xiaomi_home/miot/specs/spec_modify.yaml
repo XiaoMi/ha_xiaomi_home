@@ -1,6 +1,10 @@
 urn:miot-spec-v2:device:air-condition-outlet:0000A045:lumi-mcn04:1:
   prop.3.4:
     format: uint8
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c17:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c17:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c17:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1:
   prop.10.6:
     unit: none
@@ -15,6 +19,19 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h40h00:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
@@ -28,6 +45,12 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
   prop.3.7:
     value-range:
@@ -86,6 +109,13 @@ urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
 urn:miot-spec-v2:device:curtain:0000A00C:bjkcz-kczble:1:0000D031:
   prop.2.2:
     name: status-a
+urn:miot-spec-v2:device:electronic-valve:0000A0A7:sanmei-s1:1:
+  prop.3.1:
+    expr: round(src_value/100, 2)
+  prop.3.2:
+    expr: round(src_value/100, 2)
+  prop.3.3:
+    expr: round(src_value/10, 1)
 urn:miot-spec-v2:device:fan:0000A005:dmaker-p33:1:
   prop.2.2:
     name: fan-level-a
@@ -101,10 +131,19 @@ urn:miot-spec-v2:device:fan:0000A005:dmaker-p5:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p43:1:
   prop.2.2:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p45:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
     name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p69:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p70:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p76:1:0000D062:
   prop.2.4:
     name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:zhimi-sa1:3:
@@ -152,6 +191,10 @@ urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:2: urn:miot-spec-v2:device:hood
 urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3:
   prop.3.1:
     name: on-ventilation
+urn:miot-spec-v2:device:humidifier:0000A00E:zhimi-ca4:2:
+  prop.2.7:
+    unit: percentage
+    expr: round(src_value*0.83)
 urn:miot-spec-v2:device:kettle:0000A009:yunmi-r3:1:
   prop.3.1:
     unit: ppm
@@ -172,7 +215,7 @@ urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:
       description: open
     - value: 1
       description: closed
-    expr: src_value!=1
+    expr: (src_value!=1)
 urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
   prop.3.2:
     access:
@@ -213,6 +256,9 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
     unit: mA
   prop.3.2:
     expr: round(src_value/10, 1)
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2d:1:
+  prop.3.2:
+    expr: round(src_value/1000, 2)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
   prop.11.1:
     name: power-consumption
@@ -257,7 +303,7 @@ urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
 urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
-    expr: src_value!=1
+    expr: (src_value!=1)
 urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm:1:0000D042:
   prop.27.3:
     name: light-on

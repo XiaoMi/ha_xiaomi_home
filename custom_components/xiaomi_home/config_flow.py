@@ -75,9 +75,9 @@ from .miot.const import (
     DEFAULT_CLOUD_SERVER,
     DEFAULT_CTRL_MODE,
     DEFAULT_INTEGRATION_LANGUAGE,
-    DEFAULT_COVER_CLOSED_POSITION,
-    MIN_COVER_CLOSED_POSITION,
-    MAX_COVER_CLOSED_POSITION,
+    DEFAULT_COVER_DEAD_ZONE_WIDTH,
+    MIN_COVER_DEAD_ZONE_WIDTH,
+    MAX_COVER_DEAD_ZONE_WIDTH,
     DEFAULT_NICK_NAME,
     DEFAULT_OAUTH2_API_HOST,
     DOMAIN,
@@ -132,7 +132,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     _cloud_server: str
     _integration_language: str
-    _cover_closed_position: int
+    _cover_dz_width: int
     _auth_info: dict
     _nick_name: str
     _home_selected: dict
@@ -155,7 +155,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._main_loop = asyncio.get_running_loop()
         self._cloud_server = DEFAULT_CLOUD_SERVER
         self._integration_language = DEFAULT_INTEGRATION_LANGUAGE
-        self._cover_closed_position = DEFAULT_COVER_CLOSED_POSITION
+        self._cover_dz_width = DEFAULT_COVER_DEAD_ZONE_WIDTH
         self._storage_path = ''
         self._virtual_did = ''
         self._uid = ''
@@ -956,7 +956,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'action_debug': self._action_debug,
                 'hide_non_standard_entities':
                     self._hide_non_standard_entities,
-                'cover_closed_position': self._cover_closed_position,
+                'cover_dead_zone_width': self._cover_dz_width,
                 'display_binary_mode': self._display_binary_mode,
                 'display_devices_changed_notify':
                     self._display_devices_changed_notify
@@ -1001,7 +1001,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _hide_non_standard_entities: bool
     _display_binary_mode: list[str]
     _display_devs_notify: list[str]
-    _cover_closed_position: int
+    _cover_dz_width: int
 
     _oauth_redirect_url_full: str
     _auth_info: dict
@@ -1022,7 +1022,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _opt_lan_ctrl_cfg: bool
     _opt_network_detect_cfg: bool
     _opt_check_network_deps: bool
-    _cover_pos_new: int
+    _cover_width_new: int
 
     _trans_rules_count: int
     _trans_rules_count_success: int
@@ -1051,8 +1051,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._ctrl_mode = self._entry_data.get('ctrl_mode', DEFAULT_CTRL_MODE)
         self._integration_language = self._entry_data.get(
             'integration_language', DEFAULT_INTEGRATION_LANGUAGE)
-        self._cover_closed_position = self._entry_data.get(
-            'cover_closed_position', DEFAULT_COVER_CLOSED_POSITION)
+        self._cover_dz_width = self._entry_data.get(
+            'cover_dead_zone_width', DEFAULT_COVER_DEAD_ZONE_WIDTH)
         self._nick_name = self._entry_data.get('nick_name', DEFAULT_NICK_NAME)
         self._action_debug = self._entry_data.get('action_debug', False)
         self._hide_non_standard_entities = self._entry_data.get(
@@ -1078,7 +1078,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._action_debug_new = False
         self._hide_non_standard_entities_new = False
         self._display_binary_mode_new = []
-        self._cover_pos_new = self._cover_closed_position
+        self._cover_width_new = self._cover_dz_width
         self._update_user_info = False
         self._update_devices = False
         self._update_trans_rules = False
@@ -1352,11 +1352,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         self._miot_i18n.translate(
                             'config.binary_mode')),  # type: ignore
                     vol.Optional(
-                        'cover_closed_position',
-                        default=self._cover_closed_position  # type: ignore
+                        'cover_dead_zone_width',
+                        default=self._cover_dz_width  # type: ignore
                     ): vol.All(vol.Coerce(int), vol.Range(
-                        min=MIN_COVER_CLOSED_POSITION,
-                        max=MAX_COVER_CLOSED_POSITION)),
+                        min=MIN_COVER_DEAD_ZONE_WIDTH,
+                        max=MAX_COVER_DEAD_ZONE_WIDTH)),
                     vol.Required(
                         'update_trans_rules',
                         default=self._update_trans_rules  # type: ignore
@@ -1395,8 +1395,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'update_lan_ctrl_config', self._opt_lan_ctrl_cfg)
         self._opt_network_detect_cfg = user_input.get(
             'network_detect_config', self._opt_network_detect_cfg)
-        self._cover_pos_new = user_input.get(
-            'cover_closed_position', self._cover_closed_position)
+        self._cover_width_new = user_input.get(
+            'cover_dead_zone_width', self._cover_dz_width)
 
         return await self.async_step_update_user_info()
 
@@ -1945,7 +1945,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     'nick_name': self._nick_name,
                     'lang_new': INTEGRATION_LANGUAGES[self._lang_new],
                     'nick_name_new': self._nick_name_new,
-                    'cover_pos_new': self._cover_pos_new,
+                    'cover_width_new': self._cover_width_new,
                     'devices_add': len(self._devices_add),
                     'devices_remove': len(self._devices_remove),
                     'trans_rules_count': self._trans_rules_count,
@@ -1972,8 +1972,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if self._lang_new != self._integration_language:
             self._entry_data['integration_language'] = self._lang_new
             self._need_reload = True
-        if self._cover_pos_new != self._cover_closed_position:
-            self._entry_data['cover_closed_position'] = self._cover_pos_new
+        if self._cover_width_new != self._cover_dz_width:
+            self._entry_data['cover_dead_zone_width'] = self._cover_width_new
             self._need_reload = True
         if self._update_user_info:
             self._entry_data['nick_name'] = self._nick_name_new

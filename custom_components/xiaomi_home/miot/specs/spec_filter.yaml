@@ -48,3 +48,9 @@ urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:
   services:
   - '2'
   - '4'
+urn:miot-spec-v2:device:vacuum:0000A006:narwa-001:
+  services:
+  - '*'
+urn:miot-spec-v2:device:vacuum:0000A006:narwa-ax11:
+  services:
+  - '*'

@@ -1,4 +1,23 @@
 # CHANGELOG
+## v0.4.2
+### Changed
+- Set the battery service's start-charge action as the fallback action to support RETURN_HOME feature of the vacuum entity. [#1344](https://github.com/XiaoMi/ha_xiaomi_home/pull/1344)
+### Fixed
+- Correct the property value format after expression calculation. [#1366](https://github.com/XiaoMi/ha_xiaomi_home/pull/1366)
+- Fix the MIoT-Spec-V2 of fix: xiaomi.fan.p70 and fix: xiaomi.fan.p76 fan level, xiaomi.airc.rr0r00 and xiaomi.airc.h43h00 humidity-range, and zhimi.humidifier.ca4 water level. [#1367](https://github.com/XiaoMi/ha_xiaomi_home/pull/1367)
+- Ignore the unsupported model hmpace.motion.v6nfc.
+- Delete all unsupported MIoT-Spec-V2 instances of narwa.vacuum.001 and narwa.vacuum.ax11. [#1355](https://github.com/XiaoMi/ha_xiaomi_home/pull/1355)
+
+## v0.4.1
+### Changed
+- The setting option "Cover closed position" in CONFIGURE is changed to "Cover dead zone width". [#1301](https://github.com/XiaoMi/ha_xiaomi_home/pull/1301)
+- Add an alongside switch entity for 090615.aircondition.ktf and juhl.aircondition.hvac. [#1303](https://github.com/XiaoMi/ha_xiaomi_home/pull/1303)
+### Fixed
+- Fix the vacuum status so that the vacuum activity will not always be idle. [#1299](https://github.com/XiaoMi/ha_xiaomi_home/pull/1299)
+- Set the device on when the switch status is False or None. [#1303](https://github.com/XiaoMi/ha_xiaomi_home/pull/1303)
+- Hide sensitive info in printing logs. [#1328](https://github.com/XiaoMi/ha_xiaomi_home/pull/1328)
+- Fix the MIoT-Spec-V2 of cuco.plug.cp2d electric current, xiaomi.fan.p45 fan level, sanmei.valve.s1 power consumption, current and voltage, xiaomi.aircondition.c17, xiaomi.aircondition.m16 and xiaomi.airc.h40h00 humidity-range unit. [#1329](https://github.com/XiaoMi/ha_xiaomi_home/pull/1329)
+
 ## v0.4.0
 ### Added
 - Add the watch as the device tracker entity. [#1189](https://github.com/XiaoMi/ha_xiaomi_home/pull/1189)
