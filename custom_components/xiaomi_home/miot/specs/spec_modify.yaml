@@ -84,6 +84,8 @@ urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
     name: target-position-a
   prop.2.9:
     name: target-position-b
+  prop.2.11:
+    expr: (100-src_value)
 urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
   prop.2.3:
     value-range:
