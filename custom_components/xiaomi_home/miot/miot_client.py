@@ -1376,7 +1376,7 @@ class MIoTClient:
         """
         # MIoT cloud may not publish the online state updating message
         # for the BLE device. Assume that all BLE devices are online.
-        # MIoT cloud does not publish the online state update message for the
+        # MIoT cloud does not publish the online state updating message for the
         # child device under the proxy gateway (eg, VRF air conditioner
         # controller). Assume that all proxy gateway child devices are online.
         for did, info in cloud_list.items():
