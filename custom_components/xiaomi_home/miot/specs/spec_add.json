@@ -82,6 +82,22 @@
       ]
     }
   ],
+  "urn:miot-spec-v2:device:speaker:0000A015:xiaomi-l05b:1": [
+    {
+      "iid": 3,
+      "type": "urn:miot-spec-v2:service:play:0000781D:xiaomi-l05b:1",
+      "description": "Play Control",
+      "actions": [
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:action:play:0000280B:xiaomi-l05b:1",
+          "description": "Play",
+          "in": [],
+          "out": []
+        }
+      ]
+    }
+  ],
   "urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:1:0000C822": [
     {
       "iid": 2,

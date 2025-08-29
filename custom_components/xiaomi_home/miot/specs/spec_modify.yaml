@@ -48,6 +48,18 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:2: urn:miot-spec-v2:
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1:
   prop.10.6:
     unit: none
+  prop.3.12:
+    name: vertical-swing-left-up
+  prop.3.13:
+    name: vertical-swing-left-down
+  prop.3.14:
+    name: vertical-swing-right-up
+  prop.3.15:
+    name: vertical-swing-right-down
+  prop.3.20:
+    name: horizontal-swing-left
+  prop.3.22:
+    name: horizontal-swing-right
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
@@ -72,6 +84,8 @@ urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
     name: target-position-a
   prop.2.9:
     name: target-position-b
+  prop.2.11:
+    expr: (100-src_value)
 urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
   prop.2.3:
     value-range:

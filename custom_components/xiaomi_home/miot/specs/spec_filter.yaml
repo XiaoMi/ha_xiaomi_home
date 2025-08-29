@@ -1,6 +1,9 @@
 urn:miot-spec-v2:device:air-conditioner:0000A004:090615-ktf:
   services:
   - '4'
+urn:miot-spec-v2:device:air-conditioner:0000A004:759413-iez:
+  properties:
+  - '2.3'
 urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ma4:
   properties:
   - 9.*
