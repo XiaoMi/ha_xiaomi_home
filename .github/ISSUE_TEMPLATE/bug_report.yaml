@@ -5,8 +5,8 @@ body:
     attributes:
       label: Describe the Bug / 描述问题
       description: |
-        > A clear and concise description of what the bug is.
-        > 清晰且简明地描述问题。
+        > A clear and concise description of what the bug is. Please include the device model information (Like xiaomi.gateway.hub1 which can be found in Device info page).
+        > 清晰且简明地描述问题。请注明设备 model 信息（例如 xiaomi.gateway.hub1，可在设备详情页查询）。
     validations:
       required: true
 

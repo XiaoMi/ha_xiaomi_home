@@ -203,6 +203,16 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                 self._attr_supported_features |= VacuumEntityFeature.LOCATE
                 self._action_identify = action
 
+        # Use start-charge from battery service as fallback
+        # if stop-and-gocharge is not available
+        if self._action_stop_and_gocharge is None:
+            for action in entity_data.actions:
+                if action.name == 'start-charge':
+                    self._attr_supported_features |= (
+                        VacuumEntityFeature.RETURN_HOME)
+                    self._action_stop_and_gocharge = action
+                    break
+
     async def async_start(self) -> None:
         """Start or resume the cleaning task."""
         if self._prop_status is not None:
