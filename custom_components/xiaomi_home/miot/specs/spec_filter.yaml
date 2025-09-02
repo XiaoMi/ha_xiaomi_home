@@ -47,6 +47,13 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:xiaomi-pir1:
   services:
   - '1'
   - '5'
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-l15a:
+  properties:
+  - '3.3'
+  - '6.1'
+  - '6.2'
+  - '6.3'
+  - '6.4'
 urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01:
   services:
   - '2'
