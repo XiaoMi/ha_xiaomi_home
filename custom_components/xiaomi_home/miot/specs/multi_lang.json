@@ -5,6 +5,12 @@
       "service:003:property:001:valuelist:001": "Dry"
     }
   },
+  "urn:miot-spec-v2:device:fan:0000A005:zhimi-za1": {
+    "zh-Hans": {
+      "service:002:property:005:valuelist:000": "自然风",
+      "service:002:property:005:valuelist:001": "直吹风"
+    }
+  },
   "urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1": {
     "de": {
       "service:001": "Geräteinformationen",
@@ -274,13 +280,13 @@
       "service:002:property:002": "Air Conditioner Mode",
       "service:004": "Air Conditioner"
     },
-    "zh_cn": {
+    "zh-Hans": {
       "service:002": "地暖",
       "service:004": "空调"
     }
   },
   "urn:miot-spec-v2:device:vacuum:0000A006:ijai-v1": {
-    "zh_cn": {
+    "zh-Hans": {
       "service:007:property:005:valuelist:000": "安静",
       "service:007:property:005:valuelist:001": "标准",
       "service:007:property:005:valuelist:002": "中档",
