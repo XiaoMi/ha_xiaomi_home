@@ -90,7 +90,6 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     # pylint: disable=unused-argument
     _prop_status: Optional[MIoTSpecProperty]
     _prop_fan_level: Optional[MIoTSpecProperty]
-    _prop_battery_level: Optional[MIoTSpecProperty]
     _prop_status_cleaning: Optional[list[int]]
     _prop_status_docked: Optional[list[int]]
     _prop_status_paused: Optional[list[int]]
@@ -117,7 +116,6 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
 
         self._prop_status = None
         self._prop_fan_level = None
-        self._prop_battery_level = None
         self._prop_status_cleaning = []
         self._prop_status_docked = []
         self._prop_status_paused = []
@@ -180,9 +178,6 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                 self._attr_fan_speed_list = list(self._fan_level_map.values())
                 self._attr_supported_features |= VacuumEntityFeature.FAN_SPEED
                 self._prop_fan_level = prop
-            elif prop.name == 'battery-level':
-                self._attr_supported_features |= VacuumEntityFeature.BATTERY
-                self._prop_battery_level = prop
         # action
         for action in entity_data.actions:
             if action.name == 'start-sweep':
@@ -250,11 +245,6 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     def name(self) -> Optional[str]:
         """Name of the vacuum entity."""
         return self._device_name
-
-    @property
-    def battery_level(self) -> Optional[int]:
-        """The current battery level of the vacuum cleaner."""
-        return self.get_prop_value(prop=self._prop_battery_level)
 
     @property
     def fan_speed(self) -> Optional[str]:
