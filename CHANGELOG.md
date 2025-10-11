@@ -1,10 +1,23 @@
 # CHANGELOG
+## v0.4.3
+### Changed
+- Remove `VacuumEntityFeature.BATTERY` from the vacuum entity. [#1433](https://github.com/XiaoMi/ha_xiaomi_home/pull/1433)
+- Subscribe the proxy gateway child device up messages even though the device is offline. [#1393](https://github.com/XiaoMi/ha_xiaomi_home/pull/1393)
+### Fixed
+- Fix the integer value step. [#1388](https://github.com/XiaoMi/ha_xiaomi_home/pull/1388)
+- Fix the contact-state property value format. [#1387](https://github.com/XiaoMi/ha_xiaomi_home/pull/1387)
+- Fix the MIoT-Spec-V2 of xiaomi.airc.rr0r00 swing mode and hyd.airer.lyjpro current-position. [#1394](https://github.com/XiaoMi/ha_xiaomi_home/pull/1394)
+- Fix roidmi.vacuum.v60 siid=2 aiid=3 out field format.
+- Ignore unsupported properties of xiaomi.wifispeaker.l15a and 759413.aircondition.iez.
+- Add an alongside button entity for xiaomi.wifispeaker.l05b play action.
+- Add zhimi.fan.za1 fan mode description in zh_Hans.
+
 ## v0.4.2
 ### Changed
 - Set the battery service's start-charge action as the fallback action to support RETURN_HOME feature of the vacuum entity. [#1344](https://github.com/XiaoMi/ha_xiaomi_home/pull/1344)
 ### Fixed
 - Correct the property value format after expression calculation. [#1366](https://github.com/XiaoMi/ha_xiaomi_home/pull/1366)
-- Fix the MIoT-Spec-V2 of fix: xiaomi.fan.p70 and fix: xiaomi.fan.p76 fan level, xiaomi.airc.rr0r00 and xiaomi.airc.h43h00 humidity-range, and zhimi.humidifier.ca4 water level. [#1367](https://github.com/XiaoMi/ha_xiaomi_home/pull/1367)
+- Fix the MIoT-Spec-V2 of xiaomi.fan.p70 and xiaomi.fan.p76 fan level, xiaomi.airc.rr0r00 and xiaomi.airc.h43h00 humidity-range, and zhimi.humidifier.ca4 water level. [#1367](https://github.com/XiaoMi/ha_xiaomi_home/pull/1367)
 - Ignore the unsupported model hmpace.motion.v6nfc.
 - Delete all unsupported MIoT-Spec-V2 instances of narwa.vacuum.001 and narwa.vacuum.ax11. [#1355](https://github.com/XiaoMi/ha_xiaomi_home/pull/1355)
 
