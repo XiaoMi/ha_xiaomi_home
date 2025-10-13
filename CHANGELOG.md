@@ -11,6 +11,7 @@
 - Ignore unsupported properties of xiaomi.wifispeaker.l15a and 759413.aircondition.iez.
 - Add an alongside button entity for xiaomi.wifispeaker.l05b play action.
 - Add zhimi.fan.za1 fan mode description in zh_Hans.
+- Fix the error reported by pylint-4.0.0. [#1455](https://github.com/XiaoMi/ha_xiaomi_home/pull/1455)
 
 ## v0.4.2
 ### Changed
