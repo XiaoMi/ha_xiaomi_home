@@ -1,0 +1,160 @@
+{
+    "config": {
+        "other": {
+            "devices": "Cihazlar",
+            "found_central_gateway": ", Yerel Merkezi Hub Ağ Geçidi Bulundu",
+            "without_room": "Oda atanmamış",
+            "no_display": "Gösterme"
+        },
+        "control_mode": {
+            "auto": "Otomatik",
+            "cloud": "Bulut"
+        },
+        "statistics_logic": {
+            "or": "VEYA mantığı",
+            "and": "VE mantığı"
+        },
+        "filter_mode": {
+            "exclude": "Hariç tut",
+            "include": "Dahil et"
+        },
+        "connect_type": {
+            "0": "WiFi",
+            "1": "yunyi cihazı",
+            "2": "Bulut cihazı",
+            "3": "ZigBee",
+            "4": "webSocket",
+            "5": "Sanal cihaz",
+            "6": "BLE",
+            "7": "Yerel AP",
+            "8": "WiFi+BLE",
+            "9": "Diğer",
+            "10": "İşlev eklentisi",
+            "11": "Hücresel ağ",
+            "12": "Kablo",
+            "13": "NB-IoT",
+            "14": "Üçüncü taraf bulut erişimi",
+            "15": "Kızılötesi uzaktan kumanda cihazı",
+            "16": "BLE-Mesh",
+            "17": "Sanal cihaz grubu",
+            "18": "Ağ geçidi alt cihazı",
+            "19": "Güvenlik seviyesi ağ geçidi alt cihazı",
+            "22": "PLC",
+            "23": "Yalnızca kablo",
+            "24": "Matter",
+            "25": "WiFi+Hücresel ağ"
+        },
+        "room_name_rule": {
+            "none": "Senkronize etme",
+            "home_room": "Ev Adı ve Oda Adı (Xiaomi Home Yatak Odası)",
+            "room": "Oda Adı (Yatak Odası)",
+            "home": "Ev Adı (Xiaomi Home)"
+        },
+        "option_status": {
+            "enable": "Etkinleştir",
+            "disable": "Devre Dışı Bırak"
+        },
+        "binary_mode": {
+            "text": "Metin Sensör Varlığı",
+            "bool": "İkili Sensör Varlığı"
+        },
+        "device_state": {
+            "add": "Ekle",
+            "del": "Kullanılamıyor",
+            "offline": "Çevrimdışı"
+        },
+        "lan_ctrl_config": {
+            "notice_net_dup": "\r\n**[Bildirim]** Aynı ağa bağlı olabilecek birden fazla ağ kartı algılandı. Lütfen seçime dikkat edin.",
+            "net_unavailable": "Arayüz kullanılamıyor"
+        }
+    },
+    "oauth2": {
+        "success": {
+            "title": "Kimlik Doğrulama Başarılı",
+            "content": "Lütfen bu sayfayı kapatın ve 'İleri'ye tıklamak için hesap kimlik doğrulama sayfasına geri dönün.",
+            "button": "Kapat"
+        },
+        "fail": {
+            "title": "Kimlik Doğrulama Başarısız",
+            "content": "{error_msg}, lütfen bu sayfayı kapatın ve kimlik doğrulama bağlantısına tekrar tıklamak için hesap kimlik doğrulama sayfasına geri dönün.",
+            "button": "Kapat"
+        },
+        "error_msg": {
+            "-10100": "Geçersiz yanıt parametreleri ('code' veya 'state' alanı boş)",
+            "-10101": "Geçirilen 'state' alanı uyumsuz"
+        }
+    },
+    "miot": {
+        "client": {
+            "invalid_oauth_info": "Kimlik doğrulama bilgileri geçersiz, bulut bağlantısı kullanılamayacak, lütfen Xiaomi Home entegrasyon sayfasına girin, yeniden kimlik doğrulaması yapmak için 'Seçenekler'e tıklayın",
+            "invalid_device_cache": "Önbellek cihaz bilgileri anormal, lütfen Xiaomi Home entegrasyon sayfasına girin, yerel önbelleği güncellemek için 'Seçenekler->Cihaz listesini güncelle'ye tıklayın",
+            "invalid_cert_info": "Geçersiz kullanıcı sertifikası, yerel merkezi bağlantı kullanılamayacak, lütfen Xiaomi Home entegrasyon sayfasına girin, yeniden kimlik doğrulaması yapmak için 'Seçenekler'e tıklayın",
+            "device_cloud_error": "Buluttan cihaz bilgileri alınırken bir istisna oluştu, lütfen yerel ağ bağlantısını kontrol edin",
+            "xiaomi_home_error_title": "Xiaomi Home Entegrasyon Hatası",
+            "xiaomi_home_error": "**{nick_name}({uid}, {cloud_server})** hatası algılandı, lütfen yeniden yapılandırmak için seçenekler sayfasına girin.\n\n**Hata mesajı**: \n{message}",
+            "device_list_changed_title": "Xiaomi Home cihaz listesi değişiklikleri",
+            "device_list_changed": "**{nick_name}({uid}, {cloud_server})** cihaz bilgilerinin değiştiği algılandı, lütfen entegrasyon seçenekleri sayfasına girin, yerel cihaz bilgilerini güncellemek için `Seçenekler->Cihaz listesini güncelle`ye tıklayın.\n\nGeçerli ağ durumu: {network_status}\n{message}\n",
+            "device_list_add": "\n**{count} yeni cihaz:** \n{message}",
+            "device_list_del": "\n**{count} cihaz kullanılamıyor:** \n{message}",
+            "device_list_offline": "\n**{count} cihaz çevrimdışı:** \n{message}",
+            "network_status_online": "Çevrimiçi",
+            "network_status_offline": "Çevrimdışı",
+            "central_state_changed_title": "Merkezi Hub Ağ Geçidi Bağlantı Durumu",
+            "central_state_changed": "**{nick_name}({uid}, {cloud_server})** Xiaomi merkezi hub ağ geçidine yerel bağlantı: {conn_status}",
+            "central_state_connected": "Bağlandı",
+            "central_state_disconnected": "Bağlantı kesildi",
+            "device_exec_error": "Yürütme hatası"
+        }
+    },
+    "error": {
+        "common": {
+            "-10000": "Bilinmeyen hata",
+            "-10001": "Hizmet kullanılamıyor",
+            "-10002": "Geçersiz parametre",
+            "-10003": "Yetersiz kaynaklar",
+            "-10004": "İç hata",
+            "-10005": "Yetersiz izinler",
+            "-10006": "Yürütme zaman aşımı",
+            "-10007": "Cihaz çevrimdışı veya mevcut değil",
+            "-10020": "Yetkisiz (OAuth2)",
+            "-10030": "Geçersiz token (HTTP)",
+            "-10040": "Geçersiz mesaj formatı",
+            "-10050": "Geçersiz sertifika",
+            "-704000000": "Bilinmeyen hata",
+            "-704010000": "Yetkisiz (cihaz silinmiş olabilir)",
+            "-704014006": "Cihaz açıklaması bulunamadı",
+            "-704030013": "Özellik okunabilir değil",
+            "-704030023": "Özellik yazılabilir değil",
+            "-704030033": "Özellik abone edilebilir değil",
+            "-704040002": "Hizmet mevcut değil",
+            "-704040003": "Özellik mevcut değil",
+            "-704040004": "Olay mevcut değil",
+            "-704040005": "Eylem mevcut değil",
+            "-704040999": "Özellik çevrimiçi değil",
+            "-704042001": "Cihaz mevcut değil",
+            "-704042011": "Cihaz çevrimdışı",
+            "-704053036": "Cihaz işlemi zaman aşımı",
+            "-704053100": "Cihaz mevcut durumda bu işlemi gerçekleştiremiyor",
+            "-704083036": "Cihaz işlemi zaman aşımı",
+            "-704090001": "Cihaz mevcut değil",
+            "-704220008": "Geçersiz ID",
+            "-704220025": "Eylem parametre sayısı uyumsuz",
+            "-704220035": "Eylem parametre hatası",
+            "-704220043": "Özellik değer hatası",
+            "-704222034": "Eylem dönüş değer hatası",
+            "-705004000": "Bilinmeyen hata",
+            "-705004501": "Bilinmeyen hata",
+            "-705201013": "Özellik okunabilir değil",
+            "-705201015": "Eylem yürütme hatası",
+            "-705201023": "Özellik yazılabilir değil",
+            "-705201033": "Özellik abone edilebilir değil",
+            "-706012000": "Bilinmeyen hata",
+            "-706012013": "Özellik okunabilir değil",
+            "-706012015": "Eylem yürütme hatası",
+            "-706012023": "Özellik yazılabilir değil",
+            "-706012033": "Özellik abone edilebilir değil",
+            "-706012043": "Özellik değer hatası",
+            "-706014006": "Cihaz açıklaması bulunamadı"
+        }
+    }
+}
