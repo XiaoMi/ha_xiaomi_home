@@ -539,6 +539,7 @@ class _MipsClient(ABC):
         """
         self.__thread_check()
         if not self._mqtt or not self._mqtt.is_connected():
+            self.log_error(f'mips sub when not connected, {topic}')
             return
         try:
             if topic not in self._mips_sub_pending_map:
@@ -557,6 +558,7 @@ class _MipsClient(ABC):
         """
         self.__thread_check()
         if not self._mqtt or not self._mqtt.is_connected():
+            self.log_debug(f'mips unsub when not connected, {topic}')
             return
         try:
             result, mid = self._mqtt.unsubscribe(topic=topic)
@@ -666,6 +668,7 @@ class _MipsClient(ABC):
             _LOGGER.error("__on_connect, but mqtt is None")
             return
         if not self._mqtt.is_connected():
+            _LOGGER.error('__on_connect, but mqtt is disconnected')
             return
         self.log_info(f'mips connect, {flags}, {rc}, {props}')
         self.__reset_reconnect_time()
@@ -1017,9 +1020,11 @@ class MipsCloudClient(_MipsClient):
                     did, MIoTDeviceState.ONLINE if msg['event'] == 'online' else
                     MIoTDeviceState.OFFLINE, ctx)
 
-        if did.startswith('blt.'):
-            # MIoT cloud may not publish BLE device online/offline state message.
-            # Do not subscribe BLE device online/offline state.
+        if did.startswith('blt.') or did.startswith('proxy.'):
+            # MIoT cloud may not publish BLE device or proxy gateway child device
+            # online/offline state message.
+            # Do not subscribe BLE device or proxy gateway child device
+            # online/offline state.
             return True
         return self.__reg_broadcast_external(topic=topic,
                                              handler=on_state_msg,

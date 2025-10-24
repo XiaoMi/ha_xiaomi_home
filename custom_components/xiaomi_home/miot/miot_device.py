@@ -1154,7 +1154,9 @@ class MIoTServiceEntity(Entity):
         for prop in self.entity_data.props:
             if prop.iid != params["piid"] or prop.service.iid != params["siid"]:
                 continue
-            value: Any = prop.value_format(params["value"])
+            value: Any = prop.value_format(params['value'])
+            value = prop.eval_expr(value)
+            value = prop.value_format(value)
             self._prop_value_map[prop] = value
             if prop in self._prop_changed_subs:
                 self._prop_changed_subs[prop](prop, value)
@@ -1335,9 +1337,10 @@ class MIoTPropertyEntity(Entity):
                 piid=self.spec.iid))
 
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
-        _LOGGER.debug("property changed, %s", params)
-        self._value = self.spec.value_format(params["value"])
-        self._value = self.spec.eval_expr(self._value)
+        _LOGGER.debug('property changed, %s', params)
+        value: Any = self.spec.value_format(params['value'])
+        value = self.spec.eval_expr(value)
+        self._value = self.spec.value_format(value)
         if not self._pending_write_ha_state_timer:
             self.async_write_ha_state()
 

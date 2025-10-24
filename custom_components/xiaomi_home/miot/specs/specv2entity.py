@@ -167,8 +167,8 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             },
             'battery': {
                 'required': {
-                    'properties': {
-                        'battery-level': {'read'}
+                    'actions': {
+                        'start-charge'
                     }
                 }
             }

@@ -22,6 +22,10 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:2: urn:miot-spec-v2:
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h40h00:1:
   prop.10.6:
     unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1:
   prop.10.6:
     unit: none
@@ -41,6 +45,24 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1:
+  prop.10.6:
+    unit: none
+  prop.3.12:
+    name: vertical-swing-left-up
+  prop.3.13:
+    name: vertical-swing-left-down
+  prop.3.14:
+    name: vertical-swing-right-up
+  prop.3.15:
+    name: vertical-swing-right-down
+  prop.3.20:
+    name: horizontal-swing-left
+  prop.3.22:
+    name: horizontal-swing-right
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
   prop.3.7:
     value-range:
@@ -62,6 +84,8 @@ urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
     name: target-position-a
   prop.2.9:
     name: target-position-b
+  prop.2.11:
+    expr: (100-src_value)
 urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
   prop.2.3:
     value-range:
@@ -130,6 +154,12 @@ urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p69:1:0000D062:
   prop.2.4:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p70:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p76:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:zhimi-sa1:3:
   prop.2.2:
     name: fan-level-a
@@ -175,6 +205,10 @@ urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:2: urn:miot-spec-v2:device:hood
 urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3:
   prop.3.1:
     name: on-ventilation
+urn:miot-spec-v2:device:humidifier:0000A00E:zhimi-ca4:2:
+  prop.2.7:
+    unit: percentage
+    expr: round(src_value*0.83)
 urn:miot-spec-v2:device:kettle:0000A009:yunmi-r3:1:
   prop.3.1:
     unit: ppm
