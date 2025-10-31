@@ -66,7 +66,7 @@ class MIoTSpecValueRange:
     """MIoT SPEC value range class."""
     min_: int
     max_: int
-    step: int
+    step: int | float
 
     def __init__(self, value_range: Union[dict, list]) -> None:
         if isinstance(value_range, dict):
@@ -567,9 +567,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
             return
         self._value_range = MIoTSpecValueRange(value_range=value)
         if isinstance(value, list):
-            self.precision = len(str(
-                value[2]).split('.')[1].rstrip('0')) if '.' in str(
-                    value[2]) else 0
+            step_: str = format(value[2], '.10f').rstrip('0').rstrip('.')
+            self.precision = len(step_.split('.')[1]) if '.' in step_ else 0
 
     @property
     def value_list(self) -> Optional[MIoTSpecValueList]:
