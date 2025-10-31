@@ -237,6 +237,15 @@ urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
     - read
     - notify
     unit: mV
+urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-bmgl01:1:
+  prop.2.2:
+    value-list:
+    - value: 0
+      description: 0 Seconds
+    - value: 2
+      description: 2 Minutes
+    - value: 5
+      description: 5 Minutes
 urn:miot-spec-v2:device:motor-controller:0000A01D:adp-adswb4:1:0000C837:
   prop.2.1:
     name: motor-switch
