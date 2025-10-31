@@ -322,9 +322,15 @@ class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
         elif swing_mode == SWING_HORIZONTAL:
             await self.set_property_async(prop=self._prop_horizontal_swing,
                                           value=True)
+            if self._prop_vertical_swing:
+                await self.set_property_async(prop=self._prop_vertical_swing,
+                                              value=False)
         elif swing_mode == SWING_VERTICAL:
             await self.set_property_async(prop=self._prop_vertical_swing,
                                           value=True)
+            if self._prop_horizontal_swing:
+                await self.set_property_async(prop=self._prop_horizontal_swing,
+                                              value=False)
         elif swing_mode == SWING_OFF:
             if self._prop_horizontal_swing:
                 await self.set_property_async(prop=self._prop_horizontal_swing,
