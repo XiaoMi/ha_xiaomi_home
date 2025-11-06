@@ -285,7 +285,15 @@ urn:miot-spec-v2:device:motor-controller:0000A01D:adp-adswb4:1:0000C837:
     name: motor-switch
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:1: urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2:
+  prop.2.5:
+    name: people-number
   prop.2.8:
+    name: people-number
+  prop.2.11:
+    name: people-number
+  prop.2.14:
+    name: people-number
+  prop.2.17:
     name: people-number
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:
   prop.2.6:
