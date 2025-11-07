@@ -330,7 +330,7 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
 
 ## 多语言支持
 
-米家集成配置选项中可选择的集成使用的语言有简体中文、繁体中文、英文、西班牙语、俄语、法语、德语、日语这八种语言。目前，米家集成配置页面的简体中文和英文已经过人工校审，其他语言由机器翻译。如果您希望修改配置页面的词句，则需要修改 `custom_components/xiaomi_home/translations/` 以及 `custom_components/xiaomi_home/miot/i18n/` 目录下相应语言的 json 文件。
+米家集成配置选项中可选择的集成使用的语言有简体中文、繁体中文、英文、西班牙语、俄语、法语、德语、日语、意大利语、荷兰语、葡萄牙语、巴西葡萄牙语、土耳其语这十三种语言。目前，米家集成配置页面的简体中文和英文已经过人工校审，其他语言由机器翻译或社区贡献。如果您希望修改配置页面的词句，则需要修改 `custom_components/xiaomi_home/translations/` 以及 `custom_components/xiaomi_home/miot/i18n/` 目录下相应语言的 json 文件。
 
 在显示 Home Assistant 实体名称时，米家集成会从小米云下载设备厂商为设备配置的多语言文件，该文件包含设备 MIoT-Spec-V2 实例的多语言翻译。 `multi_lang.json` 是本地维护的多语言配置字典，其优先级高于从云端获取的多语言文件，可用于补充或修改设备的多语言翻译。
 
@@ -348,7 +348,7 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
 
 `multi_lang.json` 的键值为 MIoT-Spec-V2 设备实例的 urn （不含版本号“version”字段）。
 
-language code 为语言代码，取值为 zh-Hans、zh-Hant、en、es、ru、fr、de、ja （对应上述米家集成可选的八种语言）。
+language code 为语言代码，取值为 zh-Hans、zh-Hant、en、es、ru、fr、de、ja、it、nl、pt、pt-BR、tr（对应上述米家集成可选的十三种语言）。
 
 instance code 为 MIoT-Spec-V2 实例代码，格式如下：
 
