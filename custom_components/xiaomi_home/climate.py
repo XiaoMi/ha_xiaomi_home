@@ -523,6 +523,8 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
                         self._hvac_mode_map[item.value] = HVACMode.DRY
                     elif item.name in {'fan'}:
                         self._hvac_mode_map[item.value] = HVACMode.FAN_ONLY
+                    elif item.name in {'heat_cool'}:
+                        self._hvac_mode_map[item.value] = HVACMode.HEAT_COOL
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
                 self._prop_mode = prop
             elif prop.name == 'ac-state':
