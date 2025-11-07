@@ -116,6 +116,7 @@ INTEGRATION_LANGUAGES = {
     'nl': 'Nederlands',
     'pt': 'Português',
     'pt-BR': 'Português (Brasil)',
+    'tr': 'Türkçe',
     'ru': 'Русский',
     'zh-Hans': '简体中文',
     'zh-Hant': '繁體中文'
