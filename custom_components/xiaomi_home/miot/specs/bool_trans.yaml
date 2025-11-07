@@ -96,6 +96,9 @@ translate:
     zh-Hant:
       'false': 假
       'true': 真
+    tr:
+      'false': Yanlış
+      'true': Doğru
   contact_state:
     de:
       'false': Kein Kontakt
@@ -133,6 +136,9 @@ translate:
     zh-Hant:
       'false': 分離
       'true': 接觸
+    tr:
+      'false': Temas Yok
+      'true': Temas
   motion_state:
     de:
       'false': Keine Bewegung erkannt
@@ -170,6 +176,9 @@ translate:
     zh-Hant:
       'false': 無人
       'true': 有人
+    tr:
+      'false': Hareket Algılanmadı
+      'true': Hareket Algılandı
   open_close:
     de:
       'false': Schließen
@@ -207,6 +216,9 @@ translate:
     zh-Hant:
       'false': 關閉
       'true': 開啟
+    tr:
+      'false': Kapalı
+      'true': Açık
   yes_no:
     de:
       'false': Nein
@@ -244,3 +256,6 @@ translate:
     zh-Hant:
       'false': 否
       'true': 是
+    tr:
+      'false': Hayır
+      'true': Evet
