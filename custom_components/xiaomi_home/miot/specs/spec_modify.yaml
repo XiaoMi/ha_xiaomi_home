@@ -484,6 +484,24 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:1:0000D05A:
+  prop.3.2:
+    unit: days
+  prop.3.3:
+    unit: days
+  prop.3.4:
+    unit: L
+  prop.3.5:
+    unit: L
+  prop.5.2:
+    unit: days
+  prop.5.3:
+    unit: days
+  prop.5.4:
+    unit: L
+  prop.5.5:
+    unit: L
+urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:2:0000D05A: urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:1:0000D05A
 urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:
   prop.4.1:
     unit: ppm
