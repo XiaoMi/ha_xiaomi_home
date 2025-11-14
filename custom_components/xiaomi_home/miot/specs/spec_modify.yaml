@@ -138,6 +138,12 @@ urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
 urn:miot-spec-v2:device:curtain:0000A00C:bjkcz-kczble:1:0000D031:
   prop.2.2:
     name: status-a
+urn:miot-spec-v2:device:dehumidifier:0000A02D:xiaomi-lite:1:
+  prop.3.2:
+    value-range:
+    - -30
+    - 100
+    - 0.1
 urn:miot-spec-v2:device:electronic-valve:0000A0A7:sanmei-s1:1:
   prop.3.1:
     format: float
