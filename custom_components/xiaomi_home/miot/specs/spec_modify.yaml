@@ -92,6 +92,12 @@ urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:2: urn:miot-spec-v2:dev
 urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3:
   prop.3.5:
     expr: (src_value*6)
+urn:miot-spec-v2:device:dehumidifier:0000A02D:xiaomi-lite:1:
+  prop.3.2:
+    value-range:
+    - -30
+    - 100
+    - 0.1
 urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
   prop.2.3:
     name: current-position-a
