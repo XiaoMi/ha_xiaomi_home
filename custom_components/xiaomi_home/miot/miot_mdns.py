@@ -232,9 +232,10 @@ class MipsService:
             for item in list(self._services.values()):
                 if item['name'] != name:
                     continue
-                service_data = self._services.pop(item['group_id'], {})
-                self.__call_service_change(
-                    state=MipsServiceState.REMOVED, data=service_data)
+            # Ignore mdns REMOVED package. Let the connection close by itself.
+                # service_data = self._services.pop(item['group_id'], {})
+                # self.__call_service_change(
+                #     state=MipsServiceState.REMOVED, data=service_data)
                 return
         self._main_loop.create_task(
             self.__request_service_info_async(zeroconf, service_type, name))

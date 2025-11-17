@@ -1048,11 +1048,11 @@ class MIoTClient:
 
         mips = self._mips_local.get(group_id, None)
         if mips:
-            if state == MipsServiceState.REMOVED:
-                mips.disconnect()
-                self._mips_local.pop(group_id, None)
-                return
-            if (
+            # if state == MipsServiceState.REMOVED:
+            #     mips.disconnect()
+            #     self._mips_local.pop(group_id, None)
+            #     return
+            if ( # ADDED or UPDATED
                 mips.client_id == self._entry_data['virtual_did']
                 and mips.host == data['addresses'][0]
                 and mips.port == data['port']
