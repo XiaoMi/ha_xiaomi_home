@@ -145,6 +145,25 @@ urn:miot-spec-v2:device:dehumidifier:0000A02D:xiaomi-lite:1:
     - -30
     - 100
     - 0.1
+urn:miot-spec-v2:device:electronic-valve:0000A0A7:lxzn-02:1:0000C833:
+  prop.3.1:
+    format: float
+    value-range:
+    - 0
+    - 999999
+    - 0.01
+    expr: (src_value/100)
+  prop.3.2:
+    unit: mA
+  prop.3.3:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
+    expr: (src_value/10)
+  prop.4.1:
+    unit: kW
 urn:miot-spec-v2:device:electronic-valve:0000A0A7:sanmei-s1:1:
   prop.3.1:
     format: float
