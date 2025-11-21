@@ -1040,6 +1040,7 @@ class MIoTServiceEntity(Entity):
                 f'set property failed, property is None, '
                 f'{self.entity_id}, {self.name}')
         value = prop.value_format(value)
+        value = prop.value_precision(value)
         if prop not in self.entity_data.props:
             raise RuntimeError(
                 f'set property failed, unknown property, '
@@ -1077,9 +1078,11 @@ class MIoTServiceEntity(Entity):
                 'get property failed, not readable, %s, %s, %s',
                 self.entity_id, self.name, prop.name)
             return None
-        result = prop.value_format(
+        value: Any = prop.value_format(
             await self.miot_device.miot_client.get_prop_async(
                 did=self.miot_device.did, siid=prop.service.iid, piid=prop.iid))
+        value = prop.eval_expr(value)
+        result = prop.value_precision(value)
         if result != self._prop_value_map[prop]:
             self._prop_value_map[prop] = result
             self.async_write_ha_state()
@@ -1110,7 +1113,7 @@ class MIoTServiceEntity(Entity):
                 continue
             value: Any = prop.value_format(params['value'])
             value = prop.eval_expr(value)
-            value = prop.value_format(value)
+            value = prop.value_precision(value)
             self._prop_value_map[prop] = value
             if prop in self._prop_changed_subs:
                 self._prop_changed_subs[prop](prop, value)
@@ -1258,6 +1261,7 @@ class MIoTPropertyEntity(Entity):
                 f'set property failed, not writable, '
                 f'{self.entity_id}, {self.name}')
         value = self.spec.value_format(value)
+        value = self.spec.value_precision(value)
         try:
             await self.miot_device.miot_client.set_prop_async(
                 did=self.miot_device.did, siid=self.spec.service.iid,
@@ -1275,16 +1279,19 @@ class MIoTPropertyEntity(Entity):
                 'get property failed, not readable, %s, %s',
                 self.entity_id, self.name)
             return None
-        return self.spec.value_format(
+        value: Any = self.spec.value_format(
             await self.miot_device.miot_client.get_prop_async(
                 did=self.miot_device.did, siid=self.spec.service.iid,
                 piid=self.spec.iid))
+        value = self.spec.eval_expr(value)
+        result = self.spec.value_precision(value)
+        return result
 
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
         value: Any = self.spec.value_format(params['value'])
         value = self.spec.eval_expr(value)
-        self._value = self.spec.value_format(value)
+        self._value = self.spec.value_precision(value)
         if not self._pending_write_ha_state_timer:
             self.async_write_ha_state()
 
