@@ -748,6 +748,7 @@ class MIoTDevice:
             'w': UnitOfPower.WATT,
             'W': UnitOfPower.WATT,
             'kW': UnitOfPower.KILO_WATT,
+            'Wh': UnitOfEnergy.WATT_HOUR,
             'kWh': UnitOfEnergy.KILO_WATT_HOUR,
             'A': UnitOfElectricCurrent.AMPERE,
             'mA': UnitOfElectricCurrent.MILLIAMPERE,

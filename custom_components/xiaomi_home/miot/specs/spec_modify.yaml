@@ -371,6 +371,19 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2d:1:
   prop.3.2:
     unit: mA
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp7pd:1:
+  prop.11.1:
+    unit: Wh
+    value-range:
+    - 0
+    - 65535
+    - 0.001
+    expr: (src_value*1000)
+  prop.11.4:
+    value-range:
+    - 0
+    - 10000
+    - 0.01
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
   prop.11.1:
     format: float
