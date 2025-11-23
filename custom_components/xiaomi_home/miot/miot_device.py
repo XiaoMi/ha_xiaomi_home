@@ -1282,7 +1282,20 @@ class MIoTPropertyEntity(Entity):
 
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
-        value: Any = self.spec.value_format(params['value'])
+
+        raw_value = params["value"]
+
+        if isinstance(raw_value, str):
+            try:
+                numeric_value = float(raw_value)
+                if numeric_value.is_integer():
+                    raw_value = int(numeric_value)
+                else:
+                    raw_value = numeric_value
+            except ValueError:
+                pass
+
+        value = self.spec.value_format(raw_value)
         value = self.spec.eval_expr(value)
         self._value = self.spec.value_format(value)
         if not self._pending_write_ha_state_timer:
