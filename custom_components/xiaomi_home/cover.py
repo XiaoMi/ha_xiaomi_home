@@ -143,6 +143,8 @@ class Cover(MIoTServiceEntity, CoverEntity):
                                   self.entity_id)
                     continue
                 for item in prop.value_list.items:
+                    item_str: str = item.name
+                    item_name: str = re.sub(r'[^a-z]', '', item_str)
                     if item.name in {'open', 'up'}:
                         self._attr_supported_features |= (
                             CoverEntityFeature.OPEN)
