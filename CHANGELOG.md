@@ -1,4 +1,13 @@
 # CHANGELOG
+## v0.4.4
+### Added
+- Add Turkish language support. [#1468](https://github.com/XiaoMi/ha_xiaomi_home/pull/1468)
+### Fixed
+- Stop MQTT internal loop immediately when main loop is closed. [#1465](https://github.com/XiaoMi/ha_xiaomi_home/pull/1465)
+- Fix the float value precision. [#1485](https://github.com/XiaoMi/ha_xiaomi_home/pull/1485)
+- Fix the climate entity swing mode setting. [#1486](https://github.com/XiaoMi/ha_xiaomi_home/pull/1486)
+- Fix the MIoT-Spec-V2 of cykj.hood.jyj22 urn version 4, lumi.motion.bmgl01 siid=2 piid=2 value-list, ykcn.valve.cbcs power property value unit, ainice.sensor_occupy.3b people-number property and qdhkl.airc.a42 hvac mode. [#1496](https://github.com/XiaoMi/ha_xiaomi_home/pull/1496)
+
 ## v0.4.3
 ### Changed
 - Remove `VacuumEntityFeature.BATTERY` from the vacuum entity. [#1433](https://github.com/XiaoMi/ha_xiaomi_home/pull/1433)

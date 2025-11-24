@@ -1679,7 +1679,7 @@
   "urn:miot-spec-v2:device:vacuum:0000A006:roidmi-v60:3": [
     {
       "iid": 2,
-      "type": "urn:miot-spec-v2:service:vacuum:00007810:roidmi-v60:1",
+      "type": "urn:miot-spec-v2:service:cleaner:00007810:roidmi-v60:1",
       "description": "Robot Cleaner",
       "actions": [
         {

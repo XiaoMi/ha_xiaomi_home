@@ -5,6 +5,12 @@
       "service:003:property:001:valuelist:001": "Dry"
     }
   },
+  "urn:miot-spec-v2:device:electronic-valve:0000A0A7:ykcn-cbcs": {
+    "zh-Hans": {
+      "service:004:property:001": "功率过高-阈值设置",
+      "service:004:property:009": "欠压告警-阈值设置"
+    }
+  },
   "urn:miot-spec-v2:device:fan:0000A005:zhimi-za1": {
     "zh-Hans": {
       "service:002:property:005:valuelist:000": "自然风",

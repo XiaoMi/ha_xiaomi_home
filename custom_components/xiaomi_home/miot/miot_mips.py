@@ -619,6 +619,13 @@ class _MipsClient(ABC):
 
     def __mqtt_loop_handler(self) -> None:
         try:
+            # If the main loop is closed, stop the internal loop immediately
+            if self.main_loop.is_closed():
+                self.log_debug(
+                    'The main loop is closed, stop the internal loop.')
+                if not self._internal_loop.is_closed():
+                    self._internal_loop.stop()
+                return
             if self._mqtt:
                 self._mqtt.loop_read()
             if self._mqtt:

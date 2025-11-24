@@ -328,7 +328,7 @@ Device information service (urn:miot-spec-v2:service:device-information:00007801
 
 ## Multiple Language Support
 
-There are 8 languages available for selection in the config flow language option of Xiaomi Home, including Simplified Chinese, Traditional Chinese, English, Spanish, Russian, French, German, and Japanese. The config flow page in Simplified Chinese and English has been manually reviewed by the developer. Other languages are translated by machine translation. If you want to modify the words and sentences in the config flow page, you need to modify the json file of the certain language in `custom_components/xiaomi_home/translations/` and `custom_components/xiaomi_home/miot/i18n/` directory.
+There are 13 languages available for selection in the config flow language option of Xiaomi Home, including Simplified Chinese, Traditional Chinese, English, Spanish, Russian, French, German, Japanese, Italian, Dutch, Portuguese, Brazilian Portuguese, and Turkish. The config flow page in Simplified Chinese and English has been manually reviewed by the developer. Other languages are translated by machine translation or community contributions. If you want to modify the words and sentences in the config flow page, you need to modify the json file of the certain language in `custom_components/xiaomi_home/translations/` and `custom_components/xiaomi_home/miot/i18n/` directory.
 
 When displaying Home Assistant entity name, Xiaomi Home downloads the multiple language file configured by the device vendor from MIoT Cloud, which contains translations for MIoT-Spec-V2 instances of the device. `multi_lang.json` is a locally maintained multiple language dictionary, which has a higher priority than the multiple language file obtained from the cloud and can be used to supplement or modify the multiple language translation of devices.
 
@@ -346,7 +346,7 @@ The format of `multi_lang.json` is as follows.
 
 The key of `multi_lang.json` dictionary is the urn excluding the "version" field of the MIoT-Spec-V2 device instance.
 
-The language code is zh-Hans, zh-Hant, en, es, ru, fr, de, or ja, corresponding to the 8 selectable languages mentioned above.
+The language code is zh-Hans, zh-Hant, en, es, ru, fr, de, ja, it, nl, pt, pt-BR, or tr, corresponding to the 13 selectable languages mentioned above.
 
 The instance code is the code of the MIoT-Spec-V2 instance, which is in the format of:
 
