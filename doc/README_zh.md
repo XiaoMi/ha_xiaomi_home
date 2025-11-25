@@ -386,6 +386,7 @@ siid、piid、eiid、aiid、value 均为十进制三位整数。
 - 贡献指南： [English](../CONTRIBUTING.md) | [简体中文](./CONTRIBUTING_zh.md)
 - [更新日志](../CHANGELOG.md)
 - 开发文档： https://developers.home-assistant.io/docs/creating_component_index
+- [常见问题](https://github.com/XiaoMi/ha_xiaomi_home/wiki)
 
 ## 目录结构
 
