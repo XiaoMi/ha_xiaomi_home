@@ -107,6 +107,7 @@ class Cover(MIoTServiceEntity, CoverEntity):
     _prop_position_value_range: Optional[int]
     _prop_pos_closing: bool
     _prop_pos_opening: bool
+    _reverse_position: bool
 
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
@@ -134,6 +135,8 @@ class Cover(MIoTServiceEntity, CoverEntity):
         self._prop_position_value_range = None
         self._prop_pos_closing = False
         self._prop_pos_opening = False
+        # 新增：针对airer类型设备反转位置
+        self._reverse_position = (entity_data.spec.device_class == CoverDeviceClass.BLIND)
 
         # properties
         for prop in entity_data.props:
@@ -257,6 +260,10 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if current is not None:
             self._prop_pos_opening = pos > current
             self._prop_pos_closing = pos < current
+            # 针对airer类型设备反转位置
+            if self._reverse_position:
+                pos = 100 - pos
+              
         pos = round(pos * self._prop_position_value_range / 100)
         await self.set_property_async(prop=self._prop_target_position,
                                       value=pos)
@@ -284,6 +291,9 @@ class Cover(MIoTServiceEntity, CoverEntity):
             pos = 0
         elif pos >= (100 - self._cover_dead_zone_width):
             pos = 100
+        # 针对airer类型设备反转位置
+        if self._reverse_position:
+            pos = 100 - pos
         return pos
 
     @property
