@@ -1,4 +1,12 @@
 # CHANGELOG
+## v0.4.5
+### Changed
+- Ignore mdns REMOVED package. [#1296](https://github.com/XiaoMi/ha_xiaomi_home/pull/1296)
+- Format value type first, then evaluate by expression, and set precision at last. [#1516](https://github.com/XiaoMi/ha_xiaomi_home/pull/1516)
+### Fixed
+- Fix xiaomi.derh.lite temperature precision. [#1505](https://github.com/XiaoMi/ha_xiaomi_home/pull/1505)
+- Fix xiaomi.waterpuri.s1200g filter property unit, lxzn.valve.02 electricity property unit, xiaomi.aircondition.c24 power consumption device class, and cuco.plug.cp7pd power consumption and power value precision. [#1517](https://github.com/XiaoMi/ha_xiaomi_home/pull/1517)
+
 ## v0.4.4
 ### Added
 - Add Turkish language support. [#1468](https://github.com/XiaoMi/ha_xiaomi_home/pull/1468)
