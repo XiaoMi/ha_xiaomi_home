@@ -60,6 +60,7 @@ NETWORK_REFRESH_INTERVAL: int = 30
 OAUTH2_CLIENT_ID: str = '2882303761520251711'
 OAUTH2_AUTH_URL: str = 'https://account.xiaomi.com/oauth2/authorize'
 DEFAULT_OAUTH2_API_HOST: str = 'ha.api.io.mi.com'
+DEFAULT_CLOUD_BROKER_HOST: str = 'ha.mqtt.io.mi.com'
 
 # seconds, 14 days
 SPEC_STD_LIB_EFFECTIVE_TIME = 3600*24*14

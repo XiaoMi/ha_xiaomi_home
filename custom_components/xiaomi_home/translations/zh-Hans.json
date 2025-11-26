@@ -21,7 +21,7 @@
             },
             "network_detect_config": {
                 "title": "网络检测配置",
-                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`。",
+                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{broker_host}`。",
                 "data": {
                     "network_detect_addr": "网络检测地址",
                     "check_network_deps": "检测网络依赖项"
@@ -176,7 +176,7 @@
             },
             "network_detect_config": {
                 "title": "网络检测配置",
-                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{cloud_server}-ha.mqtt.io.mi.com:8883`。",
+                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{broker_host}`。",
                 "data": {
                     "network_detect_addr": "网络检测地址",
                     "check_network_deps": "检测网络依赖项"

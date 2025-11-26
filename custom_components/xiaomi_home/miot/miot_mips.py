@@ -68,7 +68,11 @@ from paho.mqtt.client import (
 
 # pylint: disable=relative-beyond-top-level
 from .common import MIoTMatcher
-from .const import UNSUPPORTED_MODELS, MIHOME_MQTT_KEEPALIVE
+from .const import (
+    UNSUPPORTED_MODELS,
+    MIHOME_MQTT_KEEPALIVE,
+    DEFAULT_CLOUD_BROKER_HOST
+)
 from .miot_error import MIoTErrorCode, MIoTMipsError
 
 _LOGGER = logging.getLogger(__name__)
@@ -858,7 +862,8 @@ class MipsCloudClient(_MipsClient):
     ) -> None:
         self._msg_matcher = MIoTMatcher()
         super().__init__(
-            client_id=f'ha.{uuid}', host=f'{cloud_server}-ha.mqtt.io.mi.com',
+            client_id=f'ha.{uuid}',
+            host=f'{cloud_server}-{DEFAULT_CLOUD_BROKER_HOST}',
             port=port, username=app_id, password=token, loop=loop)
 
     @final
