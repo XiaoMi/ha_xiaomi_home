@@ -384,6 +384,7 @@ Example:
 - Contribution Guidelines: [English](./CONTRIBUTING.md) | [简体中文](./doc/CONTRIBUTING_zh.md)
 - [ChangeLog](./CHANGELOG.md)
 - Development Documents: https://developers.home-assistant.io/docs/creating_component_index
+- [FAQ](https://github.com/XiaoMi/ha_xiaomi_home/wiki)
 
 ## Directory Structure
 

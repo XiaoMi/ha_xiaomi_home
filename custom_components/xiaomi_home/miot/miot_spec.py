@@ -599,15 +599,25 @@ class MIoTSpecProperty(_MIoTSpecBase):
     def value_format(self, value: Any) -> Any:
         if value is None:
             return None
+        if isinstance(value, str):
+            if self.format_ == int:
+                value = int(float(value))
+            elif self.format_ == float:
+                value = float(value)
+        if self.format_ == bool:
+            return bool(value in [True, 1, 'True', 'true', '1'])
+        return value
+
+    def value_precision(self, value: Any) -> Any:
+        if value is None:
+            return None
+        if self.format_ == float:
+            return round(value, self.precision)
         if self.format_ == int:
             if self.value_range is None:
                 return int(round(value))
             return int(
                 round(value / self.value_range.step) * self.value_range.step)
-        if self.format_ == float:
-            return round(value, self.precision)
-        if self.format_ == bool:
-            return bool(value in [True, 1, 'True', 'true', '1'])
         return value
 
     def dump(self) -> dict:

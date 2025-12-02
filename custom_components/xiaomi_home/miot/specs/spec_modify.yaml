@@ -26,6 +26,7 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1:
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1:
   prop.8.6:
+    name: power-consumption
     unit: kWh
   prop.10.6:
     unit: none
@@ -144,6 +145,25 @@ urn:miot-spec-v2:device:dehumidifier:0000A02D:xiaomi-lite:1:
     - -30
     - 100
     - 0.1
+urn:miot-spec-v2:device:electronic-valve:0000A0A7:lxzn-02:1:0000C833:
+  prop.3.1:
+    format: float
+    value-range:
+    - 0
+    - 999999
+    - 0.01
+    expr: (src_value/100)
+  prop.3.2:
+    unit: mA
+  prop.3.3:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
+    expr: (src_value/10)
+  prop.4.1:
+    unit: kW
 urn:miot-spec-v2:device:electronic-valve:0000A0A7:sanmei-s1:1:
   prop.3.1:
     format: float
@@ -370,6 +390,19 @@ urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2d:1:
   prop.3.2:
     unit: mA
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp7pd:1:
+  prop.11.1:
+    unit: Wh
+    value-range:
+    - 0
+    - 65535
+    - 0.001
+    expr: (src_value*1000)
+  prop.11.4:
+    value-range:
+    - 0
+    - 10000
+    - 0.01
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
   prop.11.1:
     format: float
@@ -490,6 +523,24 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:1:0000D05A:
+  prop.3.2:
+    unit: days
+  prop.3.3:
+    unit: days
+  prop.3.4:
+    unit: L
+  prop.3.5:
+    unit: L
+  prop.5.2:
+    unit: days
+  prop.5.3:
+    unit: days
+  prop.5.4:
+    unit: L
+  prop.5.5:
+    unit: L
+urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:2:0000D05A: urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:1:0000D05A
 urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:
   prop.4.1:
     unit: ppm

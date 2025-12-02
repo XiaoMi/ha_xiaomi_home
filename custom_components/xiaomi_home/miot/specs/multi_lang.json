@@ -5,6 +5,11 @@
       "service:003:property:001:valuelist:001": "Dry"
     }
   },
+  "urn:miot-spec-v2:device:electronic-valve:0000A0A7:lxzn-02": {
+    "zh-Hans": {
+      "service:004:property:001": "功率过高-阈值设置"
+    }
+  },
   "urn:miot-spec-v2:device:electronic-valve:0000A0A7:ykcn-cbcs": {
     "zh-Hans": {
       "service:004:property:001": "功率过高-阈值设置",
