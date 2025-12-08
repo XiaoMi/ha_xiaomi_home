@@ -437,9 +437,9 @@ class FeatureState(MIoTServiceEntity, MediaPlayerEntity):
         """The current state."""
         current_state = self.get_prop_value(
             prop=self._prop_playing_state) if self._prop_playing_state else None
-        return (self.get_map_value(map_=self._playing_state_map,
-                                   key=current_state)
-                if current_state else MediaPlayerState.ON)
+        return (MediaPlayerState.ON if
+                (current_state is None) else self.get_map_value(
+                    map_=self._playing_state_map, key=current_state))
 
 
 class WifiSpeaker(FeatureVolumeSet, FeatureVolumeMute, FeaturePlay,
