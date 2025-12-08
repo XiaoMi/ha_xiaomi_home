@@ -430,15 +430,16 @@ class FeatureState(MIoTServiceEntity, MediaPlayerEntity):
                     elif item.name in {'pause', 'paused'}:
                         self._playing_state_map[
                             item.value] = MediaPlayerState.PAUSED
-                    self._prop_playing_state = prop
+                self._prop_playing_state = prop
 
     @property
     def state(self) -> Optional[MediaPlayerState]:
         """The current state."""
+        current_state = self.get_prop_value(
+            prop=self._prop_playing_state) if self._prop_playing_state else None
         return (self.get_map_value(map_=self._playing_state_map,
-                                   key=self.get_prop_value(
-                                       prop=self._prop_playing_state))
-                if self._prop_playing_state else MediaPlayerState.ON)
+                                   key=current_state)
+                if current_state else MediaPlayerState.ON)
 
 
 class WifiSpeaker(FeatureVolumeSet, FeatureVolumeMute, FeaturePlay,
