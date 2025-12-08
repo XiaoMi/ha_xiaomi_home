@@ -89,6 +89,16 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1:
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-fresh:0000A012:daikin-k33:1:
+  prop.2.1:
+    name: ac-on
+    format: string
+  prop.2.3:
+    name: ac-mode
+    format: string
+  prop.2.5:
+    name: ac-fan-level
+    format: string
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
   prop.3.7:
     value-range:
