@@ -519,15 +519,12 @@ class _MipsClient(ABC):
         if not self._mqtt or not self._mqtt.is_connected():
             self.log_error(f'mips sub when not connected, {topic}')
             return
-        try:
-            if topic not in self._mips_sub_pending_map:
-                self._mips_sub_pending_map[topic] = 0
-            if not self._mips_sub_pending_timer:
-                self._mips_sub_pending_timer = self._internal_loop.call_later(
-                    0.01, self.__mips_sub_internal_pending_handler, topic)
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            # Catch all exception
-            self.log_error(f'mips sub internal error, {topic}. {err}')
+
+        if topic not in self._mips_sub_pending_map:
+            self._mips_sub_pending_map[topic] = 0
+        if not self._mips_sub_pending_timer:
+            self._mips_sub_pending_timer = self._internal_loop.call_later(
+                0.01, self.__mips_sub_internal_pending_handler, topic)
 
     @final
     def _mips_unsub_internal(self, topic: str) -> None:
@@ -736,11 +733,16 @@ class _MipsClient(ABC):
                 self.log_error(f'retry mips sub internal error, {topic}')
                 continue
             subbed_count += 1
-            result, mid = self._mqtt.subscribe(topic, qos=self.MIPS_QOS)
-            if result == MQTT_ERR_SUCCESS:
-                self._mips_sub_pending_map.pop(topic)
-                self.log_debug(f'mips sub internal success, {topic}')
-                continue
+            result = mid = None
+            try:
+                result, mid = self._mqtt.subscribe(topic, qos=self.MIPS_QOS)
+                if result == MQTT_ERR_SUCCESS:
+                    self._mips_sub_pending_map.pop(topic)
+                    self.log_debug(f'mips sub internal success, {topic}')
+                    continue
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                # Catch all exception
+                self.log_error(f'mips sub internal error, {topic}. {err}')
             self._mips_sub_pending_map[topic] = count+1
             self.log_error(
                 f'retry mips sub internal, {count}, {topic}, {result}, {mid}')
