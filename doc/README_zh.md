@@ -93,11 +93,11 @@ git checkout v1.0.0
 
 - 米家集成是否支持本地化控制？
 
-  米家集成支持通过[小米中枢网关](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search)（固件版本 3.3.0_0023 及以上）或内置中枢网关（软件版本 0.8.9 及以上）的米家设备实现本地化控制。如果没有小米中枢网关或其他带中枢网关功能的设备，那么所有控制指令都会通过小米云发送。支持 Home Assistant 本地化控制的小米中枢网关（含内置中枢网关）的固件尚未发布，固件升级计划请参阅 MIoT 团队的通知。
+  米家集成支持通过[小米中枢网关](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search)（固件版本 3.3.0_0023 及以上）或[内置中枢网关](https://github.com/XiaoMi/ha_xiaomi_home/wiki/Central-hub-gateway-device-models)（软件版本 0.8.9 及以上）的米家设备实现本地化控制。如果没有小米中枢网关或其他带中枢网关功能的设备，那么所有控制指令都会通过小米云发送。支持 Home Assistant 本地化控制的小米中枢网关（含内置中枢网关）的固件已发布。
 
   小米中枢网关仅在中国大陆可用，在其他地区不可用。
 
-  米家集成也能通过开启小米局域网控制功能实现部分本地化控制效果。小米局域网控制功能只能控制与 Home Assistant 处于同一局域网内的 IP 设备（使用 WiFi、网线连接路由器的设备），无法控制蓝牙 Mesh、ZigBee 等协议接入的设备。该功能可能会引起一些异常，我们建议不要使用该功能。小米局域网控制功能开启方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新局域网控制配置
+  米家集成也能通过开启小米局域网控制功能实现部分本地化控制效果。小米局域网控制功能只能控制与 Home Assistant 处于同一局域网内的 IP 设备（使用 WiFi、网线连接路由器的设备），无法控制蓝牙 Mesh、ZigBee 等协议接入的设备。该功能可能会引起一些异常，我们建议不要使用该功能。小米局域网控制功能开启方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新局域网控制配置。
 
   小米局域网控制功能不受地区限制，在全球范围内均可用。如果 Home Assistant 所在的局域网内存在中枢网关，那么即便米家集成开启了小米局域网控制功能，该功能也不会生效。
 

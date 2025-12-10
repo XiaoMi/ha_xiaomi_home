@@ -91,13 +91,13 @@ Xiaomi Home Integration and the affiliated cloud interface is provided by Xiaomi
 
   Yes, it supports multiple Xiaomi accounts. Furthermore, Xiaomi Home Integration allows that devices belonging to different accounts can be added to a same area.
 
-- Does Xiaomi Home Integration support local control?
+- Does Xiaomi Home Integration support local mode?
 
-  Local control is implemented by [Xiaomi Central Hub Gateway](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search) (firmware version 3.3.0_0023 and above) or Xiaomi smart devices with built-in central hub gateway (software version 0.8.9 and above) inside. If you do not have a Xiaomi central hub gateway or other devices having central hub gateway function, all control commands are sent through Xiaomi Cloud. The firmware for Xiaomi central hub gateway including the built-in central hub gateway supporting Home Assistant local control feature has not been released yet. Please refer to MIoT team's notification for upgrade plans.
+  Local mode is implemented by [Xiaomi Central Hub Gateway](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search) (firmware version 3.3.0_0023 and above) or Xiaomi smart devices with [built-in central hub gateway](https://github.com/XiaoMi/ha_xiaomi_home/wiki/Central-hub-gateway-device-models) (software version 0.8.9 and above) inside. If you do not have a Xiaomi central hub gateway or other devices having central hub gateway function, all control commands are sent through Xiaomi Cloud. The firmware for Xiaomi central hub gateway including the built-in central hub gateway supporting Home Assistant local mode feature has been released.
 
   Xiaomi central hub gateway is only available in mainland China. In other regions, it is not available.
 
-  Xiaomi Home Integration can also implement partial local control by enabling Xiaomi LAN control function. Xiaomi LAN control function can only control IP devices (devices connected to the router via WiFi or ethernet cable) in the same local area network as Home Assistant. It cannot control BLE Mesh, ZigBee, etc. devices. This function may cause some abnormalities. We recommend not to use this function. Xiaomi LAN control function is enabled by [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > CONFIGURE > Update LAN control configuration
+  Xiaomi Home Integration can also implement partial local mode by enabling Xiaomi LAN control function. Xiaomi LAN control function can only control IP devices (devices connected to the router via WiFi or ethernet cable) in the same local area network as Home Assistant. It cannot control BLE Mesh, ZigBee, etc. devices. This function may cause some abnormalities. We recommend NOT using this function. Xiaomi LAN control function is enabled by [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > CONFIGURE > Update LAN control configuration.
 
   Xiaomi LAN control function is not restricted by region. It is available in all regions. However, if there is a central gateway in the local area network where Home Assistant is located, even Xiaomi LAN control function is enabled in the integration, it will not take effect.
 
