@@ -325,10 +325,12 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             },
             'play-control': {
                 'required': {
+                    'properties': {
+                        'playing-state': {'read'}
+                    },
                     'actions': {'play'}
                 },
                 'optional': {
-                    'properties': {'playing-state'},
                     'actions': {'pause', 'stop', 'next', 'previous'}
                 }
             }
