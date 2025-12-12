@@ -79,6 +79,13 @@ from .miot_i18n import MIoTI18n
 _LOGGER = logging.getLogger(__name__)
 
 
+RECOVER_NETWORK_DELAY = 120
+RECOVER_NETWORK_RETRY_DELAY = 600
+REFRESH_PROPS_DELAY = 0.2
+REFRESH_PROPS_RETRY_DELAY = 3
+REFRESH_CLOUD_DEVICES_DELAY = 6
+REFRESH_GATEWAY_DEVICES_DELAY = 3
+
 @dataclass
 class MIoTClientSub:
     """MIoT client subscription."""
@@ -156,6 +163,7 @@ class MIoTClient:
     _sub_device_state: dict[str, MipsDeviceState]
 
     _mips_local_state_changed_timers: dict[str, asyncio.TimerHandle]
+    _recover_network_timer: Optional[asyncio.TimerHandle]
     _refresh_token_timer: Optional[asyncio.TimerHandle]
     _refresh_cert_timer: Optional[asyncio.TimerHandle]
     _refresh_cloud_devices_timer: Optional[asyncio.TimerHandle]
@@ -226,6 +234,7 @@ class MIoTClient:
         self._sub_device_state = {}
 
         self._mips_local_state_changed_timers = {}
+        self._recover_network_timer = None
         self._refresh_token_timer = None
         self._refresh_cert_timer = None
         self._refresh_cloud_devices_timer = None
@@ -406,6 +415,10 @@ class MIoTClient:
                     devices=list(self._device_list_cache.keys()))
             await self._miot_lan.vote_for_lan_ctrl_async(
                 key=f'{self._uid}-{self._cloud_server}', vote=False)
+        # Cancel recover network
+        if self._recover_network_timer:
+            self._recover_network_timer.cancel()
+            self._recover_network_timer = None
         # Cancel refresh auth info
         if self._refresh_token_timer:
             self._refresh_token_timer.cancel()
@@ -717,7 +730,7 @@ class MIoTClient:
         if self._refresh_props_timer:
             return
         self._refresh_props_timer = self._main_loop.call_later(
-            0.2, lambda: self._main_loop.create_task(
+            REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
     async def get_prop_async(self, did: str, siid: int, piid: int) -> Any:
@@ -1022,14 +1035,13 @@ class MIoTClient:
     @final
     async def __on_network_status_changed(self, status: bool) -> None:
         _LOGGER.info('network status changed, %s', status)
+        if self._recover_network_timer:
+            self._recover_network_timer.cancel()
+            self._recover_network_timer = None
         if status:
-            # Check auth_info
-            if await self.refresh_oauth_info_async():
-                # Connect to mips cloud
-                self._mips_cloud.connect()
-                # Update device list
-                self.__request_refresh_cloud_devices()
-            await self.refresh_user_cert_async()
+            self._recover_network_timer = self._main_loop.call_later(
+                RECOVER_NETWORK_DELAY, lambda: self._main_loop.create_task(
+                    self.__recover_network_async()))
         else:
             self.__request_show_devices_changed_notify(delay_sec=30)
             # Cancel refresh cloud devices
@@ -1038,6 +1050,25 @@ class MIoTClient:
                 self._refresh_cloud_devices_timer = None
             # Disconnect cloud mips
             self._mips_cloud.disconnect()
+
+    @final
+    async def __recover_network_async(self) -> None:
+        _LOGGER.info('recover network connection')
+        if self._recover_network_timer:
+            self._recover_network_timer.cancel()
+            self._recover_network_timer = None
+        # Check auth_info
+        if await self.refresh_oauth_info_async():
+            # Connect to mips cloud
+            self._mips_cloud.connect()
+            # Update device list
+            self.__request_refresh_cloud_devices()
+        else:
+            self._recover_network_timer = self._main_loop.call_later(
+                RECOVER_NETWORK_RETRY_DELAY,
+                lambda: self._main_loop.create_task(
+                    self.__recover_network_async()))
+        await self.refresh_user_cert_async()
 
     @final
     async def __on_mips_service_state_change(
@@ -1495,7 +1526,7 @@ class MIoTClient:
         if self._refresh_cloud_devices_timer:
             return
         self._refresh_cloud_devices_timer = self._main_loop.call_later(
-            6, lambda: self._main_loop.create_task(
+            REFRESH_CLOUD_DEVICES_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_cloud_devices_async()))
 
     @final
@@ -1619,7 +1650,8 @@ class MIoTClient:
             return
         self._mips_local_state_changed_timers[group_id] = (
             self._main_loop.call_later(
-                3, lambda: self._main_loop.create_task(
+                REFRESH_GATEWAY_DEVICES_DELAY,
+                lambda: self._main_loop.create_task(
                     self.__refresh_gw_devices_with_group_id_async(
                         group_id=group_id))))
 
@@ -1773,7 +1805,7 @@ class MIoTClient:
             self._refresh_props_retry_count = 0
             if self._refresh_props_list:
                 self._refresh_props_timer = self._main_loop.call_later(
-                    0.2, lambda: self._main_loop.create_task(
+                    REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
                         self.__refresh_props_handler()))
             else:
                 self._refresh_props_timer = None
@@ -1792,7 +1824,7 @@ class MIoTClient:
         _LOGGER.info(
             'refresh props failed, retry, %s', self._refresh_props_retry_count)
         self._refresh_props_timer = self._main_loop.call_later(
-            3, lambda: self._main_loop.create_task(
+            REFRESH_PROPS_RETRY_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
     @final
