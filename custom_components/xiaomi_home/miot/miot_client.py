@@ -1434,8 +1434,12 @@ class MIoTClient:
         _LOGGER.debug(
             'refresh cloud devices, %s, %s', self._uid, self._cloud_server)
         self._refresh_cloud_devices_timer = None
-        result = await self._http.get_devices_async(
-            home_ids=list(self._entry_data.get('home_selected', {}).keys()))
+        try:
+            result = await self._http.get_devices_async(
+                home_ids=list(self._entry_data.get('home_selected', {}).keys()))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('refresh cloud devices failed, %s', err)
+            return
         if not result and 'devices' not in result:
             self.__show_client_error_notify(
                 message=self._i18n.translate(

@@ -291,7 +291,7 @@ class MIoTNetwork:
                 return self._main_loop.time() - start_ts
             return self._DETECT_TIMEOUT
         except Exception as err:  # pylint: disable=broad-exception-caught
-            print(err)
+            _LOGGER.debug('ping error, %s',err)
             return self._DETECT_TIMEOUT
 
     async def __http_async(self, url: str) -> float:
