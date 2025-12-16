@@ -371,6 +371,42 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         },
         'entity': 'television'
     },
+    'tv-box':{
+        'required': {
+            'speaker': {
+                'required': {
+                    'properties': {
+                        'volume': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'properties': {'mute'}
+                }
+            },
+            'tv-box': {
+                'required': {
+                    'actions': {'turn-off'}
+                },
+                'optional': {
+                    'properties': {'mode'},
+                    'actions': {'turn-on'}
+                }
+            }
+        },
+        'optional': {
+            'play-control': {
+                'required': {
+                    'properties': {
+                        'playing-state': {'read', 'write'}
+                    }
+                },
+                'optional': {
+                    'actions': {'play', 'pause', 'stop', 'next', 'previous'}
+                }
+            }
+        },
+        'entity': 'television'
+    },
     'watch': {
         'required': {
             'watch': {
