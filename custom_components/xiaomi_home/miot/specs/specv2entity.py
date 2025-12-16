@@ -331,6 +331,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     'actions': {'play'}
                 },
                 'optional': {
+                    'properties': {'play-loop-mode'},
                     'actions': {'pause', 'stop', 'next', 'previous'}
                 }
             }
@@ -368,6 +369,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     }
                 },
                 'optional': {
+                    'properties': {'play-loop-mode'},
                     'actions': {'play', 'pause', 'stop', 'next', 'previous'}
                 }
             }
@@ -391,7 +393,6 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     'actions': {'turn-off'}
                 },
                 'optional': {
-                    'properties': {'mode'},
                     'actions': {'turn-on'}
                 }
             }
@@ -404,6 +405,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     }
                 },
                 'optional': {
+                    'properties': {'play-loop-mode'},
                     'actions': {'play', 'pause', 'stop', 'next', 'previous'}
                 }
             }
