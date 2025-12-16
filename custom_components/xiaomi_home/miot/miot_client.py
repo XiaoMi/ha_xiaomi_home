@@ -1256,7 +1256,15 @@ class MIoTClient:
     ) -> None:
         _LOGGER.info(
             'gateway devices list changed, %s, %s', mips.group_id, did_list)
-        payload: dict = {'filter': {'did': did_list}}
+        payload: dict = {
+            'filter': {
+                'did': did_list
+            },
+            'info': [
+                'name', 'model', 'urn',
+                'online', 'specV2Access', 'pushAvailable'
+            ]
+        }
         gw_list = await mips.get_dev_list_async(
             payload=json.dumps(payload))
         if gw_list is None:
@@ -1590,7 +1598,14 @@ class MIoTClient:
         if not mips.mips_state:
             _LOGGER.debug('local mips disconnect, skip refresh, %s', group_id)
             return
-        gw_list: dict = await mips.get_dev_list_async()
+        payload: dict = {
+            'info': [
+                'name', 'model', 'urn',
+                'online', 'specV2Access', 'pushAvailable'
+            ]
+        }
+        gw_list: dict = await mips.get_dev_list_async(
+            payload=json.dumps(payload))
         if gw_list is None:
             _LOGGER.error(
                 'refresh gw devices with group_id failed, %s, %s',

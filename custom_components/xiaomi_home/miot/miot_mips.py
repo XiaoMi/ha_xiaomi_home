@@ -1394,19 +1394,9 @@ class MipsLocalClient(_MipsClient):
                 continue
             device_list[did] = {
                 'did': did,
-                'name': name,
-                'urn': urn,
-                'model': model,
                 'online': info.get('online', False),
-                'icon': info.get('icon', None),
-                'fw_version': None,
-                'home_id': '',
-                'home_name': '',
-                'room_id': info.get('roomId', ''),
-                'room_name': info.get('roomName', ''),
                 'specv2_access': info.get('specV2Access', False),
-                'push_available': info.get('pushAvailable', False),
-                'manufacturer': model.split('.')[0],
+                'push_available': info.get('pushAvailable', False)
             }
         return device_list
 
