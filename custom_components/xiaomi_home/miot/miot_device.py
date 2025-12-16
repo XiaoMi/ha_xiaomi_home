@@ -436,7 +436,8 @@ class MIoTDevice:
             optional_properties: dict
             required_actions: set
             optional_actions: set
-            # 2. The required service shall have all required properties, actions.
+            # 2. The required service shall have all required properties
+            # and actions.
             if service.name in required_services:
                 required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'required'].get(
@@ -462,13 +463,15 @@ class MIoTDevice:
                     action.name for action in service.actions
                 }.issuperset(required_actions):
                     return None
-                # 3. The required property in required service shall have all required access mode.
+                # 3. The required property in required service shall have all
+                # required access mode.
                 for prop in service.properties:
                     if prop.name in required_properties:
                         if not set(prop.access).issuperset(
                                 required_properties[prop.name]):
                             return None
-            # 4. The optional service shall have all required properties, actions.
+            # 4. The optional service shall have all required properties
+            # and actions.
             elif service.name in optional_services:
                 required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'optional'].get(
@@ -494,7 +497,8 @@ class MIoTDevice:
                     action.name for action in service.actions
                 }.issuperset(required_actions):
                     continue
-                # 5. The required property in optional service shall have all required access mode.
+                # 5. The required property in optional service shall have all
+                # required access mode.
                 for prop in service.properties:
                     if prop.name in required_properties:
                         if not set(prop.access).issuperset(
