@@ -79,6 +79,12 @@ from .miot_i18n import MIoTI18n
 _LOGGER = logging.getLogger(__name__)
 
 
+REFRESH_PROPS_DELAY = 0.2
+REFRESH_PROPS_RETRY_DELAY = 3
+REFRESH_CLOUD_DEVICES_DELAY = 6
+REFRESH_CLOUD_DEVICES_RETRY_DELAY = 60
+REFRESH_GATEWAY_DEVICES_DELAY = 3
+
 @dataclass
 class MIoTClientSub:
     """MIoT client subscription."""
@@ -717,7 +723,7 @@ class MIoTClient:
         if self._refresh_props_timer:
             return
         self._refresh_props_timer = self._main_loop.call_later(
-            0.2, lambda: self._main_loop.create_task(
+            REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
     async def get_prop_async(self, did: str, siid: int, piid: int) -> Any:
@@ -1433,9 +1439,19 @@ class MIoTClient:
     async def __refresh_cloud_devices_async(self) -> None:
         _LOGGER.debug(
             'refresh cloud devices, %s, %s', self._uid, self._cloud_server)
-        self._refresh_cloud_devices_timer = None
-        result = await self._http.get_devices_async(
-            home_ids=list(self._entry_data.get('home_selected', {}).keys()))
+        if self._refresh_cloud_devices_timer:
+            self._refresh_cloud_devices_timer.cancel()
+            self._refresh_cloud_devices_timer = None
+        try:
+            result = await self._http.get_devices_async(
+                home_ids=list(self._entry_data.get('home_selected', {}).keys()))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('refresh cloud devices failed, %s', err)
+            self._refresh_cloud_devices_timer = self._main_loop.call_later(
+                REFRESH_CLOUD_DEVICES_RETRY_DELAY,
+                lambda: self._main_loop.create_task(
+                    self.__refresh_cloud_devices_async()))
+            return
         if not result and 'devices' not in result:
             self.__show_client_error_notify(
                 message=self._i18n.translate(
@@ -1481,17 +1497,11 @@ class MIoTClient:
         _LOGGER.debug(
             'request refresh cloud devices, %s, %s',
             self._uid, self._cloud_server)
-        if immediately:
-            if self._refresh_cloud_devices_timer:
-                self._refresh_cloud_devices_timer.cancel()
-            self._refresh_cloud_devices_timer = self._main_loop.call_later(
-                0, lambda: self._main_loop.create_task(
-                    self.__refresh_cloud_devices_async()))
-            return
+        delay_sec : int = 0 if immediately else REFRESH_CLOUD_DEVICES_DELAY
         if self._refresh_cloud_devices_timer:
-            return
+            self._refresh_cloud_devices_timer.cancel()
         self._refresh_cloud_devices_timer = self._main_loop.call_later(
-            6, lambda: self._main_loop.create_task(
+            delay_sec, lambda: self._main_loop.create_task(
                 self.__refresh_cloud_devices_async()))
 
     @final
@@ -1615,7 +1625,8 @@ class MIoTClient:
             return
         self._mips_local_state_changed_timers[group_id] = (
             self._main_loop.call_later(
-                3, lambda: self._main_loop.create_task(
+                REFRESH_GATEWAY_DEVICES_DELAY,
+                lambda: self._main_loop.create_task(
                     self.__refresh_gw_devices_with_group_id_async(
                         group_id=group_id))))
 
@@ -1769,7 +1780,7 @@ class MIoTClient:
             self._refresh_props_retry_count = 0
             if self._refresh_props_list:
                 self._refresh_props_timer = self._main_loop.call_later(
-                    0.2, lambda: self._main_loop.create_task(
+                    REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
                         self.__refresh_props_handler()))
             else:
                 self._refresh_props_timer = None
@@ -1788,7 +1799,7 @@ class MIoTClient:
         _LOGGER.info(
             'refresh props failed, retry, %s', self._refresh_props_retry_count)
         self._refresh_props_timer = self._main_loop.call_later(
-            3, lambda: self._main_loop.create_task(
+            REFRESH_PROPS_RETRY_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
     @final
