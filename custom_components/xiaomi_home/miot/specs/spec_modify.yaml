@@ -5,12 +5,21 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:daikin-k2:1:
   prop.2.1:
     name: ac-on
     format: string
+    access:
+    - read
+    - notify
   prop.2.2:
     name: ac-mode
     format: string
+    access:
+    - read
+    - notify
   prop.3.1:
     name: ac-fan-level
     format: string
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:air-conditioner:0000A004:qdhkl-a42:1:
   prop.2.2:
     value-list:
@@ -93,12 +102,21 @@ urn:miot-spec-v2:device:air-fresh:0000A012:daikin-k33:1:
   prop.2.1:
     name: ac-on
     format: string
+    access:
+    - read
+    - notify
   prop.2.3:
     name: ac-mode
     format: string
+    access:
+    - read
+    - notify
   prop.2.5:
     name: ac-fan-level
     format: string
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
   prop.3.7:
     value-range:
