@@ -436,7 +436,8 @@ class MIoTDevice:
             optional_properties: dict
             required_actions: set
             optional_actions: set
-            # 2. The service shall have all required properties, actions.
+            # 2. The required service shall have all required properties
+            # and actions.
             if service.name in required_services:
                 required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'required'].get(
@@ -454,6 +455,23 @@ class MIoTDevice:
                     'required'].get(
                         service.name, {}
                 ).get('optional', {}).get('actions', set({}))
+                if not {
+                    prop.name for prop in service.properties if prop.access
+                }.issuperset(set(required_properties.keys())):
+                    return None
+                if not {
+                    action.name for action in service.actions
+                }.issuperset(required_actions):
+                    return None
+                # 3. The required property in required service shall have all
+                # required access mode.
+                for prop in service.properties:
+                    if prop.name in required_properties:
+                        if not set(prop.access).issuperset(
+                                required_properties[prop.name]):
+                            return None
+            # 4. The optional service shall have all required properties
+            # and actions.
             elif service.name in optional_services:
                 required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'optional'].get(
@@ -471,22 +489,23 @@ class MIoTDevice:
                     'optional'].get(
                     service.name, {}
                 ).get('optional', {}).get('actions', set({}))
+                if not {
+                    prop.name for prop in service.properties if prop.access
+                }.issuperset(set(required_properties.keys())):
+                    continue
+                if not {
+                    action.name for action in service.actions
+                }.issuperset(required_actions):
+                    continue
+                # 5. The required property in optional service shall have all
+                # required access mode.
+                for prop in service.properties:
+                    if prop.name in required_properties:
+                        if not set(prop.access).issuperset(
+                                required_properties[prop.name]):
+                            continue
             else:
                 continue
-            if not {
-                prop.name for prop in service.properties if prop.access
-            }.issuperset(set(required_properties.keys())):
-                return None
-            if not {
-                action.name for action in service.actions
-            }.issuperset(required_actions):
-                return None
-            # 3. The required property shall have all required access mode.
-            for prop in service.properties:
-                if prop.name in required_properties:
-                    if not set(prop.access).issuperset(
-                            required_properties[prop.name]):
-                        return None
             # property
             for prop in service.properties:
                 if prop.name in set.union(
