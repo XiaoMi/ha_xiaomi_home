@@ -1,4 +1,19 @@
 # CHANGELOG
+## v0.4.6
+### Added
+- Add tv-box device as the media player entity. [#1562](https://github.com/XiaoMi/ha_xiaomi_home/pull/1562)
+- Set play-control service's play-loop-mode property as the sound mode. [#1562](https://github.com/XiaoMi/ha_xiaomi_home/pull/1562)
+### Changed
+- Use constant value to indicate the cloud MQTT broker host domain. [#1530](https://github.com/XiaoMi/ha_xiaomi_home/pull/1530)
+- Use constant value to indicate the timer delay of refreshing devices. [#1555](https://github.com/XiaoMi/ha_xiaomi_home/pull/1555)
+- Set the playing-state property as the required property in the play-control service of the speaker device. [#1552](https://github.com/XiaoMi/ha_xiaomi_home/pull/1552)
+- Set the playing-state property as the required property in the optional play-control service of the television. [#1562](https://github.com/XiaoMi/ha_xiaomi_home/pull/1562)
+### Fixed
+- Catch paho-mqtt subscribe error properly. [#1551](https://github.com/XiaoMi/ha_xiaomi_home/pull/1551)
+- After the network resumes, keep retrying to fetch the device list until it succeeds. [#1555](https://github.com/XiaoMi/ha_xiaomi_home/pull/1555)
+- Catch the http post error properly. [#1555](https://github.com/XiaoMi/ha_xiaomi_home/pull/1555)
+- Fixed the format and the access field of daikin.aircondition.k2 and fix: daikin.airfresh.k33 string value properties. [#1561](https://github.com/XiaoMi/ha_xiaomi_home/pull/1561)
+
 ## v0.4.5
 ### Changed
 - Ignore mdns REMOVED package. [#1296](https://github.com/XiaoMi/ha_xiaomi_home/pull/1296)
