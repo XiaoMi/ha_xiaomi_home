@@ -509,6 +509,11 @@ urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx06:2:
     access:
     - read
     - notify
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-x08c:2:
+  prop.2.1:
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:speaker:0000A015:xiaomi-x08e:1:
   prop.3.1:
     name: playing-state-a
