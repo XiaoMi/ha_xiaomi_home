@@ -68,7 +68,11 @@ from paho.mqtt.client import (
 
 # pylint: disable=relative-beyond-top-level
 from .common import MIoTMatcher
-from .const import UNSUPPORTED_MODELS, MIHOME_MQTT_KEEPALIVE
+from .const import (
+    UNSUPPORTED_MODELS,
+    MIHOME_MQTT_KEEPALIVE,
+    DEFAULT_CLOUD_BROKER_HOST
+)
 from .miot_error import MIoTErrorCode, MIoTMipsError
 
 _LOGGER = logging.getLogger(__name__)
@@ -513,16 +517,14 @@ class _MipsClient(ABC):
         """
         self.__thread_check()
         if not self._mqtt or not self._mqtt.is_connected():
+            self.log_error(f'mips sub when not connected, {topic}')
             return
-        try:
-            if topic not in self._mips_sub_pending_map:
-                self._mips_sub_pending_map[topic] = 0
-            if not self._mips_sub_pending_timer:
-                self._mips_sub_pending_timer = self._internal_loop.call_later(
-                    0.01, self.__mips_sub_internal_pending_handler, topic)
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            # Catch all exception
-            self.log_error(f'mips sub internal error, {topic}. {err}')
+
+        if topic not in self._mips_sub_pending_map:
+            self._mips_sub_pending_map[topic] = 0
+        if not self._mips_sub_pending_timer:
+            self._mips_sub_pending_timer = self._internal_loop.call_later(
+                0.01, self.__mips_sub_internal_pending_handler, topic)
 
     @final
     def _mips_unsub_internal(self, topic: str) -> None:
@@ -531,6 +533,7 @@ class _MipsClient(ABC):
         """
         self.__thread_check()
         if not self._mqtt or not self._mqtt.is_connected():
+            self.log_debug(f'mips unsub when not connected, {topic}')
             return
         try:
             result, mid = self._mqtt.unsubscribe(topic=topic)
@@ -587,6 +590,13 @@ class _MipsClient(ABC):
 
     def __mqtt_loop_handler(self) -> None:
         try:
+            # If the main loop is closed, stop the internal loop immediately
+            if self.main_loop.is_closed():
+                self.log_debug(
+                    'The main loop is closed, stop the internal loop.')
+                if not self._internal_loop.is_closed():
+                    self._internal_loop.stop()
+                return
             if self._mqtt:
                 self._mqtt.loop_read()
             if self._mqtt:
@@ -639,6 +649,7 @@ class _MipsClient(ABC):
             _LOGGER.error('__on_connect, but mqtt is None')
             return
         if not self._mqtt.is_connected():
+            _LOGGER.error('__on_connect, but mqtt is disconnected')
             return
         self.log_info(f'mips connect, {flags}, {rc}, {props}')
         self.__reset_reconnect_time()
@@ -722,11 +733,16 @@ class _MipsClient(ABC):
                 self.log_error(f'retry mips sub internal error, {topic}')
                 continue
             subbed_count += 1
-            result, mid = self._mqtt.subscribe(topic, qos=self.MIPS_QOS)
-            if result == MQTT_ERR_SUCCESS:
-                self._mips_sub_pending_map.pop(topic)
-                self.log_debug(f'mips sub internal success, {topic}')
-                continue
+            result = mid = None
+            try:
+                result, mid = self._mqtt.subscribe(topic, qos=self.MIPS_QOS)
+                if result == MQTT_ERR_SUCCESS:
+                    self._mips_sub_pending_map.pop(topic)
+                    self.log_debug(f'mips sub internal success, {topic}')
+                    continue
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                # Catch all exception
+                self.log_error(f'mips sub internal error, {topic}. {err}')
             self._mips_sub_pending_map[topic] = count+1
             self.log_error(
                 f'retry mips sub internal, {count}, {topic}, {result}, {mid}')
@@ -848,7 +864,8 @@ class MipsCloudClient(_MipsClient):
     ) -> None:
         self._msg_matcher = MIoTMatcher()
         super().__init__(
-            client_id=f'ha.{uuid}', host=f'{cloud_server}-ha.mqtt.io.mi.com',
+            client_id=f'ha.{uuid}',
+            host=f'{cloud_server}-{DEFAULT_CLOUD_BROKER_HOST}',
             port=port, username=app_id, password=token, loop=loop)
 
     @final
@@ -995,9 +1012,11 @@ class MipsCloudClient(_MipsClient):
                     did, MIoTDeviceState.ONLINE if msg['event'] == 'online'
                     else MIoTDeviceState.OFFLINE, ctx)
 
-        if did.startswith('blt.'):
-        # MIoT cloud may not publish BLE device online/offline state message.
-        # Do not subscribe BLE device online/offline state.
+        if did.startswith('blt.') or did.startswith('proxy.'):
+        # MIoT cloud may not publish BLE device or proxy gateway child device
+        # online/offline state message.
+        # Do not subscribe BLE device or proxy gateway child device
+        # online/offline state.
             return True
         return self.__reg_broadcast_external(
             topic=topic, handler=on_state_msg, handler_ctx=handler_ctx)
@@ -1375,19 +1394,9 @@ class MipsLocalClient(_MipsClient):
                 continue
             device_list[did] = {
                 'did': did,
-                'name': name,
-                'urn': urn,
-                'model': model,
                 'online': info.get('online', False),
-                'icon': info.get('icon', None),
-                'fw_version': None,
-                'home_id': '',
-                'home_name': '',
-                'room_id': info.get('roomId', ''),
-                'room_name': info.get('roomName', ''),
                 'specv2_access': info.get('specV2Access', False),
-                'push_available': info.get('pushAvailable', False),
-                'manufacturer': model.split('.')[0],
+                'push_available': info.get('pushAvailable', False)
             }
         return device_list
 

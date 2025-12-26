@@ -1,12 +1,51 @@
 urn:miot-spec-v2:device:air-condition-outlet:0000A045:lumi-mcn04:1:
   prop.3.4:
     format: uint8
+urn:miot-spec-v2:device:air-conditioner:0000A004:daikin-k2:1:
+  prop.2.1:
+    name: ac-on
+    format: string
+    access:
+    - read
+    - notify
+  prop.2.2:
+    name: ac-mode
+    format: string
+    access:
+    - read
+    - notify
+  prop.3.1:
+    name: ac-fan-level
+    format: string
+    access:
+    - read
+    - notify
+urn:miot-spec-v2:device:air-conditioner:0000A004:qdhkl-a42:1:
+  prop.2.2:
+    value-list:
+    - value: 1
+      description: Cool
+    - value: 2
+      description: Dry
+    - value: 4
+      description: Fan
+    - value: 8
+      description: Heat
+    - value: 9
+      description: Auto
+    - value: 10
+      description: Heat_cool
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c17:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c17:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c17:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c20:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c24:1:
   prop.8.6:
+    name: power-consumption
     unit: kWh
   prop.10.6:
     unit: none
@@ -15,6 +54,19 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h40h00:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h43h00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m16:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
@@ -28,6 +80,43 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-mt0:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1:
+  prop.10.6:
+    unit: none
+  prop.3.12:
+    name: vertical-swing-left-up
+  prop.3.13:
+    name: vertical-swing-left-down
+  prop.3.14:
+    name: vertical-swing-right-up
+  prop.3.15:
+    name: vertical-swing-right-down
+  prop.3.20:
+    name: horizontal-swing-left
+  prop.3.22:
+    name: horizontal-swing-right
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
+urn:miot-spec-v2:device:air-fresh:0000A012:daikin-k33:1:
+  prop.2.1:
+    name: ac-on
+    format: string
+    access:
+    - read
+    - notify
+  prop.2.3:
+    name: ac-mode
+    format: string
+    access:
+    - read
+    - notify
+  prop.2.5:
+    name: ac-fan-level
+    format: string
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
   prop.3.7:
     value-range:
@@ -49,6 +138,8 @@ urn:miot-spec-v2:device:airer:0000A00D:hyd-lyjpro:1:
     name: target-position-a
   prop.2.9:
     name: target-position-b
+  prop.2.11:
+    expr: (100-src_value)
 urn:miot-spec-v2:device:airer:0000A00D:hyd-znlyj5:1:
   prop.2.3:
     value-range:
@@ -86,6 +177,72 @@ urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
 urn:miot-spec-v2:device:curtain:0000A00C:bjkcz-kczble:1:0000D031:
   prop.2.2:
     name: status-a
+urn:miot-spec-v2:device:dehumidifier:0000A02D:xiaomi-lite:1:
+  prop.3.2:
+    value-range:
+    - -30
+    - 100
+    - 0.1
+urn:miot-spec-v2:device:electronic-valve:0000A0A7:lxzn-02:1:0000C833:
+  prop.3.1:
+    format: float
+    value-range:
+    - 0
+    - 999999
+    - 0.01
+    expr: (src_value/100)
+  prop.3.2:
+    unit: mA
+  prop.3.3:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
+    expr: (src_value/10)
+  prop.4.1:
+    unit: kW
+urn:miot-spec-v2:device:electronic-valve:0000A0A7:sanmei-s1:1:
+  prop.3.1:
+    format: float
+    value-range:
+    - 0
+    - 99999999
+    - 0.01
+    expr: round(src_value/100, 2)
+  prop.3.2:
+    format: float
+    value-range:
+    - 0
+    - 16777216
+    - 0.01
+    expr: round(src_value/100, 2)
+  prop.3.3:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
+    expr: round(src_value/10, 1)
+urn:miot-spec-v2:device:electronic-valve:0000A0A7:ykcn-cbcs:1:0000C833:
+  prop.3.1:
+    format: float
+    value-range:
+    - 0
+    - 99999999
+    - 0.01
+    expr: round(src_value/100, 2)
+  prop.3.2:
+    unit: mA
+  prop.3.3:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
+    expr: round(src_value/10, 1)
+  prop.4.1:
+    unit: kW
 urn:miot-spec-v2:device:fan:0000A005:dmaker-p33:1:
   prop.2.2:
     name: fan-level-a
@@ -101,10 +258,19 @@ urn:miot-spec-v2:device:fan:0000A005:dmaker-p5:1:
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p43:1:
   prop.2.2:
     name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p45:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p51:1:
   prop.2.2:
     name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:xiaomi-p69:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p70:1:0000D062:
+  prop.2.4:
+    name: fan-level-a
+urn:miot-spec-v2:device:fan:0000A005:xiaomi-p76:1:0000D062:
   prop.2.4:
     name: fan-level-a
 urn:miot-spec-v2:device:fan:0000A005:zhimi-sa1:3:
@@ -152,6 +318,11 @@ urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:2: urn:miot-spec-v2:device:hood
 urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3:
   prop.3.1:
     name: on-ventilation
+urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:4: urn:miot-spec-v2:device:hood:0000A01B:cykj-jyj22:3
+urn:miot-spec-v2:device:humidifier:0000A00E:zhimi-ca4:2:
+  prop.2.7:
+    unit: percentage
+    expr: round(src_value*0.83)
 urn:miot-spec-v2:device:kettle:0000A009:yunmi-r3:1:
   prop.3.1:
     unit: ppm
@@ -172,19 +343,36 @@ urn:miot-spec-v2:device:magnet-sensor:0000A016:linp-m1:1:
       description: open
     - value: 1
       description: closed
-    expr: src_value!=1
+    expr: (src_value!=1)
 urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-acn001:1:
   prop.3.2:
     access:
     - read
     - notify
     unit: mV
+urn:miot-spec-v2:device:motion-sensor:0000A014:lumi-bmgl01:1:
+  prop.2.2:
+    value-list:
+    - value: 0
+      description: 0 Seconds
+    - value: 2
+      description: 2 Minutes
+    - value: 5
+      description: 5 Minutes
 urn:miot-spec-v2:device:motor-controller:0000A01D:adp-adswb4:1:0000C837:
   prop.2.1:
     name: motor-switch
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:1: urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:ainice-3b:2:
+  prop.2.5:
+    name: people-number
   prop.2.8:
+    name: people-number
+  prop.2.11:
+    name: people-number
+  prop.2.14:
+    name: people-number
+  prop.2.17:
     name: people-number
 urn:miot-spec-v2:device:occupancy-sensor:0000A0BF:izq-24:2:0000C824:
   prop.2.6:
@@ -196,26 +384,70 @@ urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:1: urn:miot-spec-v2:devi
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:2: urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3
 urn:miot-spec-v2:device:outlet:0000A002:chuangmi-212a01:3:
   prop.5.1:
-    expr: round(src_value*6/1000000, 3)
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.01
+    expr: round(src_value*6/1000000, 2)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp1md:1:
   prop.2.2:
-    name: power-consumption
-    expr: round(src_value/1000, 3)
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.01
+    expr: round(src_value/1000, 2)
   prop.2.3:
+    format: float
+    value-range:
+    - 0
+    - 3000
+    - 0.1
     expr: round(src_value/10, 1)
   prop.2.4:
     unit: mA
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:1: urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2
 urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2:2:
   prop.2.3:
+    format: float
+    value-range:
+    - 0
+    - 3000
+    - 0.1
     expr: round(src_value/10, 1)
   prop.2.4:
     unit: mA
   prop.3.2:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
     expr: round(src_value/10, 1)
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp2d:1:
+  prop.3.2:
+    unit: mA
+urn:miot-spec-v2:device:outlet:0000A002:cuco-cp7pd:1:
+  prop.11.1:
+    unit: Wh
+    value-range:
+    - 0
+    - 65535
+    - 0.001
+    expr: (src_value*1000)
+  prop.11.4:
+    value-range:
+    - 0
+    - 10000
+    - 0.01
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1:
   prop.11.1:
-    name: power-consumption
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.01
     expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:2: urn:miot-spec-v2:device:outlet:0000A002:cuco-v3:1
 urn:miot-spec-v2:device:outlet:0000A002:giot-v8icm:1:0000C816:
@@ -228,11 +460,20 @@ urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:
     unit: mA
 urn:miot-spec-v2:device:outlet:0000A002:yutai-fsov8m:1:0000C816:
   prop.4.1:
+    format: float
+    value-range:
+    - 0
+    - 429497
+    - 0.01
     expr: round(src_value/10000, 2)
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:1:0000C816: urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816
 urn:miot-spec-v2:device:outlet:0000A002:zimi-zncz01:2:0000C816:
   prop.3.1:
-    name: electric-power
+    format: float
+    value-range:
+    - 0
+    - 350000
+    - 0.01
     expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
   prop.2.1:
@@ -257,7 +498,10 @@ urn:miot-spec-v2:device:router:0000A036:xiaomi-rd08:1:
 urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
-    expr: src_value!=1
+    expr: (src_value!=1)
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-x08e:1:
+  prop.3.1:
+    name: playing-state-a
 urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm:1:0000D042:
   prop.27.3:
     name: light-on
@@ -265,10 +509,20 @@ urn:miot-spec-v2:device:switch:0000A003:090615-x1tpm:1:0000D042:
     name: light-fan-on
 urn:miot-spec-v2:device:switch:0000A003:lxzn-cbcsmj:1:0000D00D:
   prop.3.1:
+    format: float
+    value-range:
+    - 0
+    - 99999999
+    - 0.01
     expr: round(src_value/100, 2)
   prop.3.2:
-    expr: round(src_value/1000, 2)
+    unit: mA
   prop.3.3:
+    format: float
+    value-range:
+    - 0
+    - 65535
+    - 0.1
     expr: round(src_value/10, 1)
 urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
   prop.2.3:
@@ -310,6 +564,24 @@ urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
     unit: ppm
   prop.4.2:
     unit: ppm
+urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:1:0000D05A:
+  prop.3.2:
+    unit: days
+  prop.3.3:
+    unit: days
+  prop.3.4:
+    unit: L
+  prop.3.5:
+    unit: L
+  prop.5.2:
+    unit: days
+  prop.5.3:
+    unit: days
+  prop.5.4:
+    unit: L
+  prop.5.5:
+    unit: L
+urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:2:0000D05A: urn:miot-spec-v2:device:water-purifier:0000A013:xiaomi-s1200g:1:0000D05A
 urn:miot-spec-v2:device:water-purifier:0000A013:yunmi-s20:1:
   prop.4.1:
     unit: ppm

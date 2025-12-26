@@ -320,9 +320,15 @@ class FeatureSwingMode(MIoTServiceEntity, ClimateEntity):
             await self.set_property_async(prop=self._prop_vertical_swing,
                                           value=True)
         elif swing_mode == SWING_HORIZONTAL:
+            if self._prop_vertical_swing:
+                await self.set_property_async(prop=self._prop_vertical_swing,
+                                              value=False)
             await self.set_property_async(prop=self._prop_horizontal_swing,
                                           value=True)
         elif swing_mode == SWING_VERTICAL:
+            if self._prop_horizontal_swing:
+                await self.set_property_async(prop=self._prop_horizontal_swing,
+                                              value=False)
             await self.set_property_async(prop=self._prop_vertical_swing,
                                           value=True)
         elif swing_mode == SWING_OFF:
@@ -523,6 +529,8 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
                         self._hvac_mode_map[item.value] = HVACMode.DRY
                     elif item.name in {'fan'}:
                         self._hvac_mode_map[item.value] = HVACMode.FAN_ONLY
+                    elif item.name in {'heat_cool'}:
+                        self._hvac_mode_map[item.value] = HVACMode.HEAT_COOL
                 self._attr_hvac_modes = list(self._hvac_mode_map.values())
                 self._prop_mode = prop
             elif prop.name == 'ac-state':

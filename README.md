@@ -91,13 +91,13 @@ Xiaomi Home Integration and the affiliated cloud interface is provided by Xiaomi
 
   Yes, it supports multiple Xiaomi accounts. Furthermore, Xiaomi Home Integration allows that devices belonging to different accounts can be added to a same area.
 
-- Does Xiaomi Home Integration support local control?
+- Does Xiaomi Home Integration support local mode?
 
-  Local control is implemented by [Xiaomi Central Hub Gateway](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search) (firmware version 3.3.0_0023 and above) or Xiaomi smart devices with built-in central hub gateway (software version 0.8.9 and above) inside. If you do not have a Xiaomi central hub gateway or other devices having central hub gateway function, all control commands are sent through Xiaomi Cloud. The firmware for Xiaomi central hub gateway including the built-in central hub gateway supporting Home Assistant local control feature has not been released yet. Please refer to MIoT team's notification for upgrade plans.
+  Local mode is implemented by [Xiaomi Central Hub Gateway](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search) (firmware version 3.3.0_0023 and above) or Xiaomi smart devices with [built-in central hub gateway](https://github.com/XiaoMi/ha_xiaomi_home/wiki/Central-hub-gateway-device-models) (software version 0.8.9 and above) inside. If you do not have a Xiaomi central hub gateway or other devices having central hub gateway function, all control commands are sent through Xiaomi Cloud. The firmware for Xiaomi central hub gateway including the built-in central hub gateway supporting Home Assistant local mode feature has been released.
 
   Xiaomi central hub gateway is only available in mainland China. In other regions, it is not available.
 
-  Xiaomi Home Integration can also implement partial local control by enabling Xiaomi LAN control function. Xiaomi LAN control function can only control IP devices (devices connected to the router via WiFi or ethernet cable) in the same local area network as Home Assistant. It cannot control BLE Mesh, ZigBee, etc. devices. This function may cause some abnormalities. We recommend not to use this function. Xiaomi LAN control function is enabled by [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > CONFIGURE > Update LAN control configuration
+  Xiaomi Home Integration can also implement partial local mode by enabling Xiaomi LAN control function. Xiaomi LAN control function can only control IP devices (devices connected to the router via WiFi or ethernet cable) in the same local area network as Home Assistant. It cannot control BLE Mesh, ZigBee, etc. devices. This function may cause some abnormalities. We recommend NOT using this function. Xiaomi LAN control function is enabled by [Settings > Devices & services > Configured > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > CONFIGURE > Update LAN control configuration.
 
   Xiaomi LAN control function is not restricted by region. It is available in all regions. However, if there is a central gateway in the local area network where Home Assistant is located, even Xiaomi LAN control function is enabled in the integration, it will not take effect.
 
@@ -328,7 +328,7 @@ Device information service (urn:miot-spec-v2:service:device-information:00007801
 
 ## Multiple Language Support
 
-There are 8 languages available for selection in the config flow language option of Xiaomi Home, including Simplified Chinese, Traditional Chinese, English, Spanish, Russian, French, German, and Japanese. The config flow page in Simplified Chinese and English has been manually reviewed by the developer. Other languages are translated by machine translation. If you want to modify the words and sentences in the config flow page, you need to modify the json file of the certain language in `custom_components/xiaomi_home/translations/` and `custom_components/xiaomi_home/miot/i18n/` directory.
+There are 13 languages available for selection in the config flow language option of Xiaomi Home, including Simplified Chinese, Traditional Chinese, English, Spanish, Russian, French, German, Japanese, Italian, Dutch, Portuguese, Brazilian Portuguese, and Turkish. The config flow page in Simplified Chinese and English has been manually reviewed by the developer. Other languages are translated by machine translation or community contributions. If you want to modify the words and sentences in the config flow page, you need to modify the json file of the certain language in `custom_components/xiaomi_home/translations/` and `custom_components/xiaomi_home/miot/i18n/` directory.
 
 When displaying Home Assistant entity name, Xiaomi Home downloads the multiple language file configured by the device vendor from MIoT Cloud, which contains translations for MIoT-Spec-V2 instances of the device. `multi_lang.json` is a locally maintained multiple language dictionary, which has a higher priority than the multiple language file obtained from the cloud and can be used to supplement or modify the multiple language translation of devices.
 
@@ -346,7 +346,7 @@ The format of `multi_lang.json` is as follows.
 
 The key of `multi_lang.json` dictionary is the urn excluding the "version" field of the MIoT-Spec-V2 device instance.
 
-The language code is zh-Hans, zh-Hant, en, es, ru, fr, de, or ja, corresponding to the 8 selectable languages mentioned above.
+The language code is zh-Hans, zh-Hant, en, es, ru, fr, de, ja, it, nl, pt, pt-BR, or tr, corresponding to the 13 selectable languages mentioned above.
 
 The instance code is the code of the MIoT-Spec-V2 instance, which is in the format of:
 
@@ -384,6 +384,7 @@ Example:
 - Contribution Guidelines: [English](./CONTRIBUTING.md) | [简体中文](./doc/CONTRIBUTING_zh.md)
 - [ChangeLog](./CHANGELOG.md)
 - Development Documents: https://developers.home-assistant.io/docs/creating_component_index
+- [FAQ](https://github.com/XiaoMi/ha_xiaomi_home/wiki)
 
 ## Directory Structure
 

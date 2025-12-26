@@ -90,6 +90,9 @@ translate:
     ru:
       'false': Ложь
       'true': Истина
+    tr:
+      'false': Yanlış
+      'true': Doğru
     zh-Hans:
       'false': 假
       'true': 真
@@ -127,6 +130,9 @@ translate:
     ru:
       'false': Нет контакта
       'true': Контакт
+    tr:
+      'false': Temas Yok
+      'true': Temas
     zh-Hans:
       'false': 分离
       'true': 接触
@@ -164,6 +170,9 @@ translate:
     ru:
       'false': Движение не обнаружено
       'true': Обнаружено движение
+    tr:
+      'false': Hareket Algılanmadı
+      'true': Hareket Algılandı
     zh-Hans:
       'false': 无人
       'true': 有人
@@ -201,6 +210,9 @@ translate:
     ru:
       'false': Закрыть
       'true': Открыть
+    tr:
+      'false': Kapalı
+      'true': Açık
     zh-Hans:
       'false': 关闭
       'true': 开启
@@ -238,6 +250,9 @@ translate:
     ru:
       'false': Нет
       'true': Да
+    tr:
+      'false': Hayır
+      'true': Evet
     zh-Hans:
       'false': 否
       'true': 是

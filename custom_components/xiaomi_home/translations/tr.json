@@ -1,0 +1,225 @@
+{
+    "config": {
+        "flow_title": "Xiaomi Home Entegrasyonu",
+        "step": {
+            "eula": {
+                "title": "Risk Bildirimi",
+                "description": "1. Xiaomi kullanıcı bilgileriniz ve cihaz bilgileriniz Home Assistant sisteminde saklanacaktır. **Xiaomi, Home Assistant depolama mekanizmasının güvenliğini garanti edemez**. Bilgilerinizin çalınmasını önlemekten siz sorumlusunuz.\r\n2. Bu entegrasyon açık kaynak topluluğu tarafından sürdürülmektedir. Kararlılık sorunları veya diğer sorunlar olabilir. Bu entegrasyonla ilgili sorunlar veya hatalarla karşılaştığınızda, **Xiaomi müşteri hizmetleriyle iletişime geçmek yerine açık kaynak topluluğundan yardım istemelisiniz**.\r\n3. Yerel işletim ortamınızı sürdürmek için teknik beceriye ihtiyacınız vardır. Entegrasyon yeni başlayanlar için kullanıcı dostu değildir.\r\n4. Lütfen başlamadan önce README dosyasını okuyun.\n\n5. Entegrasyonun kararlı kullanımını sağlamak ve arayüz kötüye kullanımını önlemek için, **bu entegrasyonun yalnızca Home Assistant'ta kullanılmasına izin verilir. Ayrıntılar için lütfen LICENSE'a bakın**.",
+                "data": {
+                    "eula": "Yukarıdaki risklerin farkındayım ve entegrasyonun kullanımıyla ilişkili tüm riskleri gönüllü olarak üstlenmeye razıyım."
+                }
+            },
+            "auth_config": {
+                "title": "Temel yapılandırma",
+                "description": "### Giriş Bölgesi\r\nXiaomi hesabınızın bölgesini seçin. Bunu Xiaomi Home UYGULAMASI > Profil (alttaki menüde bulunur) > Ek ayarlar > Xiaomi Home Hakkında bölümünde bulabilirsiniz.\r\n### Dil\r\nCihaz ve varlık adlarının dilini seçin. Çevirisi olmayan bazı cümleler İngilizce olarak görüntülenecektir.\r\n### OAuth2 Yönlendirme URL'si\r\nOAuth2 kimlik doğrulama yönlendirme adresi **[http://homeassistant.local:8123](http://homeassistant.local:8123)** şeklindedir. Home Assistant'ın mevcut işletim terminali (örn. kişisel bilgisayar) ile aynı yerel ağda olması ve işletim terminalinin bu adres üzerinden Home Assistant ana sayfasına erişebilmesi gerekir. Aksi takdirde giriş kimlik doğrulaması başarısız olabilir.\r\n### Entegre Ağ Yapılandırması\r\nYerel ağın düzgün çalışıp çalışmadığını ve ilgili ağ kaynaklarının erişilebilir olup olmadığını kontrol edin. **İlk kez eklerken bunu seçmeniz önerilir.**\r\n### Not\r\n- Yüzlerce veya daha fazla Mi Home cihazına sahip kullanıcılar için, entegrasyonun ilk eklenmesi biraz zaman alacaktır. Lütfen sabırlı olun.\r\n- Home Assistant bir Docker ortamında çalışıyorsa, lütfen Docker ağ modunun host olarak ayarlandığından emin olun, aksi takdirde yerel kontrol işlevi düzgün çalışmayabilir.\r\n- Entegrasyonun yerel kontrol işlevinin bazı bağımlılıkları vardır. Lütfen README'yi dikkatlice okuyun.",
+                "data": {
+                    "cloud_server": "Giriş Bölgesi",
+                    "integration_language": "Dil",
+                    "oauth_redirect_url": "OAuth2 Yönlendirme URL'si",
+                    "network_detect_config": "Entegre Ağ Yapılandırması"
+                }
+            },
+            "network_detect_config": {
+                "title": "Entegre Ağ Yapılandırması",
+                "description": "## Kullanım Tanıtımı\r\n### Ağ Algılama Adresi\r\nAğın düzgün çalışıp çalışmadığını kontrol etmek için kullanılır. Ayarlanmazsa, sistem varsayılan adresi kullanılacaktır. Varsayılan adres kontrolü başarısız olursa, özel bir adres girmeyi deneyebilirsiniz.\r\n- Virgülle ayrılmış birden fazla algılama adresi girebilirsiniz, örneğin `8.8.8.8,https://www.bing.com`\r\n- Bir IP adresi ise, algılama ping üzerinden yapılacaktır. Bir HTTP(s) adresi ise, algılama HTTP GET isteği üzerinden yapılacaktır.\r\n- Sistem varsayılan algılama adresini geri yüklemek istiyorsanız, lütfen bir virgül `,` girin ve 'İleri'ye tıklayın.\r\n- **Bu yapılandırma geneldir ve değişiklikler diğer entegrasyon örneklerini etkileyecektir. Lütfen dikkatli değiştirin.**\r\n### Ağ Bağımlılıklarını Kontrol Et\r\nAşağıdaki ağ bağımlılıklarının erişilebilir olup olmadığını tek tek kontrol edin. İlgili adresler erişilebilir değilse, entegrasyon sorunlarına neden olacaktır.\r\n- OAuth2 Kimlik Doğrulama Adresi: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API Adresi: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API Adresi: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker Adresi: `mqtts://{broker_host}`.",
+                "data": {
+                    "network_detect_addr": "Ağ Algılama Adresi",
+                    "check_network_deps": "Ağ Bağımlılıklarını Kontrol Et"
+                }
+            },
+            "oauth_error": {
+                "title": "Giriş Hatası",
+                "description": "Tekrar denemek için İLERİ'ye tıklayın."
+            },
+            "homes_select": {
+                "title": "Ev ve Cihaz Seçimi",
+                "description": "## Tanıtım\r\n### Cihazın Evini İçe Aktar\r\nEntegrasyon, seçilen evden cihazları ekleyecektir.\r\n### Oda Adı Senkronizasyon Modu\r\nMi Home UYGULAMASINDAN Home Assistant'a cihazlar senkronize edilirken, Home Assistant'taki alanın adlandırılması aşağıdaki kurallara uyacaktır. Senkronizasyon işleminin Mi Home UYGULAMASINDAKI ev ve oda ayarlarını değiştirmeyeceğini unutmayın.\r\n- Senkronize etme: Cihaz herhangi bir alana eklenmeyecektir.\r\n- Diğer seçenekler: Cihazın eklendiği alan, Mi Home UYGULAMASINDAKI ev veya oda adına göre adlandırılacaktır.\r\n### Gelişmiş Ayarlar\r\nEntegrasyonun profesyonel yapılandırma seçeneklerini değiştirmek için gelişmiş ayarları gösterin.\r\n\r\n&emsp;\r\n### {nick_name} Merhaba! Lütfen cihaz eklemek istediğiniz evi seçin.",
+                "data": {
+                    "home_infos": "Cihazın Evini İçe Aktar",
+                    "area_name_rule": "Oda Adı Senkronizasyon Modu",
+                    "advanced_options": "Gelişmiş Ayarlar"
+                }
+            },
+            "advanced_options": {
+                "title": "Gelişmiş Ayarlar",
+                "description": "## Tanıtım\r\n### Aşağıdaki seçeneklerin anlamını çok net bir şekilde bilmiyorsanız, lütfen varsayılan ayarları koruyun.\r\n### Cihazları Filtrele\r\nCihazları oda adı ve cihaz türüne göre filtrelemeyi destekler, ayrıca cihaz boyutu filtrelemesini de destekler.\r\n### Kontrol Modu\r\n- Otomatik: Yerel ağda kullanılabilir bir Xiaomi merkezi hub ağ geçidi olduğunda, Home Assistant cihaz kontrol komutlarını öncelikle merkezi hub ağ geçidi üzerinden göndererek yerel kontrolü sağlar. Yerel ağda merkezi hub ağ geçidi yoksa, Xiaomi OT protokolü üzerinden kontrol komutları göndermeye çalışır. Yalnızca yukarıdaki yerel kontrol koşulları karşılanmadığında, cihaz kontrol komutları bulut üzerinden gönderilir.\r\n- Bulut: Tüm kontrol komutları bulut üzerinden gönderilir.\r\n### Eylem Hata Ayıklama Modu\r\nCihaz MIoT-Spec-V2 tarafından tanımlanan yöntemler için, bildirim varlıkları oluşturmaya ek olarak, bir metin girişi kutusu varlığı da oluşturulacaktır. Hata ayıklama sırasında cihaza kontrol komutları göndermek için bunu kullanabilirsiniz.\r\n### Standart Olmayan Oluşturulan Varlıkları Gizle\r\nAdı \"*\" ile başlayan standart olmayan MIoT-Spec-V2 örnekleri tarafından oluşturulan varlıkları gizle.\r\n### İkili Sensör Görüntüleme Modu\r\nXiaomi Home'daki ikili sensörleri metin sensör varlığı veya ikili sensör varlığı olarak görüntüleyin.\r\n### Cihaz Durum Değişikliği Bildirimlerini Göster\r\nDetaylı cihaz durum değişikliği bildirimlerini görüntüleyin, yalnızca seçilen bildirimleri gösterin.",
+                "data": {
+                    "devices_filter": "Cihazları Filtrele",
+                    "ctrl_mode": "Kontrol Modu",
+                    "action_debug": "Eylem Hata Ayıklama Modu",
+                    "hide_non_standard_entities": "Standart Olmayan Oluşturulan Varlıkları Gizle",
+                    "display_binary_mode": "İkili Sensör Görüntüleme Modu",
+                    "display_devices_changed_notify": "Cihaz Durum Değişikliği Bildirimlerini Göster"
+                }
+            },
+            "devices_filter": {
+                "title": "Cihazları Filtrele",
+                "description": "## Kullanım Talimatları\r\nCihazları ev oda adı, cihaz erişim türü ve cihaz modeline göre filtrelemeyi destekler, ayrıca cihaz boyutu filtrelemesini de destekler. Filtreleme mantığı aşağıdaki gibidir:\r\n- İlk olarak, istatistik mantığına göre, dahil edilen tüm öğelerin birleşimini veya kesişimini alın, ardından hariç tutulan öğelerin kesişimini veya birleşimini alın ve son olarak [hariç tutulan özet sonucu]ndan [dahil edilen özet sonucu]nu çıkararak [filtre sonucu]nu elde edin.\r\n- Dahil edilen öğe seçilmemişse, tümünün dahil edildiği anlamına gelir.\r\n### Filtre Modu\r\n- Hariç tut: İstenmeyen öğeleri kaldırın.\r\n- Dahil et: İstenen öğeleri dahil edin.\r\n### İstatistik Mantığı\r\n- VE mantığı: Aynı moddaki tüm öğelerin kesişimini alın.\r\n- VEYA mantığı: Aynı moddaki tüm öğelerin birleşimini alın.\r\n\r\nAyrıca entegrasyon öğesinin [Yapılandırma > Cihaz Listesini Güncelle] sayfasına gidip, yeniden filtrelemek için [Cihazları Filtrele]'yi işaretleyebilirsiniz.",
+                "data": {
+                    "room_filter_mode": "Ev Odalarını Filtrele",
+                    "room_list": "Ev Odaları",
+                    "type_filter_mode": "Cihaz Bağlantı Türünü Filtrele",
+                    "type_list": "Cihaz Bağlantı Türü",
+                    "model_filter_mode": "Cihaz Modelini Filtrele",
+                    "model_list": "Cihaz Modeli",
+                    "devices_filter_mode": "Cihazları Filtrele",
+                    "device_list": "Cihaz Listesi",
+                    "statistics_logic": "İstatistik Mantığı"
+                }
+            }
+        },
+        "progress": {
+            "oauth": "### {link_left}Giriş yapmak için buraya tıklayın{link_right}\r\n(Başarılı girişten sonra otomatik olarak bir sonraki sayfaya yönlendirileceksiniz)"
+        },
+        "error": {
+            "eula_not_agree": "Lütfen risk bildirimini okuyun.",
+            "get_token_error": "Giriş yetkilendirme bilgileri (OAuth token) alınamadı.",
+            "get_homeinfo_error": "Ev bilgileri alınamadı.",
+            "mdns_discovery_error": "Yerel cihaz keşif hizmeti istisnası.",
+            "get_cert_error": "Merkezi hub ağ geçidi sertifikası alınamadı.",
+            "no_family_selected": "Ev seçilmedi.",
+            "no_devices": "Seçilen evde cihaz yok. Lütfen cihazı olan bir ev seçin ve devam edin.",
+            "no_filter_devices": "Filtrelenmiş cihazlar boş. Lütfen geçerli filtre kriterleri seçin ve devam edin.",
+            "no_central_device": "[Merkezi Hub Ağ Geçidi Modu], Home Assistant'ın bulunduğu yerel ağda kullanılabilir bir Xiaomi merkezi hub ağ geçidi gerektirir. Lütfen seçilen evin gereksinimi karşılayıp karşılamadığını kontrol edin.",
+            "invalid_network_addr": "Geçersiz IP adresi veya HTTP adresi algılandı, lütfen geçerli bir adres girin.",
+            "invalid_ip_addr": "Ulaşılamayan IP adresi algılandı, lütfen geçerli bir IP adresi girin.",
+            "invalid_http_addr": "Ulaşılamayan HTTP adresi algılandı, lütfen geçerli bir HTTP adresi girin.",
+            "invalid_default_addr": "Varsayılan ağ algılama adresi ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin veya özel bir ağ algılama adresi kullanın.",
+            "unreachable_oauth2_host": "OAuth2 kimlik doğrulama adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin.",
+            "unreachable_http_host": "Xiaomi HTTP API adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin.",
+            "unreachable_spec_host": "Xiaomi SPEC API adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin.",
+            "unreachable_mqtt_broker": "Xiaomi MQTT Broker adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin."
+        },
+        "abort": {
+            "ha_uuid_get_failed": "Home Assistant UUID alınamadı.",
+            "network_connect_error": "Yapılandırma başarısız oldu. Ağ bağlantısı anormal. Lütfen ekipman ağ yapılandırmasını kontrol edin.",
+            "already_configured": "Bu kullanıcı için yapılandırma zaten tamamlandı. Lütfen entegrasyon sayfasına gidin ve değişiklikler için YAPILANDIRMA düğmesine tıklayın.",
+            "invalid_auth_info": "Kimlik doğrulama bilgileri süresi doldu. Lütfen entegrasyon sayfasına gidin ve yeniden kimlik doğrulaması yapmak için YAPILANDIRMA düğmesine tıklayın.",
+            "config_flow_error": "Entegrasyon yapılandırma hatası: {error}."
+        }
+    },
+    "options": {
+        "step": {
+            "auth_config": {
+                "title": "Kimlik Doğrulama Yapılandırması",
+                "description": "Yerel kimlik doğrulama bilgileri süresi doldu. Lütfen kimlik doğrulama işlemini yeniden başlatın.\r\n### Geçerli Giriş Bölgesi: {cloud_server}\r\n### OAuth2 Yönlendirme URL'si\r\nOAuth2 kimlik doğrulama yönlendirme adresi **[http://homeassistant.local:8123](http://homeassistant.local:8123)** şeklindedir. Home Assistant'ın mevcut işletim terminali (örn. kişisel bilgisayar) ile aynı yerel ağda olması ve işletim terminalinin bu adres üzerinden Home Assistant ana sayfasına erişebilmesi gerekir. Aksi takdirde giriş kimlik doğrulaması başarısız olabilir.",
+                "data": {
+                    "oauth_redirect_url": "OAuth2 Yönlendirme URL'si"
+                }
+            },
+            "oauth_error": {
+                "title": "Giriş sırasında bir hata oluştu.",
+                "description": "Tekrar denemek için İLERİ'ye tıklayın."
+            },
+            "config_options": {
+                "title": "Yapılandırma Seçenekleri",
+                "description": "### Merhaba, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nGeçerli Giriş Bölgesi: {cloud_server}\r\nEntegrasyon Örnek Kimliği: {instance_id}\r\n\r\nLütfen yapılandırmak istediğiniz seçenekleri seçin, ardından İLERİ'ye tıklayın.",
+                "data": {
+                    "integration_language": "Entegrasyon Dili",
+                    "update_user_info": "Kullanıcı bilgilerini güncelle",
+                    "update_devices": "Cihaz listesini güncelle",
+                    "action_debug": "Eylem için hata ayıklama modu",
+                    "hide_non_standard_entities": "Standart olmayan oluşturulan varlıkları gizle",
+                    "display_binary_mode": "İkili Sensör Görüntüleme Modu",
+                    "display_devices_changed_notify": "Cihaz durum değişikliği bildirimlerini göster",
+                    "update_trans_rules": "Varlık dönüştürme kurallarını güncelle",
+                    "update_lan_ctrl_config": "LAN kontrol yapılandırmasını güncelle",
+                    "network_detect_config": "Entegre ağ yapılandırması",
+                    "cover_dead_zone_width": "Perde ölü bölge genişliği"
+                }
+            },
+            "update_user_info": {
+                "title": "Kullanıcı Takma Adını Güncelle",
+                "description": "Merhaba {nick_name}, aşağıda özel takma adınızı değiştirebilirsiniz.",
+                "data": {
+                    "nick_name": "Takma Ad"
+                }
+            },
+            "homes_select": {
+                "title": "Evi ve Cihazları Yeniden Seç",
+                "description": "## Kullanım Talimatları\r\n### Evden cihazları içe aktar\r\nEntegrasyon, seçilen evlerden cihazları ekleyecektir.\r\n### Cihazları Filtrele\r\nCihazları ev oda adı, cihaz erişim türü ve cihaz modeline göre filtrelemeyi destekler, ayrıca cihaz boyutu filtrelemesini de destekler. **{local_count}** cihaz filtrelendi.\r\n### Kontrol modu\r\n- Otomatik: Yerel ağda kullanılabilir bir Xiaomi merkezi hub ağ geçidi olduğunda, Home Assistant cihaz kontrol komutlarını öncelikle merkezi hub ağ geçidi üzerinden göndererek yerel kontrolü sağlar. Yerel ağda merkezi hub ağ geçidi yoksa, Xiaomi LAN kontrol işlevi aracılığıyla kontrol komutları göndermeye çalışır. Yalnızca yukarıdaki yerel kontrol koşulları karşılanmadığında, cihaz kontrol komutları bulut üzerinden gönderilir.\r\n- Bulut: Tüm kontrol komutları bulut üzerinden gönderilir.",
+                "data": {
+                    "home_infos": "Evden cihazları içe aktar",
+                    "devices_filter": "Cihazları filtrele",
+                    "ctrl_mode": "Kontrol modu"
+                }
+            },
+            "devices_filter": {
+                "title": "Cihazları Filtrele",
+                "description": "## Kullanım Talimatları\r\nCihazları ev oda adı, cihaz erişim türü ve cihaz modeline göre filtrelemeyi destekler, ayrıca cihaz boyutu filtrelemesini de destekler. Filtreleme mantığı aşağıdaki gibidir:\r\n- İlk olarak, istatistik mantığına göre, dahil edilen tüm öğelerin birleşimini veya kesişimini alın, ardından hariç tutulan öğelerin kesişimini veya birleşimini alın ve son olarak [hariç tutulan özet sonucu]ndan [dahil edilen özet sonucu]nu çıkararak [filtre sonucu]nu elde edin.\r\n- Dahil edilen öğe seçilmemişse, tümünün dahil edildiği anlamına gelir.\r\n### Filtre Modu\r\n- Hariç tut: İstenmeyen öğeleri kaldırın.\r\n- Dahil et: İstenen öğeleri dahil edin.\r\n### İstatistik Mantığı\r\n- VE mantığı: Aynı moddaki tüm öğelerin kesişimini alın.\r\n- VEYA mantığı: Aynı moddaki tüm öğelerin birleşimini alın.\r\n\r\nAyrıca entegrasyon öğesinin [Yapılandırma > Cihaz Listesini Güncelle] sayfasına gidip, yeniden filtrelemek için [Cihazları Filtrele]'yi işaretleyebilirsiniz.",
+                "data": {
+                    "room_filter_mode": "Ev Odalarını Filtrele",
+                    "room_list": "Ev Odaları",
+                    "type_filter_mode": "Cihaz Bağlantı Türünü Filtrele",
+                    "type_list": "Cihaz Bağlantı Türü",
+                    "model_filter_mode": "Cihaz Modelini Filtrele",
+                    "model_list": "Cihaz Modeli",
+                    "devices_filter_mode": "Cihazları Filtrele",
+                    "device_list": "Cihaz Listesi",
+                    "statistics_logic": "İstatistik Mantığı"
+                }
+            },
+            "update_trans_rules": {
+                "title": "Varlık Dönüştürme Kurallarını Güncelle",
+                "description": "## Kullanım Talimatları\r\n- Mevcut entegrasyon örneğindeki cihazların varlık bilgilerini güncelleyin, MIoT-Spec-V2 çok dilli yapılandırma, boolean çeviri ve model filtreleme dahil.\r\n- **Uyarı**: Bu genel bir yapılandırmadır ve yerel önbelleği güncelleyecektir. Tüm entegrasyon örneklerini etkileyecektir.\r\n- Bu işlem biraz zaman alacaktır, lütfen sabırlı olun. \"Güncellemeyi Onayla\"yı işaretleyin ve **{urn_count}** kuralı güncellemeye başlamak için \"İleri\"ye tıklayın, aksi takdirde güncellemeyi atlayın.",
+                "data": {
+                    "confirm": "Güncellemeyi onayla"
+                }
+            },
+            "update_lan_ctrl_config": {
+                "title": "LAN kontrol yapılandırmasını güncelle",
+                "description": "## Kullanım Talimatları\r\nXiaomi LAN kontrol işlevi için yapılandırmaları güncelleyin. Bulut ve merkezi hub ağ geçidi cihazları kontrol edemediğinde, entegrasyon LAN üzerinden cihazları kontrol etmeye çalışacaktır. Hiçbir ağ kartı seçilmezse, LAN kontrol işlevi etkin olmayacaktır.\r\n- Yalnızca LAN'daki MIoT-Spec-V2 uyumlu IP cihazları desteklenir. 2020'den önce üretilen bazı cihazlar LAN kontrolünü veya LAN aboneliğini desteklemeyebilir.\r\n- Lütfen kontrol edilecek cihazlarla aynı ağdaki ağ kartlarını seçin. Birden fazla ağ kartı seçilebilir. Home Assistant'ın birden fazla ağ kartı seçimi nedeniyle yerel ağa iki veya daha fazla bağlantısı varsa, en iyi ağ bağlantısına sahip olanı seçmeniz önerilir, aksi takdirde cihazlar üzerinde kötü etkisi olabilir.\r\n- LAN'da yerel kontrolü destekleyen terminal cihazlar (ekranlı Xiaomi hoparlör, cep telefonu, vb.) varsa, LAN aboneliğini etkinleştirmek yerel otomasyon ve cihaz anormalliklerine neden olabilir.\r\n- **Uyarı**: Bu genel bir yapılandırmadır. Tüm entegrasyon örneklerini etkileyecektir. Lütfen dikkatli kullanın.\r\n{notice_net_dup}",
+                "data": {
+                    "net_interfaces": "Lütfen kullanılacak ağ kartını seçin",
+                    "enable_subscribe": "LAN aboneliğini etkinleştir"
+                }
+            },
+            "network_detect_config": {
+                "title": "Entegre Ağ Yapılandırması",
+                "description": "## Kullanım Tanıtımı\r\n### Ağ Algılama Adresi\r\nAğın düzgün çalışıp çalışmadığını kontrol etmek için kullanılır. Ayarlanmazsa, sistem varsayılan adresi kullanılacaktır. Varsayılan adres kontrolü başarısız olursa, özel bir adres girmeyi deneyebilirsiniz.\r\n- Virgülle ayrılmış birden fazla algılama adresi girebilirsiniz, örneğin `8.8.8.8,https://www.bing.com`\r\n- Bir IP adresi ise, algılama ping üzerinden yapılacaktır. Bir HTTP(s) adresi ise, algılama HTTP GET isteği üzerinden yapılacaktır.\r\n- Sistem varsayılan algılama adresini geri yüklemek istiyorsanız, lütfen bir virgül `,` girin ve 'İleri'ye tıklayın.\r\n- **Bu yapılandırma geneldir ve değişiklikler diğer entegrasyon örneklerini etkileyecektir. Lütfen dikkatli değiştirin.**\r\n### Ağ Bağımlılıklarını Kontrol Et\r\nAşağıdaki ağ bağımlılıklarının erişilebilir olup olmadığını tek tek kontrol edin. İlgili adresler erişilebilir değilse, entegrasyon sorunlarına neden olacaktır.\r\n- OAuth2 Kimlik Doğrulama Adresi: `https://account.xiaomi.com/oauth2/authorize`.\r\n- Xiaomi HTTP API Adresi: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API Adresi: `https://miot-spec.org/miot-spec-v2/template/list/device`.\r\n- Xiaomi MQTT Broker Adresi: `mqtts://{broker_host}`.",
+                "data": {
+                    "network_detect_addr": "Ağ Algılama Adresi",
+                    "check_network_deps": "Ağ Bağımlılıklarını Kontrol Et"
+                }
+            },
+            "config_confirm": {
+                "title": "Yapılandırmayı Onayla",
+                "description": "Merhaba **{nick_name}**, lütfen en son yapılandırma bilgilerini onaylayın ve ardından GÖNDER'e tıklayın.\r\nEntegrasyon güncellenmiş yapılandırmayla yeniden yüklenecektir.\r\n\r\nEntegrasyon Dili:\t{lang_new}\r\nTakma Ad:\t{nick_name_new}\r\nEylem için hata ayıklama modu:\t{action_debug}\r\nStandart olmayan oluşturulan varlıkları gizle:\t{hide_non_standard_entities}\r\nPerde ölü bölge genişliği:\t{cover_width_new}\r\nCihaz durum değişikliği bildirimlerini göster:\t{display_devices_changed_notify}\r\nCihaz Değişiklikleri:\t**{devices_add}** cihaz ekle, **{devices_remove}** cihaz kaldır\r\nDönüştürme kuralları değişikliği:\tToplam **{trans_rules_count}** kural var ve **{trans_rules_count_success}** kural güncellendi",
+                "data": {
+                    "confirm": "Değişikliği onayla"
+                }
+            }
+        },
+        "progress": {
+            "oauth": "### {link_left}Yeniden giriş yapmak için lütfen buraya tıklayın{link_right}"
+        },
+        "error": {
+            "not_auth": "Kimlik doğrulanmadı. Lütfen kullanıcı kimliğini doğrulamak için kimlik doğrulama bağlantısına tıklayın.",
+            "get_token_error": "Giriş yetkilendirme bilgileri (OAuth token) alınamadı.",
+            "get_homeinfo_error": "Ev bilgileri alınamadı.",
+            "get_cert_error": "Merkezi hub ağ geçidi sertifikası alınamadı.",
+            "no_devices": "Seçilen evde cihaz yok. Lütfen cihazı olan bir ev seçin ve devam edin.",
+            "no_filter_devices": "Filtrelenmiş cihazlar boş. Lütfen geçerli filtre kriterleri seçin ve devam edin.",
+            "no_family_selected": "Ev seçilmedi.",
+            "no_central_device": "[Merkezi Hub Ağ Geçidi Modu], Home Assistant'ın bulunduğu yerel ağda kullanılabilir bir Xiaomi merkezi hub ağ geçidi gerektirir. Lütfen seçilen evin gereksinimi karşılayıp karşılamadığını kontrol edin.",
+            "mdns_discovery_error": "Yerel cihaz keşif hizmeti istisnası.",
+            "update_config_error": "Yapılandırma bilgileri güncellenemedi.",
+            "not_confirm": "Değişiklikler onaylanmadı. Lütfen göndermeden önce değişikliği onaylayın.",
+            "invalid_network_addr": "Geçersiz IP adresi veya HTTP adresi algılandı, lütfen geçerli bir adres girin.",
+            "invalid_ip_addr": "Ulaşılamayan IP adresi algılandı, lütfen geçerli bir IP adresi girin.",
+            "invalid_http_addr": "Ulaşılamayan HTTP adresi algılandı, lütfen geçerli bir HTTP adresi girin.",
+            "invalid_default_addr": "Varsayılan ağ algılama adresi ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin veya özel bir ağ algılama adresi kullanın.",
+            "unreachable_oauth2_host": "OAuth2 kimlik doğrulama adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin.",
+            "unreachable_http_host": "Xiaomi HTTP API adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin.",
+            "unreachable_spec_host": "Xiaomi SPEC API adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin.",
+            "unreachable_mqtt_broker": "Xiaomi MQTT Broker adresine ulaşılamıyor, lütfen ağ yapılandırmasını kontrol edin."
+        },
+        "abort": {
+            "network_connect_error": "Yapılandırma başarısız oldu. Ağ bağlantısı anormal. Lütfen ekipman ağ yapılandırmasını kontrol edin.",
+            "options_flow_error": "Entegrasyon yeniden yapılandırma hatası: {error}",
+            "re_add": "Lütfen entegrasyonu yeniden ekleyin. Hata mesajı: {error}",
+            "storage_error": "Entegrasyon depolama modülü istisnası. Lütfen tekrar deneyin veya entegrasyonu yeniden ekleyin: {error}",
+            "inconsistent_account": "Hesap bilgileri tutarsız. Lütfen doğru hesapla giriş yapın."
+        }
+    }
+}

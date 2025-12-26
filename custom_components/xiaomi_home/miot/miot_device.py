@@ -436,7 +436,8 @@ class MIoTDevice:
             optional_properties: dict
             required_actions: set
             optional_actions: set
-            # 2. The service shall have all required properties, actions.
+            # 2. The required service shall have all required properties
+            # and actions.
             if service.name in required_services:
                 required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'required'].get(
@@ -454,6 +455,23 @@ class MIoTDevice:
                     'required'].get(
                         service.name, {}
                 ).get('optional', {}).get('actions', set({}))
+                if not {
+                    prop.name for prop in service.properties if prop.access
+                }.issuperset(set(required_properties.keys())):
+                    return None
+                if not {
+                    action.name for action in service.actions
+                }.issuperset(required_actions):
+                    return None
+                # 3. The required property in required service shall have all
+                # required access mode.
+                for prop in service.properties:
+                    if prop.name in required_properties:
+                        if not set(prop.access).issuperset(
+                                required_properties[prop.name]):
+                            return None
+            # 4. The optional service shall have all required properties
+            # and actions.
             elif service.name in optional_services:
                 required_properties = SPEC_DEVICE_TRANS_MAP[spec_name][
                     'optional'].get(
@@ -471,22 +489,23 @@ class MIoTDevice:
                     'optional'].get(
                     service.name, {}
                 ).get('optional', {}).get('actions', set({}))
+                if not {
+                    prop.name for prop in service.properties if prop.access
+                }.issuperset(set(required_properties.keys())):
+                    continue
+                if not {
+                    action.name for action in service.actions
+                }.issuperset(required_actions):
+                    continue
+                # 5. The required property in optional service shall have all
+                # required access mode.
+                for prop in service.properties:
+                    if prop.name in required_properties:
+                        if not set(prop.access).issuperset(
+                                required_properties[prop.name]):
+                            continue
             else:
                 continue
-            if not {
-                prop.name for prop in service.properties if prop.access
-            }.issuperset(set(required_properties.keys())):
-                return None
-            if not {
-                action.name for action in service.actions
-            }.issuperset(required_actions):
-                return None
-            # 3. The required property shall have all required access mode.
-            for prop in service.properties:
-                if prop.name in required_properties:
-                    if not set(prop.access).issuperset(
-                            required_properties[prop.name]):
-                        return None
             # property
             for prop in service.properties:
                 if prop.name in set.union(
@@ -747,6 +766,8 @@ class MIoTDevice:
             'watt': UnitOfPower.WATT,
             'w': UnitOfPower.WATT,
             'W': UnitOfPower.WATT,
+            'kW': UnitOfPower.KILO_WATT,
+            'Wh': UnitOfEnergy.WATT_HOUR,
             'kWh': UnitOfEnergy.KILO_WATT_HOUR,
             'A': UnitOfElectricCurrent.AMPERE,
             'mA': UnitOfElectricCurrent.MILLIAMPERE,
@@ -1039,6 +1060,7 @@ class MIoTServiceEntity(Entity):
                 f'set property failed, property is None, '
                 f'{self.entity_id}, {self.name}')
         value = prop.value_format(value)
+        value = prop.value_precision(value)
         if prop not in self.entity_data.props:
             raise RuntimeError(
                 f'set property failed, unknown property, '
@@ -1076,9 +1098,11 @@ class MIoTServiceEntity(Entity):
                 'get property failed, not readable, %s, %s, %s',
                 self.entity_id, self.name, prop.name)
             return None
-        result = prop.value_format(
+        value: Any = prop.value_format(
             await self.miot_device.miot_client.get_prop_async(
                 did=self.miot_device.did, siid=prop.service.iid, piid=prop.iid))
+        value = prop.eval_expr(value)
+        result = prop.value_precision(value)
         if result != self._prop_value_map[prop]:
             self._prop_value_map[prop] = result
             self.async_write_ha_state()
@@ -1108,6 +1132,8 @@ class MIoTServiceEntity(Entity):
             ):
                 continue
             value: Any = prop.value_format(params['value'])
+            value = prop.eval_expr(value)
+            value = prop.value_precision(value)
             self._prop_value_map[prop] = value
             if prop in self._prop_changed_subs:
                 self._prop_changed_subs[prop](prop, value)
@@ -1255,6 +1281,7 @@ class MIoTPropertyEntity(Entity):
                 f'set property failed, not writable, '
                 f'{self.entity_id}, {self.name}')
         value = self.spec.value_format(value)
+        value = self.spec.value_precision(value)
         try:
             await self.miot_device.miot_client.set_prop_async(
                 did=self.miot_device.did, siid=self.spec.service.iid,
@@ -1272,15 +1299,19 @@ class MIoTPropertyEntity(Entity):
                 'get property failed, not readable, %s, %s',
                 self.entity_id, self.name)
             return None
-        return self.spec.value_format(
+        value: Any = self.spec.value_format(
             await self.miot_device.miot_client.get_prop_async(
                 did=self.miot_device.did, siid=self.spec.service.iid,
                 piid=self.spec.iid))
+        value = self.spec.eval_expr(value)
+        result = self.spec.value_precision(value)
+        return result
 
     def __on_value_changed(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('property changed, %s', params)
-        self._value = self.spec.value_format(params['value'])
-        self._value = self.spec.eval_expr(self._value)
+        value: Any = self.spec.value_format(params['value'])
+        value = self.spec.eval_expr(value)
+        self._value = self.spec.value_precision(value)
         if not self._pending_write_ha_state_timer:
             self.async_write_ha_state()
 

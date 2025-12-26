@@ -60,6 +60,7 @@ NETWORK_REFRESH_INTERVAL: int = 30
 OAUTH2_CLIENT_ID: str = '2882303761520251711'
 OAUTH2_AUTH_URL: str = 'https://account.xiaomi.com/oauth2/authorize'
 DEFAULT_OAUTH2_API_HOST: str = 'ha.api.io.mi.com'
+DEFAULT_CLOUD_BROKER_HOST: str = 'ha.mqtt.io.mi.com'
 
 # seconds, 14 days
 SPEC_STD_LIB_EFFECTIVE_TIME = 3600*24*14
@@ -89,6 +90,7 @@ SUPPORTED_PLATFORMS: list = [
 
 UNSUPPORTED_MODELS: list = [
     'chuangmi.ir.v2',
+    'hmpace.motion.v6nfc',
     'xiaomi.router.rd03'
 ]
 
@@ -116,6 +118,7 @@ INTEGRATION_LANGUAGES = {
     'pt': 'Português',
     'pt-BR': 'Português (Brasil)',
     'ru': 'Русский',
+    'tr': 'Türkçe',
     'zh-Hans': '简体中文',
     'zh-Hant': '繁體中文'
 }

@@ -79,6 +79,12 @@ from .miot_i18n import MIoTI18n
 _LOGGER = logging.getLogger(__name__)
 
 
+REFRESH_PROPS_DELAY = 0.2
+REFRESH_PROPS_RETRY_DELAY = 3
+REFRESH_CLOUD_DEVICES_DELAY = 6
+REFRESH_CLOUD_DEVICES_RETRY_DELAY = 60
+REFRESH_GATEWAY_DEVICES_DELAY = 3
+
 @dataclass
 class MIoTClientSub:
     """MIoT client subscription."""
@@ -253,7 +259,18 @@ class MIoTClient:
         if not self._user_config:
             # Integration need to be add again
             raise MIoTClientError('load_user_config_async error')
-        _LOGGER.debug('user config, %s', json.dumps(self._user_config))
+        # Hide sensitive info in printing
+        p_user_config: dict = deepcopy(self._user_config)
+        p_access_token: str = p_user_config['auth_info']['access_token']
+        p_refresh_token: str = p_user_config['auth_info']['refresh_token']
+        p_mac_key: str = p_user_config['auth_info']['mac_key']
+        p_user_config['auth_info'][
+            'access_token'] = f"{p_access_token[:5]}***{p_access_token[-5:]}"
+        p_user_config['auth_info'][
+            'refresh_token'] = f"{p_refresh_token[:5]}***{p_refresh_token[-5:]}"
+        p_user_config['auth_info'][
+            'mac_key'] = f"{p_mac_key[:5]}***{p_mac_key[-5:]}"
+        _LOGGER.debug('user config, %s', json.dumps(p_user_config))
         # MIoT i18n client
         self._i18n = MIoTI18n(
             lang=self._entry_data.get(
@@ -706,7 +723,7 @@ class MIoTClient:
         if self._refresh_props_timer:
             return
         self._refresh_props_timer = self._main_loop.call_later(
-            0.2, lambda: self._main_loop.create_task(
+            REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
     async def get_prop_async(self, did: str, siid: int, piid: int) -> Any:
@@ -1037,11 +1054,11 @@ class MIoTClient:
 
         mips = self._mips_local.get(group_id, None)
         if mips:
-            if state == MipsServiceState.REMOVED:
-                mips.disconnect()
-                self._mips_local.pop(group_id, None)
-                return
-            if (
+            # if state == MipsServiceState.REMOVED:
+            #     mips.disconnect()
+            #     self._mips_local.pop(group_id, None)
+            #     return
+            if ( # ADDED or UPDATED
                 mips.client_id == self._entry_data['virtual_did']
                 and mips.host == data['addresses'][0]
                 and mips.port == data['port']
@@ -1239,7 +1256,15 @@ class MIoTClient:
     ) -> None:
         _LOGGER.info(
             'gateway devices list changed, %s, %s', mips.group_id, did_list)
-        payload: dict = {'filter': {'did': did_list}}
+        payload: dict = {
+            'filter': {
+                'did': did_list
+            },
+            'info': [
+                'name', 'model', 'urn',
+                'online', 'specV2Access', 'pushAvailable'
+            ]
+        }
         gw_list = await mips.get_dev_list_async(
             payload=json.dumps(payload))
         if gw_list is None:
@@ -1363,10 +1388,13 @@ class MIoTClient:
         """Update cloud devices.
         NOTICE: This function will operate the cloud_list
         """
-        # MIoT cloud service may not publish the online state updating message
+        # MIoT cloud may not publish the online state updating message
         # for the BLE device. Assume that all BLE devices are online.
+        # MIoT cloud does not publish the online state updating message for the
+        # child device under the proxy gateway (eg, VRF air conditioner
+        # controller). Assume that all proxy gateway child devices are online.
         for did, info in cloud_list.items():
-            if did.startswith('blt.'):
+            if did.startswith('blt.') or did.startswith('proxy.'):
                 info['online'] = True
         for did, info in self._device_list_cache.items():
             if filter_dids and did not in filter_dids:
@@ -1419,9 +1447,19 @@ class MIoTClient:
     async def __refresh_cloud_devices_async(self) -> None:
         _LOGGER.debug(
             'refresh cloud devices, %s, %s', self._uid, self._cloud_server)
-        self._refresh_cloud_devices_timer = None
-        result = await self._http.get_devices_async(
-            home_ids=list(self._entry_data.get('home_selected', {}).keys()))
+        if self._refresh_cloud_devices_timer:
+            self._refresh_cloud_devices_timer.cancel()
+            self._refresh_cloud_devices_timer = None
+        try:
+            result = await self._http.get_devices_async(
+                home_ids=list(self._entry_data.get('home_selected', {}).keys()))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('refresh cloud devices failed, %s', err)
+            self._refresh_cloud_devices_timer = self._main_loop.call_later(
+                REFRESH_CLOUD_DEVICES_RETRY_DELAY,
+                lambda: self._main_loop.create_task(
+                    self.__refresh_cloud_devices_async()))
+            return
         if not result and 'devices' not in result:
             self.__show_client_error_notify(
                 message=self._i18n.translate(
@@ -1467,17 +1505,11 @@ class MIoTClient:
         _LOGGER.debug(
             'request refresh cloud devices, %s, %s',
             self._uid, self._cloud_server)
-        if immediately:
-            if self._refresh_cloud_devices_timer:
-                self._refresh_cloud_devices_timer.cancel()
-            self._refresh_cloud_devices_timer = self._main_loop.call_later(
-                0, lambda: self._main_loop.create_task(
-                    self.__refresh_cloud_devices_async()))
-            return
+        delay_sec : int = 0 if immediately else REFRESH_CLOUD_DEVICES_DELAY
         if self._refresh_cloud_devices_timer:
-            return
+            self._refresh_cloud_devices_timer.cancel()
         self._refresh_cloud_devices_timer = self._main_loop.call_later(
-            6, lambda: self._main_loop.create_task(
+            delay_sec, lambda: self._main_loop.create_task(
                 self.__refresh_cloud_devices_async()))
 
     @final
@@ -1568,7 +1600,14 @@ class MIoTClient:
         if not mips.mips_state:
             _LOGGER.debug('local mips disconnect, skip refresh, %s', group_id)
             return
-        gw_list: dict = await mips.get_dev_list_async()
+        payload: dict = {
+            'info': [
+                'name', 'model', 'urn',
+                'online', 'specV2Access', 'pushAvailable'
+            ]
+        }
+        gw_list: dict = await mips.get_dev_list_async(
+            payload=json.dumps(payload))
         if gw_list is None:
             _LOGGER.error(
                 'refresh gw devices with group_id failed, %s, %s',
@@ -1603,7 +1642,8 @@ class MIoTClient:
             return
         self._mips_local_state_changed_timers[group_id] = (
             self._main_loop.call_later(
-                3, lambda: self._main_loop.create_task(
+                REFRESH_GATEWAY_DEVICES_DELAY,
+                lambda: self._main_loop.create_task(
                     self.__refresh_gw_devices_with_group_id_async(
                         group_id=group_id))))
 
@@ -1757,7 +1797,7 @@ class MIoTClient:
             self._refresh_props_retry_count = 0
             if self._refresh_props_list:
                 self._refresh_props_timer = self._main_loop.call_later(
-                    0.2, lambda: self._main_loop.create_task(
+                    REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
                         self.__refresh_props_handler()))
             else:
                 self._refresh_props_timer = None
@@ -1776,7 +1816,7 @@ class MIoTClient:
         _LOGGER.info(
             'refresh props failed, retry, %s', self._refresh_props_retry_count)
         self._refresh_props_timer = self._main_loop.call_later(
-            3, lambda: self._main_loop.create_task(
+            REFRESH_PROPS_RETRY_DELAY, lambda: self._main_loop.create_task(
                 self.__refresh_props_handler()))
 
     @final

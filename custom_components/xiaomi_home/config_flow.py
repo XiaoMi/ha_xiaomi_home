@@ -80,6 +80,7 @@ from .miot.const import (
     MAX_COVER_DEAD_ZONE_WIDTH,
     DEFAULT_NICK_NAME,
     DEFAULT_OAUTH2_API_HOST,
+    DEFAULT_CLOUD_BROKER_HOST,
     DOMAIN,
     OAUTH2_AUTH_URL,
     OAUTH2_CLIENT_ID,
@@ -379,8 +380,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     client_id=f'ha.{self._uid}',
                     protocol=client.MQTTv5)  # type: ignore
                 if mqtt_client.connect(
-                        host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
-                        port=8883) != 0:
+                    host=f'{self._cloud_server}-{DEFAULT_CLOUD_BROKER_HOST}',
+                    port=8883) != 0:
                     raise RuntimeError('mqtt connect error')
                 mqtt_client.disconnect()
             except Exception as err:  # pylint: disable=broad-exception-caught
@@ -411,7 +412,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }),
             errors={'base': reason},
             description_placeholders={
-                'cloud_server': self._cloud_server,
+                'broker_host':
+                    f'{self._cloud_server}-{DEFAULT_CLOUD_BROKER_HOST}:8883',
                 'http_host': (
                     DEFAULT_OAUTH2_API_HOST
                     if self._cloud_server == DEFAULT_CLOUD_SERVER
@@ -1887,8 +1889,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     client_id=f'ha.{self._uid}',
                     protocol=client.MQTTv5)  # type: ignore
                 if mqtt_client.connect(
-                        host=f'{self._cloud_server}-ha.mqtt.io.mi.com',
-                        port=8883) != 0:
+                    host=f'{self._cloud_server}-{DEFAULT_CLOUD_BROKER_HOST}',
+                    port=8883) != 0:
                     raise RuntimeError('mqtt connect error')
                 mqtt_client.disconnect()
             except Exception as err:  # pylint: disable=broad-exception-caught
@@ -1919,7 +1921,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }),
             errors={'base': reason},
             description_placeholders={
-                'cloud_server': self._cloud_server,
+                'broker_host':
+                    f'{self._cloud_server}-{DEFAULT_CLOUD_BROKER_HOST}:8883',
                 'http_host': (
                     DEFAULT_OAUTH2_API_HOST
                     if self._cloud_server == DEFAULT_CLOUD_SERVER

@@ -93,11 +93,11 @@ git checkout v1.0.0
 
 - 米家集成是否支持本地化控制？
 
-  米家集成支持通过[小米中枢网关](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search)（固件版本 3.4.0_000 以上）或内置中枢网关（软件版本 0.8.0 以上）的米家设备实现本地化控制。如果没有小米中枢网关或其他带中枢网关功能的设备，那么所有控制指令都会通过小米云发送。支持 Home Assistant 本地化控制的小米中枢网关（含内置中枢网关）的固件尚未发布，固件升级计划请参阅 MIoT 团队的通知。
+  米家集成支持通过[小米中枢网关](https://www.mi.com/shop/buy/detail?product_id=15755&cfrom=search)（固件版本 3.3.0_0023 及以上）或[内置中枢网关](https://github.com/XiaoMi/ha_xiaomi_home/wiki/Central-hub-gateway-device-models)（软件版本 0.8.9 及以上）的米家设备实现本地化控制。如果没有小米中枢网关或其他带中枢网关功能的设备，那么所有控制指令都会通过小米云发送。支持 Home Assistant 本地化控制的小米中枢网关（含内置中枢网关）的固件已发布。
 
   小米中枢网关仅在中国大陆可用，在其他地区不可用。
 
-  米家集成也能通过开启小米局域网控制功能实现部分本地化控制效果。小米局域网控制功能只能控制与 Home Assistant 处于同一局域网内的 IP 设备（使用 WiFi、网线连接路由器的设备），无法控制蓝牙 Mesh、ZigBee 等协议接入的设备。该功能可能会引起一些异常，我们建议不要使用该功能。小米局域网控制功能开启方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新局域网控制配置
+  米家集成也能通过开启小米局域网控制功能实现部分本地化控制效果。小米局域网控制功能只能控制与 Home Assistant 处于同一局域网内的 IP 设备（使用 WiFi、网线连接路由器的设备），无法控制蓝牙 Mesh、ZigBee 等协议接入的设备。该功能可能会引起一些异常，我们建议不要使用该功能。小米局域网控制功能开启方法：[设置 > 设备与服务 > 已配置 > Xiaomi Home](https://my.home-assistant.io/redirect/integration/?domain=xiaomi_home) > 配置 > 更新局域网控制配置。
 
   小米局域网控制功能不受地区限制，在全球范围内均可用。如果 Home Assistant 所在的局域网内存在中枢网关，那么即便米家集成开启了小米局域网控制功能，该功能也不会生效。
 
@@ -330,7 +330,7 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
 
 ## 多语言支持
 
-米家集成配置选项中可选择的集成使用的语言有简体中文、繁体中文、英文、西班牙语、俄语、法语、德语、日语这八种语言。目前，米家集成配置页面的简体中文和英文已经过人工校审，其他语言由机器翻译。如果您希望修改配置页面的词句，则需要修改 `custom_components/xiaomi_home/translations/` 以及 `custom_components/xiaomi_home/miot/i18n/` 目录下相应语言的 json 文件。
+米家集成配置选项中可选择的集成使用的语言有简体中文、繁体中文、英文、西班牙语、俄语、法语、德语、日语、意大利语、荷兰语、葡萄牙语、巴西葡萄牙语、土耳其语这十三种语言。目前，米家集成配置页面的简体中文和英文已经过人工校审，其他语言由机器翻译或社区贡献。如果您希望修改配置页面的词句，则需要修改 `custom_components/xiaomi_home/translations/` 以及 `custom_components/xiaomi_home/miot/i18n/` 目录下相应语言的 json 文件。
 
 在显示 Home Assistant 实体名称时，米家集成会从小米云下载设备厂商为设备配置的多语言文件，该文件包含设备 MIoT-Spec-V2 实例的多语言翻译。 `multi_lang.json` 是本地维护的多语言配置字典，其优先级高于从云端获取的多语言文件，可用于补充或修改设备的多语言翻译。
 
@@ -348,7 +348,7 @@ urn:miot-spec-v2:device:gateway:0000A019:xiaomi-hub1:
 
 `multi_lang.json` 的键值为 MIoT-Spec-V2 设备实例的 urn （不含版本号“version”字段）。
 
-language code 为语言代码，取值为 zh-Hans、zh-Hant、en、es、ru、fr、de、ja （对应上述米家集成可选的八种语言）。
+language code 为语言代码，取值为 zh-Hans、zh-Hant、en、es、ru、fr、de、ja、it、nl、pt、pt-BR、tr（对应上述米家集成可选的十三种语言）。
 
 instance code 为 MIoT-Spec-V2 实例代码，格式如下：
 
@@ -386,6 +386,7 @@ siid、piid、eiid、aiid、value 均为十进制三位整数。
 - 贡献指南： [English](../CONTRIBUTING.md) | [简体中文](./CONTRIBUTING_zh.md)
 - [更新日志](../CHANGELOG.md)
 - 开发文档： https://developers.home-assistant.io/docs/creating_component_index
+- [常见问题](https://github.com/XiaoMi/ha_xiaomi_home/wiki)
 
 ## 目录结构
 
