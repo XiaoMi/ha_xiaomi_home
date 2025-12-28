@@ -71,6 +71,7 @@ from .miot_mdns import MipsService, MipsServiceState
 from .common import (
     randomize_float, load_yaml_file, gen_absolute_path, MIoTMatcher)
 
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -812,11 +813,9 @@ class MIoTLan:
         return True
 
     @final
-    async def get_prop_async(self,
-                             did: str,
-                             siid: int,
-                             piid: int,
-                             timeout_ms: int = 10000) -> Any:
+    async def get_prop_async(
+        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
+    ) -> Any:
         self.__assert_service_ready()
         result_obj = await self.__call_api_async(
             did=did, msg={
@@ -920,10 +919,9 @@ class MIoTLan:
                 timeout_ms=timeout_ms))
         return await fut
 
-    async def __call_api_async(self,
-                               did: str,
-                               msg: dict,
-                               timeout_ms: int = 10000) -> dict:
+    async def __call_api_async(
+        self, did: str, msg: dict, timeout_ms: int = 10000
+    ) -> dict:
 
         def call_api_handler(msg: dict, fut: asyncio.Future):
             self._main_loop.call_soon_threadsafe(
@@ -1026,7 +1024,6 @@ class MIoTLan:
         handler_ctx: Any = None,
         timeout_ms: Optional[int] = None
     ) -> None:
-
         def request_timeout_handler(req_data: _MIoTLanRequestData):
             self._pending_requests.pop(req_data.msg_id, None)
             if req_data and req_data.handler:
@@ -1253,8 +1250,9 @@ class MIoTLan:
         except Exception as err:  # pylint: disable=broad-exception-caught
             _LOGGER.error('socket read handler error, %s', err)
 
-    def __raw_message_handler(self, data: bytearray, data_len: int, ip: str,
-                              if_name: str) -> None:
+    def __raw_message_handler(
+        self, data: bytearray, data_len: int, ip: str, if_name: str
+    ) -> None:
         if data[:2] != self.OT_HEADER:
             return
         # Keep alive message
@@ -1278,8 +1276,11 @@ class MIoTLan:
                 int(data[28]) == self.OT_SUPPORT_WILDCARD_SUB)
             sub_ts = struct.unpack('>I', data[20:24])[0]
             sub_type = int(data[27])
-            if (device.supported_wildcard_sub and sub_type in [0, 1, 4] and
-                    sub_ts != device.sub_ts):
+            if (
+                device.supported_wildcard_sub
+                and sub_type in [0, 1, 4]
+                and sub_ts != device.sub_ts
+            ):
                 device.subscribed = False
                 device.subscribe()
         if data_len > self.OT_PROBE_LEN:
@@ -1357,8 +1358,9 @@ class MIoTLan:
             filter_id)
         return False
 
-    def __sendto(self, if_name: Optional[str], data: bytes, address: str,
-                 port: int) -> None:
+    def __sendto(
+        self, if_name: Optional[str], data: bytes, address: str, port: int
+    ) -> None:
         if if_name is None:
             # Broadcast
             for if_n, sock in self._broadcast_socks.items():

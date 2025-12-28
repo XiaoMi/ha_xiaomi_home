@@ -624,9 +624,9 @@ class MIoTHttpClient:
             devices.update(result)
         return devices
 
-    async def get_devices_async(self,
-                                home_ids: Optional[list[str]] = None
-                               ) -> dict[str, dict]:
+    async def get_devices_async(
+        self, home_ids: Optional[list[str]] = None
+    ) -> dict[str, dict]:
         homeinfos = await self.get_homeinfos_async()
         homes: dict[str, dict[str, Any]] = {}
         devices: dict[str, dict] = {}
@@ -787,11 +787,9 @@ class MIoTHttpClient:
             self._get_prop_timer = None
         return True
 
-    async def get_prop_async(self,
-                             did: str,
-                             siid: int,
-                             piid: int,
-                             immediately: bool = False) -> Any:
+    async def get_prop_async(
+        self, did: str, siid: int, piid: int, immediately: bool = False
+    ) -> Any:
         if immediately:
             return await self.__get_prop_async(did, siid, piid)
         key: str = f'{did}.{siid}.{piid}'
@@ -843,8 +841,9 @@ class MIoTHttpClient:
 
         return res_obj['result']
 
-    async def action_async(self, did: str, siid: int, aiid: int,
-                           in_list: list[dict]) -> dict:
+    async def action_async(
+        self, did: str, siid: int, aiid: int, in_list: list[dict]
+    ) -> dict:
         """
         params = {"did": "xxxx", "siid": 2, "aiid": 1, "in": []}
         """
