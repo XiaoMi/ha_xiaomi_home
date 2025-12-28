@@ -716,7 +716,7 @@ class MIoTClient:
         # props_list = [{'did': str, 'siid': int, 'piid': int, 'value': Any}......]
         # 判断是不是只有一个did
         did_set = {prop["did"] for prop in props_list}
-        if len(did_set) == 1:
+        if len(did_set) != 1:
             raise MIoTClientError(f"more than one or no did once, {did_set}")
         did = did_set.pop()
 
