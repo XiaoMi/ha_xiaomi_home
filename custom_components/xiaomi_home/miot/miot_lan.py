@@ -922,7 +922,6 @@ class MIoTLan:
     async def __call_api_async(
         self, did: str, msg: dict, timeout_ms: int = 10000
     ) -> dict:
-
         def call_api_handler(msg: dict, fut: asyncio.Future):
             self._main_loop.call_soon_threadsafe(
                 fut.set_result, msg)
