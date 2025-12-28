@@ -78,6 +78,7 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.components.switch import SwitchDeviceClass
 
+
 # pylint: disable=relative-beyond-top-level
 from .specs.specv2entity import (
     SPEC_ACTION_TRANS_MAP,
@@ -242,8 +243,8 @@ class MIoTDevice:
             did=self._did, siid=siid, aiid=aiid, in_list=in_list)
 
     def sub_device_state(
-            self, key: str, handler: Callable[[str, MIoTDeviceState],
-                                              None]) -> int:
+        self, key: str, handler: Callable[[str, MIoTDeviceState], None]
+    ) -> int:
         sub_id = self.__gen_sub_id()
         if key in self._device_state_sub_list:
             self._device_state_sub_list[key][str(sub_id)] = handler
@@ -409,7 +410,8 @@ class MIoTDevice:
         self._action_list[action.platform].append(action)
 
     def parse_miot_device_entity(
-            self, spec_instance: MIoTSpecInstance) -> Optional[MIoTEntityData]:
+        self, spec_instance: MIoTSpecInstance
+    ) -> Optional[MIoTEntityData]:
         if spec_instance.name not in SPEC_DEVICE_TRANS_MAP:
             return None
         spec_name: str = spec_instance.name
@@ -874,8 +876,9 @@ class MIoTDevice:
         self._sub_id += 1
         return self._sub_id
 
-    def __on_device_state_changed(self, did: str, state: MIoTDeviceState,
-                                  ctx: Any) -> None:
+    def __on_device_state_changed(
+        self, did: str, state: MIoTDeviceState, ctx: Any
+    ) -> None:
         self._online = state == MIoTDeviceState.ONLINE
         for key, sub_list in self._device_state_sub_list.items():
             for handler in sub_list.values():
@@ -1156,9 +1159,9 @@ class MIoTServiceEntity(Entity):
             self.async_write_ha_state()
         return result
 
-    async def action_async(self,
-                           action: MIoTSpecAction,
-                           in_list: Optional[list] = None) -> bool:
+    async def action_async(
+        self, action: MIoTSpecAction, in_list: Optional[list] = None
+    ) -> bool:
         if not action:
             raise RuntimeError(
                 f'action failed, action is None, {self.entity_id}, {self.name}')
@@ -1457,10 +1460,9 @@ class MIoTEventEntity(Entity):
             sub_id=self._value_sub_id)
 
     @abstractmethod
-    def on_event_occurred(self,
-                          name: str,
-                          arguments: dict[str, Any] | None = None) -> None:
-        ...
+    def on_event_occurred(
+        self, name: str, arguments: dict[str, Any] | None = None
+    ) -> None: ...
 
     def __on_event_occurred(self, params: dict, ctx: Any) -> None:
         _LOGGER.debug('event occurred, %s',  params)

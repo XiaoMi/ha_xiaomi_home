@@ -1415,8 +1415,9 @@ class MIoTClient:
             _LOGGER.error('on event msg error, %s, %s', params, err)
 
     @final
-    def __check_device_state(self, cloud_state: Optional[bool], gw_state: bool,
-                             lan_state: bool) -> Optional[bool]:
+    def __check_device_state(
+        self, cloud_state: Optional[bool], gw_state: bool, lan_state: bool
+    ) -> Optional[bool]:
         if cloud_state is None and not gw_state and not lan_state:
             # Device remove
             return None
@@ -1698,10 +1699,9 @@ class MIoTClient:
         self.__request_show_devices_changed_notify()
 
     @final
-    def __request_refresh_gw_devices_by_group_id(self,
-                                                 group_id: str,
-                                                 immediately: bool = False
-                                                ) -> None:
+    def __request_refresh_gw_devices_by_group_id(
+        self, group_id: str, immediately: bool = False
+    ) -> None:
         """Request refresh gateway devices by group_id"""
         refresh_timer = self._mips_local_state_changed_timers.get(
             group_id, None)
@@ -1865,9 +1865,11 @@ class MIoTClient:
         if not self._refresh_props_list:
             return
         # Cloud, Central hub gateway, Lan control
-        if (await self.__refresh_props_from_cloud() or
-                await self.__refresh_props_from_gw() or
-                await self.__refresh_props_from_lan()):
+        if (
+            await self.__refresh_props_from_cloud()
+            or await self.__refresh_props_from_gw()
+            or await self.__refresh_props_from_lan()
+        ):
             self._refresh_props_retry_count = 0
             if self._refresh_props_list:
                 self._refresh_props_timer = self._main_loop.call_later(

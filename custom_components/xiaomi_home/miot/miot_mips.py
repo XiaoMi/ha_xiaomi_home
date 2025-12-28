@@ -415,8 +415,9 @@ class _MipsClient(ABC):
                 self._mqtt.disable_logger()
 
     @final
-    def sub_mips_state(self, key: str, handler: Callable[[str, bool],
-                                                         Coroutine]) -> bool:
+    def sub_mips_state(
+        self, key: str, handler: Callable[[str, bool], Coroutine]
+    ) -> bool:
         """Subscribe mips state.
         NOTICE: callback to main loop thread
         This will be called before the client is connected.
@@ -484,12 +485,9 @@ class _MipsClient(ABC):
     ) -> dict[str, dict]: ...
 
     @abstractmethod
-    async def get_prop_async(self,
-                             did: str,
-                             siid: int,
-                             piid: int,
-                             timeout_ms: int = 10000) -> Any:
-        ...
+    async def get_prop_async(
+        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
+    ) -> Any: ...
 
     @abstractmethod
     async def set_prop_async(
@@ -504,16 +502,13 @@ class _MipsClient(ABC):
     ) -> dict: ...
 
     @abstractmethod
-    def _on_mips_message(self, topic: str, payload: bytes) -> None:
-        ...
+    def _on_mips_message(self, topic: str, payload: bytes) -> None: ...
 
     @abstractmethod
-    def _on_mips_connect(self, rc: int, props: dict) -> None:
-        ...
+    def _on_mips_connect(self, rc: int, props: dict) -> None: ...
 
     @abstractmethod
-    def _on_mips_disconnect(self, rc: int, props: dict) -> None:
-        ...
+    def _on_mips_disconnect(self, rc: int, props: dict) -> None: ...
 
     @final
     def _mips_sub_internal(self, topic: str) -> None:
@@ -1273,11 +1268,9 @@ class MipsLocalClient(_MipsClient):
         return self.__unreg_broadcast_external(topic=topic)
 
     @final
-    async def get_prop_safe_async(self,
-                                  did: str,
-                                  siid: int,
-                                  piid: int,
-                                  timeout_ms: int = 10000) -> Any:
+    async def get_prop_safe_async(
+        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
+    ) -> Any:
         self._get_prop_queue.setdefault(did, [])
         fut: asyncio.Future = self.main_loop.create_future()
         self._get_prop_queue[did].append({
@@ -1297,11 +1290,9 @@ class MipsLocalClient(_MipsClient):
         return await fut
 
     @final
-    async def get_prop_async(self,
-                             did: str,
-                             siid: int,
-                             piid: int,
-                             timeout_ms: int = 10000) -> Any:
+    async def get_prop_async(
+        self, did: str, siid: int, piid: int, timeout_ms: int = 10000
+    ) -> Any:
         result_obj = await self.__request_async(
             topic='proxy/get',
             payload=json.dumps({
@@ -1457,9 +1448,9 @@ class MipsLocalClient(_MipsClient):
         return result_obj['result']
 
     @final
-    async def exec_action_group_list_async(self,
-                                           ag_id: str,
-                                           timeout_ms: int = 10000) -> dict:
+    async def exec_action_group_list_async(
+        self, ag_id: str, timeout_ms: int = 10000
+    ) -> dict:
         result_obj = await self.__request_async(
             topic='proxy/execMijiaActionGroup',
             payload=f'{{"id":"{ag_id}"}}',
@@ -1483,8 +1474,8 @@ class MipsLocalClient(_MipsClient):
     @final
     @on_dev_list_changed.setter
     def on_dev_list_changed(
-            self, func: Optional[Callable[[Any, list[str]],
-                                          Coroutine]]) -> None:
+        self, func: Optional[Callable[[Any, list[str]], Coroutine]]
+    ) -> None:
         """run in main loop."""
         self._on_dev_list_changed = func
 
@@ -1657,10 +1648,9 @@ class MipsLocalClient(_MipsClient):
         return True
 
     @final
-    async def __request_async(self,
-                              topic: str,
-                              payload: str,
-                              timeout_ms: int = 10000) -> dict:
+    async def __request_async(
+        self, topic: str, payload: str, timeout_ms: int = 10000
+    ) -> dict:
         fut_handler: asyncio.Future = self.main_loop.create_future()
 
         def on_msg_reply(payload: str, ctx: Any):
