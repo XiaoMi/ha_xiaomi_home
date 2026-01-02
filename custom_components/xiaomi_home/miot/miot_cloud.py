@@ -825,6 +825,22 @@ class MIoTHttpClient:
 
         return res_obj['result']
 
+    async def set_props_async(self, params: list) -> list:
+        """
+        params = [{"did": "xxxx", "siid": 2, "piid": 1, "value": False}]
+        """
+        res_obj = await self.__mihome_api_post_async(
+            url_path='/app/v2/miotspec/prop/set',
+            data={
+                'params': params
+            },
+            timeout=15
+        )
+        if 'result' not in res_obj:
+            raise MIoTHttpError('invalid response result')
+
+        return res_obj['result']
+
     async def action_async(
         self, did: str, siid: int, aiid: int, in_list: list[dict]
     ) -> dict:
