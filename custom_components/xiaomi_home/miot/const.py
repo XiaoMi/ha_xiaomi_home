@@ -90,8 +90,9 @@ SUPPORTED_PLATFORMS: list = [
 
 UNSUPPORTED_MODELS: list = [
     'chuangmi.ir.v2',
+    'era.airp.cwb03',
     'hmpace.motion.v6nfc',
-    'xiaomi.router.rd03'
+    'k0918.toothbrush.t700'
 ]
 
 DEFAULT_CLOUD_SERVER: str = 'cn'
