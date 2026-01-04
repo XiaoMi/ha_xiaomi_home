@@ -601,15 +601,8 @@ class MIoTHttpClient:
                 'bssid': device.get('bssid', None),
                 'order_time': device.get('orderTime', 0),
                 'fw_version': device.get('extra', {}).get(
-                    'fw_version', 'unknown'),
-            }
-            if isinstance(device.get('extra', None), dict) and device['extra']:
-                device_infos[did]['fw_version'] = device['extra'].get(
                     'fw_version', None)
-                device_infos[did]['mcu_version'] = device['extra'].get(
-                    'mcu_version', None)
-                device_infos[did]['platform'] = device['extra'].get(
-                    'platform', None)
+            }
 
         next_start_did = res_obj.get('next_start_did', None)
         if res_obj.get('has_more', False) and next_start_did:

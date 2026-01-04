@@ -1256,7 +1256,15 @@ class MIoTClient:
     ) -> None:
         _LOGGER.info(
             'gateway devices list changed, %s, %s', mips.group_id, did_list)
-        payload: dict = {'filter': {'did': did_list}}
+        payload: dict = {
+            'filter': {
+                'did': did_list
+            },
+            'info': [
+                'name', 'model', 'urn',
+                'online', 'specV2Access', 'pushAvailable'
+            ]
+        }
         gw_list = await mips.get_dev_list_async(
             payload=json.dumps(payload))
         if gw_list is None:
@@ -1519,6 +1527,8 @@ class MIoTClient:
             if did not in filter_dids:
                 continue
             device_old = self._device_list_gateway.get(did, None)
+            gw_state_old = device_old.get(
+                'online', False) if device_old else False
             gw_state_new: bool = False
             device_new = gw_list.pop(did, None)
             if device_new:
@@ -1532,7 +1542,7 @@ class MIoTClient:
                     device_old['online'] = False
             # Update cache group_id
             info['group_id'] = group_id
-            if not gw_state_new:
+            if (gw_state_old == gw_state_new) and (not gw_state_new):
                 continue
             self.__update_device_msg_sub(did=did)
             state_old: Optional[bool] = info.get('online', None)
@@ -1590,7 +1600,14 @@ class MIoTClient:
         if not mips.mips_state:
             _LOGGER.debug('local mips disconnect, skip refresh, %s', group_id)
             return
-        gw_list: dict = await mips.get_dev_list_async()
+        payload: dict = {
+            'info': [
+                'name', 'model', 'urn',
+                'online', 'specV2Access', 'pushAvailable'
+            ]
+        }
+        gw_list: dict = await mips.get_dev_list_async(
+            payload=json.dumps(payload))
         if gw_list is None:
             _LOGGER.error(
                 'refresh gw devices with group_id failed, %s, %s',
