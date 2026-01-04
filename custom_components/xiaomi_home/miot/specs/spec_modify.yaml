@@ -559,6 +559,9 @@ urn:miot-spec-v2:device:thermostat:0000A031:suittc-wk168:1:
       description: '15'
     - value: 16
       description: '16'
+urn:miot-spec-v2:device:toothbrush:0000A07E:xiaomi-p001:1:
+  prop.4.1041:
+    unit: days
 urn:miot-spec-v2:device:water-purifier:0000A013:roswan-lte01:1:0000D05A:
   prop.4.1:
     unit: ppm
