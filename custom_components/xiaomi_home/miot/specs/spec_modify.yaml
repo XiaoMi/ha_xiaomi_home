@@ -502,6 +502,11 @@ urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
     expr: (src_value!=1)
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-l04m:2:
+  prop.3.1:
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx04:2:
   prop.3.1:
     access:
