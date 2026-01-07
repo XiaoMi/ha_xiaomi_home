@@ -682,58 +682,66 @@ class MIoTDevice:
 
     def unit_convert(self, spec_unit: str) -> Optional[str]:
         """Convert MIoT unit to Home Assistant unit.
-        25/01/20: All online prop unit statistical tables: unit, quantity.
+        2026/01/06: property unit statistics of the latest released
+        MIoT-Spec-V2 for all device models: unit, quantity.
         {
             "no_unit": 148499,
-            "percentage": 10042,
-            "kelvin": 1895,
-            "rgb": 772,            // color
-            "celsius": 5762,
-            "none": 16106,
-            "hours": 1540,
-            "minutes": 5061,
-            "ms": 27,
-            "watt": 216,
-            "arcdegrees": 159,
-            "ppm": 177,
-            "μg/m3": 106,
-            "days": 571,
-            "seconds": 2749,
+            "percentage": 12074,
+            "none": 11857,
+            "minutes": 5707,
+            "celsius": 5767,
+            "seconds": 3062,
+            "kelvin": 2511,
+            "hours": 1380,
+            "days": 615,
+            "rgb": 752,         // color
+            "L": 379,
+            "mg/m3": 335,
+            "ppm": 182,
+            "watt": 246,
+            "arcdegrees": 130,
+            "μg/m3": 117,
+            "kWh": 149,
+            "ms": 108,
+            "pascal": 108,
+            "lux": 100,
+            "V": 59,
+            "m": 45,
+            "A": 36,
+            "mL": 30,
+            "arcdegress": 25,
+            "mA": 26,
+            "bpm": 21,          // realtime-heartrate
             "B/s": 21,
-            "pascal": 110,
-            "mg/m3": 339,
-            "lux": 125,
-            "kWh": 124,
-            "mv": 2,
-            "V": 38,
-            "A": 29,
-            "mV": 4,
-            "L": 352,
-            "m": 37,
-            "毫摩尔每升": 2,          // blood-sugar, cholesterol
-            "mmol/L": 1,            // urea
-            "weeks": 26,
-            "meter": 3,
-            "dB": 26,
-            "hour": 14,
-            "calorie": 19,          // 1 cal = 4.184 J
-            "ppb": 3,
-            "arcdegress": 30,
-            "bpm": 4,               // realtime-heartrate
-            "gram": 7,
-            "km/h": 9,
-            "W": 1,
-            "m3/h": 2,
-            "kilopascal": 1,
-            "mL": 4,
+            "weeks": 18,
+            "dB": 17,
+            "calorie": 18,      // 1 cal = 4.184 J
+            "metre": 15,
+            "hour": 11,
+            "cm": 12,
+            "gram": 8,
+            "km/h": 8,
+            "mV": 9,
+            "times": 4,         // exercise-count
+            "kCal": 4,
             "mmHg": 4,
+            "pcs": 3,
+            "meter": 3,
+            "kW": 2,
+            "KByte/s": 2,
+            "毫摩尔每升": 2,      // blood-sugar, cholesterol
+            "m3/h": 2,
+            "ppb": 2,
+            "mv": 2,
             "w": 1,
+            "bar": 1,
+            "megapascal": 1,
+            "kB": 1,
+            "mmol/L": 1,        // urea
+            "min/km": 1,
+            "kilopascal": 1,
             "liter": 1,
-            "cm": 3,
-            "mA": 2,
-            "kilogram": 2,
-            "kcal/d": 2,            // basal-metabolism
-            "times": 1              // exercise-count
+            "W": 1
         }
         """
         unit_map = {
