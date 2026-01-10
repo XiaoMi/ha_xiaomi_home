@@ -325,13 +325,10 @@ SPEC_DEVICE_TRANS_MAP: dict = {
             },
             'play-control': {
                 'required': {
-                    'properties': {
-                        'playing-state': {'read'}
-                    },
                     'actions': {'play'}
                 },
                 'optional': {
-                    'properties': {'play-loop-mode'},
+                    'properties': {'playing-state', 'play-loop-mode'},
                     'actions': {'pause', 'stop', 'next', 'previous'}
                 }
             }
@@ -376,7 +373,7 @@ SPEC_DEVICE_TRANS_MAP: dict = {
         },
         'entity': 'television'
     },
-    'tv-box':{
+    'tv-box': {
         'required': {
             'speaker': {
                 'required': {
