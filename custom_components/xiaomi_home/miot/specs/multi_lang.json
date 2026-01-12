@@ -3,20 +3,35 @@
     "en": {
       "service:003:property:001:valuelist:000": "Idle",
       "service:003:property:001:valuelist:001": "Dry"
+    },
+    "tr": {
+      "service:003:property:001:valuelist:000": "Boşta",
+      "service:003:property:001:valuelist:001": "Kurutma"
     }
   },
   "urn:miot-spec-v2:device:electronic-valve:0000A0A7:lxzn-02": {
+    "tr": {
+      "service:004:property:001": "Yüksek Güç - Eşik Ayarı"
+    },
     "zh-Hans": {
       "service:004:property:001": "功率过高-阈值设置"
     }
   },
   "urn:miot-spec-v2:device:electronic-valve:0000A0A7:ykcn-cbcs": {
+    "tr": {
+      "service:004:property:001": "Yüksek Güç - Eşik Ayarı",
+      "service:004:property:009": "Düşük Voltaj Alarmı - Eşik Ayarı"
+    },
     "zh-Hans": {
       "service:004:property:001": "功率过高-阈值设置",
       "service:004:property:009": "欠压告警-阈值设置"
     }
   },
   "urn:miot-spec-v2:device:fan:0000A005:zhimi-za1": {
+    "tr": {
+      "service:002:property:005:valuelist:000": "Doğal Rüzgar",
+      "service:002:property:005:valuelist:001": "Doğrudan Üfleme"
+    },
     "zh-Hans": {
       "service:002:property:005:valuelist:000": "自然风",
       "service:002:property:005:valuelist:001": "直吹风"
@@ -155,6 +170,28 @@
       "service:004:event:001": "Произошло виртуальное событие",
       "service:004:property:001": "Название события"
     },
+    "tr": {
+      "service:001": "Cihaz Bilgileri",
+      "service:001:property:003": "Cihaz ID",
+      "service:001:property:005": "Seri Numarası (SN)",
+      "service:002": "Ağ Geçidi",
+      "service:002:event:001": "Ağ Değişti",
+      "service:002:event:002": "Ağ Değişti",
+      "service:002:property:001": "Erişim Yöntemi",
+      "service:002:property:001:valuelist:000": "Kablolu",
+      "service:002:property:001:valuelist:001": "5G Kablosuz",
+      "service:002:property:001:valuelist:002": "2.4G Kablosuz",
+      "service:002:property:002": "IP Adresi",
+      "service:002:property:003": "WiFi Ağ Adı",
+      "service:002:property:004": "Geçerli Zaman",
+      "service:002:property:005": "DHCP Sunucusu MAC Adresi",
+      "service:003": "Gösterge Işığı",
+      "service:003:property:001": "Anahtar",
+      "service:004": "Sanal Hizmet",
+      "service:004:action:001": "Sanal Olay Oluştur",
+      "service:004:event:001": "Sanal Olay Gerçekleşti",
+      "service:004:property:001": "Olay Adı"
+    },
     "zh-Hant": {
       "service:001": "設備信息",
       "service:001:property:003": "設備ID",
@@ -179,6 +216,15 @@
     }
   },
   "urn:miot-spec-v2:device:lock:0000A038:loock-t2pv1": {
+    "tr": {
+      "service:003:property:1021:valuelist:000": "Kilitli",
+      "service:003:property:1021:valuelist:001": "Kilitli (Çocuk Kilidi)",
+      "service:003:property:1021:valuelist:002": "Kilitli (İçten Kilitli)",
+      "service:003:property:1021:valuelist:003": "Kilitli (İçten Kilitli + Çocuk Kilidi)",
+      "service:003:property:1021:valuelist:004": "Kilidi Açık",
+      "service:003:property:1021:valuelist:008": "Kapı Kapalı Değil (Zaman Aşımı)",
+      "service:003:property:1021:valuelist:012": "Kapı Aralık"
+    },
     "zh-Hans": {
       "service:003:property:1021:valuelist:000": "已上锁",
       "service:003:property:1021:valuelist:001": "已上锁(童锁)",
@@ -193,6 +239,10 @@
     "en": {
       "service:002:property:001": "Soil Moisture"
     },
+    "tr": {
+      "service:002:property:001": "Toprak Nemi",
+      "service:002:property:003": "Işık Yoğunluğu"
+    },
     "zh-Hans": {
       "service:002:property:001": "土壤湿度",
       "service:002:property:003": "光照强度"
@@ -203,6 +253,11 @@
       "service:027:property:001": "Fan Switch",
       "service:027:property:003": "Light Switch",
       "service:027:property:004": "Fan and Light Switch"
+    },
+    "tr": {
+      "service:027:property:001": "Vantilatör Anahtarı",
+      "service:027:property:003": "Işık Anahtarı",
+      "service:027:property:004": "Vantilatör ve Işık Anahtarı"
     }
   },
   "urn:miot-spec-v2:device:switch:0000A003:lumi-acn040": {
@@ -212,6 +267,13 @@
       "service:015:action:001": "Left Button Identify",
       "service:016:action:001": "Middle Button Identify",
       "service:017:action:001": "Right Button Identify"
+    },
+    "tr": {
+      "service:011": "Sağ Düğme Açma ve Kapama",
+      "service:011:property:001": "Sağ Düğme Açma ve Kapama",
+      "service:015:action:001": "Sol Düğme Tanımlama",
+      "service:016:action:001": "Orta Düğme Tanımlama",
+      "service:017:action:001": "Sağ Düğme Tanımlama"
     },
     "zh-Hans": {
       "service:015:action:001": "左键确认",
@@ -250,6 +312,37 @@
       "service:004:property:005": "температура выносного датчика",
       "service:004:property:006": "максимальная температура цели",
       "service:004:property:007": "минимальная температура цели "
+    },
+    "tr": {
+      "service:002": "Termostat",
+      "service:002:property:001": "Anahtar",
+      "service:002:property:002": "Yük Modu",
+      "service:002:property:002:valuelist:000": "Isıtmasız",
+      "service:002:property:002:valuelist:001": "Isıtma",
+      "service:002:property:003": "Arıza",
+      "service:002:property:003:valuelist:000": "Sensör Hatası",
+      "service:002:property:003:valuelist:001": "Hata Yok",
+      "service:002:property:003:valuelist:002": "Yüksek Sıcaklık Koruması",
+      "service:002:property:003:valuelist:003": "Düşük Sıcaklık Koruması",
+      "service:002:property:004": "Mod",
+      "service:002:property:004:valuelist:000": "Manuel Mod",
+      "service:002:property:004:valuelist:001": "Ev Modu",
+      "service:002:property:004:valuelist:002": "Dışarıda Modu",
+      "service:002:property:004:valuelist:003": "Otomatik Mod",
+      "service:002:property:004:valuelist:004": "Uyku Modu",
+      "service:002:property:005": "Hedef Sıcaklık",
+      "service:002:property:007": "Geçerli Sıcaklık",
+      "service:004": "Özel Hizmetler",
+      "service:004:property:001": "Çocuk Kilidi",
+      "service:004:property:002": "Sensör Tipi",
+      "service:004:property:002:valuelist:000": "Dahili Sensör",
+      "service:004:property:002:valuelist:001": "Harici Sensör",
+      "service:004:property:002:valuelist:002": "Dahili ve Harici Sensör",
+      "service:004:property:003": "Başlangıç Sıcaklık Farkı",
+      "service:004:property:004": "Telafi Sıcaklığı",
+      "service:004:property:005": "Harici Sensör Sıcaklığı",
+      "service:004:property:006": "Maksimum Hedef Sıcaklık",
+      "service:004:property:007": "Minimum Hedef Sıcaklık"
     }
   },
   "urn:miot-spec-v2:device:thermostat:0000A031:cubee-th123w": {
@@ -283,6 +376,37 @@
       "service:004:property:005": "температура выносного датчика",
       "service:004:property:006": "максимальная температура цели",
       "service:004:property:007": "минимальная температура цели "
+    },
+    "tr": {
+      "service:002": "Termostat",
+      "service:002:property:001": "Anahtar",
+      "service:002:property:002": "Yük Modu",
+      "service:002:property:002:valuelist:000": "Isıtma",
+      "service:002:property:002:valuelist:001": "Isıtmasız",
+      "service:002:property:003": "Arıza",
+      "service:002:property:003:valuelist:000": "Hata Yok",
+      "service:002:property:003:valuelist:001": "Sensör Hatası",
+      "service:002:property:003:valuelist:002": "Yüksek Sıcaklık Koruması",
+      "service:002:property:003:valuelist:003": "Düşük Sıcaklık Koruması",
+      "service:002:property:004": "Mod",
+      "service:002:property:004:valuelist:000": "Manuel Mod",
+      "service:002:property:004:valuelist:001": "Ev Modu",
+      "service:002:property:004:valuelist:002": "Dışarıda Modu",
+      "service:002:property:004:valuelist:003": "Otomatik Mod",
+      "service:002:property:004:valuelist:004": "Uyku Modu",
+      "service:002:property:005": "Hedef Sıcaklık",
+      "service:002:property:007": "Geçerli Sıcaklık",
+      "service:004": "Özel Hizmetler",
+      "service:004:property:001": "Çocuk Kilidi",
+      "service:004:property:002": "Sensör Tipi",
+      "service:004:property:002:valuelist:000": "Dahili Sensör",
+      "service:004:property:002:valuelist:001": "Harici Sensör",
+      "service:004:property:002:valuelist:002": "Dahili ve Harici Sensör",
+      "service:004:property:003": "Başlangıç Sıcaklık Farkı",
+      "service:004:property:004": "Telafi Sıcaklığı",
+      "service:004:property:005": "Harici Sensör Sıcaklığı",
+      "service:004:property:006": "Maksimum Hedef Sıcaklık",
+      "service:004:property:007": "Minimum Hedef Sıcaklık"
     }
   },
   "urn:miot-spec-v2:device:thermostat:0000A031:tofan-wk01": {
@@ -291,17 +415,204 @@
       "service:002:property:002": "Air Conditioner Mode",
       "service:004": "Air Conditioner"
     },
+    "tr": {
+      "service:002": "Yerden Isıtma",
+      "service:002:property:002": "Klima Modu",
+      "service:004": "Klima"
+    },
     "zh-Hans": {
       "service:002": "地暖",
       "service:004": "空调"
     }
   },
   "urn:miot-spec-v2:device:vacuum:0000A006:ijai-v1": {
+    "tr": {
+      "service:007:property:005:valuelist:000": "Sessiz",
+      "service:007:property:005:valuelist:001": "Standart",
+      "service:007:property:005:valuelist:002": "Orta",
+      "service:007:property:005:valuelist:003": "Güçlü"
+    },
     "zh-Hans": {
       "service:007:property:005:valuelist:000": "安静",
       "service:007:property:005:valuelist:001": "标准",
       "service:007:property:005:valuelist:002": "中档",
       "service:007:property:005:valuelist:003": "强力"
+    }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:narwa-001": {
+    "tr": {
+      "service:001": "Cihaz Bilgileri",
+      "service:002": "Pil",
+      "service:002:property:001": "Pil Seviyesi",
+      "service:003": "Robot Süpürge",
+      "service:003:property:001": "Çalışma Durumu",
+      "service:004": "Temizleme",
+      "service:004:property:001": "Temizlik Modu",
+      "service:004:property:002": "Emme Gücü",
+      "service:005": "Harita Yönetimi",
+      "service:005:property:001": "Harita Listesi",
+      "service:005:property:002": "Aktif Harita",
+      "service:005:property:003": "Harita Adı",
+      "service:006": "Tüketim Malzemeleri",
+      "service:006:property:001": "Ana Fırça Ömrü",
+      "service:006:property:002": "Yan Fırça Ömrü",
+      "service:006:property:003": "Filtre Ömrü"
+    }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:narwa-ax11": {
+    "tr": {
+      "service:001": "Cihaz Bilgileri",
+      "service:002": "Pil",
+      "service:002:property:001": "Pil Seviyesi",
+      "service:003": "Robot Süpürge",
+      "service:003:property:001": "Çalışma Durumu",
+      "service:004": "Temizleme",
+      "service:004:property:001": "Temizlik Modu",
+      "service:004:property:002": "Emme Gücü",
+      "service:005": "Harita Yönetimi",
+      "service:005:property:001": "Harita Listesi",
+      "service:005:property:002": "Aktif Harita",
+      "service:005:property:003": "Harita Adı",
+      "service:006": "Tüketim Malzemeleri",
+      "service:006:property:001": "Ana Fırça Ömrü",
+      "service:006:property:002": "Yan Fırça Ömrü",
+      "service:006:property:003": "Filtre Ömrü"
+    }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:roidmi-v60": {
+    "tr": {
+      "service:001": "Cihaz Bilgileri",
+      "service:002": "Pil",
+      "service:002:property:001": "Pil Seviyesi",
+      "service:003": "Robot Süpürge",
+      "service:003:property:001": "Çalışma Durumu",
+      "service:004": "Temizleme",
+      "service:004:property:001": "Temizlik Modu",
+      "service:004:property:002": "Emme Gücü",
+      "service:004:property:003": "Temizlik Süresi",
+      "service:004:property:004": "Temizlenen Alan",
+      "service:005": "Harita Yönetimi",
+      "service:005:property:001": "Harita Listesi",
+      "service:005:property:002": "Aktif Harita",
+      "service:005:property:003": "Harita Adı",
+      "service:006": "Tüketim Malzemeleri",
+      "service:006:property:001": "Ana Fırça Ömrü",
+      "service:006:property:002": "Yan Fırça Ömrü",
+      "service:006:property:003": "Filtre Ömrü",
+      "service:007": "Emme Gücü",
+      "service:007:property:001": "Güç Seviyesi",
+      "service:007:property:001:valuelist:000": "Sessiz",
+      "service:007:property:001:valuelist:001": "Standart",
+      "service:007:property:001:valuelist:002": "Orta",
+      "service:007:property:001:valuelist:003": "Güçlü"
+    }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:viomi-v38": {
+    "tr": {
+      "service:001": "Cihaz Bilgileri",
+      "service:002": "Pil",
+      "service:002:property:001": "Pil Seviyesi",
+      "service:002:property:002": "Şarj Durumu",
+      "service:003": "Robot Süpürge",
+      "service:003:property:001": "Çalışma Durumu",
+      "service:003:property:002": "Hata Kodu",
+      "service:004": "Temizleme",
+      "service:004:property:001": "Temizlik Modu",
+      "service:004:property:002": "Emme Gücü",
+      "service:004:property:003": "Su Seviyesi",
+      "service:004:property:004": "Temizlik Süresi",
+      "service:004:property:005": "Temizlenen Alan",
+      "service:005": "Tüketim Malzemeleri",
+      "service:005:property:001": "Ana Fırça Ömrü",
+      "service:005:property:002": "Yan Fırça Ömrü",
+      "service:005:property:003": "Filtre Ömrü",
+      "service:005:property:004": "Sensör Ömrü",
+      "service:005:property:005": "Paspas Bezi Ömrü",
+      "service:006": "Harita Yönetimi",
+      "service:006:property:001": "Harita Listesi",
+      "service:006:property:002": "Aktif Harita",
+      "service:006:property:003": "Harita Adı",
+      "service:006:property:004": "Harita ID",
+      "service:007": "Emme Gücü",
+      "service:007:property:001": "Güç Seviyesi",
+      "service:007:property:001:valuelist:000": "Sessiz",
+      "service:007:property:001:valuelist:001": "Standart",
+      "service:007:property:001:valuelist:002": "Orta",
+      "service:007:property:001:valuelist:003": "Güçlü",
+      "service:007:property:001:valuelist:004": "Maksimum",
+      "service:008": "Su Tankı",
+      "service:008:property:001": "Su Seviyesi",
+      "service:008:property:001:valuelist:000": "Düşük",
+      "service:008:property:001:valuelist:001": "Orta",
+      "service:008:property:001:valuelist:002": "Yüksek",
+      "service:009": "Bölge Temizliği",
+      "service:009:property:001": "Oda Seçimi",
+      "service:009:property:002": "Bölge Temizliği",
+      "service:010": "Zamanlama",
+      "service:010:property:001": "Zamanlayıcı",
+      "service:010:property:002": "Temizlik Zamanı",
+      "service:011": "Ses ve Bildirim",
+      "service:011:property:001": "Ses Seviyesi",
+      "service:011:property:002": "Sesli Bildirimler",
+      "service:012": "Gelişmiş Ayarlar",
+      "service:012:property:001": "Halı Modu",
+      "service:012:property:002": "Tekrar Geçiş",
+      "service:012:property:003": "Kenar Temizliği",
+      "service:012:property:004": "Engel Algılama"
+    }
+  },
+  "urn:miot-spec-v2:device:vacuum:0000A006:viomi-v5": {
+    "tr": {
+      "service:001": "Cihaz Bilgileri",
+      "service:002": "Pil",
+      "service:002:property:001": "Pil Seviyesi",
+      "service:002:property:002": "Şarj Durumu",
+      "service:003": "Robot Süpürge",
+      "service:003:property:001": "Çalışma Durumu",
+      "service:003:property:002": "Hata Kodu",
+      "service:004": "Temizleme",
+      "service:004:property:001": "Temizlik Modu",
+      "service:004:property:002": "Emme Gücü",
+      "service:004:property:003": "Su Seviyesi",
+      "service:004:property:004": "Temizlik Süresi",
+      "service:004:property:005": "Temizlenen Alan",
+      "service:005": "Tüketim Malzemeleri",
+      "service:005:property:001": "Ana Fırça Ömrü",
+      "service:005:property:002": "Yan Fırça Ömrü",
+      "service:005:property:003": "Filtre Ömrü",
+      "service:005:property:004": "Sensör Ömrü",
+      "service:005:property:005": "Paspas Bezi Ömrü",
+      "service:006": "Harita Yönetimi",
+      "service:006:property:001": "Harita Listesi",
+      "service:006:property:002": "Aktif Harita",
+      "service:006:property:003": "Harita Adı",
+      "service:006:property:004": "Harita ID",
+      "service:007": "Emme Gücü",
+      "service:007:property:001": "Güç Seviyesi",
+      "service:007:property:001:valuelist:000": "Sessiz",
+      "service:007:property:001:valuelist:001": "Standart",
+      "service:007:property:001:valuelist:002": "Orta",
+      "service:007:property:001:valuelist:003": "Güçlü",
+      "service:007:property:001:valuelist:004": "Maksimum",
+      "service:008": "Su Tankı",
+      "service:008:property:001": "Su Seviyesi",
+      "service:008:property:001:valuelist:000": "Düşük",
+      "service:008:property:001:valuelist:001": "Orta",
+      "service:008:property:001:valuelist:002": "Yüksek",
+      "service:009": "Bölge Temizliği",
+      "service:009:property:001": "Oda Seçimi",
+      "service:009:property:002": "Bölge Temizliği",
+      "service:010": "Zamanlama",
+      "service:010:property:001": "Zamanlayıcı",
+      "service:010:property:002": "Temizlik Zamanı",
+      "service:011": "Ses ve Bildirim",
+      "service:011:property:001": "Ses Seviyesi",
+      "service:011:property:002": "Sesli Bildirimler",
+      "service:012": "Gelişmiş Ayarlar",
+      "service:012:property:001": "Halı Modu",
+      "service:012:property:002": "Tekrar Geçiş",
+      "service:012:property:003": "Kenar Temizliği",
+      "service:012:property:004": "Engel Algılama"
     }
   }
 }

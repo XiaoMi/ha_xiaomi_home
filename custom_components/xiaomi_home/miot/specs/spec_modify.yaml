@@ -54,6 +54,9 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1:
   prop.10.6:
     unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-c35:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h09h00:4:
+  prop.10.6:
+    unit: none
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-h40h00:1:
   prop.10.6:
     unit: none
@@ -499,6 +502,26 @@ urn:miot-spec-v2:device:safe-box:0000A042:loock-v1:1:
   prop.5.1:
     name: contact-state
     expr: (src_value!=1)
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-l04m:2:
+  prop.3.1:
+    access:
+    - read
+    - notify
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx04:2:
+  prop.3.1:
+    access:
+    - read
+    - notify
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-lx06:2:
+  prop.3.1:
+    access:
+    - read
+    - notify
+urn:miot-spec-v2:device:speaker:0000A015:xiaomi-x08c:2:
+  prop.2.1:
+    access:
+    - read
+    - notify
 urn:miot-spec-v2:device:speaker:0000A015:xiaomi-x08e:1:
   prop.3.1:
     name: playing-state-a
