@@ -1605,6 +1605,8 @@ class MIoTClient:
             if did not in filter_dids:
                 continue
             device_old = self._device_list_gateway.get(did, None)
+            gw_state_old = device_old.get(
+                'online', False) if device_old else False
             gw_state_new: bool = False
             device_new = gw_list.pop(did, None)
             if device_new:
