@@ -812,25 +812,6 @@ class MIoTDevice:
         except Exception:  # pylint: disable=broad-except
             unit_map['μS/cm'] = 'μS/cm'
             unit_map['mWh'] = 'mWh'
-        # Handle UnitOfFrequency and UnitOfRotationalSpeed separately since
-        # they might not be available in all HA versions
-        try:
-            # pylint: disable=import-outside-toplevel
-            from homeassistant.const import (  # type: ignore
-                UnitOfFrequency,
-                UnitOfRotationalSpeed,
-            )
-            unit_map['Hz'] = UnitOfFrequency.HERTZ
-            unit_map['hz'] = UnitOfFrequency.HERTZ
-            unit_map['RPM'] = UnitOfRotationalSpeed.REVOLUTIONS_PER_MINUTE
-            unit_map['rpm'] = UnitOfRotationalSpeed.REVOLUTIONS_PER_MINUTE
-            unit_map['r/min'] = UnitOfRotationalSpeed.REVOLUTIONS_PER_MINUTE
-        except Exception:  # pylint: disable=broad-except
-            unit_map['Hz'] = 'Hz'
-            unit_map['hz'] = 'Hz'
-            unit_map['RPM'] = 'RPM'
-            unit_map['rpm'] = 'rpm'
-            unit_map['r/min'] = 'r/min'
 
         return unit_map.get(spec_unit, None)
 

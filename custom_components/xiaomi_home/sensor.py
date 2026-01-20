@@ -52,11 +52,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.components.sensor import (
-    SensorEntity,
-    SensorDeviceClass,
-    SensorStateClass,
-)
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.components.sensor import DEVICE_CLASS_UNITS
 
 from .miot.miot_device import MIoTDevice, MIoTPropertyEntity
@@ -106,8 +102,6 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
             self._attr_device_class = spec.device_class
             if spec.external_unit:
                 self._attr_native_unit_of_measurement = spec.external_unit
-            elif spec.unit and spec.unit not in {'none', 'no_unit'}:
-                self._attr_native_unit_of_measurement = spec.unit
             else:
                 # device_class is not empty but unit is empty.
                 # Set the default unit according to device_class.
@@ -121,12 +115,6 @@ class Sensor(MIoTPropertyEntity, SensorEntity):
             # Set state_class
             if spec.state_class:
                 self._attr_state_class = spec.state_class
-            elif (
-                spec.value_range
-                or spec.format_ in (int, float)
-                or self._attr_native_unit_of_measurement
-            ):
-                self._attr_state_class = SensorStateClass.MEASUREMENT
         # Set icon
         if spec.icon and not self.device_class:
             self._attr_icon = spec.icon
