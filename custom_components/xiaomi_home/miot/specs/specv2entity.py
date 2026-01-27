@@ -695,49 +695,6 @@ SPEC_PROP_TRANS_MAP: dict = {
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT,
             'unit_of_measurement': UnitOfPower.WATT
-        },
-        'dew-point-temper': {
-            'device_class': SensorDeviceClass.TEMPERATURE,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': UnitOfTemperature.CELSIUS
-        },
-        'expansion-valve': {
-            'device_class': None,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT
-        },
-        'indoor-fan-speed': {
-            'device_class': None,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT
-        },
-        'outdoor-mach-current': {
-            'device_class': SensorDeviceClass.CURRENT,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': UnitOfElectricCurrent.AMPERE
-        },
-        'outdoor-mach-voltage': {
-            'device_class': SensorDeviceClass.VOLTAGE,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': UnitOfElectricPotential.VOLT
-        },
-        'air-fresh-fan-speed': {
-            'device_class': None,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT
-        },
-        'compressor-frequency': {
-            'device_class': None,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT
-        },
-        'running-duration': {
-            'device_class': SensorDeviceClass.DURATION,
-            'entity': 'sensor',
-            'state_class': SensorStateClass.MEASUREMENT
         }
     }
 }
