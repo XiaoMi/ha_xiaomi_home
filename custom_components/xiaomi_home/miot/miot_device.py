@@ -58,11 +58,14 @@ from homeassistant.const import (
     CONCENTRATION_PARTS_PER_MILLION,
     DEGREE,
     LIGHT_LUX,
+    REVOLUTIONS_PER_MINUTE,
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS,
+    UnitOfBloodGlucoseConcentration,
     UnitOfEnergy,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
+    UnitOfFrequency,
     UnitOfInformation,
     UnitOfLength,
     UnitOfMass,
@@ -769,6 +772,9 @@ class MIoTDevice:
             'L': UnitOfVolume.LITERS,
             'liter': UnitOfVolume.LITERS,
             'mL': UnitOfVolume.MILLILITERS,
+            'Hz': UnitOfFrequency.HERTZ,
+            'calorie': UnitOfEnergy.CALORIE,
+            'kCal': UnitOfEnergy.KILO_CALORIE,
             'km/h': UnitOfSpeed.KILOMETERS_PER_HOUR,
             'm/s': UnitOfSpeed.METERS_PER_SECOND,
             'watt': UnitOfPower.WATT,
@@ -787,6 +793,9 @@ class MIoTDevice:
             'meter': UnitOfLength.METERS,
             'km': UnitOfLength.KILOMETERS,
             'm3/h': UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+            '毫摩尔每升': UnitOfBloodGlucoseConcentration.MILLIMOLE_PER_LITER,
+            'mmol/L': UnitOfBloodGlucoseConcentration.MILLIMOLE_PER_LITER,
+            'rpm': REVOLUTIONS_PER_MINUTE,
             'gram': UnitOfMass.GRAMS,
             'kilogram': UnitOfMass.KILOGRAMS,
             'dB': SIGNAL_STRENGTH_DECIBELS,
@@ -798,6 +807,7 @@ class MIoTDevice:
             'TB': UnitOfInformation.TERABYTES,
             'B/s': UnitOfDataRate.BYTES_PER_SECOND,
             'KB/s': UnitOfDataRate.KILOBYTES_PER_SECOND,
+            'KByte/s': UnitOfDataRate.KILOBYTES_PER_SECOND,
             'MB/s': UnitOfDataRate.MEGABYTES_PER_SECOND,
             'GB/s': UnitOfDataRate.GIGABYTES_PER_SECOND
         }
@@ -870,6 +880,8 @@ class MIoTDevice:
             return 'mdi:network'
         if spec_unit in {'calorie', 'kCal'}:
             return 'mdi:food'
+        if spec_unit in {'rpm'}:
+            return 'mdi:fan-clock'
         return None
 
     def __gen_sub_id(self) -> int:
