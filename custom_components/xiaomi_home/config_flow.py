@@ -109,7 +109,7 @@ _LOGGER = logging.getLogger(__name__)
 class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Xiaomi Home config flow."""
     # pylint: disable=unused-argument, inconsistent-quotes
-    VERSION = 1
+    VERSION = 2
     MINOR_VERSION = 1
     DEFAULT_AREA_NAME_RULE = 'room'
     _main_loop: asyncio.AbstractEventLoop

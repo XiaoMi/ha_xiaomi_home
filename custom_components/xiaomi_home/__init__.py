@@ -349,3 +349,101 @@ async def async_remove_config_entry_device(
     _LOGGER.info(
         'remove device, %s, %s', identifiers[1], device_entry.id)
     return True
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Migrate old entry."""
+    _LOGGER.debug(
+        'Migrating configuration from version %s.%s',
+        config_entry.version,
+        config_entry.minor_version,
+    )
+
+    if config_entry.version > 1:
+        # This means the user has downgraded from a future version
+        return False
+
+    if config_entry.version == 1:
+        await _migrate_v1_to_v2(hass, config_entry)
+
+    _LOGGER.debug(
+        'Migration to configuration version %s.%s successful',
+        config_entry.version,
+        config_entry.minor_version,
+    )
+
+    return True
+
+
+async def _migrate_v1_to_v2(hass: HomeAssistant, config_entry: ConfigEntry):
+    def ha_persistent_notify(
+        notify_id: str, title: Optional[str] = None,
+        message: Optional[str] = None
+    ) -> None:
+        """Send messages in Notifications dialog box."""
+        if title:
+            persistent_notification.async_create(
+                hass=hass,  message=message or '',
+                title=title, notification_id=notify_id)
+        else:
+            persistent_notification.async_dismiss(
+                hass=hass, notification_id=notify_id)
+
+    entry_id = config_entry.entry_id
+    entry_data = dict(config_entry.data)
+
+    ha_persistent_notify(
+        notify_id=f'{entry_id}.oauth_error', title=None, message=None)
+
+    miot_client: MIoTClient = await get_miot_instance_async(
+        hass=hass, entry_id=entry_id,
+        entry_data=entry_data,
+        persistent_notify=ha_persistent_notify)
+    # Spec parser
+    spec_parser = MIoTSpecParser(
+        lang=entry_data.get(
+            'integration_language', DEFAULT_INTEGRATION_LANGUAGE),
+        storage=miot_client.miot_storage,
+        loop=miot_client.main_loop
+    )
+    await spec_parser.init_async()
+    # Manufacturer
+    manufacturer: DeviceManufacturer = DeviceManufacturer(
+        storage=miot_client.miot_storage,
+        loop=miot_client.main_loop)
+    await manufacturer.init_async()
+    er = entity_registry.async_get(hass)
+    for _, info in miot_client.device_list.items():
+        spec_instance = await spec_parser.parse(urn=info['urn'])
+        if not isinstance(spec_instance, MIoTSpecInstance):
+            continue
+        device: MIoTDevice = MIoTDevice(
+            miot_client=miot_client,
+            device_info={
+                **info, 'manufacturer': manufacturer.get_name(
+                    info.get('manufacturer', ''))},
+            spec_instance=spec_instance)
+        device.spec_transform()
+
+        # Update unique_id
+        for platform, entities in device.entity_list.items():
+            for entity in entities:
+                if not isinstance(entity.spec, MIoTSpecService):
+                    continue
+                old_unique_id = device.gen_service_entity_id_v1(
+                    ha_domain=DOMAIN,
+                    siid=entity.spec.iid,
+                )
+                entity_id = er.async_get_entity_id(
+                    platform, DOMAIN, old_unique_id
+                )
+                if entity_id is None:
+                    continue
+                new_unique_id = device.gen_service_entity_id(
+                    ha_domain=DOMAIN,
+                    siid=entity.spec.iid,
+                    description=entity.spec.description,
+                )
+                er.async_update_entity(entity_id, new_unique_id=new_unique_id)
+
+    hass.config_entries.async_update_entry(config_entry, version=2)
