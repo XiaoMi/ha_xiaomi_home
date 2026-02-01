@@ -76,10 +76,12 @@ async def async_setup_entry(
     new_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get('humidifier', []):
+            data.platform = 'humidifier'
             data.device_class = HumidifierDeviceClass.HUMIDIFIER
             new_entities.append(
                 Humidifier(miot_device=miot_device, entity_data=data))
         for data in miot_device.entity_list.get('dehumidifier', []):
+            data.platform = 'humidifier'
             data.device_class = HumidifierDeviceClass.DEHUMIDIFIER
             new_entities.append(
                 Humidifier(miot_device=miot_device, entity_data=data))

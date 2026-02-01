@@ -125,6 +125,14 @@ async def async_setup_entry(
         await manufacturer.init_async()
         miot_devices: list[MIoTDevice] = []
         er = entity_registry.async_get(hass=hass)
+        for entry in entity_registry.async_entries_for_config_entry(
+            er, config_entry.entry_id
+        ):
+            if (
+                entry.entity_id.startswith(f'{DOMAIN}.')
+                or entry.entity_id.split('.', 1)[0] not in SUPPORTED_PLATFORMS
+            ):
+                er.async_remove(entity_id=entry.entity_id)
         for did, info in miot_client.device_list.items():
             spec_instance = await spec_parser.parse(urn=info['urn'])
             if not isinstance(spec_instance, MIoTSpecInstance):
@@ -154,12 +162,22 @@ async def async_setup_entry(
                         device.entity_list[platform]))
                     for entity in filter_entities:
                         device.entity_list[platform].remove(entity)
-                        entity_id = device.gen_service_entity_id(
-                            ha_domain=platform,
-                            siid=entity.spec.iid,
-                            description=entity.spec.description)
-                        if er.async_get(entity_id_or_uuid=entity_id):
-                            er.async_remove(entity_id=entity_id)
+                        entity_ids = [
+                            device.gen_service_entity_id(
+                                ha_domain=platform,
+                                siid=entity.spec.iid,
+                                description=entity.spec.description,
+                                slugify_description=False,
+                            ),
+                            device.gen_service_entity_id(
+                                ha_domain=platform,
+                                siid=entity.spec.iid,
+                                description=entity.spec.description,
+                            ),
+                        ]
+                        for entity_id in set(entity_ids):
+                            if er.async_get(entity_id_or_uuid=entity_id):
+                                er.async_remove(entity_id=entity_id)
                 if platform in device.prop_list:
                     filter_props = list(filter(
                         lambda prop: (
