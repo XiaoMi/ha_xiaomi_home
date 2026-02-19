@@ -255,7 +255,6 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if current is not None:
             self._prop_pos_opening = pos > current
             self._prop_pos_closing = pos < current
-        pos = 100 - pos
         pos = round(pos * self._prop_position_value_range / 100)
         await self.set_property_async(prop=self._prop_target_position,
                                       value=pos)
@@ -279,11 +278,15 @@ class Cover(MIoTServiceEntity, CoverEntity):
         if pos is None:
             return None
         pos = round(pos*100/self._prop_position_value_range)
-        pos = 100 - pos
         if pos <= self._cover_dead_zone_width:
             pos = 0
         elif pos >= (100 - self._cover_dead_zone_width):
             pos = 100
+        
+        eid = self.entity_id or ""
+        if "hotata" in eid and "airer" in eid:
+            pos = 100 - pos
+        
         return pos
 
     @property
