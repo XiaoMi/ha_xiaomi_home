@@ -56,6 +56,9 @@ from homeassistant.components.humidifier import (HumidifierEntity,
                                                  HumidifierDeviceClass,
                                                  HumidifierEntityFeature,
                                                  HumidifierAction)
+from homeassistant.components.humidifier.const import (
+    MODE_NORMAL, MODE_ECO, MODE_AWAY, MODE_BOOST, MODE_COMFORT,
+    MODE_HOME, MODE_SLEEP, MODE_AUTO, MODE_BABY)
 
 from .miot.miot_spec import MIoTSpecProperty
 from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
@@ -130,7 +133,28 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
                 if not prop.value_list:
                     _LOGGER.error('mode value_list is None, %s', self.entity_id)
                     continue
-                self._mode_map = prop.value_list.to_map()
+                self._mode_map = {}
+                for item in prop.value_list.items:
+                    if item.name in {'normal', 'constant_humidity'}:
+                        self._mode_map[item.value] = MODE_NORMAL
+                    elif item.name in {'eco'}:
+                        self._mode_map[item.value] = MODE_ECO
+                    elif item.name in {'away', 'air_dry'}:
+                        self._mode_map[item.value] = MODE_AWAY
+                    elif item.name in {'boost', 'strong'}:
+                        self._mode_map[item.value] = MODE_BOOST
+                    elif item.name in {'comfort'}:
+                        self._mode_map[item.value] = MODE_COMFORT
+                    elif item.name in {'home'}:
+                        self._mode_map[item.value] = MODE_HOME
+                    elif item.name in {'sleep'}:
+                        self._mode_map[item.value] = MODE_SLEEP
+                    elif item.name in {'auto'}:
+                        self._mode_map[item.value] = MODE_AUTO
+                    elif item.name in {'baby'}:
+                        self._mode_map[item.value] = MODE_BABY
+                    else:
+                        self._mode_map[item.value] = item.description
                 self._attr_available_modes = list(self._mode_map.values())
                 self._attr_supported_features |= HumidifierEntityFeature.MODES
                 self._prop_mode = prop
