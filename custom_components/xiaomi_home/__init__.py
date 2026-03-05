@@ -49,10 +49,17 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
+import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.components import persistent_notification
-from homeassistant.helpers import device_registry, entity_registry
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import (
+    config_validation as cv,
+    device_registry,
+    entity_registry,
+)
 
 from .miot.common import slugify_did
 from .miot.miot_storage import (
@@ -61,11 +68,19 @@ from .miot.miot_spec import (
     MIoTSpecInstance, MIoTSpecParser, MIoTSpecService)
 from .miot.const import (
     DEFAULT_INTEGRATION_LANGUAGE, DOMAIN, SUPPORTED_PLATFORMS)
-from .miot.miot_error import MIoTOauthError
+from .miot.miot_error import MIoTClientError, MIoTOauthError
 from .miot.miot_device import MIoTDevice
 from .miot.miot_client import MIoTClient, get_miot_instance_async
 
 _LOGGER = logging.getLogger(__name__)
+
+
+CALL_ACTION_SCHEMA = vol.Schema({
+    vol.Required('entity_id'): cv.entity_id,
+    vol.Required('siid'): vol.All(vol.Coerce(int), vol.Range(min=1, max=9999)),
+    vol.Required('aiid'): vol.All(vol.Coerce(int), vol.Range(min=1, max=9999)),
+    vol.Optional('params', default=[]): vol.Any(list, None),
+})
 
 
 async def async_setup(hass: HomeAssistant, hass_config: dict) -> bool:
@@ -79,6 +94,61 @@ async def async_setup(hass: HomeAssistant, hass_config: dict) -> bool:
     hass.data[DOMAIN].setdefault('entities', {})
     for platform in SUPPORTED_PLATFORMS:
         hass.data[DOMAIN]['entities'][platform] = []
+
+    async def async_handle_call_action(call: ServiceCall) -> None:
+        """Handle xiaomi_home.call_action service calls."""
+        entity_id: str = call.data['entity_id']
+        siid: int = call.data['siid']
+        aiid: int = call.data['aiid']
+        params: list = call.data.get('params') or []
+
+        er = entity_registry.async_get(hass)
+        entry = er.async_get(entity_id)
+        if entry is None or entry.config_entry_id is None:
+            raise HomeAssistantError(
+                f'Entity {entity_id} not found in xiaomi_home')
+
+        miot_client: MIoTClient = hass.data[DOMAIN]['miot_clients'].get(
+            entry.config_entry_id)
+        if miot_client is None:
+            raise HomeAssistantError(
+                f'No MIoT client for config entry {entry.config_entry_id}')
+
+        dr = device_registry.async_get(hass)
+        device_entry = dr.async_get(entry.device_id) if entry.device_id else None
+        if device_entry is None:
+            raise HomeAssistantError(
+                f'No device found for entity {entity_id}')
+
+        did = None
+        for identifier in device_entry.identifiers:
+            if identifier[0] == DOMAIN:
+                did_tag = identifier[1]
+                for d in miot_client.device_list:
+                    if slugify_did(miot_client.cloud_server, d) == did_tag:
+                        did = d
+                        break
+                break
+
+        if did is None:
+            raise HomeAssistantError(
+                f'Could not resolve device ID for entity {entity_id}')
+
+        in_list = [
+            {'piid': i + 1, 'value': v} for i, v in enumerate(params)
+        ]
+
+        try:
+            await miot_client.action_async(
+                did=did, siid=siid, aiid=aiid, in_list=in_list)
+        except MIoTClientError as err:
+            raise HomeAssistantError(
+                f'Action failed: {err}') from err
+
+    hass.services.async_register(
+        DOMAIN, 'call_action', async_handle_call_action,
+        schema=CALL_ACTION_SCHEMA)
+
     return True
 
 

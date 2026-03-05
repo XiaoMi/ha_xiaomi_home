@@ -1,0 +1,33 @@
+call_action:
+  description: Call a MIoT action on a device.
+  fields:
+    entity_id:
+      description: ID of the entity.
+      example: vacuum.my_vacuum
+      required: true
+      selector:
+        entity:
+          integration: xiaomi_home
+    siid:
+      description: MIoT service instance ID.
+      example: 2
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 9999
+          mode: box
+    aiid:
+      description: MIoT action instance ID.
+      example: 13
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 9999
+          mode: box
+    params:
+      description: Action input parameters.
+      example: "['{\"room\":[[3,4,5]]}']"
+      selector:
+        object:
