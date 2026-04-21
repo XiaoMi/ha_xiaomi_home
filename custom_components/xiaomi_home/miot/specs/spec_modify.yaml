@@ -122,23 +122,37 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:3: urn:miot-spec-
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-rr0r00:1
 urn:miot-spec-v2:device:air-fresh:0000A012:daikin-k33:1:
   prop.2.1:
-    name: ac-on
+    name: 'on'
     format: string
     access:
     - read
+    - write
     - notify
+    expr: src_value in ["OPEN", True, 1, "1", "true", "True"]
   prop.2.3:
-    name: ac-mode
+    name: 'mode'
     format: string
     access:
     - read
+    - write
     - notify
+    expr: 2 if src_value == "AUTO_MODE" else src_value
+    value-list:
+    - value: 2
+      description: 自动
   prop.2.5:
-    name: ac-fan-level
+    name: 'fan-level'
     format: string
     access:
     - read
+    - write
     - notify
+    expr: 1 if src_value in ["MID", "LOW", "WEAK"] else 2 if src_value in ["STRONG", "HIGH"] else src_value
+    value-list:
+    - value: 1
+      description: 50%
+    - value: 2
+      description: 100%
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
   prop.3.7:
     value-range:
