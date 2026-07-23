@@ -81,6 +81,11 @@ _LOGGER = logging.getLogger(__name__)
 
 REFRESH_PROPS_DELAY = 0.2
 REFRESH_PROPS_RETRY_DELAY = 3
+# Max in-flight property reads against one central hub gateway. The hub
+# proxies each read to the end device over zigbee/BLE mesh, so an unbounded
+# burst (hundreds of concurrent requests) overwhelms it and every request
+# times out with error 901.
+REFRESH_PROPS_GW_CONCURRENCY = 10
 REFRESH_CLOUD_DEVICES_DELAY = 6
 REFRESH_CLOUD_DEVICES_RETRY_DELAY = 60
 REFRESH_GATEWAY_DEVICES_DELAY = 3
@@ -1696,7 +1701,17 @@ class MIoTClient:
     async def __refresh_props_from_gw(self) -> bool:
         if not self._mips_local or not self._device_list_gateway:
             return False
+        # Cap concurrency so a large refresh cannot flood the central hub
+        # gateway; without this every request in the burst times out (901).
+        sem = asyncio.Semaphore(REFRESH_PROPS_GW_CONCURRENCY)
+
+        async def bounded_get_prop(mips_gw, did, siid, piid):
+            async with sem:
+                return await mips_gw.get_prop_async(
+                    did=did, siid=siid, piid=piid, timeout_ms=6000)
+
         request_list = {}
+        gw_list = {}
         succeed_once = False
         for key in list(self._refresh_props_list.keys()):
             did = key.split('|')[0]
@@ -1713,26 +1728,48 @@ class MIoTClient:
             if not mips_gw:
                 _LOGGER.error('mips gateway not exist, %s', key)
                 continue
-            request_list[did] = {
-                **params,
-                'fut': mips_gw.get_prop_async(
-                    did=did, siid=params['siid'], piid=params['piid'],
-                    timeout_ms=6000)}
-        results = await asyncio.gather(
-            *[v['fut'] for v in request_list.values()])
-        for (did, param), result in zip(request_list.items(), results):
-            if result is None:
-                # Don't use "not result", it will be skipped when result
-                # is 0, false
-                continue
+            request_list[did] = params
+            gw_list[did] = mips_gw
+        if not request_list:
+            return False
+        # Canary probe: send ONE request first. If the hub does not answer,
+        # do not flood it with the rest — re-queue everything and let the
+        # handler retry (it retries 3 times, then gives up). This keeps a
+        # mute or busy hub from producing hundreds of 901 timeouts per
+        # refresh cycle.
+        canary_did = next(iter(request_list))
+        canary = request_list[canary_did]
+        result = await bounded_get_prop(
+            gw_list[canary_did], canary_did, canary['siid'], canary['piid'])
+        if result is not None:
             self.__on_prop_msg(
                 params={
-                    'did': did,
-                    'siid': param['siid'],
-                    'piid': param['piid'],
+                    'did': canary_did,
+                    'siid': canary['siid'],
+                    'piid': canary['piid'],
                     'value': result},
                 ctx=None)
             succeed_once = True
+            rest = {
+                did: bounded_get_prop(
+                    gw_list[did], did, params['siid'], params['piid'])
+                for did, params in request_list.items()
+                if did != canary_did}
+            results = await asyncio.gather(*rest.values())
+            for did, result in zip(rest.keys(), results):
+                if result is None:
+                    # Don't use "not result", it will be skipped when result
+                    # is 0, false
+                    continue
+                param = request_list[did]
+                self.__on_prop_msg(
+                    params={
+                        'did': did,
+                        'siid': param['siid'],
+                        'piid': param['piid'],
+                        'value': result},
+                    ctx=None)
+                succeed_once = True
         if succeed_once:
             return True
         _LOGGER.info(
