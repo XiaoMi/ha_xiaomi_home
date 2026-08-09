@@ -596,7 +596,9 @@ class MIoTHttpClient:
                 'rssi': device.get('rssi', None),
                 'owner': device.get('owner', None),
                 'pid': device.get('pid', None),
-                'local_ip': device.get('local_ip', None),
+                'local_ip': (
+                    device.get('localip', None)
+                    or device.get('local_ip', None)),
                 'ssid': device.get('ssid', None),
                 'bssid': device.get('bssid', None),
                 'order_time': device.get('orderTime', 0),
