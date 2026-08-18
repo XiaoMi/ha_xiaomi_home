@@ -631,9 +631,10 @@ class _MipsClient(ABC):
                 ca_certs=self._ca_file,
                 certfile=self._cert_file,
                 keyfile=self._key_file)
+            self._mqtt.tls_insecure_set(True)
         else:
             self._mqtt.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
-        self._mqtt.tls_insecure_set(True)
+            self._mqtt.tls_insecure_set(False)
         self._mqtt.on_connect = self.__on_connect
         self._mqtt.on_connect_fail = self.__on_connect_failed
         self._mqtt.on_disconnect = self.__on_disconnect
