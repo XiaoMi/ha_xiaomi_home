@@ -47,7 +47,7 @@ MIoT device instance.
 """
 import asyncio
 from abc import abstractmethod
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Dict, List
 import logging
 
 from homeassistant.helpers.entity import Entity
@@ -1098,6 +1098,49 @@ class MIoTServiceEntity(Entity):
                 f'{e}, {self.entity_id}, {self.name}, {prop.name}') from e
         if update_value:
             self._prop_value_map[prop] = value
+        if write_ha_state:
+            self.async_write_ha_state()
+        return True
+
+    async def set_properties_async(
+        self, set_properties_list: List[Dict[str, Any]],
+        update_value: bool = True, write_ha_state: bool = True,
+    ) -> bool:
+        # set_properties_list = [{'prop': Optional[MIoTSpecProperty],
+        # 'value': Any}....]
+        for set_property in set_properties_list:
+            prop = set_property.get("prop")
+            value = set_property.get("value")
+            if not prop:
+                raise RuntimeError(
+                    f'set property failed, property is None, '
+                    f'{self.entity_id}, {self.name}')
+            value = prop.value_format(value)
+            value = prop.value_precision(value)
+            # 因为下面还有判断在这个循环里 所以这里要赋值回去
+            set_property["value"] = value
+            if prop not in self.entity_data.props:
+                raise RuntimeError(
+                    f'set property failed, unknown property, '
+                    f'{self.entity_id}, {self.name}, {prop.name}')
+            if not prop.writable:
+                raise RuntimeError(
+                    f'set property failed, not writable, '
+                    f'{self.entity_id}, {self.name}, {prop.name}')
+        try:
+            await self.miot_device.miot_client.set_props_async([{
+                "did": self.miot_device.did,
+                "siid": set_property["prop"].service.iid,
+                "piid": set_property["prop"].iid,
+                "value": set_property["value"],
+            } for set_property in set_properties_list])
+        except MIoTClientError as e:
+            raise RuntimeError(
+                f"{e}, {self.entity_id}, {self.name}, {'&'.join([set_property['prop'].name for set_property in set_properties_list])}") from e
+        if update_value:
+            for set_property in set_properties_list:
+                self._prop_value_map[
+                    set_property["prop"]] = set_property["value"]
         if write_ha_state:
             self.async_write_ha_state()
         return True

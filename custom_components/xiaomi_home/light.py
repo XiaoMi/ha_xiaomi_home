@@ -47,11 +47,12 @@ Light entities for Xiaomi Home.
 """
 from __future__ import annotations
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, List, Dict
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_COLOR_TEMP_KELVIN,
@@ -86,7 +87,7 @@ async def async_setup_entry(
     for miot_device in device_list:
         for data in miot_device.entity_list.get('light', []):
             new_entities.append(
-                Light(miot_device=miot_device, entity_data=data))
+                Light(miot_device=miot_device, entity_data=data, hass=hass))
 
     if new_entities:
         async_add_entities(new_entities)
@@ -106,10 +107,13 @@ class Light(MIoTServiceEntity, LightEntity):
     _mode_map: Optional[dict[Any, Any]]
 
     def __init__(
-        self, miot_device: MIoTDevice,  entity_data: MIoTEntityData
+        self, miot_device: MIoTDevice,  entity_data: MIoTEntityData,hass: HomeAssistant
     ) -> None:
         """Initialize the Light."""
         super().__init__(miot_device=miot_device,  entity_data=entity_data)
+        self.hass = hass
+        self.miot_device = miot_device
+        self._command_send_mode_entity_id = None
         self._attr_color_mode = None
         self._attr_supported_color_modes = set()
         self._attr_supported_features = LightEntityFeature(0)
@@ -252,42 +256,178 @@ class Light(MIoTServiceEntity, LightEntity):
         """
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        if self._prop_on:
-            value_on = True if self._prop_on.format_ == bool else 1
-            await self.set_property_async(
-                prop=self._prop_on, value=value_on)
-        # brightness
+        # Determine whether the device sends the light-on properties in batches or one by one
+        # Search entityid through unique_id to avoid the user modifying entityid and causing command_send_mode to not match
+        # 获取开灯模式
+        if self._command_send_mode_entity_id is None:
+            entity_registry = async_get_entity_registry(self.hass)
+            device_id = list(
+                self.miot_device.device_info.get("identifiers"))[0][1]
+            self._command_send_mode_entity_id = entity_registry.async_get_entity_id(
+                "select", DOMAIN, f"select.light_{device_id}_command_send_mode")
+        if self._command_send_mode_entity_id is None:
+            _LOGGER.error(
+                "light command_send_mode not found, %s",
+                self.entity_id,
+            )
+            return
+        command_send_mode = self.hass.states.get(
+            self._command_send_mode_entity_id)
+
+        # 判断是先发送亮度还是先发送色温
+        send_brightness_first = False
         if ATTR_BRIGHTNESS in kwargs:
-            brightness = brightness_to_value(
-                self._brightness_scale, kwargs[ATTR_BRIGHTNESS])
-            await self.set_property_async(
-                prop=self._prop_brightness, value=brightness,
-                write_ha_state=False)
-        # color-temperature
-        if ATTR_COLOR_TEMP_KELVIN in kwargs:
-            await self.set_property_async(
-                prop=self._prop_color_temp,
-                value=kwargs[ATTR_COLOR_TEMP_KELVIN],
-                write_ha_state=False)
-            self._attr_color_mode = ColorMode.COLOR_TEMP
-        # rgb color
-        if ATTR_RGB_COLOR in kwargs:
-            r = kwargs[ATTR_RGB_COLOR][0]
-            g = kwargs[ATTR_RGB_COLOR][1]
-            b = kwargs[ATTR_RGB_COLOR][2]
-            rgb = (r << 16) | (g << 8) | b
-            await self.set_property_async(
-                prop=self._prop_color, value=rgb,
-                write_ha_state=False)
-            self._attr_color_mode = ColorMode.RGB
-        # mode
-        if ATTR_EFFECT in kwargs:
-            await self.set_property_async(
-                prop=self._prop_mode,
-                value=self.get_map_key(
-                    map_=self._mode_map, value=kwargs[ATTR_EFFECT]),
-                write_ha_state=False)
-        self.async_write_ha_state()
+            brightness_new = kwargs[ATTR_BRIGHTNESS]
+            brightness_old = self.brightness
+            if brightness_old and brightness_new <= brightness_old:
+                send_brightness_first = True
+
+        # 开始发送开灯命令
+        if command_send_mode and command_send_mode.state == "Send Together":
+            set_properties_list: List[Dict[str, Any]] = []
+            # mode
+            if ATTR_EFFECT in kwargs:
+                set_properties_list.append({
+                    "prop":self._prop_mode,
+                    "value":self.get_map_key(
+                        map_=self._mode_map,value=kwargs[ATTR_EFFECT]),
+                })
+            # brightness
+            if send_brightness_first and ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
+                set_properties_list.append({
+                    "prop": self._prop_brightness,
+                    "value": brightness
+                })
+            # color-temperature
+            if ATTR_COLOR_TEMP_KELVIN in kwargs:
+                set_properties_list.append({
+                    "prop": self._prop_color_temp,
+                    "value": kwargs[ATTR_COLOR_TEMP_KELVIN],
+                })
+                self._attr_color_mode = ColorMode.COLOR_TEMP
+            # rgb color
+            if ATTR_RGB_COLOR in kwargs:
+                r = kwargs[ATTR_RGB_COLOR][0]
+                g = kwargs[ATTR_RGB_COLOR][1]
+                b = kwargs[ATTR_RGB_COLOR][2]
+                rgb = (r << 16) | (g << 8) | b
+                set_properties_list.append({
+                    "prop": self._prop_color,
+                    "value": rgb
+                })
+                self._attr_color_mode = ColorMode.RGB
+            # brightness
+            if not send_brightness_first and ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
+                set_properties_list.append({
+                    "prop": self._prop_brightness,
+                    "value": brightness
+                })
+
+            if self._prop_on:
+                value_on = True if self._prop_on.format_ == bool else 1
+                set_properties_list.append({
+                    "prop": self._prop_on,
+                    "value": value_on
+                })
+            await self.set_properties_async(set_properties_list,write_ha_state=False)
+            self.async_write_ha_state()
+
+        elif command_send_mode and command_send_mode.state == "Send Turn On First":
+            set_properties_list: List[Dict[str, Any]] = []
+            if self._prop_on:
+                value_on = True if self._prop_on.format_ == bool else 1
+                set_properties_list.append({
+                    "prop": self._prop_on,
+                    "value": value_on
+                })
+            # mode
+            if ATTR_EFFECT in kwargs:
+                set_properties_list.append({
+                    "prop":
+                        self._prop_mode,
+                    "value":
+                        self.get_map_key(
+                            map_=self._mode_map,value=kwargs[ATTR_EFFECT]),
+                })
+            # brightness
+            if send_brightness_first and ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
+                set_properties_list.append({
+                    "prop": self._prop_brightness,
+                    "value": brightness
+                })
+            # color-temperature
+            if ATTR_COLOR_TEMP_KELVIN in kwargs:
+                set_properties_list.append({
+                    "prop": self._prop_color_temp,
+                    "value": kwargs[ATTR_COLOR_TEMP_KELVIN],
+                })
+                self._attr_color_mode = ColorMode.COLOR_TEMP
+            # rgb color
+            if ATTR_RGB_COLOR in kwargs:
+                r = kwargs[ATTR_RGB_COLOR][0]
+                g = kwargs[ATTR_RGB_COLOR][1]
+                b = kwargs[ATTR_RGB_COLOR][2]
+                rgb = (r << 16) | (g << 8) | b
+                set_properties_list.append({
+                    "prop": self._prop_color,
+                    "value": rgb
+                })
+                self._attr_color_mode = ColorMode.RGB
+            # brightness
+            if not send_brightness_first and ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
+                set_properties_list.append({
+                    "prop": self._prop_brightness,
+                    "value": brightness
+                })
+
+            await self.set_properties_async(set_properties_list,write_ha_state=False)
+            self.async_write_ha_state()
+
+        else:
+            if self._prop_on:
+                value_on = True if self._prop_on.format_ == bool else 1
+                await self.set_property_async(
+                    prop=self._prop_on, value=value_on)
+            # brightness
+            if ATTR_BRIGHTNESS in kwargs:
+                brightness = brightness_to_value(
+                    self._brightness_scale, kwargs[ATTR_BRIGHTNESS])
+                await self.set_property_async(
+                    prop=self._prop_brightness, value=brightness,
+                    write_ha_state=False)
+            # color-temperature
+            if ATTR_COLOR_TEMP_KELVIN in kwargs:
+                await self.set_property_async(
+                    prop=self._prop_color_temp,
+                    value=kwargs[ATTR_COLOR_TEMP_KELVIN],
+                    write_ha_state=False)
+                self._attr_color_mode = ColorMode.COLOR_TEMP
+            # rgb color
+            if ATTR_RGB_COLOR in kwargs:
+                r = kwargs[ATTR_RGB_COLOR][0]
+                g = kwargs[ATTR_RGB_COLOR][1]
+                b = kwargs[ATTR_RGB_COLOR][2]
+                rgb = (r << 16) | (g << 8) | b
+                await self.set_property_async(
+                    prop=self._prop_color, value=rgb,
+                    write_ha_state=False)
+                self._attr_color_mode = ColorMode.RGB
+            # mode
+            if ATTR_EFFECT in kwargs:
+                await self.set_property_async(
+                    prop=self._prop_mode,
+                    value=self.get_map_key(
+                        map_=self._mode_map, value=kwargs[ATTR_EFFECT]),
+                    write_ha_state=False)
+            self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the light off."""
