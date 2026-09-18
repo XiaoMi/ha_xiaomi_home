@@ -291,6 +291,7 @@ class MIoTClient:
             cloud_server=self._cloud_server,
             client_id=OAUTH2_CLIENT_ID,
             access_token=self._user_config['auth_info']['access_token'],
+            uuid=self._entry_data['uuid'],
             loop=self._main_loop)
         # MIoT cert client
         self._cert = MIoTCert(

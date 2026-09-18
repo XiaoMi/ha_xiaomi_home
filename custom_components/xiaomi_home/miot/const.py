@@ -45,7 +45,14 @@ off Xiaomi or its affiliates' products.
 
 Constants.
 """
+import json
+from pathlib import Path
+
 DOMAIN: str = 'xiaomi_home'
+
+INTEGRATION_VERSION: str = json.loads(
+    (Path(__file__).parent.parent / 'manifest.json').read_text()
+)['version']
 DEFAULT_NAME: str = 'Xiaomi Home'
 
 DEFAULT_NICK_NAME: str = 'Xiaomi'

@@ -61,6 +61,7 @@ from .common import calc_group_id
 from .const import (
     UNSUPPORTED_MODELS,
     DEFAULT_OAUTH2_API_HOST,
+    INTEGRATION_VERSION,
     MIHOME_HTTP_API_TIMEOUT,
     OAUTH2_AUTH_URL)
 from .miot_error import MIoTErrorCode, MIoTHttpError, MIoTOauthError
@@ -161,7 +162,12 @@ class MIoTOauthClient:
         http_res = await self._session.get(
             url=f'https://{self._oauth_host}/app/v2/ha/oauth/get_token',
             params={'data': json.dumps(data)},
-            headers={'content-type': 'application/x-www-form-urlencoded'},
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent':
+                    f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+                    f' client/{self._device_id}',
+            },
             timeout=MIHOME_HTTP_API_TIMEOUT
         )
         if http_res.status == 401:
@@ -239,12 +245,14 @@ class MIoTHttpClient:
     _base_url: str
     _client_id: str
     _access_token: str
+    _device_id: str
 
     _get_prop_timer: Optional[asyncio.TimerHandle]
     _get_prop_list: dict[str, dict]
 
     def __init__(
             self, cloud_server: str, client_id: str, access_token: str,
+            uuid: str,
             loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
@@ -260,9 +268,11 @@ class MIoTHttpClient:
             not isinstance(cloud_server, str)
             or not isinstance(client_id, str)
             or not isinstance(access_token, str)
+            or not isinstance(uuid, str)
         ):
             raise MIoTHttpError('invalid params')
 
+        self._device_id = f'ha.{uuid}'
         self.update_http_header(
             cloud_server=cloud_server, client_id=client_id,
             access_token=access_token)
@@ -303,6 +313,9 @@ class MIoTHttpClient:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer{self._access_token}',
             'X-Client-AppId': self._client_id,
+            'User-Agent':
+                f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+                f' client/{self._device_id}',
         }
 
     # pylint: disable=unused-private-member
@@ -367,7 +380,12 @@ class MIoTHttpClient:
             url='https://open.account.xiaomi.com/user/profile',
             params={
                 'clientId': self._client_id, 'token': self._access_token},
-            headers={'content-type': 'application/x-www-form-urlencoded'},
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent':
+                    f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+                    f' client/{self._device_id}',
+            },
             timeout=MIHOME_HTTP_API_TIMEOUT
         )
 

@@ -512,7 +512,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._miot_http = MIoTHttpClient(
                         cloud_server=self._cloud_server,
                         client_id=OAUTH2_CLIENT_ID,
-                        access_token=auth_info['access_token'])
+                        access_token=auth_info['access_token'],
+                        uuid=self._uuid)
                 else:
                     self._miot_http.update_http_header(
                         cloud_server=self._cloud_server,
@@ -1270,6 +1271,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 cloud_server=self._cloud_server,
                 client_id=OAUTH2_CLIENT_ID,
                 access_token=auth_info['access_token'],
+                uuid=self._entry_data['uuid'],
                 loop=self._main_loop)
             if await m_http.get_uid_async() != self._uid:
                 raise AbortFlow('inconsistent_account')
