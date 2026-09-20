@@ -92,6 +92,7 @@ from .miot.const import (
     MIHOME_CERT_EXPIRE_MARGIN
 )
 from .miot.miot_cloud import MIoTHttpClient, MIoTOauthClient
+from .miot.common import get_system_info_str
 from .miot.miot_storage import MIoTStorage, MIoTCert
 from .miot.miot_mdns import MipsService
 from .miot.web_pages import oauth_redirect_page
@@ -175,6 +176,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._oauth_redirect_url_full = ''
         self._miot_oauth = None
         self._miot_http = None
+        self._system_info = ''
 
         self._cc_home_info = {}
         self._cc_home_list_show = {}
@@ -430,11 +432,13 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.info(
                     'async_step_oauth, redirect_url: %s',
                     self._oauth_redirect_url_full)
+                self._system_info = await get_system_info_str(self.hass)
                 miot_oauth = MIoTOauthClient(
                     client_id=OAUTH2_CLIENT_ID,
                     redirect_url=self._oauth_redirect_url_full,
                     cloud_server=self._cloud_server,
                     uuid=self._uuid,
+                    system_info=self._system_info,
                     loop=self._main_loop)
                 self._cc_oauth_auth_url = miot_oauth.gen_auth_url(
                     redirect_url=self._oauth_redirect_url_full)
@@ -513,7 +517,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         cloud_server=self._cloud_server,
                         client_id=OAUTH2_CLIENT_ID,
                         access_token=auth_info['access_token'],
-                        uuid=self._uuid)
+                        uuid=self._uuid,
+                        system_info=self._system_info)
                 else:
                     self._miot_http.update_http_header(
                         cloud_server=self._cloud_server,
@@ -1267,11 +1272,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     'get_access_token, %s, %s', err, traceback.format_exc())
                 raise MIoTConfigError('get_token_error') from err
             # Check uid
+            system_info = await get_system_info_str(self.hass)
             m_http: MIoTHttpClient = MIoTHttpClient(
                 cloud_server=self._cloud_server,
                 client_id=OAUTH2_CLIENT_ID,
                 access_token=auth_info['access_token'],
                 uuid=self._entry_data['uuid'],
+                system_info=system_info,
                 loop=self._main_loop)
             if await m_http.get_uid_async() != self._uid:
                 raise AbortFlow('inconsistent_account')

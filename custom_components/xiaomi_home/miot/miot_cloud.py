@@ -79,11 +79,13 @@ class MIoTOauthClient:
     _client_id: int
     _redirect_url: str
     _device_id: str
+    _user_agent: str
     _state: str
 
     def __init__(
             self, client_id: str, redirect_url: str, cloud_server: str,
-            uuid: str, loop: Optional[asyncio.AbstractEventLoop] = None
+            uuid: str, system_info: str = '',
+            loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
         if client_id is None or client_id.strip() == '':
@@ -102,6 +104,10 @@ class MIoTOauthClient:
         else:
             self._oauth_host = f'{cloud_server}.{DEFAULT_OAUTH2_API_HOST}'
         self._device_id = f'ha.{uuid}'
+        self._user_agent = (
+            f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+            f' client/{self._device_id}'
+            f' {system_info}')
         self._state = hashlib.sha1(
             f'd={self._device_id}'.encode('utf-8')).hexdigest()
         self._session = aiohttp.ClientSession(loop=self._main_loop)
@@ -164,9 +170,7 @@ class MIoTOauthClient:
             params={'data': json.dumps(data)},
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent':
-                    f'ha_xiaomi_home/{INTEGRATION_VERSION}'
-                    f' client/{self._device_id}',
+                'User-Agent': self._user_agent,
             },
             timeout=MIHOME_HTTP_API_TIMEOUT
         )
@@ -245,14 +249,14 @@ class MIoTHttpClient:
     _base_url: str
     _client_id: str
     _access_token: str
-    _device_id: str
+    _user_agent: str
 
     _get_prop_timer: Optional[asyncio.TimerHandle]
     _get_prop_list: dict[str, dict]
 
     def __init__(
             self, cloud_server: str, client_id: str, access_token: str,
-            uuid: str,
+            uuid: str, system_info: str = '',
             loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
@@ -272,7 +276,10 @@ class MIoTHttpClient:
         ):
             raise MIoTHttpError('invalid params')
 
-        self._device_id = f'ha.{uuid}'
+        self._user_agent = (
+            f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+            f' client/ha.{uuid}'
+            f' {system_info}')
         self.update_http_header(
             cloud_server=cloud_server, client_id=client_id,
             access_token=access_token)
@@ -313,9 +320,7 @@ class MIoTHttpClient:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer{self._access_token}',
             'X-Client-AppId': self._client_id,
-            'User-Agent':
-                f'ha_xiaomi_home/{INTEGRATION_VERSION}'
-                f' client/{self._device_id}',
+            'User-Agent': self._user_agent,
         }
 
     # pylint: disable=unused-private-member
@@ -382,9 +387,7 @@ class MIoTHttpClient:
                 'clientId': self._client_id, 'token': self._access_token},
             headers={
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent':
-                    f'ha_xiaomi_home/{INTEGRATION_VERSION}'
-                    f' client/{self._device_id}',
+                'User-Agent': self._user_agent,
             },
             timeout=MIHOME_HTTP_API_TIMEOUT
         )

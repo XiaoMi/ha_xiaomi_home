@@ -59,7 +59,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components import zeroconf
 
 # pylint: disable=relative-beyond-top-level
-from .common import MIoTMatcher, slugify_did
+from .common import MIoTMatcher, get_system_info_str, slugify_did
 from .const import (
     DEFAULT_CTRL_MODE, DEFAULT_INTEGRATION_LANGUAGE, DEFAULT_NICK_NAME, DOMAIN,
     MIHOME_CERT_EXPIRE_MARGIN, NETWORK_REFRESH_INTERVAL,
@@ -189,6 +189,7 @@ class MIoTClient:
             storage: MIoTStorage,
             mips_service: MipsService,
             miot_lan: MIoTLan,
+            system_info: str = '',
             loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
         # MUST run in a running event loop
         self._main_loop = loop or asyncio.get_running_loop()
@@ -207,6 +208,7 @@ class MIoTClient:
         self._entry_data = entry_data
         self._uid = entry_data['uid']
         self._cloud_server = entry_data['cloud_server']
+        self._system_info = system_info
         self._ctrl_mode = CtrlMode.load(
             entry_data.get('ctrl_mode', DEFAULT_CTRL_MODE))
         self._network = network
@@ -285,6 +287,7 @@ class MIoTClient:
             redirect_url=self._entry_data['oauth_redirect_url'],
             cloud_server=self._cloud_server,
             uuid=self._entry_data["uuid"],
+            system_info=self._system_info,
             loop=self._main_loop)
         # MIoT http client instance
         self._http = MIoTHttpClient(
@@ -292,6 +295,7 @@ class MIoTClient:
             client_id=OAUTH2_CLIENT_ID,
             access_token=self._user_config['auth_info']['access_token'],
             uuid=self._entry_data['uuid'],
+            system_info=self._system_info,
             loop=self._main_loop)
         # MIoT cert client
         self._cert = MIoTCert(
@@ -2042,6 +2046,7 @@ async def get_miot_instance_async(
         hass.data[DOMAIN]['miot_lan'] = miot_lan
         _LOGGER.info('create miot_lan instance')
     # MIoT client
+    system_info = await get_system_info_str(hass)
     miot_client = MIoTClient(
         entry_id=entry_id,
         entry_data=entry_data,
@@ -2049,6 +2054,7 @@ async def get_miot_instance_async(
         storage=storage,
         mips_service=mips_service,
         miot_lan=miot_lan,
+        system_info=system_info,
         loop=loop
     )
     miot_client.persistent_notify = persistent_notify
