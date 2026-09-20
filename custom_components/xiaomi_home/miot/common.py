@@ -194,6 +194,6 @@ async def get_system_info_str(hass) -> str:
     from homeassistant.helpers.system_info import async_get_system_info
     info = await async_get_system_info(hass)
     return (
-        f'os/{info["os_name"]}/{info["os_version"]}/{info["arch"]}'
-        f' hass/{info["version"]}'
+        f'hass/{info["version"]}'
+        f' ({info["os_name"]}/{info["os_version"]}; {info["arch"]})'
     )

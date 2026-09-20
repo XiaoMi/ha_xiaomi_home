@@ -106,8 +106,8 @@ class MIoTOauthClient:
         self._device_id = f'ha.{uuid}'
         self._user_agent = (
             f'ha_xiaomi_home/{INTEGRATION_VERSION}'
-            f' client/{self._device_id}'
-            f' {system_info}')
+            f' {system_info}'
+            f' client/{self._device_id}')
         self._state = hashlib.sha1(
             f'd={self._device_id}'.encode('utf-8')).hexdigest()
         self._session = aiohttp.ClientSession(loop=self._main_loop)
@@ -278,8 +278,8 @@ class MIoTHttpClient:
 
         self._user_agent = (
             f'ha_xiaomi_home/{INTEGRATION_VERSION}'
-            f' client/ha.{uuid}'
-            f' {system_info}')
+            f' {system_info}'
+            f' client/ha.{uuid}')
         self.update_http_header(
             cloud_server=cloud_server, client_id=client_id,
             access_token=access_token)
