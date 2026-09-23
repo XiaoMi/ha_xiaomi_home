@@ -57,8 +57,7 @@ from homeassistant.components.humidifier import (HumidifierEntity,
                                                  HumidifierEntityFeature,
                                                  HumidifierAction)
 from homeassistant.components.humidifier.const import (
-    MODE_NORMAL, MODE_ECO, MODE_AWAY, MODE_BOOST, MODE_COMFORT,
-    MODE_HOME, MODE_SLEEP, MODE_AUTO, MODE_BABY)
+    MODE_NORMAL, MODE_ECO, MODE_BOOST, MODE_COMFORT, MODE_SLEEP, MODE_AUTO)
 
 from .miot.miot_spec import MIoTSpecProperty
 from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
