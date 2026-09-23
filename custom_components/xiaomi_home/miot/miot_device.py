@@ -348,11 +348,21 @@ class MIoTDevice:
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
             f'{self._model_strs[-1][:20]}')
 
-    def gen_service_entity_id(self, ha_domain: str, siid: int,
-                              description: str) -> str:
+    def gen_service_entity_id(
+        self,
+        ha_domain: str,
+        siid: int,
+        description: str,
+        slugify_description: bool = True,
+    ) -> str:
+        description_slug = description
+        if slugify_description:
+            description_slug = slugify_name(description)
+            if not description_slug:
+                description_slug = f'service_{siid}'
         return (
             f'{ha_domain}.{self._model_strs[0][:9]}_{self.did_tag}_'
-            f'{self._model_strs[-1][:20]}_s_{siid}_{description}')
+            f'{self._model_strs[-1][:20]}_s_{siid}_{description_slug}')
 
     def gen_prop_entity_id(
         self, ha_domain: str, spec_name: str, siid: int, piid: int
@@ -918,7 +928,10 @@ class MIoTServiceEntity(Entity):
     _pending_write_ha_state_timer: Optional[asyncio.TimerHandle]
 
     def __init__(
-        self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+        self,
+        miot_device: MIoTDevice,
+        entity_data: MIoTEntityData,
+        ha_domain: str | None = None,
     ) -> None:
         if (
             miot_device is None
@@ -934,11 +947,14 @@ class MIoTServiceEntity(Entity):
         self._value_sub_ids = {}
         # Gen entity id
         if isinstance(self.entity_data.spec, MIoTSpecInstance):
-            self.entity_id = miot_device.gen_device_entity_id(DOMAIN)
+            entity_id_domain = ha_domain or self.entity_data.platform
+            self.entity_id = miot_device.gen_device_entity_id(
+                entity_id_domain)
             self._attr_name = f' {self.entity_data.spec.description_trans}'
         elif isinstance(self.entity_data.spec, MIoTSpecService):
+            entity_id_domain = ha_domain or self.entity_data.platform
             self.entity_id = miot_device.gen_service_entity_id(
-                DOMAIN, siid=self.entity_data.spec.iid,
+                entity_id_domain, siid=self.entity_data.spec.iid,
                 description=self.entity_data.spec.description)
             self._attr_name = (
                 f'{"* "if self.entity_data.spec.proprietary else " "}'
@@ -1241,7 +1257,7 @@ class MIoTPropertyEntity(Entity):
         self._pending_write_ha_state_timer = None
         # Gen entity_id
         self.entity_id = self.miot_device.gen_prop_entity_id(
-            ha_domain=DOMAIN, spec_name=spec.name,
+            ha_domain=spec.platform, spec_name=spec.name,
             siid=spec.service.iid, piid=spec.iid)
         # Set entity attr
         self._attr_unique_id = self.entity_id
@@ -1383,7 +1399,7 @@ class MIoTEventEntity(Entity):
         self._main_loop = miot_device.miot_client.main_loop
         # Gen entity_id
         self.entity_id = self.miot_device.gen_event_entity_id(
-            ha_domain=DOMAIN, spec_name=spec.name,
+            ha_domain=spec.platform, spec_name=spec.name,
             siid=spec.service.iid,  eiid=spec.iid)
         # Set entity attr
         self._attr_unique_id = self.entity_id
@@ -1494,7 +1510,7 @@ class MIoTActionEntity(Entity):
         self._state_sub_id = 0
         # Gen entity_id
         self.entity_id = self.miot_device.gen_action_entity_id(
-            ha_domain=DOMAIN, spec_name=spec.name,
+            ha_domain=spec.platform, spec_name=spec.name,
             siid=spec.service.iid, aiid=spec.iid)
         # Set entity attr
         self._attr_unique_id = self.entity_id

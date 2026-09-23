@@ -73,9 +73,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
     new_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get('wifi-speaker', []):
+            data.platform = 'media_player'
             new_entities.append(
                 WifiSpeaker(miot_device=miot_device, entity_data=data))
         for data in miot_device.entity_list.get('television', []):
+            data.platform = 'media_player'
             new_entities.append(
                 Television(miot_device=miot_device, entity_data=data))
 

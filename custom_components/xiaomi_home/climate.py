@@ -73,18 +73,23 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry,
     new_entities = []
     for miot_device in device_list:
         for data in miot_device.entity_list.get('air-conditioner', []):
+            data.platform = 'climate'
             new_entities.append(
                 AirConditioner(miot_device=miot_device, entity_data=data))
         for data in miot_device.entity_list.get('heater', []):
+            data.platform = 'climate'
             new_entities.append(
                 Heater(miot_device=miot_device, entity_data=data))
         for data in miot_device.entity_list.get('bath-heater', []):
+            data.platform = 'climate'
             new_entities.append(
                 PtcBathHeater(miot_device=miot_device, entity_data=data))
         for data in miot_device.entity_list.get('thermostat', []):
+            data.platform = 'climate'
             new_entities.append(
                 Thermostat(miot_device=miot_device, entity_data=data))
         for data in miot_device.entity_list.get('electric-blanket', []):
+            data.platform = 'climate'
             new_entities.append(
                 ElectricBlanket(miot_device=miot_device, entity_data=data))
 
