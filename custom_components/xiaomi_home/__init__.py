@@ -52,7 +52,7 @@ from typing import Optional
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.components import persistent_notification
-from homeassistant.helpers import device_registry, entity_registry
+from homeassistant.helpers import config_validation as cv, device_registry, entity_registry
 
 from .miot.common import slugify_did
 from .miot.miot_storage import (
@@ -66,6 +66,8 @@ from .miot.miot_device import MIoTDevice
 from .miot.miot_client import MIoTClient, get_miot_instance_async
 
 _LOGGER = logging.getLogger(__name__)
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, hass_config: dict) -> bool:
