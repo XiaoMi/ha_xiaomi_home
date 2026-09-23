@@ -11,7 +11,7 @@
             },
             "auth_config": {
                 "title": "基础配置",
-                "description": "### 登录地区\r\n选择小米账号所在的地区。您可以在 `米家APP > 我的（位于底部菜单） > 更多设置 > 关于米家` 中查看。\r\n### 语言\r\n选择设备及实体名称所用的语言。缺少翻译的部分语句将使用英文显示。\r\n### OAuth2 认证跳转地址\r\nOAuth2 认证跳转地址为 **[http://homeassistant.local:8123](http://homeassistant.local:8123)**，Home Assistant 需要与当前操作终端（例如，个人电脑）在同一局域网内，且操作终端能通过该地址访问 Home Assistant 首页，否则登录认证可能会失败。\r\n### 集成网络配置\r\n检测本地网络是否正常，相关网络资源是否可访问。**首次添加时建议勾选。**\r\n### 注意事项\r\n- 对于数百个及以上米家设备的用户，首次添加集成会耗费一些时间，请耐心等待。\r\n- 如果 Home Assistant 运行在docker环境下，请确保docker网络模式为host，否则会导致本地控制功能异常。\r\n- 集成本地控制功能存在一些依赖项，请仔细阅读README。",
+                "description": "### 登录地区\r\n选择小米账号所在的地区。您可以在 `米家APP > 我的（位于底部菜单） > 更多设置 > 关于米家` 中查看。\r\n### 语言\r\n选择设备及实体名称所用的语言。缺少翻译的部分语句将使用英文显示。\r\n### OAuth2 认证跳转地址\r\nOAuth2 认证跳转地址为 **[{oauth_redirect_url}]({oauth_redirect_url})**，Home Assistant 需要与当前操作终端（例如，个人电脑）在同一局域网内，且操作终端能通过该地址访问 Home Assistant 首页，否则登录认证可能会失败。\r\n### 集成网络配置\r\n检测本地网络是否正常，相关网络资源是否可访问。**首次添加时建议勾选。**\r\n### 注意事项\r\n- 对于数百个及以上米家设备的用户，首次添加集成会耗费一些时间，请耐心等待。\r\n- 如果 Home Assistant 运行在docker环境下，请确保docker网络模式为host，否则会导致本地控制功能异常。\r\n- 集成本地控制功能存在一些依赖项，请仔细阅读README。",
                 "data": {
                     "cloud_server": "登录地区",
                     "integration_language": "语言",
@@ -21,7 +21,7 @@
             },
             "network_detect_config": {
                 "title": "网络检测配置",
-                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{broker_host}`。",
+                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,{bing_url}`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`{oauth2_auth_url}`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`{spec_api_url}`。\r\n- 小米 MQTT Broker 地址：`mqtts://{broker_host}`。",
                 "data": {
                     "network_detect_addr": "网络检测地址",
                     "check_network_deps": "检测网络依赖项"
@@ -102,7 +102,7 @@
         "step": {
             "auth_config": {
                 "title": "认证配置",
-                "description": "检测到本地认证信息过期，请重新开始认证\r\n### 当前登录地区: {cloud_server}\r\n### OAuth2 认证跳转地址\r\nOAuth2 认证跳转地址为 **[http://homeassistant.local:8123](http://homeassistant.local:8123)**，Home Assistant 需要与当前操作终端（例如，个人电脑）在同一局域网内，且操作终端能通过该地址访问 Home Assistant 首页，否则登录认证可能会失败。",
+                "description": "检测到本地认证信息过期，请重新开始认证\r\n### 当前登录地区: {cloud_server}\r\n### OAuth2 认证跳转地址\r\nOAuth2 认证跳转地址为 **[{oauth_redirect_url}]({oauth_redirect_url})**，Home Assistant 需要与当前操作终端（例如，个人电脑）在同一局域网内，且操作终端能通过该地址访问 Home Assistant 首页，否则登录认证可能会失败。",
                 "data": {
                     "oauth_redirect_url": "认证跳转地址"
                 }
@@ -176,7 +176,7 @@
             },
             "network_detect_config": {
                 "title": "网络检测配置",
-                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,https://www.bing.com`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`https://account.xiaomi.com/oauth2/authorize`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`https://miot-spec.org/miot-spec-v2/template/list/device`。\r\n- 小米 MQTT Broker 地址：`mqtts://{broker_host}`。",
+                "description": "## 使用介绍\r\n### 网络检测地址\r\n用于检测网络是否正常，未设置时将使用系统默认地址检测。如果默认地址检测异常时，可尝试输入可用的自定义地址检测。\r\n- 可输入多个检测地址，地址之间使用`,`号间隔，如`8.8.8.8,{bing_url}`\r\n- 如果为IP地址，将采用ping方式检测，如果为http(s)地址，将采用 HTTP GET 访问该地址检测。\r\n- 如果想恢复系统默认检测地址，请输入`,`号，然后点击'下一步'。\r\n- **该配置为全局配置，修改会影响其它集成实例的网络检测，请谨慎修改。**\r\n### 检测网络依赖项\r\n依次检查下述网络依赖项是否可访问。如果相关地址无法访问，将会导致集成异常。\r\n- OAuth2 认证地址：`{oauth2_auth_url}`。\r\n- 小米 HTTP API 地址：`https://{http_host}/app/v2/ha/oauth/get_token`。\r\n- 小米 SPEC API 地址：`{spec_api_url}`。\r\n- 小米 MQTT Broker 地址：`mqtts://{broker_host}`。",
                 "data": {
                     "network_detect_addr": "网络检测地址",
                     "check_network_deps": "检测网络依赖项"
