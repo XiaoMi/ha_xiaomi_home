@@ -135,24 +135,20 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
                     continue
                 self._mode_map = {}
                 for item in prop.value_list.items:
-                    if item.name in {'normal', 'constant_humidity'}:
+                    if item.name in {'none', 'the_standard_model',
+                                     'constant_speed', '标准'}:
                         self._mode_map[item.value] = MODE_NORMAL
-                    elif item.name in {'eco'}:
+                    elif item.name in {'低湿'}:
                         self._mode_map[item.value] = MODE_ECO
-                    elif item.name in {'away', 'air_dry'}:
-                        self._mode_map[item.value] = MODE_AWAY
-                    elif item.name in {'boost', 'strong'}:
+                    elif item.name in {'strong', '高湿'}:
                         self._mode_map[item.value] = MODE_BOOST
-                    elif item.name in {'comfort'}:
+                    elif item.name in {'skin'}:
                         self._mode_map[item.value] = MODE_COMFORT
-                    elif item.name in {'home'}:
-                        self._mode_map[item.value] = MODE_HOME
-                    elif item.name in {'sleep'}:
+                    elif item.name in {'sleep', 'sleep_mode', '睡眠'}:
                         self._mode_map[item.value] = MODE_SLEEP
-                    elif item.name in {'auto'}:
+                    elif item.name in {'constant_humidity',
+                                       'const_humidity', '自动'}:
                         self._mode_map[item.value] = MODE_AUTO
-                    elif item.name in {'baby'}:
-                        self._mode_map[item.value] = MODE_BABY
                     else:
                         self._mode_map[item.value] = item.description
                 self._attr_available_modes = list(self._mode_map.values())
