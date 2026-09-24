@@ -153,9 +153,11 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                     'actions': {'start-sweep', 'stop-sweeping'},
                 },
                 'optional': {
-                    'properties': {'status', 'fan-level'},
+                    'properties': {
+                        'status', 'fan-level', 'room-information'},
                     'actions': {
-                        'pause-sweeping', 'continue-sweep', 'stop-and-gocharge'
+                        'pause-sweeping', 'continue-sweep', 'stop-and-gocharge',
+                        'start-vacuum-room-sweep'
                     }
                 }
             }
