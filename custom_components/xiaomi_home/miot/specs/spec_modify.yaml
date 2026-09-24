@@ -206,6 +206,9 @@ urn:miot-spec-v2:device:bath-heater:0000A028:opple-acmoto:1:
       description: medium
     - value: 255
       description: high
+urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-na2:2:
+  prop.5.8:
+    name: fan-level-a
 urn:miot-spec-v2:device:bath-heater:0000A028:xiaomi-s1:1:
   prop.4.4:
     name: fan-level-ventilation
