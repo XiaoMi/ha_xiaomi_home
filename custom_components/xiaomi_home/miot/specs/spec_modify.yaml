@@ -518,6 +518,17 @@ urn:miot-spec-v2:device:plant-monitor:0000A030:hhcc-v1:1:
     name: soil-ec
     icon: mdi:sprout-outline
     unit: μS/cm
+urn:miot-spec-v2:device:relay:0000A03D:hey-h100:1:
+  prop.3.1:
+    unit: kWh
+    format: float
+    value-range:
+    - 0
+    - 100000000
+    - 0.01
+    expr: round(src_value/100, 2)
+  prop.3.2:
+    unit: mA
 urn:miot-spec-v2:device:relay:0000A03D:lumi-c2acn01:1:
   prop.4.1:
     unit: kWh
