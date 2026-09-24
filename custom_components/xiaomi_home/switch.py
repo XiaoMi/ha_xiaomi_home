@@ -72,6 +72,12 @@ async def async_setup_entry(
     for miot_device in device_list:
         for prop in miot_device.prop_list.get('switch', []):
             new_entities.append(Switch(miot_device=miot_device, spec=prop))
+        if miot_device.model == 'daikin.airfresh.k33':
+            for entity_data in miot_device.entity_list.get('fan', []):
+                for prop in entity_data.props:
+                    if prop.name == 'on':
+                        new_entities.append(
+                            Switch(miot_device=miot_device, spec=prop))
 
     if new_entities:
         async_add_entities(new_entities)
