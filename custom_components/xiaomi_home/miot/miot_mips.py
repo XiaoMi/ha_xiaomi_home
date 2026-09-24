@@ -1102,7 +1102,16 @@ class MipsCloudClient(_MipsClient):
         if not bc_list:
             return
         # The message from the cloud is not packed.
-        payload_str: str = payload.decode('utf-8')
+        try:
+            payload_str: str = payload.decode('utf-8')
+        except UnicodeDecodeError as err:
+            # Some cloud pushes carry a payload that is not valid UTF-8.
+            # Drop the message instead of raising, otherwise the exception
+            # aborts paho's read loop and subsequent messages may be lost.
+            self.log_error(
+                f'on message, drop non-utf-8 payload, {err}, {topic}, '
+                f'{payload.hex()}')
+            return
         # self.log_debug(f"on broadcast, {topic}, {payload}")
         for item in bc_list or []:
             if item.handler is None:
