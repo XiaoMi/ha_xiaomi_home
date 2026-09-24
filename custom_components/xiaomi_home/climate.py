@@ -711,6 +711,8 @@ class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
         """Initialize the thermostat."""
+        self._prop_ac_state: Optional[MIoTSpecProperty] = None
+
         super().__init__(miot_device=miot_device, entity_data=entity_data)
 
         self._attr_icon = 'mdi:thermostat'
@@ -721,6 +723,71 @@ class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
         # preset modes
         self._init_preset_modes('thermostat', 'mode')
 
+        # Listen for ac-state composite property which may encode power status
+        # for some thermostat models (e.g. midea via xiaomi home cloud)
+        for prop in entity_data.props:
+            if prop.name == 'ac-state':
+                self._prop_ac_state = prop
+                self.sub_prop_changed(prop=prop,
+                                      handler=self.__ac_state_changed)
+                break
+        # Also subscribe to 'mode' changes as a fallback: when mode changes
+        # but _prop_on doesn't update, try to infer power state from mode value
+        if self._prop_mode:
+            self.sub_prop_changed(prop=self._prop_mode,
+                                  handler=self.__mode_changed_callback)
+
+    def __ac_state_changed(self, prop: MIoTSpecProperty, value: Any) -> None:
+        """Handle ac-state composite property updates."""
+        del prop
+        if not isinstance(value, str):
+            _LOGGER.debug('thermostat ac_state value not str, %s', value)
+            return
+        v_ac_state = {}
+        v_split = value.split('_')
+        for item in v_split:
+            if len(item) < 2:
+                _LOGGER.debug('thermostat ac_state item error, %s', item)
+                continue
+            try:
+                v_ac_state[item[0]] = int(item[1:])
+            except ValueError:
+                _LOGGER.debug('thermostat ac_state value error, %s', item)
+        # P: power status. 0: on, 1: off
+        if 'P' in v_ac_state and self._prop_on:
+            was_off = self.get_prop_value(prop=self._prop_on) is False
+            self.set_prop_value(prop=self._prop_on,
+                                value=v_ac_state['P'] == 0)
+            if was_off and v_ac_state['P'] == 0:
+                _LOGGER.debug('thermostat ac_state turned ON via ac-state')
+        # T: target temperature
+        if 'T' in v_ac_state and self._prop_target_temp:
+            self.set_prop_value(prop=self._prop_target_temp,
+                                value=v_ac_state['T'])
+        # F: fan level
+        if 'F' in v_ac_state and self._prop_fan_level:
+            self.set_prop_value(prop=self._prop_fan_level,
+                                value=v_ac_state['F'])
+
+    def __mode_changed_callback(self, prop: MIoTSpecProperty, value: Any) -> None:
+        """
+        Fallback: when mode changes but _prop_on didn't update,
+        try to determine power state from the mode value.
+        Some thermostats never push 'on' property changes, only mode.
+        """
+        del prop
+        if not self._mode_map or value is None:
+            return
+        mode_desc = self._mode_map.get(value, None)
+        if mode_desc is None:
+            return
+        # If mode has a valid value (not unknown/none), the device is ON
+        current_on = self.get_prop_value(prop=self._prop_on)
+        if current_on is not True:
+            self.set_prop_value(prop=self._prop_on, value=True)
+            _LOGGER.debug('thermostat inferred ON from mode change: %s -> %s',
+                          value, mode_desc)
+
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the target hvac mode."""
         await self.set_property_async(
@@ -730,8 +797,35 @@ class Thermostat(FeatureOnOff, FeatureTargetTemperature, FeatureTemperature,
     @property
     def hvac_mode(self) -> Optional[HVACMode]:
         """The current hvac mode."""
-        return (HVACMode.AUTO if self.get_prop_value(
-            prop=self._prop_on) else HVACMode.OFF)
+        on_value = self.get_prop_value(prop=self._prop_on)
+        # If _prop_on has a value, use it directly
+        if on_value is not None:
+            return HVACMode.AUTO if on_value else HVACMode.OFF
+        # Fallback: if mode has a valid value, device is on
+        if self._prop_mode:
+            mode_val = self.get_prop_value(prop=self._prop_mode)
+            if mode_val is not None:
+                return HVACMode.AUTO
+        return HVACMode.OFF
+
+    @property
+    def hvac_action(self) -> Optional[HVACAction]:
+        """The current hvac action."""
+        if self.hvac_mode == HVACMode.OFF:
+            return HVACAction.OFF
+        if self._prop_mode:
+            mode_val = self.get_prop_value(prop=self._prop_mode)
+            if mode_val is not None:
+                mode_desc = self._mode_map.get(mode_val, None) if self._mode_map else None
+                if mode_desc == "Cool" or mode_desc == "制冷":
+                    return HVACAction.COOLING
+                if mode_desc == "Heat" or mode_desc == "制热":
+                    return HVACAction.HEATING
+                if mode_desc == "Fan" or mode_desc == "送风":
+                    return HVACAction.FAN
+                if mode_desc == "Dry" or mode_desc == "除湿":
+                    return HVACAction.DRYING
+        return HVACAction.IDLE
 
 
 class ElectricBlanket(FeatureOnOff, FeatureTargetTemperature,
