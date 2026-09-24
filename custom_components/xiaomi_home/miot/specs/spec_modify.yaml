@@ -177,6 +177,19 @@ urn:miot-spec-v2:device:airer:0000A00D:mrbond-m33a:1:
     name: current-position-a
   prop.2.11:
     name: current-position-b
+urn:miot-spec-v2:device:bath-heater:0000A028:aupu-qa3s:1:
+  prop.5.2:
+    value-list:
+    - value: 1
+      description: Level_1
+    - value: 2
+      description: Level_2
+    - value: 3
+      description: Level_3
+    - value: 4
+      description: Level_4
+    - value: 5
+      description: Level_5
 urn:miot-spec-v2:device:bath-heater:0000A028:mike-2:1:
   prop.3.1:
     name: mode-a
