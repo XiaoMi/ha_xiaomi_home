@@ -81,6 +81,20 @@ async def async_setup(hass: HomeAssistant, hass_config: dict) -> bool:
     hass.data[DOMAIN].setdefault('entities', {})
     for platform in SUPPORTED_PLATFORMS:
         hass.data[DOMAIN]['entities'][platform] = []
+    # An unofficial migration patch bumped the config entry version. Home
+    # Assistant refuses to load an entry whose version is newer than the one
+    # declared by the config flow, so reset it, the unique_id is migrated when
+    # the entry is set up instead. This runs before the entry is loaded, hence
+    # before its version is checked.
+    for config_entry in hass.config_entries.async_entries(DOMAIN):
+        if config_entry.version <= 1:
+            continue
+        _LOGGER.warning(
+            'reset the config entry version set by an unofficial patch, '
+            '%s -> 1, the unique_id of the entities is migrated '
+            'automatically, %s',
+            config_entry.version, config_entry.entry_id)
+        hass.config_entries.async_update_entry(config_entry, version=1)
     return True
 
 
@@ -106,8 +120,12 @@ def migrate_service_unique_id(
         return True
     legacy_unique_id: Optional[str] = next(
         (legacy_unique_id
-         for legacy_unique_id in device.gen_service_entity_id_legacy(
-             ha_domain=DOMAIN, siid=spec.iid)
+         for legacy_unique_id in (
+             device.gen_service_entity_id_unofficial(
+                 ha_domain=DOMAIN, siid=spec.iid,
+                 description=spec.description)
+             + device.gen_service_entity_id_legacy(
+                 ha_domain=DOMAIN, siid=spec.iid))
          if legacy_unique_id in er_entries),
         None)
     if not legacy_unique_id:
