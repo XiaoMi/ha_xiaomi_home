@@ -482,7 +482,7 @@ class _MipsClient(ABC):
         self,
         payload: Optional[str] = None,
         timeout_ms: int = 10000
-    ) -> dict[str, dict]: ...
+    ) -> Optional[dict[str, dict]]: ...
 
     @abstractmethod
     async def get_prop_async(
@@ -1031,7 +1031,7 @@ class MipsCloudClient(_MipsClient):
 
     async def get_dev_list_async(
         self, payload: Optional[str] = None, timeout_ms: int = 10000
-    ) -> dict[str, dict]:
+    ) -> Optional[dict[str, dict]]:
         raise NotImplementedError('please call in http client')
 
     async def get_prop_async(
@@ -1102,7 +1102,16 @@ class MipsCloudClient(_MipsClient):
         if not bc_list:
             return
         # The message from the cloud is not packed.
-        payload_str: str = payload.decode('utf-8')
+        try:
+            payload_str: str = payload.decode('utf-8')
+        except UnicodeDecodeError as err:
+            # Some cloud pushes carry a payload that is not valid UTF-8.
+            # Drop the message instead of raising, otherwise the exception
+            # aborts paho's read loop and subsequent messages may be lost.
+            self.log_error(
+                f'on message, drop non-utf-8 payload, {err}, {topic}, '
+                f'{payload.hex()}')
+            return
         # self.log_debug(f"on broadcast, {topic}, {payload}")
         for item in bc_list or []:
             if item.handler is None:
@@ -1376,12 +1385,13 @@ class MipsLocalClient(_MipsClient):
     @final
     async def get_dev_list_async(
         self, payload: Optional[str] = None, timeout_ms: int = 10000
-    ) -> dict[str, dict]:
+    ) -> Optional[dict[str, dict]]:
         result_obj = await self.__request_async(
             topic='proxy/getDevList', payload=payload or '{}',
             timeout_ms=timeout_ms)
         if not result_obj or 'devList' not in result_obj:
-            raise MIoTMipsError('invalid result')
+            self.log_error(f'get dev list failed, invalid result, {payload}')
+            return None
         device_list = {}
         for did, info in result_obj['devList'].items():
             name: str = info.get('name', None)
