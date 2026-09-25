@@ -52,7 +52,6 @@ import json
 import secrets
 import socket
 import struct
-import time
 from typing import Any, Optional
 
 from cryptography.hazmat.backends import default_backend
@@ -122,19 +121,44 @@ def _probe(virtual_did: int) -> bytes:
     return bytes(buf)
 
 
-def _hello_did(packet: bytes) -> Optional[tuple[str, int]]:
+def hello_identity(packet: bytes, did: str) -> Optional[tuple[int, int]]:
+    """Return header did and device stamp when packet is a hello from did.
+
+    chuangmi.ir.v2 speaks classic miIO: 32-bit device id at bytes 8-12.
+    Newer Wi-Fi devices put a 64-bit id at bytes 4-12. The stamp is at
+    bytes 12-16 in both layouts when the upper 32 bits are zero.
+    """
     if len(packet) < 32 or packet[:2] != b'\x21\x31':
         return None
-    did = str(struct.unpack('>Q', packet[4:12])[0])
+    want = int(did)
+    wide = struct.unpack('>Q', packet[4:12])[0]
+    narrow = struct.unpack('>I', packet[8:12])[0]
     stamp = struct.unpack('>I', packet[12:16])[0]
-    return did, stamp
+    if wide == want:
+        return wide, stamp
+    if narrow == (want & 0xFFFFFFFF) and (wide >> 32) == 0:
+        return narrow, stamp
+    return None
+
+
+def command_stamp(hello_stamp: int, attempt: int) -> int:
+    """Return a device timestamp strictly newer than the hello."""
+    return (hello_stamp + 1 + attempt) & 0xFFFFFFFF
+
+
+async def _recv(loop, sock, deadline: float):
+    remain = deadline - loop.time()
+    if remain <= 0:
+        raise asyncio.TimeoutError
+    return await asyncio.wait_for(
+        loop.sock_recvfrom(sock, 4096), timeout=remain)
 
 
 async def _rpc_to(
     did: str, token: str, method: str, params: Any,
     address: str, timeout: float
 ) -> dict:
-    """Hello the device, then send one miIO method."""
+    """Hello the device, then send one miIO method to its real address."""
     loop = asyncio.get_running_loop()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -143,44 +167,52 @@ async def _rpc_to(
         sock.setblocking(False)
         virtual_did = secrets.randbits(63)
         await loop.sock_sendto(sock, _probe(virtual_did), (address, OT_PORT))
-        deadline = loop.time() + timeout
-        stamp: Optional[int] = None
-        hello_at = time.monotonic()
-        while loop.time() < deadline:
-            remain = deadline - loop.time()
+        hello_deadline = loop.time() + min(timeout, 3.0)
+        found: Optional[tuple[int, int, str]] = None
+        while loop.time() < hello_deadline:
             try:
-                data, _addr = await asyncio.wait_for(
-                    loop.sock_recvfrom(sock, 4096), timeout=remain)
+                data, addr = await _recv(loop, sock, hello_deadline)
             except asyncio.TimeoutError:
                 break
-            hello = _hello_did(data)
-            if hello and hello[0] == str(int(did)):
-                stamp = hello[1]
-                hello_at = time.monotonic()
+            ident = hello_identity(data, did)
+            if ident:
+                found = (ident[0], ident[1], addr[0])
                 break
-        if stamp is None:
+        if found is None:
             raise TimeoutError('miIO hello timeout')
+        header_did, hello_stamp, peer = found
+        # The command needs its own window. Sharing the hello deadline
+        # made the request expire as soon as discovery finished.
         msg_id = secrets.randbelow(0x7FFFFFFF) + 1
         payload = {'id': msg_id, 'method': method, 'params': params}
-        device_stamp = stamp + int(time.monotonic() - hello_at)
-        packet = build_miio_packet(did, token, payload, device_stamp)
-        await loop.sock_sendto(sock, packet, (address, OT_PORT))
-        while loop.time() < deadline:
-            remain = max(0.1, deadline - loop.time())
-            try:
-                data, _addr = await asyncio.wait_for(
-                    loop.sock_recvfrom(sock, 4096), timeout=remain)
-            except asyncio.TimeoutError:
-                break
-            if len(data) <= 32:
-                continue
-            try:
-                reply = decrypt_miio_packet(token, data)
-            except (ValueError, json.JSONDecodeError):
-                continue
-            if reply.get('id') == msg_id:
-                return reply
-        raise TimeoutError('miIO call timeout')
+        bad_token = 0
+        for attempt in range(3):
+            packet = build_miio_packet(
+                str(header_did), token, payload,
+                command_stamp(hello_stamp, attempt))
+            await loop.sock_sendto(sock, packet, (peer, OT_PORT))
+            # Retry with a newer stamp instead of waiting out the
+            # full timeout on a packet the device ignored.
+            call_deadline = loop.time() + min(4.0, timeout)
+            while loop.time() < call_deadline:
+                try:
+                    data, addr = await _recv(loop, sock, call_deadline)
+                except asyncio.TimeoutError:
+                    break
+                if addr[0] != peer or len(data) <= 32:
+                    continue
+                try:
+                    reply = decrypt_miio_packet(token, data)
+                except (ValueError, json.JSONDecodeError):
+                    bad_token += 1
+                    continue
+                if reply.get('id') == msg_id:
+                    return reply
+        if bad_token:
+            raise MIoTClientError(
+                'the remote answered but the device token was rejected. '
+                'Update the device list and try again.')
+        raise TimeoutError(f'miIO call timeout, peer {peer}')
     finally:
         sock.close()
 

@@ -46,6 +46,23 @@ def test_inline_and_stored_commands():
 
 
 @pytest.mark.github
+def test_miio_hello_and_stamp():
+    import struct
+    from miot.miio_rpc import command_stamp, hello_identity
+
+    # Classic miIO hello: 32-bit device id, upper 32 bits zero.
+    packet = bytearray(32)
+    packet[:2] = b'\x21\x31'
+    struct.pack_into('>H', packet, 2, 32)
+    struct.pack_into('>I', packet, 8, 12345)
+    struct.pack_into('>I', packet, 12, 100)
+    assert hello_identity(bytes(packet), '12345') == (12345, 100)
+    assert hello_identity(bytes(packet), '999') is None
+    assert command_stamp(100, 0) == 101
+    assert command_stamp(100, 2) == 103
+
+
+@pytest.mark.github
 def test_miio_packet_roundtrip():
     from miot.miio_rpc import build_miio_packet, decrypt_miio_packet
 
