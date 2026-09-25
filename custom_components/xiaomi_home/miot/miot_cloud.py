@@ -755,7 +755,18 @@ class MIoTHttpClient:
         if not props_buffer:
             _LOGGER.error('get prop error, empty request list')
             return False
-        results = await self.get_props_async(props_buffer)
+        try:
+            results = await self.get_props_async(props_buffer)
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            # If the batch request fails (timeout, network error, etc.), the
+            # pending futures in self._get_prop_list would otherwise stay
+            # unresolved forever. Subsequent get_prop_async calls with the
+            # same key reuse the dead future via the cache lookup at the top
+            # of get_prop_async, so the integration would never recover until
+            # restart. Fall through with empty results so the loop below
+            # drains every requested key with set_result(None).
+            _LOGGER.error('get prop batch failed, %s', err)
+            results = []
 
         for result in results:
             if not all(
