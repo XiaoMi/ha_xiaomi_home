@@ -41,6 +41,7 @@ def load_py_file():
         'const.py',
         'miot_cloud.py',
         'miot_error.py',
+        'ir_code.py',
         'miot_i18n.py',
         'miot_lan.py',
         'miot_mdns.py',

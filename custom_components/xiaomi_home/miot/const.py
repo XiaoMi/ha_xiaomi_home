@@ -80,6 +80,7 @@ SUPPORTED_PLATFORMS: list = [
     'media_player',
     'notify',
     'number',
+    'remote',
     'select',
     'sensor',
     'switch',
@@ -88,8 +89,12 @@ SUPPORTED_PLATFORMS: list = [
     'water_heater',
 ]
 
-UNSUPPORTED_MODELS: list = [
+# Profile devices controlled with legacy miIO methods over LAN.
+IR_REMOTE_MODELS: list = [
     'chuangmi.ir.v2',
+]
+
+UNSUPPORTED_MODELS: list = [
     'era.airp.cwb03',
     'hmpace.motion.v6nfc',
     'k0918.toothbrush.t700'
