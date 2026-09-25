@@ -49,7 +49,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import secrets
 import socket
 import struct
 from typing import Any, Optional
@@ -63,6 +62,11 @@ from .miot_error import MIoTClientError
 OT_PORT = 54321
 OT_HEADER = 0x2131
 _HEADER_LEN = 32
+# python-miio MiIOProtocol.discover hello. Profile devices such as
+# chuangmi.ir.v2 answer this and ignore the newer MDID probe.
+_HELLO = bytes.fromhex(
+    '21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+_RETRY = 3
 
 
 def _md5(data: bytes) -> bytes:
@@ -79,20 +83,27 @@ def _cipher(token: bytes) -> Cipher:
 
 
 def build_miio_packet(
-    did: str, token: str, payload: dict, stamp: int
+    device_id: bytes, token: str, payload: dict, stamp: int
 ) -> bytes:
-    """Build one encrypted miIO datagram."""
+    """Build one classic miIO datagram.
+
+    python-miio EncryptionAdapter appends a NUL before PKCS7. The header
+    unknown field stays 0 and device_id is the 4 bytes from the handshake.
+    """
+    if len(device_id) != 4:
+        raise ValueError('device id must be 4 bytes')
     token_bytes = bytes.fromhex(token)
-    clear = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+    clear = json.dumps(payload).encode('utf-8') + b'\x00'
     padder = padding.PKCS7(algorithms.AES128.block_size).padder()
     padded = padder.update(clear) + padder.finalize()
     encryptor = _cipher(token_bytes).encryptor()
     encrypted = encryptor.update(padded) + encryptor.finalize()
     data_len = _HEADER_LEN + len(encrypted)
     packet = bytearray(data_len)
-    packet[:_HEADER_LEN] = struct.pack(
-        '>HHQI16s', OT_HEADER, data_len, int(did), stamp, token_bytes)
-    packet[_HEADER_LEN:data_len] = encrypted
+    packet[:16] = struct.pack(
+        '>HHI4sI', OT_HEADER, data_len, 0, device_id, stamp & 0xFFFFFFFF)
+    packet[16:32] = token_bytes
+    packet[32:data_len] = encrypted
     packet[16:32] = _md5(packet[:data_len])
     return bytes(packet)
 
@@ -113,36 +124,28 @@ def decrypt_miio_packet(token: str, packet: bytes) -> dict:
     return json.loads(clear.rstrip(b'\x00'))
 
 
-def _probe(virtual_did: int) -> bytes:
-    buf = bytearray(32)
-    buf[:20] = (
-        b'!1\x00\x20\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFFMDID')
-    buf[20:28] = struct.pack('>Q', virtual_did)
-    return bytes(buf)
+def hello_identity(packet: bytes) -> Optional[tuple[bytes, int]]:
+    """Return the 4-byte device id and stamp from a classic hello.
 
-
-def hello_identity(packet: bytes, did: str) -> Optional[tuple[int, int]]:
-    """Return header did and device stamp when packet is a hello from did.
-
-    chuangmi.ir.v2 speaks classic miIO: 32-bit device id at bytes 8-12.
-    Newer Wi-Fi devices put a 64-bit id at bytes 4-12. The stamp is at
-    bytes 12-16 in both layouts when the upper 32 bits are zero.
+    Layout matches python-miio Message: unknown at bytes 4-8, device id
+    at bytes 8-12, timestamp at bytes 12-16.
     """
     if len(packet) < 32 or packet[:2] != b'\x21\x31':
         return None
-    want = int(did)
-    wide = struct.unpack('>Q', packet[4:12])[0]
-    narrow = struct.unpack('>I', packet[8:12])[0]
-    stamp = struct.unpack('>I', packet[12:16])[0]
-    if wide == want:
-        return wide, stamp
-    if narrow == (want & 0xFFFFFFFF) and (wide >> 32) == 0:
-        return narrow, stamp
-    return None
+    length = struct.unpack('>H', packet[2:4])[0]
+    if length < 32:
+        return None
+    return bytes(packet[8:12]), struct.unpack('>I', packet[12:16])[0]
 
 
-def command_stamp(hello_stamp: int, attempt: int) -> int:
-    """Return a device timestamp strictly newer than the hello."""
+def hello_matches(device_id: bytes, did: str) -> bool:
+    """True when the hello id is the cloud did, or its lower 32 bits."""
+    got = struct.unpack('>I', device_id)[0]
+    return got == (int(did) & 0xFFFFFFFF)
+
+
+def command_stamp(hello_stamp: int, attempt: int = 0) -> int:
+    """Return the timestamp python-miio sends: handshake time plus 1s."""
     return (hello_stamp + 1 + attempt) & 0xFFFFFFFF
 
 
@@ -154,60 +157,100 @@ async def _recv(loop, sock, deadline: float):
         loop.sock_recvfrom(sock, 4096), timeout=remain)
 
 
+async def _handshake(loop, sock, did: str, address: str, timeout: float):
+    """Send the classic hello and return device id, stamp, and peer."""
+    broadcast = address == '255.255.255.255'
+    deadline = loop.time() + timeout
+    await loop.sock_sendto(sock, _HELLO, (address, OT_PORT))
+    fallback = None
+    while loop.time() < deadline:
+        try:
+            data, addr = await _recv(loop, sock, deadline)
+        except asyncio.TimeoutError:
+            break
+        ident = hello_identity(data)
+        if not ident:
+            continue
+        device_id, stamp = ident
+        if hello_matches(device_id, did):
+            return device_id, stamp, addr[0]
+        if not broadcast and fallback is None:
+            # Unicast: python-miio keeps the id the device announced.
+            fallback = (device_id, stamp, addr[0])
+    if fallback:
+        return fallback
+    raise TimeoutError('miIO hello timeout')
+
+
+async def _await_reply(
+    loop, sock, token: str, msg_id: int, peer: str, timeout: float
+):
+    """Return the decrypted reply for msg_id, or None on timeout."""
+    deadline = loop.time() + timeout
+    bad_token = 0
+    while loop.time() < deadline:
+        try:
+            data, addr = await _recv(loop, sock, deadline)
+        except asyncio.TimeoutError:
+            break
+        if addr[0] != peer or len(data) <= 32:
+            continue
+        try:
+            reply = decrypt_miio_packet(token, data)
+        except (ValueError, json.JSONDecodeError):
+            bad_token += 1
+            continue
+        if reply.get('id') == msg_id:
+            return reply, bad_token
+    return None, bad_token
+
+
 async def _rpc_to(
     did: str, token: str, method: str, params: Any,
     address: str, timeout: float
 ) -> dict:
-    """Hello the device, then send one miIO method to its real address."""
+    """Handshake, then send one miIO method the way python-miio does."""
     loop = asyncio.get_running_loop()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         sock.bind(('0.0.0.0', 0))
         sock.setblocking(False)
-        virtual_did = secrets.randbits(63)
-        await loop.sock_sendto(sock, _probe(virtual_did), (address, OT_PORT))
-        hello_deadline = loop.time() + min(timeout, 3.0)
-        found: Optional[tuple[int, int, str]] = None
-        while loop.time() < hello_deadline:
+        window = min(5.0, timeout)
+        device_id = None
+        hello_stamp = 0
+        peer = address
+        for _ in range(_RETRY):
             try:
-                data, addr = await _recv(loop, sock, hello_deadline)
-            except asyncio.TimeoutError:
+                device_id, hello_stamp, peer = await _handshake(
+                    loop, sock, did, address, window)
                 break
-            ident = hello_identity(data, did)
-            if ident:
-                found = (ident[0], ident[1], addr[0])
-                break
-        if found is None:
+            except TimeoutError:
+                continue
+        if device_id is None:
             raise TimeoutError('miIO hello timeout')
-        header_did, hello_stamp, peer = found
-        # The command needs its own window. Sharing the hello deadline
-        # made the request expire as soon as discovery finished.
-        msg_id = secrets.randbelow(0x7FFFFFFF) + 1
-        payload = {'id': msg_id, 'method': method, 'params': params}
+        msg_id = 1
         bad_token = 0
-        for attempt in range(3):
+        if params is None:
+            params = []
+        for attempt in range(_RETRY):
+            payload = {'id': msg_id, 'method': method, 'params': params}
             packet = build_miio_packet(
-                str(header_did), token, payload,
-                command_stamp(hello_stamp, attempt))
+                device_id, token, payload,
+                command_stamp(hello_stamp))
             await loop.sock_sendto(sock, packet, (peer, OT_PORT))
-            # Retry with a newer stamp instead of waiting out the
-            # full timeout on a packet the device ignored.
-            call_deadline = loop.time() + min(4.0, timeout)
-            while loop.time() < call_deadline:
-                try:
-                    data, addr = await _recv(loop, sock, call_deadline)
-                except asyncio.TimeoutError:
-                    break
-                if addr[0] != peer or len(data) <= 32:
-                    continue
-                try:
-                    reply = decrypt_miio_packet(token, data)
-                except (ValueError, json.JSONDecodeError):
-                    bad_token += 1
-                    continue
-                if reply.get('id') == msg_id:
-                    return reply
+            reply, rejects = await _await_reply(
+                loop, sock, token, msg_id, peer, window)
+            bad_token += rejects
+            if reply is not None:
+                return reply
+            # python-miio retries with id += 100 and a fresh handshake.
+            msg_id += 100
+            try:
+                device_id, hello_stamp, peer = await _handshake(
+                    loop, sock, did, peer, window)
+            except TimeoutError:
+                hello_stamp = command_stamp(hello_stamp, attempt)
         if bad_token:
             raise MIoTClientError(
                 'the remote answered but the device token was rejected. '

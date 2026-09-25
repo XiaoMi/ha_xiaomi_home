@@ -860,12 +860,16 @@ class MIoTClient:
         """Send a legacy miIO method to a profile device.
 
         Cloud spec actions cannot carry miIO.ir_learn / miIO.ir_play.
-        Use the LAN service when it is up, otherwise call the device
-        directly. A central gateway or cloud control mode turns the LAN
-        service off, but the remote still answers on UDP 54321.
+        Infrared remotes speak classic miIO (python-miio), so they skip
+        the LAN service. Other profile devices use that service when it
+        is up, then fall back to a direct UDP call.
         """
+        info = self._device_list_cache.get(did) or {}
+        cloud = self._device_list_cloud.get(did) or {}
+        model = info.get('model') or cloud.get('model')
         if (
-            self._ctrl_mode == CtrlMode.AUTO
+            model not in IR_REMOTE_MODELS
+            and self._ctrl_mode == CtrlMode.AUTO
             and self._miot_lan.init_done
         ):
             lan_info = self._device_list_lan.get(did) or {}
@@ -877,8 +881,6 @@ class MIoTClient:
                 except MIoTLanError as err:
                     _LOGGER.info(
                         'lan miio failed, try direct, %s, %s', did, err)
-        info = self._device_list_cache.get(did) or {}
-        cloud = self._device_list_cloud.get(did) or {}
         token = info.get('token') or cloud.get('token')
         ip = info.get('local_ip') or cloud.get('local_ip')
         return await miio_rpc_async(

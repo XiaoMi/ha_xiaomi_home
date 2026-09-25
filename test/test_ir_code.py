@@ -48,17 +48,20 @@ def test_inline_and_stored_commands():
 @pytest.mark.github
 def test_miio_hello_and_stamp():
     import struct
-    from miot.miio_rpc import command_stamp, hello_identity
+    from miot.miio_rpc import command_stamp, hello_identity, hello_matches
 
-    # Classic miIO hello: 32-bit device id, upper 32 bits zero.
+    # Classic miIO hello: 32-bit device id at bytes 8-12.
     packet = bytearray(32)
     packet[:2] = b'\x21\x31'
     struct.pack_into('>H', packet, 2, 32)
     struct.pack_into('>I', packet, 8, 12345)
     struct.pack_into('>I', packet, 12, 100)
-    assert hello_identity(bytes(packet), '12345') == (12345, 100)
-    assert hello_identity(bytes(packet), '999') is None
-    assert command_stamp(100, 0) == 101
+    device_id, stamp = hello_identity(bytes(packet))
+    assert device_id == struct.pack('>I', 12345)
+    assert stamp == 100
+    assert hello_matches(device_id, '12345')
+    assert hello_identity(b'') is None
+    assert command_stamp(100) == 101
     assert command_stamp(100, 2) == 103
 
 
@@ -72,7 +75,11 @@ def test_miio_packet_roundtrip():
         'method': 'miIO.ir_read',
         'params': {'key': '1000000'},
     }
-    packet = build_miio_packet('12345', token, payload, 1700000000)
+    import struct
+    device_id = struct.pack('>I', 12345)
+    packet = build_miio_packet(device_id, token, payload, 1700000000)
+    assert packet[4:8] == b'\x00\x00\x00\x00'
+    assert packet[8:12] == device_id
     assert decrypt_miio_packet(token, packet) == payload
 
 
