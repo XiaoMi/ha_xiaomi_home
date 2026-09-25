@@ -46,6 +46,16 @@ def test_inline_and_stored_commands():
 
 
 @pytest.mark.github
+def test_ir_remote_urn_without_spec():
+    from miot.const import IR_REMOTE_STUB_URN, ir_remote_urn
+
+    assert ir_remote_urn('chuangmi.ir.v2', None) == IR_REMOTE_STUB_URN
+    assert ir_remote_urn('chuangmi.ir.v2', '') == IR_REMOTE_STUB_URN
+    assert ir_remote_urn('chuangmi.ir.v2', ' urn:real ') == 'urn:real'
+    assert ir_remote_urn('chuangmi.plug.m1', None) is None
+
+
+@pytest.mark.github
 def test_pronto_to_raw():
     from miot.ir_code import parse_inline_command, pronto_to_raw
 

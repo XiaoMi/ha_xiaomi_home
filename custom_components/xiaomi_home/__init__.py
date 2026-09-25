@@ -61,7 +61,7 @@ from .miot.miot_spec import (
     MIoTSpecInstance, MIoTSpecParser, MIoTSpecService)
 from .miot.const import (
     DEFAULT_INTEGRATION_LANGUAGE, DOMAIN, IR_REMOTE_MODELS,
-    SUPPORTED_PLATFORMS)
+    IR_REMOTE_STUB_URN, SUPPORTED_PLATFORMS)
 from .miot.miot_error import MIoTOauthError
 from .miot.miot_device import MIoTDevice, MIoTEntityData
 from .miot.miot_client import MIoTClient, get_miot_instance_async
@@ -182,7 +182,16 @@ async def async_setup_entry(
                 registry=er, config_entry_id=entry_id)}
         migrate_failed: int = 0
         for did, info in miot_client.device_list.items():
-            spec_instance = await spec_parser.parse(urn=info['urn'])
+            urn = info.get('urn')
+            # The universal remote has no published spec. Skip the
+            # download so a missing spec_type cannot drop the device.
+            if (
+                info.get('model') in IR_REMOTE_MODELS
+                and urn in (None, '', IR_REMOTE_STUB_URN)
+            ):
+                spec_instance = None
+            else:
+                spec_instance = await spec_parser.parse(urn=urn)
             if not isinstance(spec_instance, MIoTSpecInstance):
                 if info.get('model') not in IR_REMOTE_MODELS:
                     _LOGGER.error(
@@ -191,9 +200,7 @@ async def async_setup_entry(
                 _LOGGER.info(
                     'use stub spec for infrared remote, %s', did)
                 spec_instance = MIoTSpecInstance(
-                    urn=info.get('urn') or (
-                        'urn:miot-spec-v2:device:remote-control:'
-                        '0000A021:chuangmi-v2:1'),
+                    urn=IR_REMOTE_STUB_URN,
                     name='remote-control',
                     description='Infrared remote control',
                     description_trans='Infrared remote control')

@@ -45,6 +45,8 @@ off Xiaomi or its affiliates' products.
 
 Constants.
 """
+from typing import Optional
+
 DOMAIN: str = 'xiaomi_home'
 DEFAULT_NAME: str = 'Xiaomi Home'
 
@@ -90,9 +92,23 @@ SUPPORTED_PLATFORMS: list = [
 ]
 
 # Profile devices controlled with legacy miIO methods over LAN.
+# They often have no spec_type in the cloud device list.
 IR_REMOTE_MODELS: list = [
     'chuangmi.ir.v2',
 ]
+IR_REMOTE_STUB_URN: str = (
+    'urn:miot-spec-v2:device:remote-control:0000A021:chuangmi-v2:1')
+
+
+def ir_remote_urn(
+    model: Optional[str], urn: Optional[str]
+) -> Optional[str]:
+    """Return a spec URN, or a stub URN for the universal IR remote."""
+    if isinstance(urn, str) and urn.strip():
+        return urn.strip()
+    if model in IR_REMOTE_MODELS:
+        return IR_REMOTE_STUB_URN
+    return None
 
 UNSUPPORTED_MODELS: list = [
     'era.airp.cwb03',
