@@ -76,36 +76,22 @@ async def async_setup_entry(
 
 class DeviceTracker(MIoTServiceEntity, TrackerEntity):
     """Tracker entities for Xiaomi Home."""
-    _prop_battery_level: Optional[MIoTSpecProperty]
     _prop_latitude: Optional[MIoTSpecProperty]
     _prop_longitude: Optional[MIoTSpecProperty]
-    _prop_area_id: Optional[MIoTSpecProperty]
 
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
         super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._prop_battery_level = None
         self._prop_latitude = None
         self._prop_longitude = None
-        self._prop_area_id = None
 
-        # properties
+        # Battery and area name are separate sensors. TrackerEntity no
+        # longer accepts battery_level or location_name.
         for prop in entity_data.props:
-            if prop.name == 'battery-level':
-                self._prop_battery_level = prop
-            elif prop.name == 'latitude':
+            if prop.name == 'latitude':
                 self._prop_latitude = prop
             elif prop.name == 'longitude':
                 self._prop_longitude = prop
-            elif prop.name == 'area-id':
-                self._prop_area_id = prop
-
-    @property
-    def battery_level(self) -> Optional[int]:
-        """The battery level of the device."""
-        return None if (self._prop_battery_level
-                        is None) else self.get_prop_value(
-                            prop=self._prop_battery_level)
 
     @property
     def latitude(self) -> Optional[float]:
@@ -118,9 +104,3 @@ class DeviceTracker(MIoTServiceEntity, TrackerEntity):
         """The longitude coordinate of the device."""
         return None if self._prop_longitude is None else self.get_prop_value(
             prop=self._prop_longitude)
-
-    @property
-    def location_name(self) -> Optional[str]:
-        """The location name of the device."""
-        return None if self._prop_area_id is None else self.get_prop_value(
-            prop=self._prop_area_id)
