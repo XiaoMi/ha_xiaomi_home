@@ -65,6 +65,7 @@ from .const import (
     MIHOME_CERT_EXPIRE_MARGIN, NETWORK_REFRESH_INTERVAL,
     OAUTH2_CLIENT_ID, SUPPORT_CENTRAL_GATEWAY_CTRL,
     DEFAULT_COVER_DEAD_ZONE_WIDTH, IR_REMOTE_MODELS)
+from .miio_rpc import miio_rpc_async
 from .miot_cloud import MIoTHttpClient, MIoTOauthClient
 from .miot_error import MIoTClientError, MIoTErrorCode, MIoTLanError
 from .miot_mips import (
@@ -856,29 +857,33 @@ class MIoTClient:
         self, did: str, method: str, params: Any,
         timeout_ms: int = 10000
     ) -> dict:
-        """Send a legacy miIO method over LAN.
+        """Send a legacy miIO method to a profile device.
 
-        Profile devices such as chuangmi.ir.v2 have no MIoT-Spec-V2
-        action, so cloud control cannot carry these methods.
+        Cloud spec actions cannot carry miIO.ir_learn / miIO.ir_play.
+        Use the LAN service when it is up, otherwise call the device
+        directly. A central gateway or cloud control mode turns the LAN
+        service off, but the remote still answers on UDP 54321.
         """
         if (
-            self._ctrl_mode != CtrlMode.AUTO
-            or not self._miot_lan.init_done
+            self._ctrl_mode == CtrlMode.AUTO
+            and self._miot_lan.init_done
         ):
-            raise MIoTClientError(
-                'LAN control is unavailable. Enable LAN control and keep '
-                'Home Assistant on the same network as the remote.')
-        lan_info = self._device_list_lan.get(did) or {}
-        if not lan_info.get('online', False):
-            raise MIoTClientError(
-                'remote is not discovered on the LAN. Enable LAN control '
-                'and keep Home Assistant on the same network.')
-        try:
-            return await self._miot_lan.call_async(
-                did=did, method=method, params=params,
-                timeout_ms=timeout_ms)
-        except MIoTLanError as err:
-            raise MIoTClientError(str(err.message)) from err
+            lan_info = self._device_list_lan.get(did) or {}
+            if lan_info.get('online', False):
+                try:
+                    return await self._miot_lan.call_async(
+                        did=did, method=method, params=params,
+                        timeout_ms=timeout_ms)
+                except MIoTLanError as err:
+                    _LOGGER.info(
+                        'lan miio failed, try direct, %s, %s', did, err)
+        info = self._device_list_cache.get(did) or {}
+        cloud = self._device_list_cloud.get(did) or {}
+        token = info.get('token') or cloud.get('token')
+        ip = info.get('local_ip') or cloud.get('local_ip')
+        return await miio_rpc_async(
+            did=did, token=token, method=method, params=params,
+            ip=ip, timeout_ms=timeout_ms)
 
     def sub_prop(
         self, did: str, handler: Callable[[dict, Any], None],

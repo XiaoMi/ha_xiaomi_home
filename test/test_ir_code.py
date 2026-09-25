@@ -46,6 +46,20 @@ def test_inline_and_stored_commands():
 
 
 @pytest.mark.github
+def test_miio_packet_roundtrip():
+    from miot.miio_rpc import build_miio_packet, decrypt_miio_packet
+
+    token = '00112233445566778899aabbccddeeff'
+    payload = {
+        'id': 7,
+        'method': 'miIO.ir_read',
+        'params': {'key': '1000000'},
+    }
+    packet = build_miio_packet('12345', token, payload, 1700000000)
+    assert decrypt_miio_packet(token, packet) == payload
+
+
+@pytest.mark.github
 def test_ir_remote_urn_without_spec():
     from miot.const import IR_REMOTE_STUB_URN, ir_remote_urn
 

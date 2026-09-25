@@ -85,7 +85,7 @@ Xiaomi Home Integration and the affiliated cloud interface is provided by Xiaomi
 
 - Does Xiaomi Home Integration support all Xiaomi smart devices?
 
-  Xiaomi Home Integration currently supports most categories of the smart device. Only a few categories are not supported. They are Bluetooth device, infrared device and virtual device. The Xiaomi universal remote `chuangmi.ir.v2` is the exception: it is added as a `remote` entity. It has no MIoT-Spec-V2, so after installing this version open the integration options and update the device list once; otherwise the remote stays out of the imported list. Learn, send and delete use the same actions as the Broadlink integration, and codes are stored locally. Commands are sent with local LAN control. Enable LAN control and keep Home Assistant on the same network as the remote. A central hub gateway disables LAN control, and the remote cannot be used in that case.
+  Xiaomi Home Integration currently supports most categories of the smart device. Only a few categories are not supported. They are Bluetooth device, infrared device and virtual device. The Xiaomi universal remote `chuangmi.ir.v2` is the exception: it is added as a `remote` entity. It has no MIoT-Spec-V2, so after installing this version open the integration options and update the device list once; otherwise the remote stays out of the imported list. Learn, send and delete use the same actions as the Broadlink integration, and codes are stored locally. Commands are sent directly to the remote on the local network (UDP 54321) and do not require the integration LAN-control switch. Home Assistant must be on the same network as the remote. If Home Assistant runs in Docker, use host network.
 
   ```yaml
   action: remote.learn_command
