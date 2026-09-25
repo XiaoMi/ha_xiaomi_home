@@ -216,6 +216,9 @@ async def async_setup_entry(
                 if not device.entity_list.get('remote'):
                     device.append_entity(MIoTEntityData(
                         platform='remote', spec=device.spec_instance))
+                if not device.entity_list.get('infrared'):
+                    device.append_entity(MIoTEntityData(
+                        platform='infrared', spec=device.spec_instance))
             # Migrate the unique_id of the entities registered by a previous
             # version of the integration
             for entities in device.entity_list.values():

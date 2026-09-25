@@ -168,6 +168,47 @@ def pronto_to_raw(pronto: str, repeats: int = 1) -> tuple[str, int]:
     return base64.b64encode(signal).decode(), int(round(pronto_data.frequency))
 
 
+def timings_to_chuangmi(
+    timings: list, frequency: int = DEFAULT_FREQUENCY
+) -> tuple[str, int]:
+    """Convert signed microsecond timings into a chuangmi code.
+
+    Positive values are marks and negative values are spaces. Older
+    infrared-protocols builds yield Timing objects with high_us/low_us.
+    """
+    signed: list[int] = []
+    for item in timings:
+        if isinstance(item, int):
+            signed.append(item)
+            continue
+        signed.append(int(item.high_us))
+        low = int(getattr(item, 'low_us', 0))
+        if low:
+            signed.append(-low)
+    pairs = []
+    index = 0
+    while index < len(signed):
+        pulse = abs(signed[index])
+        gap = abs(signed[index + 1]) if index + 1 < len(signed) else 0
+        pairs.append((pulse, gap))
+        index += 2
+    if not pairs:
+        raise ValueError('infrared command has no timings')
+    times = sorted({value for pair in pairs for value in pair})
+    if len(times) > 16:
+        raise ValueError('infrared command has too many distinct times')
+    times_map = {item: idx for idx, item in enumerate(times)}
+    signal = ChuangmiIrSignal.build({
+        'times_index': times + [0] * (16 - len(times)),
+        'edge_pairs': [
+            {'pulse': times_map[pulse], 'gap': times_map[gap]}
+            for pulse, gap in pairs
+        ],
+    })
+    freq = frequency if frequency and frequency > 0 else DEFAULT_FREQUENCY
+    return base64.b64encode(signal).decode(), int(freq)
+
+
 def parse_inline_command(command: str) -> Optional[tuple[str, int]]:
     """Parse a raw, b64 or Pronto command.
 

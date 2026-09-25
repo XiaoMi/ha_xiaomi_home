@@ -78,6 +78,7 @@ SUPPORTED_PLATFORMS: list = [
     'event',
     'fan',
     'humidifier',
+    'infrared',
     'light',
     'media_player',
     'notify',

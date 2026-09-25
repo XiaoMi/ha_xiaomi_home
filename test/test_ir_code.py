@@ -107,3 +107,14 @@ def test_pronto_to_raw():
     with pytest.raises(ValueError):
         parse_inline_command('b64:')
     assert parse_inline_command('power') is None
+
+
+@pytest.mark.github
+def test_timings_to_chuangmi():
+    from miot.ir_code import timings_to_chuangmi
+
+    code, freq = timings_to_chuangmi([9000, -4500, 560, -560], 38000)
+    assert code
+    assert freq == 38000
+    with pytest.raises(ValueError):
+        timings_to_chuangmi([])

@@ -111,8 +111,11 @@ class XiaomiRemote(MIoTServiceEntity, RemoteEntity):
         """Initialize the remote."""
         super().__init__(miot_device=miot_device, entity_data=entity_data)
         self._attr_name = None
+        self._attr_icon = 'mdi:wifi'
         self._attr_is_on = True
-        self._attr_assumed_state = True
+        # A known state renders one toggle in Controls. assumed_state
+        # would show separate on and off buttons instead.
+        self._attr_assumed_state = False
         self._attr_supported_features = (
             RemoteEntityFeature.LEARN_COMMAND
             | RemoteEntityFeature.DELETE_COMMAND)
