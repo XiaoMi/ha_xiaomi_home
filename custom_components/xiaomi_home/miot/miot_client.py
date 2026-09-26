@@ -855,7 +855,7 @@ class MIoTClient:
 
     async def call_miio_async(
         self, did: str, method: str, params: Any,
-        timeout_ms: int = 10000
+        timeout_ms: int = 10000, retry_count: int = 3
     ) -> dict:
         """Send a legacy miIO method to a profile device.
 
@@ -885,7 +885,7 @@ class MIoTClient:
         ip = info.get('local_ip') or cloud.get('local_ip')
         return await miio_rpc_async(
             did=did, token=token, method=method, params=params,
-            ip=ip, timeout_ms=timeout_ms)
+            ip=ip, timeout_ms=timeout_ms, retry_count=retry_count)
 
     def sub_prop(
         self, did: str, handler: Callable[[dict, Any], None],

@@ -67,6 +67,9 @@ _HEADER_LEN = 32
 _HELLO = bytes.fromhex(
     '21310020ffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 _RETRY = 3
+_SESSION_TTL = 20.0
+# did -> (device_id, stamp, peer, token, msg_id, updated)
+_sessions: dict[str, tuple] = {}
 
 
 def _md5(data: bytes) -> bytes:
@@ -201,13 +204,33 @@ async def _await_reply(
             bad_token += 1
             continue
         if reply.get('id') == msg_id:
-            return reply, bad_token
-    return None, bad_token
+            stamp = struct.unpack('>I', data[12:16])[0]
+            return reply, bad_token, stamp
+    return None, bad_token, 0
+
+
+def _remember_session(
+    did: str, token: str, device_id: bytes, stamp: int,
+    peer: str, msg_id: int, now: float
+) -> None:
+    _sessions[did] = (device_id, stamp, peer, token, msg_id, now)
+
+
+async def _send_once(
+    loop, sock, token: str, device_id: bytes, stamp: int,
+    peer: str, msg_id: int, method: str, params: Any, timeout: float
+):
+    """Send one command on an existing handshake."""
+    payload = {'id': msg_id, 'method': method, 'params': params}
+    packet = build_miio_packet(
+        device_id, token, payload, command_stamp(stamp))
+    await loop.sock_sendto(sock, packet, (peer, OT_PORT))
+    return await _await_reply(loop, sock, token, msg_id, peer, timeout)
 
 
 async def _rpc_to(
     did: str, token: str, method: str, params: Any,
-    address: str, timeout: float
+    address: str, timeout: float, retry_count: int = _RETRY
 ) -> dict:
     """Handshake, then send one miIO method the way python-miio does."""
     loop = asyncio.get_running_loop()
@@ -217,32 +240,53 @@ async def _rpc_to(
         sock.bind(('0.0.0.0', 0))
         sock.setblocking(False)
         window = min(5.0, timeout)
+        if params is None:
+            params = []
         device_id = None
         hello_stamp = 0
         peer = address
-        for _ in range(_RETRY):
-            try:
-                device_id, hello_stamp, peer = await _handshake(
-                    loop, sock, did, address, window)
-                break
-            except TimeoutError:
-                continue
-        if device_id is None:
-            raise TimeoutError('miIO hello timeout')
         msg_id = 1
         bad_token = 0
-        if params is None:
-            params = []
-        for attempt in range(_RETRY):
-            payload = {'id': msg_id, 'method': method, 'params': params}
-            packet = build_miio_packet(
-                device_id, token, payload,
-                command_stamp(hello_stamp))
-            await loop.sock_sendto(sock, packet, (peer, OT_PORT))
-            reply, rejects = await _await_reply(
-                loop, sock, token, msg_id, peer, window)
+        cached = _sessions.get(did)
+        session_ok = (
+            cached
+            and cached[3] == token
+            and loop.time() - cached[5] < _SESSION_TTL)
+        if session_ok:
+            device_id, hello_stamp, peer = cached[0], cached[1], cached[2]
+            msg_id = cached[4] + 1
+            if msg_id >= 9999:
+                msg_id = 1
+            reply, rejects, reply_stamp = await _send_once(
+                loop, sock, token, device_id, hello_stamp, peer,
+                msg_id, method, params, window)
             bad_token += rejects
             if reply is not None:
+                _remember_session(
+                    did, token, device_id, reply_stamp or hello_stamp,
+                    peer, msg_id, loop.time())
+                return reply
+            _sessions.pop(did, None)
+            device_id = None
+        if device_id is None:
+            for _ in range(max(retry_count, 1)):
+                try:
+                    device_id, hello_stamp, peer = await _handshake(
+                        loop, sock, did, address, window)
+                    break
+                except TimeoutError:
+                    continue
+        if device_id is None:
+            raise TimeoutError('miIO hello timeout')
+        for attempt in range(max(retry_count, 1)):
+            reply, rejects, reply_stamp = await _send_once(
+                loop, sock, token, device_id, hello_stamp, peer,
+                msg_id, method, params, window)
+            bad_token += rejects
+            if reply is not None:
+                _remember_session(
+                    did, token, device_id, reply_stamp or hello_stamp,
+                    peer, msg_id, loop.time())
                 return reply
             # python-miio retries with id += 100 and a fresh handshake.
             msg_id += 100
@@ -262,7 +306,8 @@ async def _rpc_to(
 
 async def miio_rpc_async(
     did: str, token: str, method: str, params: Any,
-    ip: Optional[str] = None, timeout_ms: int = 10000
+    ip: Optional[str] = None, timeout_ms: int = 10000,
+    retry_count: int = _RETRY
 ) -> dict:
     """Send a miIO method without the integration LAN-control service.
 
@@ -284,7 +329,7 @@ async def miio_rpc_async(
     for address in targets:
         try:
             return await _rpc_to(
-                did, token, method, params, address, timeout)
+                did, token, method, params, address, timeout, retry_count)
         except (TimeoutError, OSError) as err:
             last_error = err
     raise MIoTClientError(

@@ -82,6 +82,10 @@ from .miot.miot_error import MIoTClientError
 _LOGGER = logging.getLogger(__name__)
 
 _LEARN_TIMEOUT = 30
+# Poll often. A 1s sleep left Home Assistant in the learning state
+# after the remote had already finished capturing.
+_LEARN_POLL = 0.2
+_LEARN_READ_TIMEOUT_MS = 800
 _NOTIFY_TITLE = 'Xiaomi Home'
 
 
@@ -252,13 +256,24 @@ class XiaomiRemote(MIoTServiceEntity, RemoteEntity):
         try:
             ensure_miio_ok(await self._call(
                 'miIO.ir_learn', {'key': LEARN_SLOT}))
-            deadline = asyncio.get_running_loop().time() + timeout
-            while asyncio.get_running_loop().time() < deadline:
-                await asyncio.sleep(1)
-                code = ir_code_from_read(await self._call(
-                    'miIO.ir_read', {'key': LEARN_SLOT}))
-                if code:
-                    return code
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + timeout
+            while loop.time() < deadline:
+                try:
+                    result = await self._call(
+                        'miIO.ir_read', {'key': LEARN_SLOT},
+                        timeout_ms=_LEARN_READ_TIMEOUT_MS, retry_count=1)
+                except HomeAssistantError:
+                    # The remote ignores reads until capture finishes.
+                    result = None
+                if result is not None:
+                    code = ir_code_from_read(result)
+                    if code:
+                        return code
+                remain = deadline - loop.time()
+                if remain <= 0:
+                    break
+                await asyncio.sleep(min(_LEARN_POLL, remain))
             raise TimeoutError('learn timeout')
         finally:
             persistent_notification.async_dismiss(
@@ -268,10 +283,14 @@ class XiaomiRemote(MIoTServiceEntity, RemoteEntity):
         ensure_miio_ok(await self._call(
             'miIO.ir_play', {'freq': freq, 'code': code}))
 
-    async def _call(self, method: str, params: dict) -> dict:
+    async def _call(
+        self, method: str, params: dict,
+        timeout_ms: int = 10000, retry_count: int = 3
+    ) -> dict:
         try:
             return await self.miot_device.miot_client.call_miio_async(
-                did=self.miot_device.did, method=method, params=params)
+                did=self.miot_device.did, method=method, params=params,
+                timeout_ms=timeout_ms, retry_count=retry_count)
         except MIoTClientError as err:
             raise HomeAssistantError(str(err)) from err
 
