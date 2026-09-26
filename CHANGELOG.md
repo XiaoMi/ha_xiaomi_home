@@ -1,4 +1,17 @@
 # CHANGELOG
+## v0.4.8
+### Added
+- Add the Xiaomi universal remote `chuangmi.ir.v2` as a `remote` entity. Learn, send and delete follow the Broadlink actions, and codes are stored locally.
+- Register the universal remote as an infrared emitter so it appears under Settings > Infrared on Home Assistant 2026.4 or newer.
+### Changed
+- The universal remote control in the device Controls section is a single toggle.
+- Learn polling reuses the miIO handshake and stops as soon as the remote has stored a code.
+### Fixed
+- Keep `chuangmi.ir.v2` when the cloud device list has no spec type.
+- Talk to the universal remote with classic miIO, without the integration LAN-control service.
+- Stop overriding the deprecated device tracker `location_name` and `battery_level` properties. Battery level and area name are sensors.
+- Use `UnitOfDensity` and `UnitOfRatio` instead of the deprecated concentration unit constants.
+
 ## v0.4.7
 ### Added
 - Add turkish language in multi_lang.json. [#1593](https://github.com/XiaoMi/ha_xiaomi_home/pull/1593)
