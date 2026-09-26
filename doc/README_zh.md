@@ -85,7 +85,25 @@ git checkout v1.0.0
 
 - 米家集成是否支持所有的小米米家设备？
 
-  米家集成目前支持大部分米家设备品类，但仍有一小部分设备品类（蓝牙、红外及虚拟设备）并不支持。
+  米家集成目前支持大部分米家设备品类，但仍有一小部分设备品类（蓝牙、红外及虚拟设备）并不支持。小米万能遥控器 `chuangmi.ir.v2` 是例外：它会添加为 `remote` 实体，并作为红外发射器出现在「设置 → 红外」。设备页「控制」里是一个开关。该设备没有 MIoT-Spec-V2，云端设备列表里通常也没有规格类型。安装此版本后，请到集成选项里更新一次设备列表，否则遥控器不会进入已导入列表。学习、发送和删除指令的用法与 Broadlink 集成相同，码值保存在本地。指令直接发到遥控器（UDP 54321），不依赖集成里的局域网控制开关，中枢网关也不会关掉这条通道。Home Assistant 必须和遥控器在同一局域网。如果 Home Assistant 跑在 Docker 里，请使用 host 网络。
+
+  ```yaml
+  action: remote.learn_command
+  target:
+    entity_id: remote.living_room_ir
+  data:
+    device: television
+    command: power
+
+  action: remote.send_command
+  target:
+    entity_id: remote.living_room_ir
+  data:
+    device: television
+    command: power
+  ```
+
+  原始码使用 `b64:` 前缀。以 `0000` 开头的 Pronto 十六进制码也可以直接发送。`alternative: true` 会保存两组码并轮流发送，与 Broadlink 相同。
 
 - 米家集成是否可以同时使用多个小米账号？
 

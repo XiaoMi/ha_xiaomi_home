@@ -61,8 +61,10 @@ from .common import calc_group_id
 from .const import (
     UNSUPPORTED_MODELS,
     DEFAULT_OAUTH2_API_HOST,
+    IR_REMOTE_MODELS,
     MIHOME_HTTP_API_TIMEOUT,
-    OAUTH2_AUTH_URL)
+    OAUTH2_AUTH_URL,
+    ir_remote_urn)
 from .miot_error import MIoTErrorCode, MIoTHttpError, MIoTOauthError
 
 _LOGGER = logging.getLogger(__name__)
@@ -560,16 +562,22 @@ class MIoTHttpClient:
         for device in res_obj.get('list', []) or []:
             did = device.get('did', None)
             name = device.get('name', None)
-            urn = device.get('spec_type', None)
+            spec_type = device.get('spec_type', None)
             model = device.get('model', None)
             if did is None or name is None:
                 _LOGGER.info(
                     'invalid device, cloud, %s', device)
                 continue
-            if urn is None or model is None:
+            urn = ir_remote_urn(model, spec_type)
+            if model is None or urn is None:
                 _LOGGER.info(
                     'missing the urn|model field, cloud, %s', device)
                 continue
+            if model in IR_REMOTE_MODELS and urn == ir_remote_urn(
+                    model, None):
+                _LOGGER.info(
+                    'keep infrared remote without spec, %s, %s',
+                    model, did)
             if did.startswith('miwifi.'):
                 # The miwifi.* routers defined SPEC functions, but none of them
                 # were implemented.
