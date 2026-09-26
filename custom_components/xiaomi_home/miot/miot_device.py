@@ -52,10 +52,6 @@ import logging
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_PARTS_PER_BILLION,
-    CONCENTRATION_PARTS_PER_MILLION,
     DEGREE,
     LIGHT_LUX,
     REVOLUTIONS_PER_MINUTE,
@@ -88,7 +84,11 @@ from .specs.specv2entity import (
     SPEC_DEVICE_TRANS_MAP,
     SPEC_EVENT_TRANS_MAP,
     SPEC_PROP_TRANS_MAP,
-    SPEC_SERVICE_TRANS_MAP
+    SPEC_SERVICE_TRANS_MAP,
+    UNIT_MG_M3,
+    UNIT_PPB,
+    UNIT_PPM,
+    UNIT_UG_M3,
 )
 from .common import slugify_name, slugify_did
 from .const import DOMAIN
@@ -798,10 +798,10 @@ class MIoTDevice:
             'celsius': UnitOfTemperature.CELSIUS,
             'fahrenheit': UnitOfTemperature.FAHRENHEIT,
             'kelvin': UnitOfTemperature.KELVIN,
-            'μg/m3': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-            'mg/m3': CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
-            'ppm': CONCENTRATION_PARTS_PER_MILLION,
-            'ppb': CONCENTRATION_PARTS_PER_BILLION,
+            'μg/m3': UNIT_UG_M3,
+            'mg/m3': UNIT_MG_M3,
+            'ppm': UNIT_PPM,
+            'ppb': UNIT_PPB,
             'lux': LIGHT_LUX,
             'pascal': UnitOfPressure.PA,
             'kilopascal': UnitOfPressure.KPA,

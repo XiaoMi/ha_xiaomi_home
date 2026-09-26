@@ -65,6 +65,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 
 # pylint: disable=relative-beyond-top-level
+from .const import IR_REMOTE_MODELS
 from .miot_error import MIoTError, MIoTLanError, MIoTErrorCode
 from .miot_network import InterfaceStatus, MIoTNetwork, NetworkInfo
 from .miot_mdns import MipsService, MipsServiceState
@@ -145,6 +146,7 @@ class _MIoTLanDevice:
     token: bytes
     cipher: Cipher
     ip: Optional[str]
+    raw_rpc: bool
 
     offset: int
     subscribed: bool
@@ -169,11 +171,13 @@ class _MIoTLanDevice:
         manager: 'MIoTLan',
         did: str,
         token: str,
-        ip: Optional[str] = None
+        ip: Optional[str] = None,
+        raw_rpc: bool = False
     ) -> None:
         self._manager: MIoTLan = manager
         self.did = did
         self.token = bytes.fromhex(token)
+        self.raw_rpc = raw_rpc
         aes_key: bytes = self.__md5(self.token)
         aex_iv: bytes = self.__md5(aes_key + self.token)
         self.cipher = Cipher(
@@ -877,6 +881,27 @@ class MIoTLan:
         raise MIoTError('Invalid result', MIoTErrorCode.CODE_INTERNAL_ERROR)
 
     @final
+    async def call_async(
+        self, did: str, method: str, params: Any,
+        timeout_ms: int = 10000
+    ) -> dict:
+        """Send a legacy miIO method to a LAN device."""
+        self.__assert_service_ready()
+        try:
+            result_obj = await self.__call_api_async(
+                did=did, msg={
+                    'method': method,
+                    'params': params
+                }, timeout_ms=timeout_ms)
+        except ValueError as err:
+            raise MIoTLanError(
+                str(err), MIoTErrorCode.CODE_LAN_UNAVAILABLE) from err
+        if not isinstance(result_obj, dict):
+            raise MIoTLanError(
+                'Invalid result', MIoTErrorCode.CODE_INTERNAL_ERROR)
+        return result_obj
+
+    @final
     async def get_dev_list_async(
         self, timeout_ms: int = 10000
     ) -> dict[str, dict]:
@@ -1089,14 +1114,16 @@ class MIoTLan:
             if not did.isdigit():
                 _LOGGER.info('invalid did, %s', did)
                 continue
-            if (
-                    'model' not in info
-                    or info['model'] in self._profile_models):
+            model = info.get('model')
+            raw_rpc = model in IR_REMOTE_MODELS
+            if model is None or (
+                    model in self._profile_models and not raw_rpc):
                 # Do not support the local control of
-                # Profile device for the time being
+                # Profile device for the time being.
+                # Infrared remotes stay registered for raw miIO RPC.
                 _LOGGER.info(
                     'model not support local ctrl, %s, %s',
-                    did, info.get('model'))
+                    did, model)
                 continue
             if did not in self._lan_devices:
                 if 'token' not in info:
@@ -1109,7 +1136,7 @@ class MIoTLan:
                     continue
                 self._lan_devices[did] = _MIoTLanDevice(
                     manager=self, did=did, token=info['token'],
-                    ip=info.get('ip', None))
+                    ip=info.get('ip', None), raw_rpc=raw_rpc)
             else:
                 self._lan_devices[did].update_info(info)
 
@@ -1239,11 +1266,16 @@ class MIoTLan:
         timestamp: int = struct.unpack('>I', data[12:16])[0]
         device.offset = int(time.time()) - timestamp
         # Keep alive if this is a probe
-        if data_len == self.OT_PROBE_LEN or device.subscribed:
-            device.keep_alive(ip=ip, if_name=if_name)
-        # Manage device subscribe status
         if (
-            self._enable_subscribe
+                data_len == self.OT_PROBE_LEN
+                or device.subscribed
+                or device.raw_rpc):
+            device.keep_alive(ip=ip, if_name=if_name)
+        # Manage device subscribe status. Raw miIO devices do not
+        # implement MIoT property subscription.
+        if (
+            not device.raw_rpc
+            and self._enable_subscribe
             and data_len == self.OT_PROBE_LEN
             and data[16:20] == b'MSUB'
             and data[24:27] == b'PUB'

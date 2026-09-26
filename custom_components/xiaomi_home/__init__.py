@@ -60,9 +60,10 @@ from .miot.miot_storage import (
 from .miot.miot_spec import (
     MIoTSpecInstance, MIoTSpecParser, MIoTSpecService)
 from .miot.const import (
-    DEFAULT_INTEGRATION_LANGUAGE, DOMAIN, SUPPORTED_PLATFORMS)
+    DEFAULT_INTEGRATION_LANGUAGE, DOMAIN, IR_REMOTE_MODELS,
+    IR_REMOTE_STUB_URN, SUPPORTED_PLATFORMS)
 from .miot.miot_error import MIoTOauthError
-from .miot.miot_device import MIoTDevice
+from .miot.miot_device import MIoTDevice, MIoTEntityData
 from .miot.miot_client import MIoTClient, get_miot_instance_async
 
 _LOGGER = logging.getLogger(__name__)
@@ -181,10 +182,28 @@ async def async_setup_entry(
                 registry=er, config_entry_id=entry_id)}
         migrate_failed: int = 0
         for did, info in miot_client.device_list.items():
-            spec_instance = await spec_parser.parse(urn=info['urn'])
+            urn = info.get('urn')
+            # The universal remote has no published spec. Skip the
+            # download so a missing spec_type cannot drop the device.
+            if (
+                info.get('model') in IR_REMOTE_MODELS
+                and urn in (None, '', IR_REMOTE_STUB_URN)
+            ):
+                spec_instance = None
+            else:
+                spec_instance = await spec_parser.parse(urn=urn)
             if not isinstance(spec_instance, MIoTSpecInstance):
-                _LOGGER.error('spec content is None, %s, %s', did, info)
-                continue
+                if info.get('model') not in IR_REMOTE_MODELS:
+                    _LOGGER.error(
+                        'spec content is None, %s, %s', did, info)
+                    continue
+                _LOGGER.info(
+                    'use stub spec for infrared remote, %s', did)
+                spec_instance = MIoTSpecInstance(
+                    urn=IR_REMOTE_STUB_URN,
+                    name='remote-control',
+                    description='Infrared remote control',
+                    description_trans='Infrared remote control')
             device: MIoTDevice = MIoTDevice(
                 miot_client=miot_client,
                 device_info={
@@ -193,6 +212,13 @@ async def async_setup_entry(
                 spec_instance=spec_instance)
             miot_devices.append(device)
             device.spec_transform()
+            if info.get('model') in IR_REMOTE_MODELS:
+                if not device.entity_list.get('remote'):
+                    device.append_entity(MIoTEntityData(
+                        platform='remote', spec=device.spec_instance))
+                if not device.entity_list.get('infrared'):
+                    device.append_entity(MIoTEntityData(
+                        platform='infrared', spec=device.spec_instance))
             # Migrate the unique_id of the entities registered by a previous
             # version of the integration
             for entities in device.entity_list.values():

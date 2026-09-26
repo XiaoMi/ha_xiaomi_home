@@ -64,9 +64,10 @@ from .const import (
     DEFAULT_CTRL_MODE, DEFAULT_INTEGRATION_LANGUAGE, DEFAULT_NICK_NAME, DOMAIN,
     MIHOME_CERT_EXPIRE_MARGIN, NETWORK_REFRESH_INTERVAL,
     OAUTH2_CLIENT_ID, SUPPORT_CENTRAL_GATEWAY_CTRL,
-    DEFAULT_COVER_DEAD_ZONE_WIDTH)
+    DEFAULT_COVER_DEAD_ZONE_WIDTH, IR_REMOTE_MODELS)
+from .miio_rpc import miio_rpc_async
 from .miot_cloud import MIoTHttpClient, MIoTOauthClient
-from .miot_error import MIoTClientError, MIoTErrorCode
+from .miot_error import MIoTClientError, MIoTErrorCode, MIoTLanError
 from .miot_mips import (
     MIoTDeviceState, MipsCloudClient, MipsDeviceState,
     MipsLocalClient)
@@ -77,6 +78,28 @@ from .miot_mdns import MipsService, MipsServiceState
 from .miot_i18n import MIoTI18n
 
 _LOGGER = logging.getLogger(__name__)
+
+_LAN_CONNECT_TYPES = (0, 8, 12, 23)
+
+
+def _lan_devices_from_cache(device_list: dict[str, dict]) -> dict:
+    """Devices that can be registered for local miIO control."""
+    devices: dict = {}
+    for did, info in device_list.items():
+        if 'token' not in info or 'connect_type' not in info:
+            continue
+        model = info.get('model')
+        if (
+            info['connect_type'] not in _LAN_CONNECT_TYPES
+            and model not in IR_REMOTE_MODELS
+        ):
+            continue
+        devices[did] = {
+            'token': info['token'],
+            'model': model,
+            'connect_type': info['connect_type']
+        }
+    return devices
 
 
 REFRESH_PROPS_DELAY = 0.2
@@ -830,6 +853,40 @@ class MIoTClient:
             'client action failed, %s.%d.%d', did, siid, aiid)
         return []
 
+    async def call_miio_async(
+        self, did: str, method: str, params: Any,
+        timeout_ms: int = 10000, retry_count: int = 3
+    ) -> dict:
+        """Send a legacy miIO method to a profile device.
+
+        Cloud spec actions cannot carry miIO.ir_learn / miIO.ir_play.
+        Infrared remotes speak classic miIO (python-miio), so they skip
+        the LAN service. Other profile devices use that service when it
+        is up, then fall back to a direct UDP call.
+        """
+        info = self._device_list_cache.get(did) or {}
+        cloud = self._device_list_cloud.get(did) or {}
+        model = info.get('model') or cloud.get('model')
+        if (
+            model not in IR_REMOTE_MODELS
+            and self._ctrl_mode == CtrlMode.AUTO
+            and self._miot_lan.init_done
+        ):
+            lan_info = self._device_list_lan.get(did) or {}
+            if lan_info.get('online', False):
+                try:
+                    return await self._miot_lan.call_async(
+                        did=did, method=method, params=params,
+                        timeout_ms=timeout_ms)
+                except MIoTLanError as err:
+                    _LOGGER.info(
+                        'lan miio failed, try direct, %s, %s', did, err)
+        token = info.get('token') or cloud.get('token')
+        ip = info.get('local_ip') or cloud.get('local_ip')
+        return await miio_rpc_async(
+            did=did, token=token, method=method, params=params,
+            ip=ip, timeout_ms=timeout_ms, retry_count=retry_count)
+
     def sub_prop(
         self, did: str, handler: Callable[[dict, Any], None],
         siid: Optional[int] = None, piid: Optional[int] = None,
@@ -1186,15 +1243,8 @@ class MIoTClient:
                 await self.__on_lan_device_state_changed(
                     did=did, state=info, ctx=None)
             _LOGGER.info('lan device list, %s', self._device_list_lan)
-            self._miot_lan.update_devices(devices={
-                did: {
-                    'token': info['token'],
-                    'model': info['model'],
-                    'connect_type': info['connect_type']}
-                for did, info in self._device_list_cache.items()
-                if 'token' in info and 'connect_type' in info
-                and info['connect_type'] in [0, 8, 12, 23]
-            })
+            self._miot_lan.update_devices(
+                devices=_lan_devices_from_cache(self._device_list_cache))
         else:
             for did, info in self._device_list_lan.items():
                 if not info.get('online', False):
@@ -1476,15 +1526,8 @@ class MIoTClient:
             self._ctrl_mode == CtrlMode.AUTO
             and self._miot_lan.init_done
         ):
-            self._miot_lan.update_devices(devices={
-                did: {
-                    'token': info['token'],
-                    'model': info['model'],
-                    'connect_type': info['connect_type']}
-                for did, info in self._device_list_cache.items()
-                if 'token' in info and 'connect_type' in info
-                and info['connect_type'] in [0, 8, 12, 23]
-            })
+            self._miot_lan.update_devices(
+                devices=_lan_devices_from_cache(self._device_list_cache))
 
         self.__request_show_devices_changed_notify()
 
