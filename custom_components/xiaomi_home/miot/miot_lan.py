@@ -52,6 +52,7 @@ import time
 import asyncio
 from dataclasses import dataclass
 from enum import Enum, auto
+import ipaddress
 import logging
 import random
 import secrets
@@ -315,6 +316,8 @@ class _MIoTLanDevice:
         _LOGGER.debug('miot lan device delete, %s', self.did)
 
     def update_info(self, info: dict) -> None:
+        if isinstance(info.get('ip'), str) and info['ip']:
+            self.ip = info['ip']
         if (
             'token' in info
             and len(info['token']) == 32
@@ -1098,6 +1101,10 @@ class MIoTLan:
                     'model not support local ctrl, %s, %s',
                     did, info.get('model'))
                 continue
+            ip = info.get('ip', None)
+            if_name = self.__get_if_name_by_ip(ip=ip)
+            device_info = info if not ip or if_name else {
+                key: value for key, value in info.items() if key != 'ip'}
             if did not in self._lan_devices:
                 if 'token' not in info:
                     _LOGGER.error(
@@ -1109,9 +1116,36 @@ class MIoTLan:
                     continue
                 self._lan_devices[did] = _MIoTLanDevice(
                     manager=self, did=did, token=info['token'],
-                    ip=info.get('ip', None))
+                    ip=device_info.get('ip', None))
             else:
-                self._lan_devices[did].update_info(info)
+                self._lan_devices[did].update_info(device_info)
+
+            if if_name:
+                self.ping(if_name=if_name, target_ip=ip)
+
+    def __get_if_name_by_ip(self, ip: Any) -> Optional[str]:
+        if not isinstance(ip, str):
+            return None
+        try:
+            target = ipaddress.IPv4Address(ip)
+        except ipaddress.AddressValueError:
+            _LOGGER.info('invalid device ip, %s', ip)
+            return None
+        for if_name in self._net_ifs:
+            info = self._network.network_info.get(if_name, None)
+            if not info:
+                continue
+            try:
+                network = ipaddress.IPv4Network(
+                    f'{info.ip}/{info.netmask}', strict=False)
+            except (ipaddress.AddressValueError, ipaddress.NetmaskValueError):
+                _LOGGER.error(
+                    'invalid network info, %s, %s, %s',
+                    if_name, info.ip, info.netmask)
+                continue
+            if target in network:
+                return if_name
+        return None
 
     def __delete_devices(self, devices: list[str]) -> None:
         for did in devices:
@@ -1357,6 +1391,12 @@ class MIoTLan:
         try:
             # Scan devices
             self.ping(if_name=None, target_ip='255.255.255.255')
+            for device in self._lan_devices.values():
+                if device.online or not device.ip:
+                    continue
+                if_name = self.__get_if_name_by_ip(ip=device.ip)
+                if if_name:
+                    self.ping(if_name=if_name, target_ip=device.ip)
         except Exception as err:  # pylint: disable=broad-exception-caught
             # Ignore any exceptions to avoid blocking the loop
             _LOGGER.error('ping device error, %s', err)

@@ -10,6 +10,42 @@ import pytest
 _LOGGER = logging.getLogger(__name__)
 
 
+@pytest.mark.github
+@pytest.mark.asyncio
+async def test_miot_cloud_get_device_local_ip(monkeypatch):
+    from miot.miot_cloud import MIoTHttpClient
+
+    miot_http = MIoTHttpClient(
+        cloud_server='cn', client_id='test-client', access_token='test-token')
+
+    async def mock_mihome_api_post_async(url_path: str, data: dict) -> dict:
+        assert url_path == '/app/v2/home/device_list_page'
+        assert data['dids'] == ['123456']
+        return {
+            'result': {
+                'list': [{
+                    'did': '123456',
+                    'name': 'Test Device',
+                    'spec_type': 'urn:miot-spec-v2:device:test:0000A000',
+                    'model': 'xiaomi.test.v1',
+                    'pid': 0,
+                    'isOnline': True,
+                    'localip': '192.168.1.2'
+                }],
+                'has_more': False
+            }
+        }
+
+    monkeypatch.setattr(
+        miot_http, '_MIoTHttpClient__mihome_api_post_async',
+        mock_mihome_api_post_async)
+    try:
+        devices = await miot_http.get_devices_with_dids_async(['123456'])
+        assert devices['123456']['local_ip'] == '192.168.1.2'
+    finally:
+        await miot_http.deinit_async()
+
+
 @pytest.mark.asyncio
 @pytest.mark.dependency()
 async def test_miot_oauth_async(

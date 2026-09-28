@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Unit test for miot_lan.py."""
 import logging
+from types import SimpleNamespace
 from typing import Any
+from unittest.mock import Mock, call
 import pytest
 import asyncio
 from zeroconf import IPVersion
@@ -9,7 +11,45 @@ from zeroconf.asyncio import AsyncZeroconf
 
 _LOGGER = logging.getLogger(__name__)
 
-# pylint: disable=import-outside-toplevel, unused-argument
+# pylint: disable=import-outside-toplevel, protected-access, unused-argument
+
+
+@pytest.mark.github
+def test_lan_unicast_discovery_uses_matching_interface():
+    from miot.miot_lan import MIoTLan
+    from miot.miot_network import NetworkInfo
+
+    miot_lan = object.__new__(MIoTLan)
+    miot_lan._net_ifs = {'br706', 'br709'}
+    miot_lan._network = SimpleNamespace(network_info={
+        'br706': NetworkInfo(
+            name='br706', ip='100.64.0.1', netmask='255.255.255.0',
+            net_seg='100.64.0.0'),
+        'br709': NetworkInfo(
+            name='br709', ip='100.70.0.91', netmask='255.255.255.248',
+            net_seg='100.70.0.88')
+    })
+    miot_lan._lan_devices = {
+        '123456': SimpleNamespace(
+            online=False, ip='100.70.0.93'),
+        '123457': SimpleNamespace(
+            online=True, ip='100.70.0.94')
+    }
+    miot_lan._scan_timer = None
+    miot_lan._last_scan_interval = None
+    miot_lan._internal_loop = SimpleNamespace(call_later=Mock())
+    miot_lan.ping = Mock()
+
+    assert miot_lan._MIoTLan__get_if_name_by_ip(
+        '100.70.0.93') == 'br709'
+    assert miot_lan._MIoTLan__get_if_name_by_ip('192.0.2.1') is None
+    assert miot_lan._MIoTLan__get_if_name_by_ip('invalid') is None
+
+    miot_lan._MIoTLan__scan_devices()
+    assert miot_lan.ping.call_args_list == [
+        call(if_name=None, target_ip='255.255.255.255'),
+        call(if_name='br709', target_ip='100.70.0.93')
+    ]
 
 
 @pytest.mark.parametrize('test_devices', [{

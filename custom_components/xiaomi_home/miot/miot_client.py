@@ -1195,7 +1195,8 @@ class MIoTClient:
                 did: {
                     'token': info['token'],
                     'model': info['model'],
-                    'connect_type': info['connect_type']}
+                    'connect_type': info['connect_type'],
+                    'ip': info.get('local_ip', None)}
                 for did, info in self._device_list_cache.items()
                 if 'token' in info and 'connect_type' in info
                 and info['connect_type'] in [0, 8, 12, 23]
@@ -1485,7 +1486,8 @@ class MIoTClient:
                 did: {
                     'token': info['token'],
                     'model': info['model'],
-                    'connect_type': info['connect_type']}
+                    'connect_type': info['connect_type'],
+                    'ip': info.get('local_ip', None)}
                 for did, info in self._device_list_cache.items()
                 if 'token' in info and 'connect_type' in info
                 and info['connect_type'] in [0, 8, 12, 23]
