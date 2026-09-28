@@ -96,6 +96,14 @@ urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m28:5:
     unit: rpm
   prop.12.21:
     unit: celsius
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:1:
+  prop.10.6:
+    unit: none
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:4: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:5: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:1
+urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:6: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m4:1
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:1: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:2: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
 urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:3: urn:miot-spec-v2:device:air-conditioner:0000A004:xiaomi-m9:6
