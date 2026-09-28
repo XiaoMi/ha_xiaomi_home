@@ -147,6 +147,11 @@ class Fan(MIoTServiceEntity, FanEntity):
                         self._speed_max - self._speed_min)/self._speed_step)+1
                     self._attr_supported_features |= FanEntityFeature.SET_SPEED
                     self._prop_fan_level = prop
+                    # Clear any value-list state set by a previously processed
+                    # value-list fan-level prop, so that the percentage property
+                    # does not pick the value-list branch with a stale map.
+                    self._speed_names = []
+                    self._speed_name_map = {}
                 elif (
                     self._prop_fan_level is None
                     and prop.value_list
