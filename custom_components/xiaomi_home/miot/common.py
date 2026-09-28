@@ -198,4 +198,7 @@ async def get_system_info_str(hass) -> str:
     os_version = info['os_version']
     arch = info['arch']
     installation_type = info['installation_type']
-    return f'hass/{version} ({os_name}/{os_version}; {arch}; {installation_type})'
+    return (
+        f'hass/{version} ({os_name}/{os_version};'
+        f' {arch}; {installation_type})'
+    )
