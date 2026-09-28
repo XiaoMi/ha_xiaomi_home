@@ -48,6 +48,7 @@ Vacuum entities for Xiaomi Home.
 from __future__ import annotations
 from typing import Any, Optional
 import re
+import json
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -65,6 +66,13 @@ try:  # VacuumActivity is introduced in HA core 2025.1.0
     HA_CORE_HAS_ACTIVITY = True
 except ImportError:
     HA_CORE_HAS_ACTIVITY = False
+
+try:  # Segment / CLEAN_AREA require a recent HA core (clean_area service)
+    from homeassistant.components.vacuum import Segment
+    HA_CORE_HAS_CLEAN_AREA = hasattr(
+        VacuumEntityFeature, 'CLEAN_AREA')
+except ImportError:
+    HA_CORE_HAS_CLEAN_AREA = False
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -102,6 +110,9 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
     _action_continue_sweep: Optional[MIoTSpecAction]
     _action_stop_and_gocharge: Optional[MIoTSpecAction]
     _action_identify: Optional[MIoTSpecAction]
+    _action_start_vacuum_room_sweep: Optional[MIoTSpecAction]
+    _prop_room_information: Optional[MIoTSpecProperty]
+    _prop_vacuum_room_ids: Optional[MIoTSpecProperty]
 
     _status_map: Optional[dict[int, str]]
     _fan_level_map: Optional[dict[int, str]]
@@ -127,6 +138,9 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
         self._action_continue_sweep = None
         self._action_stop_and_gocharge = None
         self._action_identify = None
+        self._action_start_vacuum_room_sweep = None
+        self._prop_room_information = None
+        self._prop_vacuum_room_ids = None
         self._status_map = None
         self._fan_level_map = None
 
@@ -178,6 +192,8 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                 self._attr_fan_speed_list = list(self._fan_level_map.values())
                 self._attr_supported_features |= VacuumEntityFeature.FAN_SPEED
                 self._prop_fan_level = prop
+            elif prop.name == 'room-information':
+                self._prop_room_information = prop
         # action
         for action in entity_data.actions:
             if action.name == 'start-sweep':
@@ -197,6 +213,18 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
             elif action.name == 'identify':
                 self._attr_supported_features |= VacuumEntityFeature.LOCATE
                 self._action_identify = action
+            elif action.name == 'start-vacuum-room-sweep':
+                self._action_start_vacuum_room_sweep = action
+                if action.in_:
+                    self._prop_vacuum_room_ids = action.in_[0]
+
+        # Enable area (room) cleaning when the device exposes the
+        # room list and the room-sweep action, and the running HA
+        # core supports the CLEAN_AREA feature.
+        if (HA_CORE_HAS_CLEAN_AREA
+                and self._action_start_vacuum_room_sweep is not None
+                and self._prop_room_information is not None):
+            self._attr_supported_features |= VacuumEntityFeature.CLEAN_AREA
 
         # Use start-charge from battery service as fallback
         # if stop-and-gocharge is not available
@@ -240,6 +268,53 @@ class Vacuum(MIoTServiceEntity, StateVacuumEntity):
                                            value=fan_speed)
         await self.set_property_async(prop=self._prop_fan_level,
                                       value=fan_level_value)
+
+    async def async_get_segments(self) -> list[Segment]:
+        """Return the rooms (segments) the vacuum can clean."""
+        if self._prop_room_information is None:
+            return []
+        raw = self.get_prop_value(prop=self._prop_room_information)
+        if not raw:
+            try:
+                raw = await self.get_property_async(
+                    prop=self._prop_room_information)
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error('get room-information failed, %s, %s',
+                              err, self.entity_id)
+                return []
+        try:
+            data = json.loads(raw) if isinstance(raw, str) else raw
+        except (ValueError, TypeError):
+            _LOGGER.error('invalid room-information value, %s, %s',
+                          raw, self.entity_id)
+            return []
+        segments: list[Segment] = []
+        for room in (data or {}).get('rooms', []):
+            rid = room.get('id')
+            if rid is None:
+                continue
+            segments.append(
+                Segment(id=str(rid), name=room.get('name') or str(rid)))
+        return segments
+
+    async def async_clean_segments(
+            self, segment_ids: list[str], **kwargs: Any) -> None:
+        """Clean the given rooms (segments)."""
+        if not segment_ids or self._action_start_vacuum_room_sweep is None:
+            return
+        # 'vacuum-room-ids' expects a JSON array string of room ids, e.g.
+        # "[3, 10]" (same payload the app_segment_clean / Mi Home flow uses;
+        # see XiaoMi/ha_xiaomi_home PR #1702).
+        room_ids = json.dumps(
+            [int(s) if str(s).isdigit() else str(s) for s in segment_ids])
+        in_list = (
+            [{'piid': self._prop_vacuum_room_ids.iid, 'value': room_ids}]
+            if self._prop_vacuum_room_ids is not None else [])
+        _LOGGER.info(
+            'start vacuum room sweep, %s, segment_ids=%s, in_list=%s',
+            self.entity_id, segment_ids, in_list)
+        await self.action_async(
+            action=self._action_start_vacuum_room_sweep, in_list=in_list)
 
     @property
     def name(self) -> Optional[str]:
