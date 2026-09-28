@@ -52,14 +52,9 @@ import logging
 
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_PARTS_PER_BILLION,
-    CONCENTRATION_PARTS_PER_MILLION,
     DEGREE,
     LIGHT_LUX,
     REVOLUTIONS_PER_MINUTE,
-    PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS,
     UnitOfBloodGlucoseConcentration,
     UnitOfEnergy,
@@ -104,6 +99,23 @@ from .miot_spec import (
     MIoTSpecValueList,
     MIoTSpecValueRange
 )
+
+try:  # UnitOfDensity and UnitOfRatio are introduced in HA core 2026.7
+    from homeassistant.const import UnitOfDensity, UnitOfRatio
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = (
+        UnitOfDensity.MICROGRAMS_PER_CUBIC_METER)
+    CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER = (
+        UnitOfDensity.MILLIGRAMS_PER_CUBIC_METER)
+    CONCENTRATION_PARTS_PER_MILLION = UnitOfRatio.PARTS_PER_MILLION
+    CONCENTRATION_PARTS_PER_BILLION = UnitOfRatio.PARTS_PER_BILLION
+    PERCENTAGE = UnitOfRatio.PERCENTAGE
+except ImportError:
+    from homeassistant.const import (
+        CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
+        CONCENTRATION_PARTS_PER_BILLION,
+        CONCENTRATION_PARTS_PER_MILLION,
+        PERCENTAGE)
 
 _LOGGER = logging.getLogger(__name__)
 

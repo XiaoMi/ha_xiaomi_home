@@ -50,12 +50,22 @@ from homeassistant.components.sensor import SensorStateClass
 from homeassistant.components.event import EventDeviceClass
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
-from homeassistant.const import (CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-                                 CONCENTRATION_PARTS_PER_MILLION,
-                                 EntityCategory, LIGHT_LUX, UnitOfEnergy,
+from homeassistant.const import (EntityCategory, LIGHT_LUX, UnitOfEnergy,
                                  UnitOfPower, UnitOfElectricCurrent,
                                  UnitOfElectricPotential, UnitOfTemperature,
-                                 UnitOfPressure, PERCENTAGE)
+                                 UnitOfPressure)
+
+try:  # UnitOfDensity and UnitOfRatio are introduced in HA core 2026.7
+    from homeassistant.const import UnitOfDensity, UnitOfRatio
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = (
+        UnitOfDensity.MICROGRAMS_PER_CUBIC_METER)
+    CONCENTRATION_PARTS_PER_MILLION = UnitOfRatio.PARTS_PER_MILLION
+    PERCENTAGE = UnitOfRatio.PERCENTAGE
+except ImportError:
+    from homeassistant.const import (
+        CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        CONCENTRATION_PARTS_PER_MILLION,
+        PERCENTAGE)
 
 # pylint: disable=pointless-string-statement
 """SPEC_DEVICE_TRANS_MAP
