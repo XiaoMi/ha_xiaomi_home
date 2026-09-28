@@ -310,6 +310,9 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ): bool,
             }),
             errors={'base': reason},
+            description_placeholders={
+                'oauth_redirect_url': OAUTH_REDIRECT_URL,
+            },
             last_step=False,
         )
 
@@ -419,7 +422,12 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'http_host': (
                     DEFAULT_OAUTH2_API_HOST
                     if self._cloud_server == DEFAULT_CLOUD_SERVER
-                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')},
+                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}'),
+                'bing_url': 'https://www.bing.com',
+                'oauth2_auth_url': OAUTH2_AUTH_URL,
+                'spec_api_url':
+                    'https://miot-spec.org/miot-spec-v2/template/list/device',
+            },
             last_step=False
         )
 
@@ -1189,6 +1197,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }),
             description_placeholders={
                 'cloud_server': CLOUD_SERVERS[self._cloud_server],
+                'oauth_redirect_url': OAUTH_REDIRECT_URL,
             },
             last_step=False,
         )
@@ -1935,7 +1944,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 'http_host': (
                     DEFAULT_OAUTH2_API_HOST
                     if self._cloud_server == DEFAULT_CLOUD_SERVER
-                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}')},
+                    else f'{self._cloud_server}.{DEFAULT_OAUTH2_API_HOST}'),
+                'bing_url': 'https://www.bing.com',
+                'oauth2_auth_url': OAUTH2_AUTH_URL,
+                'spec_api_url':
+                    'https://miot-spec.org/miot-spec-v2/template/list/device',
+            },
             last_step=False
         )
 

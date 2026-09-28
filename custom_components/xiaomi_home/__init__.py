@@ -52,7 +52,7 @@ from typing import Optional
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.components import persistent_notification
-from homeassistant.helpers import device_registry, entity_registry
+from homeassistant.helpers import config_validation as cv, device_registry, entity_registry
 
 from .miot.common import slugify_did
 from .miot.miot_storage import (
@@ -67,6 +67,8 @@ from .miot.miot_client import MIoTClient, get_miot_instance_async
 
 _LOGGER = logging.getLogger(__name__)
 
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
 
 async def async_setup(hass: HomeAssistant, hass_config: dict) -> bool:
     # pylint: disable=unused-argument
@@ -79,6 +81,52 @@ async def async_setup(hass: HomeAssistant, hass_config: dict) -> bool:
     hass.data[DOMAIN].setdefault('entities', {})
     for platform in SUPPORTED_PLATFORMS:
         hass.data[DOMAIN]['entities'][platform] = []
+    return True
+
+
+def migrate_service_unique_id(
+    er: entity_registry.EntityRegistry,
+    er_entries: dict[str, entity_registry.RegistryEntry],
+    device: MIoTDevice, spec: MIoTSpecService
+) -> bool:
+    """Migrate the unique_id of a service entity registered by a previous
+    version of the integration.
+
+    Only the unique_id is rewritten, the entity_id is left untouched so that
+    the automations, scripts and dashboards referring to it keep working.
+
+    Return False when a legacy entity was found but could not be migrated.
+    """
+    unique_id = device.gen_service_entity_id(
+        ha_domain=DOMAIN, siid=spec.iid, description=spec.description)
+    if unique_id in er_entries:
+        # Already up to date. A legacy entity left over from the format change
+        # may still be registered, it is not removed here since that would
+        # also drop the name, area and aliases set by the user.
+        return True
+    legacy_unique_id: Optional[str] = next(
+        (legacy_unique_id
+         for legacy_unique_id in device.gen_service_entity_id_legacy(
+             ha_domain=DOMAIN, siid=spec.iid)
+         if legacy_unique_id in er_entries),
+        None)
+    if not legacy_unique_id:
+        # A newly added entity
+        return True
+    entity_id = er_entries[legacy_unique_id].entity_id
+    try:
+        er.async_update_entity(entity_id, new_unique_id=unique_id)
+    except ValueError as error:
+        # The unique_id is registered by another config entry, which happens
+        # when the same device is shared between two Xiaomi accounts
+        _LOGGER.warning(
+            'migrate unique_id failed, %s, %s, %s',
+            error, entity_id, unique_id)
+        return False
+    er_entries[unique_id] = er_entries.pop(legacy_unique_id)
+    _LOGGER.info(
+        'migrate unique_id, %s, %s -> %s',
+        entity_id, legacy_unique_id, unique_id)
     return True
 
 
@@ -125,6 +173,13 @@ async def async_setup_entry(
         await manufacturer.init_async()
         miot_devices: list[MIoTDevice] = []
         er = entity_registry.async_get(hass=hass)
+        # Index the registered entities by unique_id, used to migrate the
+        # entities registered by a previous version of the integration
+        er_entries: dict[str, entity_registry.RegistryEntry] = {
+            entry.unique_id: entry
+            for entry in entity_registry.async_entries_for_config_entry(
+                registry=er, config_entry_id=entry_id)}
+        migrate_failed: int = 0
         for did, info in miot_client.device_list.items():
             spec_instance = await spec_parser.parse(urn=info['urn'])
             if not isinstance(spec_instance, MIoTSpecInstance):
@@ -138,6 +193,16 @@ async def async_setup_entry(
                 spec_instance=spec_instance)
             miot_devices.append(device)
             device.spec_transform()
+            # Migrate the unique_id of the entities registered by a previous
+            # version of the integration
+            for entities in device.entity_list.values():
+                for entity in entities:
+                    if not isinstance(entity.spec, MIoTSpecService):
+                        continue
+                    if not migrate_service_unique_id(
+                            er=er, er_entries=er_entries, device=device,
+                            spec=entity.spec):
+                        migrate_failed += 1
             # Remove filter entities and non-standard entities
             for platform in SUPPORTED_PLATFORMS:
                 # ONLY support filter spec service translate entity
@@ -233,6 +298,12 @@ async def async_setup_entry(
                         siid=prop.service.iid, piid=prop.iid)
                     if er.async_get(entity_id_or_uuid=entity_id):
                         er.async_remove(entity_id=entity_id)
+
+        if migrate_failed:
+            _LOGGER.warning(
+                'unique_id migration skipped, %s entities may show up as new '
+                'entities while the old ones become unavailable',
+                migrate_failed)
 
         hass.data[DOMAIN]['devices'][config_entry.entry_id] = miot_devices
         await hass.config_entries.async_forward_entry_setups(

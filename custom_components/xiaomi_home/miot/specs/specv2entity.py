@@ -51,6 +51,7 @@ from homeassistant.components.event import EventDeviceClass
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
 from homeassistant.const import (CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+                                 CONCENTRATION_PARTS_PER_MILLION,
                                  EntityCategory, LIGHT_LUX, UnitOfEnergy,
                                  UnitOfPower, UnitOfElectricCurrent,
                                  UnitOfElectricPotential, UnitOfTemperature,
@@ -641,6 +642,12 @@ SPEC_PROP_TRANS_MAP: dict = {
             'device_class': SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT
+        },
+        'co2-density': {
+            'device_class': SensorDeviceClass.CO2,
+            'entity': 'sensor',
+            'state_class': SensorStateClass.MEASUREMENT,
+            'unit_of_measurement': CONCENTRATION_PARTS_PER_MILLION
         },
         'battery-level': {
             'device_class': SensorDeviceClass.BATTERY,

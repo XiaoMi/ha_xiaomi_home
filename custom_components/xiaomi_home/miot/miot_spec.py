@@ -617,7 +617,8 @@ class MIoTSpecProperty(_MIoTSpecBase):
             if self.value_range is None:
                 return int(round(value))
             return int(
-                round(value / self.value_range.step) * self.value_range.step)
+                round((value - self.value_range.min_) / self.value_range.step) *
+                self.value_range.step + self.value_range.min_)
         return value
 
     def dump(self) -> dict:
