@@ -89,3 +89,29 @@ async def test_spec_random_parse_async(test_cache_path, test_lang):
         assert result is not None
     end_ts = time.time()*1000
     _LOGGER.info('takes time, %s, %s', test_count, end_ts-start_ts)
+
+
+@pytest.mark.github
+def test_value_list_item_name_normalised():
+    """Value-list item names must be normalised on every load path."""
+    from miot.miot_spec import MIoTSpecValueListItem, MIoTSpecValueList
+
+    # cloud parsing path (already normalised before this fix)
+    assert MIoTSpecValueList.from_spec(
+        [{'value': 0, 'name': 'Cool', 'description': '制冷'}]
+    ).items[0].name == 'cool'
+
+    # local cache path: caches written by older versions keep the original
+    # cloud casing, which used to leave climate.py's lower-case hvac mode
+    # matching empty so the entity only exposed "off"
+    assert MIoTSpecValueListItem(
+        {'value': 0, 'name': 'Cool', 'description': '制冷'}).name == 'cool'
+    assert MIoTSpecValueList(
+        [{'value': 2, 'name': 'Fan', 'description': '送风'}]
+    ).items[0].name == 'fan'
+    assert MIoTSpecValueListItem(
+        {'value': 0, 'name': 'Heat', 'description': '制热'}).name == 'heat'
+
+    # bool style value-list items carry no name and must stay untouched
+    assert MIoTSpecValueListItem(
+        {'value': True, 'description': '开启'}).name is None
