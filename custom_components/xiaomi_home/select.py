@@ -52,6 +52,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.components.select import SelectEntity
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .miot.const import DOMAIN
 from .miot.miot_device import MIoTDevice, MIoTPropertyEntity
@@ -75,6 +77,17 @@ async def async_setup_entry(
     if new_entities:
         async_add_entities(new_entities)
 
+    # create select for light
+    new_light_select_entities = []
+    for miot_device in device_list:
+        # Add it to all devices with light entities, because some bathroom heaters and clothes drying racks also have lights.
+        # if "device:light" in miot_device.spec_instance.urn:
+        if miot_device.entity_list.get("light", []):
+            device_id = list(miot_device.device_info.get("identifiers"))[0][1]
+            new_light_select_entities.append(
+                LightCommandSendMode(hass=hass, device_id=device_id))
+    if new_light_select_entities:
+        async_add_entities(new_light_select_entities)
 
 class Select(MIoTPropertyEntity, SelectEntity):
     """Select entities for Xiaomi Home."""
@@ -94,3 +107,38 @@ class Select(MIoTPropertyEntity, SelectEntity):
     def current_option(self) -> Optional[str]:
         """Return the current selected option."""
         return self.get_vlist_description(value=self._value)
+
+
+class LightCommandSendMode(SelectEntity, RestoreEntity):
+    """To control whether to turn on the light, you need to send the light-on command first and
+    then send other color temperatures and brightness or send them all at the same time.
+    The default is to send one by one."""
+
+    def __init__(self, hass: HomeAssistant, device_id: str):
+        super().__init__()
+        self.hass = hass
+        self._device_id = device_id
+        self._attr_name = "Command Send Mode"
+        self.entity_id = f"select.light_{device_id}_command_send_mode"
+        self._attr_unique_id = self.entity_id
+        self._attr_options = [
+            "Send One by One", "Send Turn On First", "Send Together"
+        ]
+        self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
+        self._attr_current_option = self._attr_options[0]
+        self._attr_entity_category = EntityCategory.CONFIG
+
+    async def async_select_option(self, option: str):
+        if option in self._attr_options:
+            self._attr_current_option = option
+            self.async_write_ha_state()
+
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        if (last_state := await self.async_get_last_state()
+           ) and last_state.state in self._attr_options:
+            self._attr_current_option = last_state.state
+
+    @property
+    def current_option(self):
+        return self._attr_current_option

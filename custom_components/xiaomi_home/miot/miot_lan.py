@@ -58,7 +58,7 @@ import secrets
 import socket
 import struct
 import threading
-from typing import Any, Callable, Coroutine, Optional, final
+from typing import Any, Callable, Coroutine, Optional, final, Dict, List
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
@@ -853,6 +853,29 @@ class MIoTLan:
                 and 'code' in result_obj['result'][0]
             ):
                 return result_obj['result'][0]
+            if 'code' in result_obj:
+                return result_obj
+        raise MIoTError('Invalid result', MIoTErrorCode.CODE_INTERNAL_ERROR)
+
+    @final
+    async def set_props_async(
+        self,did: str,props_list: List[Dict[str, Any]],
+        timeout_ms: int = 10000) -> dict:
+        # props_list = [{'did': did, 'siid': siid, 'piid': piid, 'value': value}......]
+        self.__assert_service_ready()
+        result_obj = await self.__call_api_async(
+            did=did, msg={
+                'method': 'set_properties',
+                'params': props_list,
+            }, timeout_ms=timeout_ms)
+        if result_obj:
+            if (
+                'result' in result_obj and
+                len(result_obj['result']) == len(props_list)
+                and result_obj['result'][0].get('did') == did
+                and all('code' in item for item in result_obj['result'])
+            ):
+                return result_obj['result']
             if 'code' in result_obj:
                 return result_obj
         raise MIoTError('Invalid result', MIoTErrorCode.CODE_INTERNAL_ERROR)
