@@ -114,7 +114,13 @@ class MIoTSpecValueListItem:
         if 'value' not in item or 'description' not in item:
             raise MIoTSpecError('invalid value list item, %s')
 
-        self.name = item.get('name', None)
+        # Keep the name consistent with from_spec(): slugified and
+        # lower-cased. Specs restored from the local cache keep the original
+        # cloud casing (e.g. "Cool"), which breaks name based matching such as
+        # the air-conditioner hvac mode map (only "off" would be exposed).
+        name = item.get('name', None)
+        self.name = (slugify(text=name, separator='_').lower()
+                     if isinstance(name, str) and name else name)
         self.value = item['value']
         self.description = item['description']
 
