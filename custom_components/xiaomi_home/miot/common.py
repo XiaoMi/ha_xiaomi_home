@@ -186,3 +186,19 @@ class MIoTHttp:
         ev_loop = loop or asyncio.get_running_loop()
         return await ev_loop.run_in_executor(
             None, MIoTHttp.post, url, data, headers)
+
+
+async def get_system_info_str(hass) -> str:
+    """Get system info string for User-Agent."""
+    # pylint: disable=import-outside-toplevel
+    from homeassistant.helpers.system_info import async_get_system_info
+    info = await async_get_system_info(hass)
+    version = info['version']
+    os_name = info['os_name']
+    os_version = info['os_version']
+    arch = info['arch']
+    installation_type = info['installation_type']
+    return (
+        f'hass/{version} ({os_name}/{os_version};'
+        f' {arch}; {installation_type})'
+    )

@@ -55,7 +55,6 @@ from homeassistant.const import (
     DEGREE,
     LIGHT_LUX,
     REVOLUTIONS_PER_MINUTE,
-    PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS,
     UnitOfBloodGlucoseConcentration,
     UnitOfEnergy,
@@ -104,6 +103,12 @@ from .miot_spec import (
     MIoTSpecValueList,
     MIoTSpecValueRange
 )
+
+try:  # UnitOfRatio.PERCENTAGE replaces the constant in HA core 2026.7
+    from homeassistant.const import UnitOfRatio
+    PERCENTAGE = UnitOfRatio.PERCENTAGE
+except ImportError:
+    from homeassistant.const import PERCENTAGE
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -1,4 +1,24 @@
 # CHANGELOG
+## v0.5.0
+### Added
+- Add co2-density property mapping to SPEC_PROP_TRANS_MAP to enable statistics recording for CO2 sensors. [#1631](https://github.com/XiaoMi/ha_xiaomi_home/pull/1631)
+- Migrate the unique_id of the service entities. [#1778](https://github.com/XiaoMi/ha_xiaomi_home/pull/1778)
+- Add English and Swedish translations for viomi.vacuum.v18. [#1747](https://github.com/XiaoMi/ha_xiaomi_home/pull/1747)
+- Add a User-Agent header to all cloud HTTP requests. [#1804](https://github.com/XiaoMi/ha_xiaomi_home/pull/1804)
+### Changed
+- Use a valid entity_id with the platform domain. [#1777](https://github.com/XiaoMi/ha_xiaomi_home/pull/1777)
+- Map the humidifier mode name to the built-in mode. [1658](https://github.com/XiaoMi/ha_xiaomi_home/pull/1658)
+- Ignore license in the validate-hacs action and use action/checkout@v5 instead of v4. [#1802](https://github.com/XiaoMi/ha_xiaomi_home/pull/1802)
+- Replace deprecated CONCENTRATION_* unit constants. [#1801](https://github.com/XiaoMi/ha_xiaomi_home/pull/1801)
+### Fixed
+- Verify mijia cloud mqtt broker hostname during tls establishment. [#1774](https://github.com/XiaoMi/ha_xiaomi_home/pull/1774)
+- Calculate the property value for the right value step. [#1623](https://github.com/XiaoMi/ha_xiaomi_home/pull/1623)
+- Replace hardcoded URLs with description placeholders in all 13 translation files to comply with hassfest TRANSLATIONS rules. Add corresponding placeholder values in config_flow.py for both ConfigFlow and OptionsFlow form methods. [#1800](https://github.com/XiaoMi/ha_xiaomi_home/pull/1800)
+- Drop non-UTF-8 cloud mips message instead of crashing mqtt loop. [#1750](https://github.com/XiaoMi/ha_xiaomi_home/pull/1750)
+- Drain stale futures in __get_prop_handler on batch failure. [#1723](https://github.com/XiaoMi/ha_xiaomi_home/pull/1723)
+- Return None instead of raising when getDevList times out. [#1793](https://github.com/XiaoMi/ha_xiaomi_home/pull/1793)
+- Fix the MIoT-Spec-V2 of aupu.bhf_light.qa3s fan-level value-list, hey.relay.h100 power-consumption and electric-current, xiaomi.bhf_light.na2 fan-level, rw02.fan.rw001 fan-level, cykj.hood.jyj22 fan-level, daikin.aircondition.k5 mode and fan-level, xiaomi.aircondition.m4 humidity-range unit. [#1805](https://github.com/XiaoMi/ha_xiaomi_home/pull/1805)
+
 ## v0.4.7
 ### Added
 - Add turkish language in multi_lang.json. [#1593](https://github.com/XiaoMi/ha_xiaomi_home/pull/1593)

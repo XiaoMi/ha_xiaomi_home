@@ -54,7 +54,13 @@ from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import (EntityCategory, LIGHT_LUX, UnitOfEnergy,
                                  UnitOfPower, UnitOfElectricCurrent,
                                  UnitOfElectricPotential, UnitOfTemperature,
-                                 UnitOfPressure, PERCENTAGE)
+                                 UnitOfPressure)
+
+try:  # UnitOfRatio.PERCENTAGE replaces the constant in HA core 2026.7
+    from homeassistant.const import UnitOfRatio
+    PERCENTAGE = UnitOfRatio.PERCENTAGE
+except ImportError:
+    from homeassistant.const import PERCENTAGE
 
 
 def _ha_unit(enum_name: str, member: str, legacy: str) -> str:
