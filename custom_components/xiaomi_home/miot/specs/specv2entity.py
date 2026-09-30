@@ -45,6 +45,7 @@ off Xiaomi or its affiliates' products.
 
 Conversion rules of MIoT-Spec-V2 instance to Home Assistant entity.
 """
+import homeassistant.const as ha_const
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.components.event import EventDeviceClass
@@ -55,17 +56,33 @@ from homeassistant.const import (EntityCategory, LIGHT_LUX, UnitOfEnergy,
                                  UnitOfElectricPotential, UnitOfTemperature,
                                  UnitOfPressure)
 
-try:  # UnitOfDensity and UnitOfRatio are introduced in HA core 2026.7
-    from homeassistant.const import UnitOfDensity, UnitOfRatio
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = (
-        UnitOfDensity.MICROGRAMS_PER_CUBIC_METER)
-    CONCENTRATION_PARTS_PER_MILLION = UnitOfRatio.PARTS_PER_MILLION
+try:  # UnitOfRatio.PERCENTAGE replaces the constant in HA core 2026.7
+    from homeassistant.const import UnitOfRatio
     PERCENTAGE = UnitOfRatio.PERCENTAGE
 except ImportError:
-    from homeassistant.const import (
-        CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-        CONCENTRATION_PARTS_PER_MILLION,
-        PERCENTAGE)
+    from homeassistant.const import PERCENTAGE
+
+
+def _ha_unit(enum_name: str, member: str, legacy: str) -> str:
+    """Return a unit enum, or the old constant on older Home Assistant."""
+    unit_enum = getattr(ha_const, enum_name, None)
+    if unit_enum is not None:
+        return getattr(unit_enum, member)
+    return getattr(ha_const, legacy)
+
+
+UNIT_UG_M3 = _ha_unit(
+    'UnitOfDensity', 'MICROGRAMS_PER_CUBIC_METER',
+    'CONCENTRATION_MICROGRAMS_PER_CUBIC_METER')
+UNIT_MG_M3 = _ha_unit(
+    'UnitOfDensity', 'MILLIGRAMS_PER_CUBIC_METER',
+    'CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER')
+UNIT_PPM = _ha_unit(
+    'UnitOfRatio', 'PARTS_PER_MILLION',
+    'CONCENTRATION_PARTS_PER_MILLION')
+UNIT_PPB = _ha_unit(
+    'UnitOfRatio', 'PARTS_PER_BILLION',
+    'CONCENTRATION_PARTS_PER_BILLION')
 
 # pylint: disable=pointless-string-statement
 """SPEC_DEVICE_TRANS_MAP
@@ -432,20 +449,9 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                         'latitude': {'read'}
                     }
                 },
-                'optional': {
-                    'properties': {'area-id'}
-                }
             }
         },
-        'optional': {
-            'battery': {
-                'required': {
-                    'properties': {
-                        'battery-level': {'read'}
-                    }
-                }
-            }
-        },
+        'optional': {},
         'entity': 'device_tracker'
     }
 }
@@ -623,19 +629,19 @@ SPEC_PROP_TRANS_MAP: dict = {
             'device_class': SensorDeviceClass.PM25,
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+            'unit_of_measurement': UNIT_UG_M3
         },
         'pm10-density': {
             'device_class': SensorDeviceClass.PM10,
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+            'unit_of_measurement': UNIT_UG_M3
         },
         'pm1': {
             'device_class': SensorDeviceClass.PM1,
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+            'unit_of_measurement': UNIT_UG_M3
         },
         'atmospheric-pressure': {
             'device_class': SensorDeviceClass.ATMOSPHERIC_PRESSURE,
@@ -657,7 +663,7 @@ SPEC_PROP_TRANS_MAP: dict = {
             'device_class': SensorDeviceClass.CO2,
             'entity': 'sensor',
             'state_class': SensorStateClass.MEASUREMENT,
-            'unit_of_measurement': CONCENTRATION_PARTS_PER_MILLION
+            'unit_of_measurement': UNIT_PPM
         },
         'battery-level': {
             'device_class': SensorDeviceClass.BATTERY,

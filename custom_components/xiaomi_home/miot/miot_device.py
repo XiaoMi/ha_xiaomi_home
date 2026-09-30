@@ -83,7 +83,11 @@ from .specs.specv2entity import (
     SPEC_DEVICE_TRANS_MAP,
     SPEC_EVENT_TRANS_MAP,
     SPEC_PROP_TRANS_MAP,
-    SPEC_SERVICE_TRANS_MAP
+    SPEC_SERVICE_TRANS_MAP,
+    UNIT_MG_M3,
+    UNIT_PPB,
+    UNIT_PPM,
+    UNIT_UG_M3,
 )
 from .common import slugify_name, slugify_did
 from .const import DOMAIN
@@ -100,22 +104,11 @@ from .miot_spec import (
     MIoTSpecValueRange
 )
 
-try:  # UnitOfDensity and UnitOfRatio are introduced in HA core 2026.7
-    from homeassistant.const import UnitOfDensity, UnitOfRatio
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = (
-        UnitOfDensity.MICROGRAMS_PER_CUBIC_METER)
-    CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER = (
-        UnitOfDensity.MILLIGRAMS_PER_CUBIC_METER)
-    CONCENTRATION_PARTS_PER_MILLION = UnitOfRatio.PARTS_PER_MILLION
-    CONCENTRATION_PARTS_PER_BILLION = UnitOfRatio.PARTS_PER_BILLION
+try:  # UnitOfRatio.PERCENTAGE replaces the constant in HA core 2026.7
+    from homeassistant.const import UnitOfRatio
     PERCENTAGE = UnitOfRatio.PERCENTAGE
 except ImportError:
-    from homeassistant.const import (
-        CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-        CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
-        CONCENTRATION_PARTS_PER_BILLION,
-        CONCENTRATION_PARTS_PER_MILLION,
-        PERCENTAGE)
+    from homeassistant.const import PERCENTAGE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -810,10 +803,10 @@ class MIoTDevice:
             'celsius': UnitOfTemperature.CELSIUS,
             'fahrenheit': UnitOfTemperature.FAHRENHEIT,
             'kelvin': UnitOfTemperature.KELVIN,
-            'μg/m3': CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-            'mg/m3': CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
-            'ppm': CONCENTRATION_PARTS_PER_MILLION,
-            'ppb': CONCENTRATION_PARTS_PER_BILLION,
+            'μg/m3': UNIT_UG_M3,
+            'mg/m3': UNIT_MG_M3,
+            'ppm': UNIT_PPM,
+            'ppb': UNIT_PPB,
             'lux': LIGHT_LUX,
             'pascal': UnitOfPressure.PA,
             'kilopascal': UnitOfPressure.KPA,

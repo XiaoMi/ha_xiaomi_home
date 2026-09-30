@@ -43,19 +43,25 @@ or other intellectual property rights of Xiaomi or its affiliates; or,
 2. You make, have made, manufacture, sell, or offer to sell products that knock
 off Xiaomi or its affiliates' products.
 
-Device tracker entities for Xiaomi Home.
+Infrared emitter for the Xiaomi universal remote.
 """
 from __future__ import annotations
-from typing import Optional
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.components.device_tracker import TrackerEntity
+
+try:
+    from homeassistant.components.infrared import InfraredEmitterEntity
+except ImportError:  # Home Assistant before the infrared entity existed
+    InfraredEmitterEntity = None
 
 from .miot.const import DOMAIN
-from .miot.miot_device import MIoTDevice, MIoTServiceEntity, MIoTEntityData
-from .miot.miot_spec import MIoTSpecProperty
+from .miot.ir_code import DEFAULT_FREQUENCY, ensure_miio_ok, timings_to_chuangmi
+from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
+from .miot.miot_error import MIoTClientError
 
 
 async def async_setup_entry(
@@ -63,44 +69,50 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up a config entry."""
+    if InfraredEmitterEntity is None:
+        return
     device_list: list[MIoTDevice] = hass.data[DOMAIN]['devices'][
         config_entry.entry_id]
     new_entities = []
     for miot_device in device_list:
-        for data in miot_device.entity_list.get('device_tracker', []):
-            new_entities.append(
-                DeviceTracker(miot_device=miot_device, entity_data=data))
+        for data in miot_device.entity_list.get('infrared', []):
+            new_entities.append(XiaomiInfrared(
+                miot_device=miot_device, entity_data=data))
     if new_entities:
         async_add_entities(new_entities)
 
 
-class DeviceTracker(MIoTServiceEntity, TrackerEntity):
-    """Tracker entities for Xiaomi Home."""
-    _prop_latitude: Optional[MIoTSpecProperty]
-    _prop_longitude: Optional[MIoTSpecProperty]
+if InfraredEmitterEntity is not None:
 
-    def __init__(self, miot_device: MIoTDevice,
-                 entity_data: MIoTEntityData) -> None:
-        super().__init__(miot_device=miot_device, entity_data=entity_data)
-        self._prop_latitude = None
-        self._prop_longitude = None
+    class XiaomiInfrared(MIoTServiceEntity, InfraredEmitterEntity):
+        """chuangmi.ir.v2 emitter for Settings > Infrared."""
 
-        # Battery and area name are separate sensors. TrackerEntity no
-        # longer accepts battery_level or location_name.
-        for prop in entity_data.props:
-            if prop.name == 'latitude':
-                self._prop_latitude = prop
-            elif prop.name == 'longitude':
-                self._prop_longitude = prop
+        _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    @property
-    def latitude(self) -> Optional[float]:
-        """The latitude coordinate of the device."""
-        return None if self._prop_latitude is None else self.get_prop_value(
-            prop=self._prop_latitude)
+        def __init__(
+            self, miot_device: MIoTDevice, entity_data: MIoTEntityData
+        ) -> None:
+            """Initialize the emitter."""
+            super().__init__(
+                miot_device=miot_device, entity_data=entity_data)
+            # The remote entity already uses the device unique id.
+            self._attr_unique_id = f'{self._attr_unique_id}_emitter'
+            self._attr_name = None
 
-    @property
-    def longitude(self) -> Optional[float]:
-        """The longitude coordinate of the device."""
-        return None if self._prop_longitude is None else self.get_prop_value(
-            prop=self._prop_longitude)
+        async def async_send_command(self, command) -> None:
+            """Send one Home Assistant infrared command."""
+            freq = getattr(command, 'modulation', None) or DEFAULT_FREQUENCY
+            try:
+                code, freq = timings_to_chuangmi(
+                    command.get_raw_timings(), freq)
+            except ValueError as err:
+                raise HomeAssistantError(str(err)) from err
+            try:
+                ensure_miio_ok(
+                    await self.miot_device.miot_client.call_miio_async(
+                        did=self.miot_device.did,
+                        method='miIO.ir_play',
+                        params={'freq': freq, 'code': code}))
+            except MIoTClientError as err:
+                raise HomeAssistantError(str(err)) from err

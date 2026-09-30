@@ -85,7 +85,25 @@ Xiaomi Home Integration and the affiliated cloud interface is provided by Xiaomi
 
 - Does Xiaomi Home Integration support all Xiaomi smart devices?
 
-  Xiaomi Home Integration currently supports most categories of the smart device. Only a few categories are not supported. They are Bluetooth device, infrared device and virtual device.
+  Xiaomi Home Integration currently supports most categories of the smart device. Only a few categories are not supported. They are Bluetooth device, infrared device and virtual device. The Xiaomi universal remote `chuangmi.ir.v2` is the exception: it is added as a `remote` entity and as an infrared emitter, so it shows under Settings > Infrared. The device control is a single toggle. It has no MIoT-Spec-V2, so after installing this version open the integration options and update the device list once; otherwise the remote stays out of the imported list. Learn, send and delete use the same actions as the Broadlink integration, and codes are stored locally. Commands are sent directly to the remote on the local network (UDP 54321) and do not require the integration LAN-control switch. Home Assistant must be on the same network as the remote. If Home Assistant runs in Docker, use host network.
+
+  ```yaml
+  action: remote.learn_command
+  target:
+    entity_id: remote.living_room_ir
+  data:
+    device: television
+    command: power
+
+  action: remote.send_command
+  target:
+    entity_id: remote.living_room_ir
+  data:
+    device: television
+    command: power
+  ```
+
+  A raw code uses the `b64:` prefix. A Pronto hex string that starts with `0000` can be sent the same way. `alternative: true` stores two codes and alternates them, the same as Broadlink.
 
 - Does Xiaomi Home Integration support multiple Xiaomi accounts?
 

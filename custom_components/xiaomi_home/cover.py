@@ -282,6 +282,11 @@ class Cover(MIoTServiceEntity, CoverEntity):
             pos = 0
         elif pos >= (100 - self._cover_dead_zone_width):
             pos = 100
+        
+        eid = self.entity_id or ""
+        if "hotata" in eid and "airer" in eid:
+            pos = 100 - pos
+        
         return pos
 
     @property
