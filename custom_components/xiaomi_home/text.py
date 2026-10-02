@@ -138,43 +138,16 @@ class ActionText(MIoTActionEntity, TextEntity):
             raise ValueError(
                 f'action exec failed, {self.name}({self.entity_id}), '
                 f'invalid action params, {value}')
-        in_value: list[dict] = []
-        for index, prop in enumerate(self.spec.in_):
-            if prop.format_ == str:
-                if isinstance(in_list[index], (bool, int, float, str)):
-                    in_value.append(
-                        {'piid': prop.iid, 'value': str(in_list[index])})
-                    continue
-            elif prop.format_ == bool:
-                if isinstance(in_list[index], (bool, int)):
-                    # yes, no, on, off, true, false and other bool types
-                    # will also be parsed as 0 and 1 of int.
-                    in_value.append(
-                        {'piid': prop.iid, 'value': bool(in_list[index])})
-                    continue
-            elif prop.format_ == float:
-                if isinstance(in_list[index], (int, float)):
-                    in_value.append(
-                        {'piid': prop.iid, 'value': in_list[index]})
-                    continue
-            elif prop.format_ == int:
-                if isinstance(in_list[index], int):
-                    in_value.append(
-                        {'piid': prop.iid, 'value': in_list[index]})
-                    continue
-            # Invalid params type, raise error.
+        try:
+            result = await self.async_execute(in_list)
+        except ValueError as e:
             _LOGGER.error(
-                'action exec failed, %s(%s), invalid params item, '
-                'which item(%s) in the list must be %s, %s type was %s, %s',
-                self.name, self.entity_id, prop.description_trans,
-                prop.format_, in_list[index], type(
-                    in_list[index]).__name__, value)
+                'action exec failed, %s(%s), invalid action params, %s',
+                self.name, self.entity_id, value)
             raise ValueError(
                 f'action exec failed, {self.name}({self.entity_id}), '
-                f'invalid params item, which item({prop.description_trans}) '
-                f'in the list must be {prop.format_}, {in_list[index]} type '
-                f'was {type(in_list[index]).__name__}, {value}')
+                f'invalid action params, {value}') from e
 
         self._attr_native_value = value
-        if await self.action_async(in_list=in_value):
+        if result:
             self.async_write_ha_state()
