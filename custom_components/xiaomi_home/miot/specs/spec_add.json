@@ -1753,5 +1753,433 @@
         }
       ]
     }
+  ],
+  "urn:miot-spec-v2:device:vacuum:0000A006:xiaomi-ov71gl:1": [
+    {
+      "iid": 2,
+      "type": "urn:miot-spec-v2:service:vacuum:00007810:xiaomi-ov71gl:1",
+      "description": "Robot Cleaner",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:on:00000006:xiaomi-ov71gl:1",
+          "description": "Switch Status",
+          "format": "bool",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:status:00000007:xiaomi-ov71gl:1",
+          "description": "Status",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Idle"
+            },
+            {
+              "value": 2,
+              "description": "Charging"
+            },
+            {
+              "value": 3,
+              "description": "BreakCharging"
+            },
+            {
+              "value": 4,
+              "description": "Sweeping"
+            },
+            {
+              "value": 5,
+              "description": "Paused"
+            },
+            {
+              "value": 6,
+              "description": "GoCharging"
+            },
+            {
+              "value": 7,
+              "description": "GoWash"
+            },
+            {
+              "value": 8,
+              "description": "Remote"
+            },
+            {
+              "value": 9,
+              "description": "Charged"
+            },
+            {
+              "value": 10,
+              "description": "BuildingMap"
+            },
+            {
+              "value": 11,
+              "description": "Updating"
+            },
+            {
+              "value": 12,
+              "description": "Sleeping"
+            },
+            {
+              "value": 13,
+              "description": "Relocation"
+            },
+            {
+              "value": 14,
+              "description": "StationWorking"
+            },
+            {
+              "value": 15,
+              "description": "Error"
+            },
+            {
+              "value": 16,
+              "description": "Sweeping and Mopping"
+            },
+            {
+              "value": 17,
+              "description": "Mopping"
+            },
+            {
+              "value": 18,
+              "description": "Paused"
+            },
+            {
+              "value": 19,
+              "description": "GoChargeBreak"
+            },
+            {
+              "value": 20,
+              "description": "WashBreak"
+            },
+            {
+              "value": 21,
+              "description": "IdleInOutside"
+            }
+          ]
+        },
+        {
+          "iid": 3,
+          "type": "urn:miot-spec-v2:property:fault:00000009:xiaomi-ov71gl:1",
+          "description": "Device Fault",
+          "format": "uint32",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "No Faults"
+            }
+          ]
+        },
+        {
+          "iid": 4,
+          "type": "urn:miot-spec-v2:property:sweep-type:00000135:xiaomi-ov71gl:1",
+          "description": "Sweep Type",
+          "format": "uint8",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Sweep"
+            },
+            {
+              "value": 2,
+              "description": "Mop"
+            },
+            {
+              "value": 3,
+              "description": "Sweep and Mop"
+            },
+            {
+              "value": 4,
+              "description": "Sweep Before Mopping"
+            }
+          ]
+        },
+        {
+          "iid": 5,
+          "type": "urn:miot-spec-v2:property:room-id:00000136:xiaomi-ov71gl:1",
+          "description": "Room ID",
+          "format": "string",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        },
+        {
+          "iid": 6,
+          "type": "urn:miot-spec-v2:property:zone-id:00000137:xiaomi-ov71gl:1",
+          "description": "Zone ID",
+          "format": "string",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ]
+        },
+        {
+          "iid": 7,
+          "type": "urn:miot-spec-v2:property:clean-time:00000138:xiaomi-ov71gl:1",
+          "description": "Clean Time",
+          "format": "uint32",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "unit": "minutes",
+          "value-range": [
+            0,
+            4294967295,
+            1
+          ]
+        },
+        {
+          "iid": 8,
+          "type": "urn:miot-spec-v2:property:sweep-count:00000139:xiaomi-ov71gl:1",
+          "description": "Sweep Count",
+          "format": "uint8",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Once"
+            },
+            {
+              "value": 2,
+              "description": "Twice"
+            },
+            {
+              "value": 3,
+              "description": "Three Times"
+            }
+          ]
+        },
+        {
+          "iid": 9,
+          "type": "urn:miot-spec-v2:property:fan-level:00000016:xiaomi-ov71gl:1",
+          "description": "Fan Level",
+          "format": "uint8",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "Silent"
+            },
+            {
+              "value": 1,
+              "description": "Standard"
+            },
+            {
+              "value": 2,
+              "description": "Strong"
+            },
+            {
+              "value": 3,
+              "description": "Turbo"
+            }
+          ]
+        },
+        {
+          "iid": 10,
+          "type": "urn:miot-spec-v2:property:water-level:0000013A:xiaomi-ov71gl:1",
+          "description": "Water Level",
+          "format": "uint8",
+          "access": [
+            "read",
+            "write",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 0,
+              "description": "Off"
+            },
+            {
+              "value": 1,
+              "description": "Level 1"
+            },
+            {
+              "value": 2,
+              "description": "Level 2"
+            },
+            {
+              "value": 3,
+              "description": "Level 3"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:action:start-sweep-mop:0000280A:xiaomi-ov71gl:1",
+          "description": "Start Sweep Mop",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:action:stop-sweeping:00002805:xiaomi-ov71gl:1",
+          "description": "Stop Sweeping",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 3,
+          "type": "urn:miot-spec-v2:action:stop-and-gocharge:000028B4:xiaomi-ov71gl:1",
+          "description": "Stop And Gocharge",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 4,
+          "type": "urn:miot-spec-v2:action:start-sweep:00002804:xiaomi-ov71gl:1",
+          "description": "Start Sweep",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 5,
+          "type": "urn:miot-spec-v2:action:start-mop:00002806:xiaomi-ov71gl:1",
+          "description": "Start Mop",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 6,
+          "type": "urn:miot-spec-v2:action:start-sweep-and-mop:00002807:xiaomi-ov71gl:1",
+          "description": "Start Sweep And Mop",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 7,
+          "type": "urn:miot-spec-v2:action:pause-sweeping:00002863:xiaomi-ov71gl:1",
+          "description": "Pause Sweeping",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 8,
+          "type": "urn:miot-spec-v2:action:continue-sweep:000028AA:xiaomi-ov71gl:1",
+          "description": "Continue Sweep",
+          "in": [],
+          "out": []
+        },
+        {
+          "iid": 9,
+          "type": "urn:miot-spec-v2:action:start-room-sweep:00002826:xiaomi-ov71gl:1",
+          "description": "Start Room Sweep",
+          "in": [
+            5
+          ],
+          "out": []
+        },
+        {
+          "iid": 10,
+          "type": "urn:miot-spec-v2:action:start-zone-sweep:00002827:xiaomi-ov71gl:1",
+          "description": "Start Zone Sweep",
+          "in": [
+            6
+          ],
+          "out": []
+        }
+      ]
+    },
+    {
+      "iid": 3,
+      "type": "urn:miot-spec-v2:service:battery:00007805:xiaomi-ov71gl:1",
+      "description": "Battery",
+      "properties": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:property:battery-level:00000014:xiaomi-ov71gl:1",
+          "description": "Battery Level",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "unit": "percentage",
+          "value-range": [
+            0,
+            100,
+            1
+          ]
+        },
+        {
+          "iid": 2,
+          "type": "urn:miot-spec-v2:property:charging-state:00000015:xiaomi-ov71gl:1",
+          "description": "Charging State",
+          "format": "uint8",
+          "access": [
+            "read",
+            "notify"
+          ],
+          "value-list": [
+            {
+              "value": 1,
+              "description": "Charging"
+            },
+            {
+              "value": 2,
+              "description": "Not Charging"
+            },
+            {
+              "value": 3,
+              "description": "Not Chargeable"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:action:start-charge:00002802:xiaomi-ov71gl:1",
+          "description": "Start Charge",
+          "in": [],
+          "out": []
+        }
+      ]
+    },
+    {
+      "iid": 6,
+      "type": "urn:miot-spec-v2:service:identify:00007801:xiaomi-ov71gl:1",
+      "description": "Identify",
+      "actions": [
+        {
+          "iid": 1,
+          "type": "urn:miot-spec-v2:action:identify:00002801:xiaomi-ov71gl:1",
+          "description": "Identify",
+          "in": [],
+          "out": []
+        }
+      ]
+    }
   ]
 }
