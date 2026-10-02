@@ -86,7 +86,7 @@ from .specs.specv2entity import (
     SPEC_SERVICE_TRANS_MAP
 )
 from .common import slugify_name, slugify_did
-from .const import DOMAIN
+from .const import DATA_ACTION_ENTITIES, DOMAIN
 from .miot_client import MIoTClient
 from .miot_error import MIoTClientError, MIoTDeviceError
 from .miot_mips import MIoTDeviceState
@@ -1612,11 +1612,14 @@ class MIoTActionEntity(Entity):
         return self.miot_device.device_info
 
     async def async_added_to_hass(self) -> None:
+        self.hass.data[DOMAIN][DATA_ACTION_ENTITIES][self.entity_id] = self
         self._state_sub_id = self.miot_device.sub_device_state(
             key=f'a.{ self.service.iid}.{self.spec.iid}',
             handler=self.__on_device_state_changed)
 
     async def async_will_remove_from_hass(self) -> None:
+        self.hass.data[DOMAIN][DATA_ACTION_ENTITIES].pop(
+            self.entity_id, None)
         self.miot_device.unsub_device_state(
             key=f'a.{ self.service.iid}.{self.spec.iid}',
             sub_id=self._state_sub_id)

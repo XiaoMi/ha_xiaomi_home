@@ -49,6 +49,7 @@ import json
 from pathlib import Path
 
 DOMAIN: str = 'xiaomi_home'
+DATA_ACTION_ENTITIES: str = 'action_entities'
 
 INTEGRATION_VERSION: str = json.loads(
     (Path(__file__).parent.parent / 'manifest.json').read_text()
