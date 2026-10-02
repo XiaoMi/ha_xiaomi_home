@@ -221,5 +221,17 @@
             "storage_error": "Exceção no módulo de armazenamento da integração. Tente novamente ou volte a adicionar a integração: {error}",
             "inconsistent_account": "A informação da conta é inconsistente. Por favor, inicie sessão com a conta correta."
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "Executar ação MIoT",
+            "description": "Executa uma ação MIoT independente do Xiaomi Home e, opcionalmente, devolve a sua saída.",
+            "fields": {
+                "params": {
+                    "name": "Parâmetros",
+                    "description": "Parâmetros de entrada MIoT ordenados. Deixe vazio para ações sem parâmetros."
+                }
+            }
+        }
     }
 }

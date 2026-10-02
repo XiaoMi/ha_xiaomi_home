@@ -221,5 +221,17 @@
             "storage_error": "Integration storage module exception. Please try again or re-add the integration: {error}",
             "inconsistent_account": "Account information is inconsistent. Please login with the correct account."
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "Execute MIoT action",
+            "description": "Execute one standalone Xiaomi Home MIoT action and optionally return its output.",
+            "fields": {
+                "params": {
+                    "name": "Parameters",
+                    "description": "Ordered MIoT action input parameters. Leave empty for actions that take no parameters."
+                }
+            }
+        }
     }
 }

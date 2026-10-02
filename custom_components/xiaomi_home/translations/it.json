@@ -221,5 +221,17 @@
             "storage_error": "Eccezione del modulo di archiviazione dell'integrazione. Si prega di riprovare o riaggiungere l'integrazione: {error}",
             "inconsistent_account": "Le informazioni dell'account sono incoerenti."
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "Esegui azione MIoT",
+            "description": "Esegue un'azione MIoT autonoma di Xiaomi Home e, facoltativamente, ne restituisce l'output.",
+            "fields": {
+                "params": {
+                    "name": "Parametri",
+                    "description": "Parametri di input MIoT ordinati. Lasciare vuoto per le azioni senza parametri."
+                }
+            }
+        }
     }
 }

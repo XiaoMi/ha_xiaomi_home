@@ -221,5 +221,17 @@
             "storage_error": "集成存储模块异常。请重试或者重新添加集成：{error}",
             "inconsistent_account": "账号信息不一致。请使用正确的账号登录。"
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "执行 MIoT 操作",
+            "description": "执行一个独立的 Xiaomi Home MIoT 操作，并可选择返回其输出。",
+            "fields": {
+                "params": {
+                    "name": "参数",
+                    "description": "按顺序排列的 MIoT 操作输入参数。无参数操作请留空。"
+                }
+            }
+        }
     }
 }
