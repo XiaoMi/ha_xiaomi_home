@@ -221,5 +221,17 @@
             "storage_error": "Entegrasyon depolama modülü istisnası. Lütfen tekrar deneyin veya entegrasyonu yeniden ekleyin: {error}",
             "inconsistent_account": "Hesap bilgileri tutarsız. Lütfen doğru hesapla giriş yapın."
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "MIoT eylemini çalıştır",
+            "description": "Bağımsız bir Xiaomi Home MIoT eylemini çalıştırır ve isteğe bağlı olarak çıktısını döndürür.",
+            "fields": {
+                "params": {
+                    "name": "Parametreler",
+                    "description": "Sıralı MIoT eylem giriş parametreleri. Parametresiz eylemler için boş bırakın."
+                }
+            }
+        }
     }
 }

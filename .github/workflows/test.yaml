@@ -28,3 +28,148 @@ jobs:
       - name: Unit test with pytest
         run: |
           pytest -v -s -m github ./test/
+
+  home-assistant-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install Home Assistant test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest-homeassistant-custom-component==0.13.367
+
+      - name: Run Home Assistant runtime tests
+        run: |
+          PYTHONPATH=. pytest --asyncio-mode=auto -v -s ./ha_tests/
+
+
+  home-assistant-minimum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install Home Assistant 2024.4.4
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            -c https://raw.githubusercontent.com/home-assistant/core/2024.4.4/homeassistant/package_constraints.txt \
+            "homeassistant==2024.4.4" \
+            "construct>=2.10.56" \
+            "josepy<2.0.0" \
+            paho-mqtt numpy cryptography psutil
+
+      - name: Smoke test minimum Home Assistant version
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          import asyncio
+          import importlib.util
+          from pathlib import Path
+          import sys
+          import types
+
+          from homeassistant.core import HomeAssistant
+          from homeassistant.helpers.entity import Entity
+
+          package = types.ModuleType("custom_components.xiaomi_home")
+          package.__path__ = []
+          sys.modules["custom_components.xiaomi_home"] = package
+
+          miot_package = types.ModuleType(
+              "custom_components.xiaomi_home.miot")
+          miot_package.__path__ = []
+          sys.modules["custom_components.xiaomi_home.miot"] = miot_package
+
+          const = types.ModuleType(
+              "custom_components.xiaomi_home.miot.const")
+          const.DATA_ACTION_ENTITIES = "action_entities"
+          const.DOMAIN = "xiaomi_home"
+          sys.modules[
+              "custom_components.xiaomi_home.miot.const"] = const
+
+          class MIoTActionEntity(Entity):
+              """Minimal action entity base for the compatibility smoke."""
+
+          miot_device = types.ModuleType(
+              "custom_components.xiaomi_home.miot.miot_device")
+          miot_device.MIoTActionEntity = MIoTActionEntity
+          sys.modules[
+              "custom_components.xiaomi_home.miot.miot_device"] = miot_device
+
+          spec = importlib.util.spec_from_file_location(
+              "custom_components.xiaomi_home.services",
+              Path("custom_components/xiaomi_home/services.py"),
+          )
+          assert spec is not None and spec.loader is not None
+          services = importlib.util.module_from_spec(spec)
+          sys.modules[spec.name] = services
+          spec.loader.exec_module(services)
+
+          class OutputProperty:
+              iid = 18
+              name = "temp-history-data"
+              format_ = str
+
+          class Spec:
+              out = [OutputProperty()]
+
+          class DummyAction(MIoTActionEntity):
+              _attr_should_poll = False
+              _attr_available = True
+
+              def __init__(self) -> None:
+                  self.entity_id = "button.minimum_action"
+                  self.spec = Spec()
+
+              async def async_execute(self, params):
+                  assert params == []
+                  return ["minimum-ok"]
+
+          async def main() -> None:
+              hass = HomeAssistant(".")
+              entity = DummyAction()
+              entity.hass = hass
+              hass.data.setdefault(const.DOMAIN, {})
+              hass.data[const.DOMAIN][const.DATA_ACTION_ENTITIES] = {
+                  entity.entity_id: entity
+              }
+              services.async_setup_services(hass)
+              assert hass.services.has_service(
+                  const.DOMAIN, services.SERVICE_EXECUTE_ACTION)
+
+              response = await hass.services.async_call(
+                  const.DOMAIN,
+                  services.SERVICE_EXECUTE_ACTION,
+                  {
+                      "entity_id": entity.entity_id,
+                      "params": [],
+                  },
+                  blocking=True,
+                  return_response=True,
+              )
+              assert response == {
+                  entity.entity_id: {
+                      "output": [{
+                          "piid": 18,
+                          "name": "temp-history-data",
+                          "format": "str",
+                          "value": "minimum-ok",
+                      }],
+                      "raw_output": ["minimum-ok"],
+                  }
+              }
+
+          asyncio.run(main())
+          PY

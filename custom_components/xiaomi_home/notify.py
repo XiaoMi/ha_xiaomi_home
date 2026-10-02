@@ -120,36 +120,10 @@ class Notify(MIoTActionEntity, NotifyEntity):
                 'action exec failed, %s(%s), invalid action params, %s',
                 self.name, self.entity_id, message)
             return
-        in_value: list[dict] = []
-        for index, prop in enumerate(self.spec.in_):
-            if prop.format_ == str:
-                if isinstance(in_list[index], (bool, int, float, str)):
-                    in_value.append(
-                        {'piid': prop.iid, 'value': str(in_list[index])})
-                    continue
-            elif prop.format_ == bool:
-                if isinstance(in_list[index], (bool, int)):
-                    # yes, no, on, off, true, false and other bool types
-                    # will also be parsed as 0 and 1 of int.
-                    in_value.append(
-                        {'piid': prop.iid, 'value': bool(in_list[index])})
-                    continue
-            elif prop.format_ == float:
-                if isinstance(in_list[index], (int, float)):
-                    in_value.append(
-                        {'piid': prop.iid, 'value': in_list[index]})
-                    continue
-            elif prop.format_ == int:
-                if isinstance(in_list[index], int):
-                    in_value.append(
-                        {'piid': prop.iid, 'value': in_list[index]})
-                    continue
-            # Invalid params type, raise error.
+        try:
+            await self.async_execute(in_list)
+        except ValueError:
             _LOGGER.error(
-                'action exec failed, %s(%s), invalid params item, '
-                'which item(%s) in the list must be %s, %s type was %s, %s',
-                self.name, self.entity_id, prop.description_trans,
-                prop.format_, in_list[index], type(
-                    in_list[index]).__name__, message)
-            return
-        await self.action_async(in_list=in_value)
+                'action exec failed, %s(%s), invalid action params, %s',
+                self.name, self.entity_id, message)
+

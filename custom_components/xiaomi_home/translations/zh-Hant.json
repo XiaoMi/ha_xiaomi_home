@@ -221,5 +221,17 @@
             "storage_error": "集成存儲模塊異常。請重試或者重新添加集成：{error}",
             "inconsistent_account": "帳號信息不一致。請使用正確的帳號登錄。"
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "執行 MIoT 動作",
+            "description": "執行一個獨立的 Xiaomi Home MIoT 動作，並可選擇回傳其輸出。",
+            "fields": {
+                "params": {
+                    "name": "參數",
+                    "description": "依順序排列的 MIoT 動作輸入參數。無參數動作請留空。"
+                }
+            }
+        }
     }
 }

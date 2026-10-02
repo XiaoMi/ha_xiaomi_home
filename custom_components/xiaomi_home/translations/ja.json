@@ -221,5 +221,17 @@
             "storage_error": "統合ストレージモジュールに異常があります。再試行するか、統合を再度追加してください：{error}",
             "inconsistent_account": "アカウント情報が一致しません。正しいアカウントでログインしてください。"
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "MIoT アクションを実行",
+            "description": "Xiaomi Home の独立した MIoT アクションを実行し、必要に応じて出力を返します。",
+            "fields": {
+                "params": {
+                    "name": "パラメーター",
+                    "description": "順序付きの MIoT アクション入力パラメーター。パラメーターのないアクションでは空のままにします。"
+                }
+            }
+        }
     }
 }

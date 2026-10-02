@@ -221,5 +221,17 @@
             "storage_error": "Erreur de stockage pour l'intégration. Veuillez réessayer ou réajouter l'intégration : {error}",
             "inconsistent_account": "Les informations de compte sont incohérentes. Veuillez vous connecter avec les informations de compte correctes."
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "Exécuter une action MIoT",
+            "description": "Exécute une action MIoT autonome de Xiaomi Home et renvoie éventuellement sa sortie.",
+            "fields": {
+                "params": {
+                    "name": "Paramètres",
+                    "description": "Paramètres d’entrée MIoT ordonnés. Laisser vide pour les actions sans paramètres."
+                }
+            }
+        }
     }
 }

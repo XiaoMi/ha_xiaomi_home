@@ -1,0 +1,16 @@
+execute_action:
+  fields:
+    entity_id:
+      required: true
+      selector:
+        entity:
+          integration: xiaomi_home
+          domain:
+            - button
+            - notify
+          multiple: false
+    params:
+      required: false
+      default: []
+      selector:
+        object:

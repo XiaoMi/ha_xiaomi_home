@@ -85,4 +85,4 @@ class Button(MIoTActionEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        return await self.action_async()
+        await self.async_execute([])

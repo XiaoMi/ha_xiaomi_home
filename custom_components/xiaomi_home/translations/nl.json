@@ -221,5 +221,17 @@
             "storage_error": "Integratie opslagmodule-exceptie. Probeer het opnieuw of voeg de integratie opnieuw toe: {error}",
             "inconsistent_account": "Accountinformatie is inconsistent. Log in met het juiste account."
         }
+    },
+    "services": {
+        "execute_action": {
+            "name": "MIoT-actie uitvoeren",
+            "description": "Voert een zelfstandige Xiaomi Home MIoT-actie uit en retourneert optioneel de uitvoer.",
+            "fields": {
+                "params": {
+                    "name": "Parameters",
+                    "description": "Geordende MIoT-invoerparameters. Laat leeg voor acties zonder parameters."
+                }
+            }
+        }
     }
 }
