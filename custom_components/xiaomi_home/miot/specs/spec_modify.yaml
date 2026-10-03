@@ -163,6 +163,12 @@ urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-cgd1st:1:
 urn:miot-spec-v2:device:air-monitor:0000A008:cgllc-s1:1:
   prop.2.5:
     name: voc-density
+urn:miot-spec-v2:device:air-monitor:0000A008:miaomiaoce-co2:1:
+  prop.3.1029:
+    value-range:
+    - 400
+    - 5000
+    - 1
 urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:1: urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3
 urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:2: urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3
 urn:miot-spec-v2:device:air-purifier:0000A007:zhimi-ua1a:3:
