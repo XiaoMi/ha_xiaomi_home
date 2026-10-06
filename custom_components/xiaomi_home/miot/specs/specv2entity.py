@@ -431,21 +431,10 @@ SPEC_DEVICE_TRANS_MAP: dict = {
                         'longitude': {'read'},
                         'latitude': {'read'}
                     }
-                },
-                'optional': {
-                    'properties': {'area-id'}
                 }
             }
         },
-        'optional': {
-            'battery': {
-                'required': {
-                    'properties': {
-                        'battery-level': {'read'}
-                    }
-                }
-            }
-        },
+        'optional': {},
         'entity': 'device_tracker'
     }
 }
