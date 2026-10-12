@@ -71,6 +71,12 @@ async def async_setup_entry(
     for miot_device in device_list:
         for prop in miot_device.prop_list.get('select', []):
             new_entities.append(Select(miot_device=miot_device, spec=prop))
+        if miot_device.model == 'daikin.airfresh.k33':
+            for entity_data in miot_device.entity_list.get('fan', []):
+                for prop in entity_data.props:
+                    if prop.name == 'fan-level':
+                        new_entities.append(
+                            Select(miot_device=miot_device, spec=prop))
 
     if new_entities:
         async_add_entities(new_entities)
@@ -82,15 +88,33 @@ class Select(MIoTPropertyEntity, SelectEntity):
     def __init__(self, miot_device: MIoTDevice, spec: MIoTSpecProperty) -> None:
         """Initialize the Select."""
         super().__init__(miot_device=miot_device, spec=spec)
+        self._custom_options_map: dict | None = None
+        if miot_device.model == 'daikin.airfresh.k33' and spec.name == 'fan-level':
+            self._custom_options_map = {
+                1: '50%',
+                2: '100%',
+            }
         if self._value_list:
-            self._attr_options = self._value_list.descriptions
+            self._attr_options = (
+                list(self._custom_options_map.values())
+                if self._custom_options_map
+                else self._value_list.descriptions
+            )
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
+        if self._custom_options_map:
+            reverse_map = {
+                value: key for key, value in self._custom_options_map.items()
+            }
+            await self.set_property_async(value=reverse_map.get(option))
+            return
         await self.set_property_async(
             value=self.get_vlist_value(description=option))
 
     @property
     def current_option(self) -> Optional[str]:
         """Return the current selected option."""
+        if self._custom_options_map:
+            return self._custom_options_map.get(self._value)
         return self.get_vlist_description(value=self._value)
