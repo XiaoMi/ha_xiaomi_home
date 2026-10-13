@@ -214,6 +214,26 @@ class MipsDeviceState:
     handler_ctx: Any = None
 
 
+class _MipsCloudMQTTClient(Client):
+    """Allow literal hashes in Xiaomi cloud device identifiers only."""
+
+    @staticmethod
+    def _filter_wildcard_len_check(sub: bytes) -> int:
+        # Xiaomi's cloud broker permits hashes inside a DID, although standard
+        # MQTT topic filters do not. Keep all other paho validation unchanged.
+        # pylint: disable=protected-access
+        parts: list[bytes] = sub.split(b'/')
+        if (
+            len(parts) >= 4 and parts[0] == b'device'
+            and len(parts[1]) > 1 and b'#' in parts[1]
+            and (parts[2] == b'state' or parts[2:4] in (
+                [b'up', b'properties_changed'], [b'up', b'event_occured']))
+        ):
+            parts[1] = parts[1].replace(b'#', b'_')
+            return Client._filter_wildcard_len_check(b'/'.join(parts))
+        return Client._filter_wildcard_len_check(sub)
+
+
 class _MipsClient(ABC):
     """MIoT Pub/Sub client."""
     # pylint: disable=unused-argument
@@ -237,6 +257,7 @@ class _MipsClient(ABC):
 
     _mqtt_logger: Optional[logging.Logger]
     _mqtt: Optional[Client]
+    _mqtt_client_class: type[Client] = Client
     _mqtt_fd: int
     _mqtt_timer: Optional[asyncio.TimerHandle]
     _mqtt_state: bool
@@ -615,7 +636,8 @@ class _MipsClient(ABC):
         self.log_info('mips_loop_thread start')
         # mqtt init for API_VERSION2,
         # callback_api_version=CallbackAPIVersion.VERSION2,
-        self._mqtt = Client(client_id=self._client_id, protocol=MQTTv5)
+        self._mqtt = self._mqtt_client_class(
+            client_id=self._client_id, protocol=MQTTv5)
         self._mqtt.enable_logger(logger=self._mqtt_logger)
         # Set mqtt config
         if self._username:
@@ -854,6 +876,7 @@ class _MipsClient(ABC):
 
 class MipsCloudClient(_MipsClient):
     """MIoT Pub/Sub Cloud Client."""
+    _mqtt_client_class: type[Client] = _MipsCloudMQTTClient
     # pylint: disable=unused-argument
     # pylint: disable=inconsistent-quotes
     _msg_matcher: MIoTMatcher
