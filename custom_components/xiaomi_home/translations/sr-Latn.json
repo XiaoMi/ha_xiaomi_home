@@ -1,0 +1,225 @@
+{
+    "config": {
+        "flow_title": "Xiaomi Home Integration",
+        "step": {
+            "eula": {
+                "title": "Obaveštenje o riziku",
+                "description": "1. Vaše Xiaomi korisničke informacije i informacije o uređajima biće sačuvane u sistemu Home Assistant. **Xiaomi ne može da garantuje bezbednost mehanizma skladištenja Home Assistanta**. Vi ste odgovorni za sprečavanje krađe svojih informacija.\r\n2. Ovu integraciju održava zajednica otvorenog koda. Mogu postojati problemi sa stabilnošću ili druge poteškoće. Kada naiđete na probleme ili greške u ovoj integraciji, **treba da potražite pomoć od zajednice otvorenog koda, a ne da kontaktirate Xiaomi korisničku podršku**.\r\n3. Potrebne su vam određene tehničke sposobnosti da održavate svoje lokalno radno okruženje. Integracija nije prilagođena početnicima.\r\n4. Molimo pročitajte README fajl pre početka.\n\n5. Da biste obezbedili stabilno korišćenje integracije i sprečili zloupotrebu interfejsa, **ova integracija je dozvoljena samo za korišćenje u Home Assistant-u. Za detalje pogledajte LICENCU**.",
+                "data": {
+                    "eula": "Svestan sam gore navedenih rizika i spreman sam da dobrovoljno preuzmem sve rizike povezane sa korišćenjem integracije."
+                }
+            },
+            "auth_config": {
+                "title": "Osnovna konfiguracija",
+                "description": "### Region prijave\r\nIzaberite region svog Xiaomi naloga. Možete ga pronaći u Xiaomi Home aplikaciji > Profil (u meniju na dnu) > Dodatna podešavanja > O Xiaomi Home.\r\n### Jezik\r\nIzaberite jezik naziva uređaja i entiteta. Neke rečenice bez prevoda biće prikazane na engleskom.\r\n### OAuth2 URL za preusmeravanje\r\nOAuth2 adresa za preusmeravanje autentifikacije je **[{oauth_redirect_url}]({oauth_redirect_url})**. Home Assistant mora biti u istoj lokalnoj mreži kao trenutni terminal (npr. lični računar) i terminal mora imati pristup početnoj stranici Home Assistanta preko ove adrese. U suprotnom, autentifikacija prijave može neuspeti.\r\n### Integrisana mrežna konfiguracija\r\nProverite da li lokalna mreža funkcioniše ispravno i da li su povezani mrežni resursi dostupni. **Preporučuje se da ovo izaberete prilikom prvog dodavanja.**\r\n### Napomena\r\n- Za korisnike sa stotinama ili više Mi Home uređaja, inicijalno dodavanje integracije će potrajati. Molimo budite strpljivi.\r\n- Ako Home Assistant radi u Docker okruženju, molimo obezbedite da je Docker mrežni režim podešen na host, u suprotnom funkcionalnost lokalne kontrole možda neće raditi ispravno.\r\n- Funkcionalnost lokalne kontrole integracije ima određene zavisnosti. Molimo pažljivo pročitajte README.",
+                "data": {
+                    "cloud_server": "Region prijave",
+                    "integration_language": "Jezik",
+                    "oauth_redirect_url": "OAuth2 URL za preusmeravanje",
+                    "network_detect_config": "Integrisana mrežna konfiguracija"
+                }
+            },
+            "network_detect_config": {
+                "title": "Integrisana mrežna konfiguracija",
+                "description": "## Uvod u korišćenje\r\n### Adresa za detekciju mreže\r\nKoristi se za proveru da li mreža funkcioniše ispravno. Ako nije postavljena, koristiće se podrazumevana adresa sistema. Ako provera podrazumevane adrese ne uspe, možete pokušati da unesete prilagođenu adresu.\r\n- Možete uneti više adresa za detekciju, odvojene zarezom, na primer `8.8.8.8,{bing_url}`\r\n- Ako je IP adresa, detekcija će se vršiti putem pinga. Ako je HTTP(s) adresa, detekcija će se vršiti putem HTTP GET zahteva.\r\n- Ako želite da vratite podrazumevanu adresu sistema za detekciju, unesite zarez `,` i kliknite 'Next'.\r\n- **Ova konfiguracija je globalna i promene će uticati na druge instance integracije. Molimo menjajte pažljivo.**\r\n### Provera mrežnih zavisnosti\r\nProverite sledeće mrežne zavisnosti jednu po jednu da biste videli da li su dostupne. Ako povezane adrese nisu dostupne, to će izazvati probleme sa integracijom.\r\n- OAuth2 adresa za prijavu: `{oauth2_auth_url}`.\r\n- Xiaomi HTTP API adresa: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API adresa: `{spec_api_url}`.\r\n- Xiaomi MQTT Broker adresa: `mqtts://{broker_host}`.",
+                "data": {
+                    "network_detect_addr": "Adresa za detekciju mreže",
+                    "check_network_deps": "Proveri mrežne zavisnosti"
+                }
+            },
+            "oauth_error": {
+                "title": "Greška pri prijavi",
+                "description": "Kliknite NEXT da pokušate ponovo."
+            },
+            "homes_select": {
+                "title": "Izbor doma i uređaja",
+                "description": "## Uvod\r\n### Uvoz uređaja iz doma\r\nIntegracija će dodati uređaje iz izabranog doma.\r\n### Režim sinhronizacije naziva prostorija\r\nPrilikom sinhronizacije uređaja iz Mi Home aplikacije u Home Assistant, imenovanje prostorija u Home Assistant-u pratiće sledeća pravila. Napomena: proces sinhronizacije neće menjati podešavanja doma i prostorija u Mi Home aplikaciji.\r\n- Ne sinhronizuj: Uređaj neće biti dodat ni u jednu prostoriju.\r\n- Ostale opcije: Prostorija u koju je uređaj dodat biće imenovana prema nazivu doma ili prostorije u Mi Home aplikaciji.\r\n### Napredna podešavanja\r\nPrikaži napredna podešavanja radi izmene profesionalnih konfiguracionih opcija integracije.\r\n\r\n&emsp;\r\n### {nick_name} Zdravo! Molimo izaberite dom u koji želite da dodate uređaj.",
+                "data": {
+                    "home_infos": "Uvoz uređaja iz doma",
+                    "area_name_rule": "Režim sinhronizacije naziva prostorija",
+                    "advanced_options": "Napredna podešavanja"
+                }
+            },
+            "advanced_options": {
+                "title": "Napredna podešavanja",
+                "description": "## Uvod\r\n### Osim ako niste potpuno sigurni u značenje sledećih opcija, zadržite podrazumevana podešavanja.\r\n### Filter uređaja\r\nPodržava filtriranje uređaja po nazivu prostorije i tipu uređaja, a takođe podržava i filtriranje po dimenzijama uređaja.\r\n### Režim kontrole\r\n- Auto: Kada postoji dostupan Xiaomi centralni hab gejtvej u lokalnoj mreži, Home Assistant će prioritetno slati komande za kontrolu uređaja preko centralnog hab gejtveja radi lokalne kontrole. Ako nema centralnog hab gejtveja u lokalnoj mreži, pokušaće da šalje komande preko Xiaomi OT protokola radi lokalne kontrole. Tek kada navedeni uslovi lokalne kontrole nisu ispunjeni, komande za kontrolu uređaja biće poslate preko oblaka.\r\n- Cloud: Sve komande za kontrolu se šalju preko oblaka.\r\n### Režim debaga za akcije\r\nZa metode definisane od strane uređaja MIoT-Spec-V2, pored generisanja entiteta obaveštenja, biće generisan i entitet tekstualnog polja za unos. Možete ga koristiti za slanje komandi uređaju tokom debagovanja.\r\n### Sakrij nestandardno generisane entitete\r\nSakrij entitete generisane od nestandardnih MIoT-Spec-V2 instanci sa imenima koja počinju sa \"*\".\r\n### Režim prikaza binarnih senzora\r\nPrikaži binarne senzore u Xiaomi Home kao tekstualne entitete senzora ili binarne entitete senzora。\r\n### Prikaži obaveštenja o promeni statusa uređaja\r\nPrikaži detaljna obaveštenja o promeni statusa uređaja, prikazujući samo izabrana obaveštenja.",
+                "data": {
+                    "devices_filter": "Filter uređaja",
+                    "ctrl_mode": "Režim kontrole",
+                    "action_debug": "Režim debaga za akcije",
+                    "hide_non_standard_entities": "Sakrij nestandardno generisane entitete",
+                    "display_binary_mode": "Režim prikaza binarnih senzora",
+                    "display_devices_changed_notify": "Prikaži obaveštenja o promeni statusa uređaja"
+                }
+            },
+            "devices_filter": {
+                "title": "Filter uređaja",
+                "description": "## Uputstvo za korišćenje\r\nPodržava filtriranje uređaja po nazivu prostorije u domu, tipu pristupa uređaja i modelu uređaja, a takođe podržava i filtriranje po dimenzijama uređaja. Logika filtriranja je sledeća:\r\n- Prvo, prema statističkoj logici, dobija se unija ili presek svih uključenih stavki, zatim se dobija presek ili unija isključenih stavki, i na kraju se od [uključenog zbirnog rezultata] oduzima [isključen zbirni rezultat] da bi se dobio [rezultat filtriranja].\r\n- Ako nisu izabrane uključene stavke, to znači da su sve uključene.\r\n### Režim filtriranja\r\n- Isključi: Uklanja neželjene stavke.\r\n- Uključi: Uključuje željene stavke.\r\n### Statistička logika\r\n- AND logika: Uzima presek svih stavki u istom režimu.\r\n- OR logika: Uzima uniju svih stavki u istom režimu.\r\n\r\nMožete takođe otići na stranicu [Konfiguracija > Ažuriraj listu uređaja] u okviru integracije, označiti [Filter uređaja] da biste ponovo filtrirali.",
+                "data": {
+                    "room_filter_mode": "Filter prostorija",
+                    "room_list": "Prostorije",
+                    "type_filter_mode": "Filter tipa povezivanja uređaja",
+                    "type_list": "Tip povezivanja uređaja",
+                    "model_filter_mode": "Filter modela uređaja",
+                    "model_list": "Model uređaja",
+                    "devices_filter_mode": "Filter uređaja",
+                    "device_list": "Lista uređaja",
+                    "statistics_logic": "Statistička logika"
+                }
+            }
+        },
+        "progress": {
+            "oauth": "### {link_left}Kliknite ovde da se prijavite{link_right}\r\n(Posle uspešne prijave bićete automatski preusmereni na sledeću stranicu)"
+        },
+        "error": {
+            "eula_not_agree": "Molimo pročitajte obaveštenje o riziku.",
+            "get_token_error": "Neuspešno preuzimanje informacija o autorizaciji prijave (OAuth token).",
+            "get_homeinfo_error": "Neuspešno preuzimanje informacija o domu.",
+            "mdns_discovery_error": "Izuzetak u lokalnom servisu za otkrivanje uređaja.",
+            "get_cert_error": "Neuspešno preuzimanje sertifikata centralnog hab gejtveja.",
+            "no_family_selected": "Nije izabran dom.",
+            "no_devices": "Nema uređaja u izabranom domu. Molimo izaberite dom sa uređajima i nastavite.",
+            "no_filter_devices": "Filtrirani uređaji su prazni. Molimo izaberite validne kriterijume filtera i nastavite.",
+            "no_central_device": "[Režim centralnog hab gejtveja] zahteva Xiaomi centralni hab gejtvej dostupan u lokalnoj mreži gde postoji Home Assistant. Proverite da li izabrani dom ispunjava zahtev.",
+            "invalid_network_addr": "Otkrivena nevažeća IP ili HTTP adresa, unesite važeću adresu.",
+            "invalid_ip_addr": "Otkrivena nedostupna IP adresa, unesite važeću IP adresu.",
+            "invalid_http_addr": "Otkrivena nedostupna HTTP adresa, unesite važeću HTTP adresu.",
+            "invalid_default_addr": "Podrazumevana adresa za detekciju mreže je nedostupna, proverite mrežnu konfiguraciju ili koristite prilagođenu adresu za detekciju mreže.",
+            "unreachable_oauth2_host": "Nije moguće pristupiti OAuth2 adresi za prijavu, proverite mrežnu konfiguraciju.",
+            "unreachable_http_host": "Nije moguće pristupiti Xiaomi HTTP API adresi, proverite mrežnu konfiguraciju.",
+            "unreachable_spec_host": "Nije moguće pristupiti Xiaomi SPEC API adresi, proverite mrežnu konfiguraciju.",
+            "unreachable_mqtt_broker": "Nije moguće pristupiti Xiaomi MQTT Broker adresi, proverite mrežnu konfiguraciju."
+        },
+        "abort": {
+            "ha_uuid_get_failed": "Neuspešno preuzimanje Home Assistant UUID-a.",
+            "network_connect_error": "Konfiguracija nije uspela. Mrežna konekcija je nenormalna. Proverite mrežnu konfiguraciju uređaja.",
+            "already_configured": "Konfiguracija za ovog korisnika je već završena. Molimo idite na stranicu integracije i kliknite dugme KONFIGURIŠI za izmene.",
+            "invalid_auth_info": "Informacije o autentifikaciji su istekle. Molimo idite na stranicu integracije i kliknite dugme KONFIGURIŠI da ponovo izvršite autentifikaciju.",
+            "config_flow_error": "Greška u konfiguraciji integracije: {error}."
+        }
+    },
+    "options": {
+        "step": {
+            "auth_config": {
+                "title": "Konfiguracija autentifikacije",
+                "description": "Lokalne informacije o autentifikaciji su istekle. Molimo ponovo pokrenite proces autentifikacije.\r\n### Trenutni region prijave: {cloud_server}\r\n### OAuth2 URL za preusmeravanje\r\nOAuth2 adresa za preusmeravanje autentifikacije je **[{oauth_redirect_url}]({oauth_redirect_url})**. Home Assistant mora biti u istoj lokalnoj mreži kao trenutni terminal (npr. lični računar) i terminal mora imati pristup početnoj stranici Home Assistanta preko ove adrese. U suprotnom, autentifikacija prijave može neuspeti.",
+                "data": {
+                    "oauth_redirect_url": "OAuth2 URL za preusmeravanje"
+                }
+            },
+            "oauth_error": {
+                "title": "Došlo je do greške tokom prijave.",
+                "description": "Kliknite NEXT da pokušate ponovo."
+            },
+            "config_options": {
+                "title": "Opcije konfiguracije",
+                "description": "### Zdravo, {nick_name}\r\n\r\nXiaomi ID: {uid}\r\nTrenutni region prijave: {cloud_server}\r\nID instance integracije: {instance_id}\r\n\r\nMolimo izaberite opcije koje želite da konfigurišete, zatim kliknite NEXT.",
+                "data": {
+                    "integration_language": "Jezik integracije",
+                    "update_user_info": "Ažuriraj korisničke informacije",
+                    "update_devices": "Ažuriraj listu uređaja",
+                    "action_debug": "Režim debaga za akcije",
+                    "hide_non_standard_entities": "Sakrij nestandardno kreirane entitete",
+                    "display_binary_mode": "Režim prikaza binarnih senzora",
+                    "display_devices_changed_notify": "Prikaži obaveštenja o promeni statusa uređaja",
+                    "update_trans_rules": "Ažuriraj pravila transformacije entiteta",
+                    "update_lan_ctrl_config": "Ažuriraj konfiguraciju LAN kontrole",
+                    "network_detect_config": "Integrisana mrežna konfiguracija",
+                    "cover_dead_zone_width": "Širina mrtve zone pokrivača"
+                }
+            },
+            "update_user_info": {
+                "title": "Ažuriranje korisničkog nadimka",
+                "description": "Zdravo {nick_name}, možete izmeniti svoj prilagođeni nadimak ispod.",
+                "data": {
+                    "nick_name": "Nadimak"
+                }
+            },
+            "homes_select": {
+                "title": "Ponovni izbor doma i uređaja",
+                "description": "## Uputstvo za korišćenje\r\n### Uvoz uređaja iz doma\r\nIntegracija će dodati uređaje iz izabranih domova.\r\n### Filter uređaja\r\nPodržava filtriranje uređaja po nazivu prostorije u domu, tipu pristupa uređaja i modelu uređaja, a takođe podržava i filtriranje po dimenzijama uređaja. **{local_count}** uređaja je filtrirano.\r\n### Režim kontrole\r\n- Auto: Kada postoji dostupan Xiaomi centralni hab gejtvej u lokalnoj mreži, Home Assistant će prioritetno slati komande za kontrolu uređaja preko centralnog hab gejtveja radi lokalne kontrole. Ako nema centralnog hab gejtveja u lokalnoj mreži, pokušaće da šalje komande preko Xiaomi LAN kontrolne funkcije. Tek kada navedeni uslovi lokalne kontrole nisu ispunjeni, komande za kontrolu uređaja biće poslate preko oblaka.\r\n- Cloud: Sve komande za kontrolu se šalju preko oblaka.",
+                "data": {
+                    "home_infos": "Uvoz uređaja iz doma",
+                    "devices_filter": "Filter uređaja",
+                    "ctrl_mode": "Režim kontrole"
+                }
+            },
+            "devices_filter": {
+                "title": "Filter uređaja",
+                "description": "## Uputstvo za korišćenje\r\nPodržava filtriranje uređaja po nazivu prostorije u domu, tipu pristupa uređaja i modelu uređaja, a takođe podržava i filtriranje po dimenzijama uređaja. Logika filtriranja je sledeća:\r\n- Prvo, prema statističkoj logici, dobija se unija ili presek svih uključenih stavki, zatim se dobija presek ili unija isključenih stavki, i na kraju se od [uključenog zbirnog rezultata] oduzima [isključen zbirni rezultat] da bi se dobio [rezultat filtriranja].\r\n- Ako nisu izabrane uključene stavke, to znači da su sve uključene.\r\n### Režim filtriranja\r\n- Isključi: Uklanja neželjene stavke.\r\n- Uključi: Uključuje željene stavke.\r\n### Statistička logika\r\n- AND logika: Uzima presek svih stavki u istom režimu.\r\n- OR logika: Uzima uniju svih stavki u istom režimu.\r\n\r\nMožete takođe otići na stranicu [Konfiguracija > Ažuriraj listu uređaja] u okviru integracije, označiti [Filter uređaja] da biste ponovo filtrirali.",
+                "data": {
+                    "room_filter_mode": "Filter prostorija",
+                    "room_list": "Prostorije",
+                    "type_filter_mode": "Filter tipa povezivanja uređaja",
+                    "type_list": "Tip povezivanja uređaja",
+                    "model_filter_mode": "Filter modela uređaja",
+                    "model_list": "Model uređaja",
+                    "devices_filter_mode": "Filter uređaja",
+                    "device_list": "Lista uređaja",
+                    "statistics_logic": "Statistička logika"
+                }
+            },
+            "update_trans_rules": {
+                "title": "Ažuriranje pravila transformacije entiteta",
+                "description": "## Uputstvo za korišćenje\r\n- Ažurirajte informacije o entitetima uređaja u trenutnoj instanci integracije, uključujući MIoT-Spec-V2 višejezičnu konfiguraciju, prevod booleana i filtriranje modela.\r\n- **Upozorenje**: Ovo je globalna konfiguracija i ažuriraće lokalni keš. Uticaće na sve instance integracije.\r\n- Ova operacija će potrajati, budite strpljivi. Označite \"Potvrdi ažuriranje\" i kliknite \"Next\" da biste započeli ažuriranje **{urn_count}** pravila, u suprotnom preskočite ažuriranje.",
+                "data": {
+                    "confirm": "Potvrdi ažuriranje"
+                }
+            },
+            "update_lan_ctrl_config": {
+                "title": "Ažuriranje konfiguracije LAN kontrole",
+                "description": "## Uputstvo za korišćenje\r\nAžurirajte konfiguracije za Xiaomi LAN kontrolnu funkciju. Kada oblak i centralni hab gejtvej ne mogu da kontrolišu uređaje, integracija će pokušati da kontroliše uređaje preko LAN-a. Ako mrežna kartica nije izabrana, LAN kontrolna funkcija neće imati efekta.\r\n- Podržani su samo MIoT-Spec-V2 kompatibilni IP uređaji u LAN mreži. Neki uređaji proizvedeni pre 2020. možda ne podržavaju LAN kontrolu ili LAN pretplatu.\r\n- Molimo izaberite mrežnu karticu(e) na istoj mreži kao uređaji koji se kontrolišu. Može se izabrati više mrežnih kartica. Ako Home Assistant ima dve ili više veza ka lokalnoj mreži zbog višestrukog izbora mrežnih kartica, preporučuje se da izaberete onu sa najboljom mrežnom konekcijom, u suprotnom može negativno uticati na uređaje.\r\n- Ako postoje terminalni uređaji (Xiaomi zvučnik sa ekranom, mobilni telefon itd.) u LAN mreži koji podržavaju lokalnu kontrolu, omogućavanje LAN pretplate može izazvati anomalije u lokalnoj automatizaciji i uređajima.\r\n- **Upozorenje**: Ovo je globalna konfiguracija. Uticaće na sve instance integracije. Koristite pažljivo.\r\n{notice_net_dup}",
+                "data": {
+                    "net_interfaces": "Molimo izaberite mrežnu karticu za korišćenje",
+                    "enable_subscribe": "Omogući LAN pretplatu"
+                }
+            },
+            "network_detect_config": {
+                "title": "Integrisana mrežna konfiguracija",
+                "description": "## Uvod u korišćenje\r\n### Adresa za detekciju mreže\r\nKoristi se za proveru da li mreža funkcioniše ispravno. Ako nije postavljena, koristiće se podrazumevana adresa sistema. Ako provera podrazumevane adrese ne uspe, možete pokušati da unesete prilagođenu adresu.\r\n- Možete uneti više adresa za detekciju, odvojene zarezom, na primer `8.8.8.8,{bing_url}`\r\n- Ako je IP adresa, detekcija će se vršiti putem pinga. Ako je HTTP(s) adresa, detekcija će se vršiti putem HTTP GET zahteva.\r\n- Ako želite da vratite podrazumevanu adresu sistema za detekciju, unesite zarez `,` i kliknite 'Next'.\r\n- **Ova konfiguracija je globalna i promene će uticati na druge instance integracije. Molimo menjajte pažljivo.**\r\n### Provera mrežnih zavisnosti\r\nProverite sledeće mrežne zavisnosti jednu po jednu da biste videli da li su dostupne. Ako povezane adrese nisu dostupne, to će izazvati probleme sa integracijom.\r\n- OAuth2 adresa za prijavu: `{oauth2_auth_url}`.\r\n- Xiaomi HTTP API adresa: `https://{http_host}/app/v2/ha/oauth/get_token`.\r\n- Xiaomi SPEC API adresa: `{spec_api_url}`.\r\n- Xiaomi MQTT Broker adresa: `mqtts://{broker_host}`.",
+                "data": {
+                    "network_detect_addr": "Adresa za detekciju mreže",
+                    "check_network_deps": "Proveri mrežne zavisnosti"
+                }
+            },
+            "config_confirm": {
+                "title": "Potvrda konfiguracije",
+                "description": "Zdravo **{nick_name}**, molimo potvrdite najnovije informacije o konfiguraciji i zatim kliknite na SUBMIT.\r\nIntegracija će se ponovo učitati koristeći ažuriranu konfiguraciju.\r\n\r\nJezik integracije:\t{lang_new}\r\nNadimak:\t{nick_name_new}\r\nRežim debaga za akcije:\t{action_debug}\r\nSakrij nestandardno kreirane entitete:\t{hide_non_standard_entities}\r\nŠirina mrtve zone pokrivača:\t{cover_width_new}\r\nPrikaz obaveštenja o promeni statusa uređaja:\t{display_devices_changed_notify}\r\nPromene uređaja:\tDodato **{devices_add}** uređaja, uklonjeno **{devices_remove}** uređaja\r\nPromene pravila transformacije:\tUkupno **{trans_rules_count}** pravila, ažurirano **{trans_rules_count_success}** pravila",
+                "data": {
+                    "confirm": "Potvrdite promenu"
+                }
+            }
+        },
+        "progress": {
+            "oauth": "### {link_left}Kliknite ovde da se ponovo prijavite{link_right}"
+        },
+        "error": {
+            "not_auth": "Niste prijavljeni. Kliknite na link za prijavu da biste potvrdili identitet korisnika.",
+            "get_token_error": "Neuspešno preuzimanje informacija o autorizaciji prijave (OAuth token).",
+            "get_homeinfo_error": "Neuspešno preuzimanje informacija o domu.",
+            "get_cert_error": "Neuspešno preuzimanje sertifikata centralnog hab gejtveja.",
+            "no_devices": "Nema uređaja u izabranom domu. Molimo izaberite dom sa uređajima i nastavite.",
+            "no_filter_devices": "Filtrirani uređaji su prazni. Molimo izaberite validne kriterijume filtera i nastavite.",
+            "no_family_selected": "Nije izabran dom.",
+            "no_central_device": "[Režim centralnog hab gejtveja] zahteva Xiaomi centralni hab gejtvej dostupan u lokalnoj mreži gde postoji Home Assistant. Proverite da li izabrani dom ispunjava zahtev.",
+            "mdns_discovery_error": "Izuzetak u lokalnom servisu za otkrivanje uređaja.",
+            "update_config_error": "Neuspešno ažuriranje informacija o konfiguraciji.",
+            "not_confirm": "Promene nisu potvrđene. Molimo potvrdite promenu pre slanja.",
+            "invalid_network_addr": "Otkrivena nevažeća IP ili HTTP adresa, unesite važeću adresu.",
+            "invalid_ip_addr": "Otkrivena nedostupna IP adresa, unesite važeću IP adresu.",
+            "invalid_http_addr": "Otkrivena nedostupna HTTP adresa, unesite važeću HTTP adresu.",
+            "invalid_default_addr": "Podrazumevana adresa za detekciju mreže je nedostupna, proverite mrežnu konfiguraciju ili koristite prilagođenu adresu za detekciju mreže.",
+            "unreachable_oauth2_host": "Nije moguće pristupiti OAuth2 adresi za prijavu, proverite mrežnu konfiguraciju.",
+            "unreachable_http_host": "Nije moguće pristupiti Xiaomi HTTP API adresi, proverite mrežnu konfiguraciju.",
+            "unreachable_spec_host": "Nije moguće pristupiti Xiaomi SPEC API adresi, proverite mrežnu konfiguraciju.",
+            "unreachable_mqtt_broker": "Nije moguće pristupiti Xiaomi MQTT Broker adresi, proverite mrežnu konfiguraciju."
+        },
+        "abort": {
+            "network_connect_error": "Konfiguracija nije uspela. Mrežna konekcija je nenormalna. Proverite mrežnu konfiguraciju uređaja.",
+            "options_flow_error": "Greška pri ponovnoj konfiguraciji integracije: {error}",
+            "re_add": "Ponovo dodajte integraciju. Poruka o grešci: {error}",
+            "storage_error": "Izuzetak u modulu skladišta integracije. Pokušajte ponovo ili ponovo dodajte integraciju: {error}",
+            "inconsistent_account": "Informacije o nalogu su nedosledne. Prijavite se sa ispravnim nalogom."
+        }
+    }
+}
