@@ -515,6 +515,10 @@ urn:miot-spec-v2:device:outlet:0000A002:qmi-psv3:1:0000C816:
     unit: mV
   prop.3.4:
     unit: mA
+urn:miot-spec-v2:device:outlet:0000A002:uwize-yzs01:1: urn:miot-spec-v2:device:outlet:0000A002:uwize-yzs01:1:0000D032
+urn:miot-spec-v2:device:outlet:0000A002:uwize-yzs01:1:0000D032:
+  prop.3.1:
+    expr: round(src_value/100, 2)
 urn:miot-spec-v2:device:outlet:0000A002:yutai-fsov8m:1:0000C816:
   prop.4.1:
     format: float
