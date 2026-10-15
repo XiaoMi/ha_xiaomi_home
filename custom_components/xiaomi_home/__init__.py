@@ -317,13 +317,19 @@ async def async_setup_entry(
         if isinstance(devices_remove, list) and devices_remove:
             dr = device_registry.async_get(hass)
             for did in devices_remove:
-                device_entry = dr.async_get_device(
-                    identifiers={(
-                        DOMAIN,
-                        slugify_did(
-                            cloud_server=config_entry.data['cloud_server'],
-                            did=did))},
-                    connections=None)
+                identifier = (
+                    DOMAIN,
+                    slugify_did(
+                        cloud_server=config_entry.data['cloud_server'],
+                        did=did))
+                if hasattr(dr, 'async_get_device_by_identifier'):
+                    # Home Assistant 2026.8+, identifiers are unique per
+                    # config entry
+                    device_entry = dr.async_get_device_by_identifier(
+                        identifier, config_entry.entry_id)
+                else:
+                    device_entry = dr.async_get_device(
+                        identifiers={identifier}, connections=None)
                 if not device_entry:
                     _LOGGER.error('remove device not found, %s', did)
                     continue
