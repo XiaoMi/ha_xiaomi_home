@@ -573,9 +573,7 @@ class MIoTClient:
                         uid=self._uid, cloud_server=self._cloud_server,
                         config={'auth_info': auth_info}):
                     raise MIoTClientError('update_user_config_async error')
-                _LOGGER.info(
-                    'refresh oauth info, get new access_token, %s',
-                    auth_info)
+                _LOGGER.info('refresh oauth info, get new access_token')
                 refresh_time = int(auth_info['expires_ts'] - time.time())
                 if refresh_time <= 0:
                     raise MIoTClientError('invalid expires time')
