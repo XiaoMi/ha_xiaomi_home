@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "Importeer de familie van het apparaat",
                     "area_name_rule": "Kamernaam Synchronisatiemodus",
-                    "advanced_options": "Geavanceerde instellingen"
+                    "advanced_options": "Geavanceerde instellingen",
+                    "enable_manual_scenes": "Handmatige bediening van Xiaomi Home-scènes inschakelen"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "Werk entiteitsconversieregels bij",
                     "update_lan_ctrl_config": "Werk LAN controleconfiguratie bij",
                     "network_detect_config": "Geïntegreerde Netwerkconfiguratie",
-                    "cover_dead_zone_width": "Breedte van de dode hoek van het gordijn"
+                    "cover_dead_zone_width": "Breedte van de dode hoek van het gordijn",
+                    "enable_manual_scenes": "Handmatige bediening van Xiaomi Home-scènes inschakelen"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "Voeg de integratie opnieuw toe. Foutmelding: {error}",
             "storage_error": "Integratie opslagmodule-exceptie. Probeer het opnieuw of voeg de integratie opnieuw toe: {error}",
             "inconsistent_account": "Accountinformatie is inconsistent. Log in met het juiste account."
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "Handmatige bediening van Xiaomi Home-scènes"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "Er is geen beschikbare uitvoeringsroute voor deze scène."
+        },
+        "scene_busy": {
+            "message": "Deze scène wordt al uitgevoerd."
+        },
+        "scene_failed": {
+            "message": "Het verzoek om de scène uit te voeren is geweigerd."
+        },
+        "scene_result_unknown": {
+            "message": "Het resultaat van de scène-uitvoering is onbekend. Er wordt niet automatisch opnieuw geprobeerd."
         }
     }
 }

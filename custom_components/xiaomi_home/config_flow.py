@@ -128,6 +128,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _ctrl_mode: str
     _area_name_rule: str
     _action_debug: bool
+    _enable_manual_scenes: bool
     _hide_non_standard_entities: bool
     _display_binary_mode: list[str]
     _display_devices_changed_notify: list[str]
@@ -165,6 +166,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._ctrl_mode = DEFAULT_CTRL_MODE
         self._area_name_rule = self.DEFAULT_AREA_NAME_RULE
         self._action_debug = False
+        self._enable_manual_scenes = True
         self._hide_non_standard_entities = False
         self._display_binary_mode = ['bool']
         self._display_devices_changed_notify = ['add', 'del', 'offline']
@@ -682,6 +684,8 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not user_input:
                 return await self.__show_homes_select_form('')
 
+            self._enable_manual_scenes = user_input.get(
+                'enable_manual_scenes', self._enable_manual_scenes)
             home_selected: list = user_input.get('home_infos', [])
             if not home_selected:
                 return await self.__show_homes_select_form(
@@ -740,6 +744,10 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     default=self._area_name_rule  # type: ignore
                 ): vol.In(self._miot_i18n.translate(
                     key='config.room_name_rule')),
+                vol.Required(
+                    'enable_manual_scenes',
+                    default=self._enable_manual_scenes  # type: ignore
+                ): bool,
                 vol.Required(
                     'advanced_options', default=False  # type: ignore
                 ): bool,
@@ -970,6 +978,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 'devices_filter': self._devices_filter,
                 'area_name_rule': self._area_name_rule,
                 'action_debug': self._action_debug,
+                'enable_manual_scenes': self._enable_manual_scenes,
                 'hide_non_standard_entities':
                     self._hide_non_standard_entities,
                 'cover_dead_zone_width': self._cover_dz_width,
@@ -1014,6 +1023,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _home_selected_list: list
     _devices_filter: dict
     _action_debug: bool
+    _enable_manual_scenes: bool
     _hide_non_standard_entities: bool
     _display_binary_mode: list[str]
     _display_devs_notify: list[str]
@@ -1030,6 +1040,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     _lang_new: str
     _nick_name_new: Optional[str]
     _action_debug_new: bool
+    _enable_manual_scenes_new: bool
     _hide_non_standard_entities_new: bool
     _display_binary_mode_new: list[str]
     _update_user_info: bool
@@ -1071,6 +1082,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'cover_dead_zone_width', DEFAULT_COVER_DEAD_ZONE_WIDTH)
         self._nick_name = self._entry_data.get('nick_name', DEFAULT_NICK_NAME)
         self._action_debug = self._entry_data.get('action_debug', False)
+        self._enable_manual_scenes = self._entry_data.get(
+            'enable_manual_scenes', False)
         self._hide_non_standard_entities = self._entry_data.get(
             'hide_non_standard_entities', False)
         self._display_binary_mode = self._entry_data.get(
@@ -1091,6 +1104,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         self._lang_new = self._integration_language
         self._nick_name_new = None
+        self._enable_manual_scenes_new = self._enable_manual_scenes
         self._action_debug_new = False
         self._hide_non_standard_entities_new = False
         self._display_binary_mode_new = []
@@ -1358,6 +1372,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): bool,
                     # Entity info configure
                     vol.Required(
+                        'enable_manual_scenes',
+                        default=self._enable_manual_scenes  # type: ignore
+                    ): bool,
+                    vol.Required(
                         'action_debug',
                         default=self._action_debug  # type: ignore
                     ): bool,
@@ -1401,6 +1419,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             'update_user_info', self._update_user_info)
         self._update_devices = user_input.get(
             'update_devices', self._update_devices)
+        self._enable_manual_scenes_new = user_input.get(
+            'enable_manual_scenes', self._enable_manual_scenes)
         self._action_debug_new = user_input.get(
             'action_debug', self._action_debug)
         self._hide_non_standard_entities_new = user_input.get(
@@ -2019,6 +2039,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         'error': 'save user devices error'})
             self._need_reload = True
         if self._update_trans_rules:
+            self._need_reload = True
+        if self._enable_manual_scenes_new != self._enable_manual_scenes:
+            self._entry_data['enable_manual_scenes'] = (
+                self._enable_manual_scenes_new)
             self._need_reload = True
         if self._action_debug_new != self._action_debug:
             self._entry_data['action_debug'] = self._action_debug_new

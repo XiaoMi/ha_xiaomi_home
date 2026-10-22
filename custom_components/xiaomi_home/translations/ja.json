@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "デバイスの家族をインポート",
                     "area_name_rule": "部屋の名前の同期モード",
-                    "advanced_options": "高度な設定"
+                    "advanced_options": "高度な設定",
+                    "enable_manual_scenes": "Xiaomi Homeシーンの手動制御を有効にする"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "エンティティ変換ルールを更新する",
                     "update_lan_ctrl_config": "LAN制御構成を更新する",
                     "network_detect_config": "統合ネットワーク構成",
-                    "cover_dead_zone_width": "カーテンの死角幅"
+                    "cover_dead_zone_width": "カーテンの死角幅",
+                    "enable_manual_scenes": "Xiaomi Homeシーンの手動制御を有効にする"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "統合を再度追加してください。エラーメッセージ：{error}",
             "storage_error": "統合ストレージモジュールに異常があります。再試行するか、統合を再度追加してください：{error}",
             "inconsistent_account": "アカウント情報が一致しません。正しいアカウントでログインしてください。"
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "Xiaomi Homeシーンの手動制御"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "このシーンを実行できる通信経路がありません。"
+        },
+        "scene_busy": {
+            "message": "このシーンは実行中です。"
+        },
+        "scene_failed": {
+            "message": "シーンの実行要求が拒否されました。"
+        },
+        "scene_result_unknown": {
+            "message": "シーンの実行結果は不明です。自動的に再試行しません。"
         }
     }
 }

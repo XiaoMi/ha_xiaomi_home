@@ -165,6 +165,7 @@ class _MipsRequest:
     on_reply: Callable[[str, Any], None]
     on_reply_ctx: Any
     timer: Optional[asyncio.TimerHandle]
+    log_payload: bool = True
 
 
 @dataclass
@@ -510,6 +511,14 @@ class _MipsClient(ABC):
     @abstractmethod
     def _on_mips_disconnect(self, rc: int, props: dict) -> None: ...
 
+    def _on_mips_subscribe_requested(self, topic: str, mid: int) -> None:
+        """Observe a submitted subscription in the MIPS thread."""
+
+    def _on_mips_subscribe(
+        self, client, user_data, mid, reason_codes, props=None
+    ) -> None:
+        """Observe the broker's subscription acknowledgement."""
+
     @final
     def _mips_sub_internal(self, topic: str) -> None:
         """mips subscribe.
@@ -563,6 +572,9 @@ class _MipsClient(ABC):
             handle = self._mqtt.publish(
                 topic=topic, payload=payload, qos=self.MIPS_QOS)
             # self.log_debug(f'_mips_publish_internal, {topic}, {payload}')
+            if handle.rc != MQTT_ERR_SUCCESS:
+                self.log_debug(f'mips publish rejected, rc={handle.rc}')
+                return False
             if wait_for_publish is True:
                 handle.wait_for_publish(timeout_ms/1000.0)
             return True
@@ -639,6 +651,7 @@ class _MipsClient(ABC):
         self._mqtt.on_connect_fail = self.__on_connect_failed
         self._mqtt.on_disconnect = self.__on_disconnect
         self._mqtt.on_message = self.__on_message
+        self._mqtt.on_subscribe = self._on_mips_subscribe
         # Connect to mips
         self.__mips_start_connect_tries()
         # Run event loop
@@ -738,6 +751,7 @@ class _MipsClient(ABC):
             try:
                 result, mid = self._mqtt.subscribe(topic, qos=self.MIPS_QOS)
                 if result == MQTT_ERR_SUCCESS:
+                    self._on_mips_subscribe_requested(topic, mid)
                     self._mips_sub_pending_map.pop(topic)
                     self.log_debug(f'mips sub internal success, {topic}')
                     continue
@@ -1140,6 +1154,10 @@ class MipsLocalClient(_MipsClient):
     _get_prop_queue: dict[str, list]
     _get_prop_timer: Optional[asyncio.TimerHandle]
     _on_dev_list_changed: Optional[Callable[[Any, list[str]], Coroutine]]
+    _reply_ready: asyncio.Event
+    _reply_sub_mid: Optional[int]
+    _reply_generation: int
+    _reply_ready_generation: Optional[int]
 
     def __init__(
         self, did: str, host: str, group_id: str,
@@ -1158,6 +1176,10 @@ class MipsLocalClient(_MipsClient):
         self._get_prop_queue = {}
         self._get_prop_timer = None
         self._on_dev_list_changed = None
+        self._reply_ready = asyncio.Event()
+        self._reply_sub_mid = None
+        self._reply_generation = 0
+        self._reply_ready_generation = None
 
         super().__init__(
             client_id=did, host=host, port=port,
@@ -1186,6 +1208,9 @@ class MipsLocalClient(_MipsClient):
 
     @final
     def disconnect(self) -> None:
+        if self._mips_thread:
+            self._internal_loop.call_soon_threadsafe(
+                self._on_mips_disconnect, 0, {})
         super().disconnect()
         self._request_map = {}
         self._msg_matcher = MIoTMatcher()
@@ -1419,9 +1444,19 @@ class MipsLocalClient(_MipsClient):
             topic='proxy/getMijiaActionGroupList',
             payload='{}',
             timeout_ms=timeout_ms)
-        if not result_obj or 'result' not in result_obj:
-            raise MIoTMipsError('invalid result')
-        return result_obj['result']
+        if not isinstance(result_obj, dict):
+            raise MIoTMipsError('invalid action group response')
+        result = result_obj.get('result')
+        if (not isinstance(result, list)
+                or 'error' in result_obj
+                or ('code' in result_obj and (
+                    not isinstance(result_obj['code'], int)
+                    or isinstance(result_obj['code'], bool)
+                    or result_obj['code'] != 0))
+                or any(not isinstance(item, str) or not item
+                       for item in result)):
+            raise MIoTMipsError('invalid action group list')
+        return result
 
     @final
     async def exec_action_group_list_async(
@@ -1429,13 +1464,16 @@ class MipsLocalClient(_MipsClient):
     ) -> dict:
         result_obj = await self.__request_async(
             topic='proxy/execMijiaActionGroup',
-            payload=f'{{"id":"{ag_id}"}}',
+            payload=json.dumps({'id': ag_id}),
             timeout_ms=timeout_ms)
-        if result_obj:
-            if 'result' in result_obj:
-                return result_obj['result']
-            if 'error' in result_obj:
-                return result_obj['error']
+        if (isinstance(result_obj, dict) and 'error' not in result_obj
+                and ('code' not in result_obj or (
+                    isinstance(result_obj['code'], int)
+                    and not isinstance(result_obj['code'], bool)
+                    and result_obj['code'] == 0))):
+            result = result_obj.get('result')
+            if isinstance(result, dict):
+                return result
         return {
             'code': MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value,
             'message': 'invalid result'}
@@ -1458,25 +1496,34 @@ class MipsLocalClient(_MipsClient):
     def __request(
             self, topic: str, payload: str,
             on_reply: Callable[[str, Any], None],
-            on_reply_ctx: Any = None, timeout_ms: int = 10000
+            on_reply_ctx: Any = None, timeout_ms: int = 10000,
+            generation: Optional[int] = None
     ) -> None:
+        if (generation != self._reply_generation
+                or generation != self._reply_ready_generation
+                or not self.mips_state
+                or isinstance(on_reply_ctx, asyncio.Future)
+                and on_reply_ctx.done()):
+            on_reply('{"error":{"code":-10006}}', on_reply_ctx)
+            return
         req = _MipsRequest(
             mid=self.__gen_mips_id,
             on_reply=on_reply,
             on_reply_ctx=on_reply_ctx,
-            timer=None)
+            timer=None, log_payload=topic not in (
+                'proxy/getMijiaActionGroupList', 'proxy/execMijiaActionGroup'))
         pub_topic: str = f'master/{topic}'
         result = self.__mips_publish(
             topic=pub_topic, payload=payload, mid=req.mid,
             ret_topic=self._reply_topic)
+        if not result:
+            req.on_reply('{"error":{"code":-10006}}', req.on_reply_ctx)
+            return
         self.log_debug(
             f'mips local call api, {result}, {req.mid}, {pub_topic}, '
-            f'{payload}')
+            f'{payload if req.log_payload else "[scene]"}')
 
         def on_request_timeout(req: _MipsRequest):
-            self.log_error(
-                f'on mips request timeout, {req.mid}, {pub_topic}'
-                f', {payload}')
             self._request_map.pop(str(req.mid), None)
             req.on_reply(
                 '{"error":{"code":-10006, "message":"timeout"}}',
@@ -1510,6 +1557,11 @@ class MipsLocalClient(_MipsClient):
     @final
     def _on_mips_connect(self, rc: int, props: dict) -> None:
         self.log_debug('__on_mips_connect_handler')
+        self._reply_generation += 1
+        self._reply_sub_mid = None
+        self._reply_ready_generation = None
+        self.main_loop.call_soon_threadsafe(
+            self.__set_reply_ready, self._reply_generation, False)
         # Sub did/#, include reply topic
         self._mips_sub_internal(f'{self._did}/#')
         # Sub device list change
@@ -1523,7 +1575,47 @@ class MipsLocalClient(_MipsClient):
 
     @final
     def _on_mips_disconnect(self, rc: int, props: dict) -> None:
-        pass
+        self._reply_generation += 1
+        self._reply_sub_mid = None
+        self._reply_ready_generation = None
+        self.main_loop.call_soon_threadsafe(
+            self.__set_reply_ready, self._reply_generation, False)
+        for req in list(self._request_map.values()):
+            if req.timer:
+                req.timer.cancel()
+            req.on_reply('{"error":{"code":-10006}}', req.on_reply_ctx)
+        self._request_map.clear()
+
+    def __set_reply_ready(self, generation: int, ready: bool) -> None:
+        if generation == self._reply_generation:
+            (self._reply_ready.set if ready else self._reply_ready.clear)()
+
+    def _on_mips_subscribe_requested(self, topic: str, mid: int) -> None:
+        if topic == f'{self._did}/#':
+            self._reply_sub_mid = mid
+
+    def _on_mips_subscribe(
+        self, client, user_data, mid, reason_codes, props=None
+    ) -> None:
+        if client is not self._mqtt or mid != self._reply_sub_mid:
+            return
+        codes = [getattr(code, 'value', code) for code in reason_codes]
+        ready = bool(codes) and all(
+            isinstance(code, int) and not isinstance(code, bool)
+            and 0 <= code < 128 for code in codes)
+        self._reply_ready_generation = self._reply_generation if ready else None
+        self.log_debug(
+            f'mips reply subscription acknowledgement, '
+            f'generation={self._reply_generation}, codes={codes}')
+        self.main_loop.call_soon_threadsafe(
+            self.__set_reply_ready, self._reply_generation, ready)
+
+    def __cancel_request(self, fut: asyncio.Future) -> None:
+        for mid, req in list(self._request_map.items()):
+            if req.on_reply_ctx is fut:
+                if req.timer:
+                    req.timer.cancel()
+                self._request_map.pop(mid, None)
 
     @final
     def _on_mips_message(self, topic: str, payload: bytes) -> None:
@@ -1532,10 +1624,11 @@ class MipsLocalClient(_MipsClient):
         #     f"mips local client, on_message, {topic} -> {mips_msg}")
         # Reply
         if topic == self._reply_topic:
-            self.log_debug(f'on request reply, {mips_msg}')
             req: Optional[_MipsRequest] = self._request_map.pop(
                 str(mips_msg.mid), None)
             if req:
+                if req.log_payload:
+                    self.log_debug(f'on request reply, {mips_msg}')
                 # Cancel timer
                 if req.timer:
                     req.timer.cancel()
@@ -1601,12 +1694,14 @@ class MipsLocalClient(_MipsClient):
     def __request_external(
             self, topic: str, payload: str,
             on_reply: Callable[[str, Any], None],
-            on_reply_ctx: Any = None, timeout_ms: int = 10000
+            on_reply_ctx: Any = None, timeout_ms: int = 10000,
+            generation: Optional[int] = None
     ) -> bool:
         if topic is None or payload is None or on_reply is None:
             raise MIoTMipsError('invalid params')
         self._internal_loop.call_soon_threadsafe(
-            self.__request, topic, payload, on_reply, on_reply_ctx, timeout_ms)
+            self.__request, topic, payload, on_reply, on_reply_ctx, timeout_ms,
+            generation)
         return True
 
     def __reg_broadcast_external(
@@ -1627,28 +1722,88 @@ class MipsLocalClient(_MipsClient):
     async def __request_async(
         self, topic: str, payload: str, timeout_ms: int = 10000
     ) -> dict:
+        deadline = self.main_loop.time() + timeout_ms/1000
+        generation = self._reply_generation
+        if not self.mips_state:
+            return {'error': {'code': -10006}}
+        if not self._reply_ready.is_set():
+            self._internal_loop.call_soon_threadsafe(
+                self._mips_sub_internal, f'{self._did}/#')
+            try:
+                ready = asyncio.create_task(self._reply_ready.wait())
+                disconnected = asyncio.create_task(
+                    self._event_disconnect.wait())
+                try:
+                    done, _ = await asyncio.wait(
+                        (ready, disconnected), timeout=timeout_ms/1000,
+                        return_when=asyncio.FIRST_COMPLETED)
+                    if disconnected in done:
+                        return {'error': {'code': -10006}}
+                    if ready not in done:
+                        raise TimeoutError
+                finally:
+                    ready.cancel()
+                    disconnected.cancel()
+                    await asyncio.gather(
+                        ready, disconnected, return_exceptions=True)
+            except TimeoutError:
+                log = (self.log_debug
+                       if topic == 'proxy/getMijiaActionGroupList'
+                       else self.log_error)
+                log(f'mips reply subscription not ready, '
+                    f'generation={self._reply_generation}')
+                return {'error': {'code': -10006}}
+        if (generation != self._reply_generation
+                or not self._reply_ready.is_set()):
+            return {'error': {'code': -10006}}
+        remaining_ms = int((deadline-self.main_loop.time())*1000)
+        if remaining_ms <= 0:
+            return {'error': {'code': -10006}}
         fut_handler: asyncio.Future = self.main_loop.create_future()
 
         def on_msg_reply(payload: str, ctx: Any):
             fut: asyncio.Future = ctx
-            if fut:
-                self.main_loop.call_soon_threadsafe(fut.set_result, payload)
+
+            def complete_reply():
+                # Cancellation can happen before this queued callback runs.
+                if fut and not fut.done():
+                    fut.set_result(payload)
+
+            self.main_loop.call_soon_threadsafe(complete_reply)
         if not self.__request_external(
                 topic=topic,
                 payload=payload,
                 on_reply=on_msg_reply,
                 on_reply_ctx=fut_handler,
-                timeout_ms=timeout_ms):
+                timeout_ms=remaining_ms, generation=generation):
             # Request error
             fut_handler.set_result('internal request error')
 
-        result = await fut_handler
         try:
-            return json.loads(result)
+            result = await asyncio.wait_for(
+                fut_handler, max(0, deadline-self.main_loop.time()))
+        except TimeoutError:
+            result = '{"error":{"code":-10006,"message":"timeout"}}'
+        finally:
+            if self._internal_loop and not self._internal_loop.is_closed():
+                self._internal_loop.call_soon_threadsafe(
+                    self.__cancel_request, fut_handler)
+        try:
+            response = json.loads(result)
+            if (isinstance(response, dict)
+                    and isinstance(response.get('error'), dict)
+                    and response['error'].get('message') == 'timeout'):
+                log = (self.log_debug
+                       if topic == 'proxy/getMijiaActionGroupList'
+                       else self.log_error)
+                log(f'mips request timeout, {topic}, stage=reply')
+            return response
         except json.JSONDecodeError:
             return {
                 'code': MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value,
-                'message': f'Error: {result}'}
+                'message': ('invalid scene response' if topic in (
+                    'proxy/getMijiaActionGroupList',
+                    'proxy/execMijiaActionGroup') else f'Error: {result}')}
 
     async def __get_prop_timer_handle(self) -> None:
         for did in list(self._get_prop_queue.keys()):

@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "Importa la Famiglia del Dispositivo",
                     "area_name_rule": "Modalità di Sincronizzazione del Nome della Stanza",
-                    "advanced_options": "Impostazioni Avanzate"
+                    "advanced_options": "Impostazioni Avanzate",
+                    "enable_manual_scenes": "Abilita il controllo manuale delle scene Xiaomi Home"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "Aggiorna le regole di conversione delle entità",
                     "update_lan_ctrl_config": "Aggiorna configurazione del controllo LAN",
                     "network_detect_config": "Configurazione di Rete Integrata",
-                    "cover_dead_zone_width": "Larghezza dell’angolo cieco della tenda"
+                    "cover_dead_zone_width": "Larghezza dell’angolo cieco della tenda",
+                    "enable_manual_scenes": "Abilita il controllo manuale delle scene Xiaomi Home"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "Si prega di riaggiungere l'integrazione. Messaggio di errore: {error}",
             "storage_error": "Eccezione del modulo di archiviazione dell'integrazione. Si prega di riprovare o riaggiungere l'integrazione: {error}",
             "inconsistent_account": "Le informazioni dell'account sono incoerenti."
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "Controllo manuale delle scene Xiaomi Home"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "Nessun canale di esecuzione è disponibile per questa scena."
+        },
+        "scene_busy": {
+            "message": "Questa scena è già in esecuzione."
+        },
+        "scene_failed": {
+            "message": "La richiesta di esecuzione della scena è stata rifiutata."
+        },
+        "scene_result_unknown": {
+            "message": "Il risultato dell’esecuzione della scena è sconosciuto. Non verrà riprovata automaticamente."
         }
     }
 }

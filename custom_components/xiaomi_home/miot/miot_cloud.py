@@ -250,6 +250,7 @@ class MIoTHttpClient:
     _client_id: str
     _access_token: str
     _user_agent: str
+    _scene_host: str
 
     _get_prop_timer: Optional[asyncio.TimerHandle]
     _get_prop_list: dict[str, dict]
@@ -304,6 +305,8 @@ class MIoTHttpClient:
         access_token: Optional[str] = None
     ) -> None:
         if isinstance(cloud_server, str):
+            self._scene_host = ('mico.api.mijia.tech' if cloud_server == 'cn'
+                                else f'{cloud_server}.mico.api.mijia.tech')
             if cloud_server != 'cn':
                 self._host = f'{cloud_server}.{DEFAULT_OAUTH2_API_HOST}'
             self._base_url = f'https://{self._host}'
@@ -354,23 +357,39 @@ class MIoTHttpClient:
 
     async def __mihome_api_post_async(
         self, url_path: str, data: dict,
-        timeout: int = MIHOME_HTTP_API_TIMEOUT
+        timeout: int = MIHOME_HTTP_API_TIMEOUT,
+        scene_request: bool = False
     ) -> dict:
-        http_res = await self._session.post(
-            url=f'{self._base_url}{url_path}',
-            json=data,
-            headers=self.__api_request_headers,
-            timeout=timeout)
-        if http_res.status == 401:
-            raise MIoTHttpError(
-                'mihome api get failed, unauthorized(401)',
-                MIoTErrorCode.CODE_HTTP_INVALID_ACCESS_TOKEN)
-        if http_res.status != 200:
-            raise MIoTHttpError(
-                f'mihome api post failed, {http_res.status}, '
-                f'{url_path}, {data}')
-        res_str = await http_res.text()
-        res_obj: dict = json.loads(res_str)
+        host = self._scene_host if scene_request else self._host
+        headers = self.__api_request_headers
+        headers['Host'] = host
+        async with self._session.post(
+            url=f'https://{host}{url_path}', json=data,
+            headers=headers, timeout=timeout
+        ) as http_res:
+            if http_res.status == 401:
+                raise MIoTHttpError(
+                    'mihome api post failed, unauthorized(401)',
+                    MIoTErrorCode.CODE_HTTP_INVALID_ACCESS_TOKEN)
+            if http_res.status != 200:
+                detail = '' if scene_request else f', {url_path}, {data}'
+                raise MIoTHttpError(
+                    f'mihome api post failed, {http_res.status}{detail}')
+            try:
+                res_obj = json.loads(await http_res.text())
+            except (ValueError, UnicodeError) as err:
+                if scene_request:
+                    raise MIoTHttpError('invalid scene response') from None
+                raise err
+        if scene_request:
+            if (not isinstance(res_obj, dict)
+                    or not isinstance(res_obj.get('code'), int)
+                    or isinstance(res_obj['code'], bool)):
+                raise MIoTHttpError('invalid scene response')
+            if res_obj['code'] != 0:
+                raise MIoTHttpError(
+                    f'scene request failed, code={res_obj["code"]}')
+            return res_obj
         if res_obj.get('code', None) != 0:
             raise MIoTHttpError(
                 f'invalid response code, {res_obj.get("code",None)}, '
@@ -379,6 +398,38 @@ class MIoTHttpClient:
             'mihome api post, %s%s, %s -> %s',
             self._base_url, url_path, data, res_obj)
         return res_obj
+
+    async def get_manual_scenes_async(
+        self, owner_uid: str, home_id: str
+    ) -> list[dict]:
+        """Return manual scenes in one selected home."""
+        res_obj = await self.__mihome_api_post_async(
+            url_path=('/app/appgateway/miot/appsceneservice/'
+                      'AppSceneService/GetManualSceneList'),
+            data={'owner_uid': owner_uid, 'home_id': home_id,
+                  'source': 'zkp', 'get_type': 2}, scene_request=True)
+        result = res_obj.get('result')
+        if not isinstance(result, list):
+            raise MIoTHttpError('invalid scene list')
+        return result
+
+    async def run_manual_scene_async(
+        self, owner_uid: str, home_id: str, scene_id: str,
+        room_id: Optional[str] = None
+    ) -> bool:
+        """Execute once; an ambiguous response must never be retried."""
+        data = {'owner_uid': owner_uid, 'home_id': home_id,
+                'scene_id': scene_id, 'scene_type': 2}
+        if room_id:
+            data['room_id'] = room_id
+        res_obj = await self.__mihome_api_post_async(
+            url_path=('/app/appgateway/miot/appsceneservice/'
+                      'AppSceneService/NewRunScene'),
+            data=data, scene_request=True)
+        result = res_obj.get('result')
+        if not isinstance(result, bool):
+            raise MIoTHttpError('invalid scene execution result')
+        return result
 
     async def get_user_info_async(self) -> dict:
         http_res = await self._session.get(

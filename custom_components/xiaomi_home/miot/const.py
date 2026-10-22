@@ -87,6 +87,7 @@ SUPPORTED_PLATFORMS: list = [
     'media_player',
     'notify',
     'number',
+    'scene',
     'select',
     'sensor',
     'switch',

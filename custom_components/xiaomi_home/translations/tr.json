@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "Cihazın Evini İçe Aktar",
                     "area_name_rule": "Oda Adı Senkronizasyon Modu",
-                    "advanced_options": "Gelişmiş Ayarlar"
+                    "advanced_options": "Gelişmiş Ayarlar",
+                    "enable_manual_scenes": "Xiaomi Home sahnelerinin manuel kontrolünü etkinleştir"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "Varlık dönüştürme kurallarını güncelle",
                     "update_lan_ctrl_config": "LAN kontrol yapılandırmasını güncelle",
                     "network_detect_config": "Entegre ağ yapılandırması",
-                    "cover_dead_zone_width": "Perde ölü bölge genişliği"
+                    "cover_dead_zone_width": "Perde ölü bölge genişliği",
+                    "enable_manual_scenes": "Xiaomi Home sahnelerinin manuel kontrolünü etkinleştir"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "Lütfen entegrasyonu yeniden ekleyin. Hata mesajı: {error}",
             "storage_error": "Entegrasyon depolama modülü istisnası. Lütfen tekrar deneyin veya entegrasyonu yeniden ekleyin: {error}",
             "inconsistent_account": "Hesap bilgileri tutarsız. Lütfen doğru hesapla giriş yapın."
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "Xiaomi Home sahnelerinin manuel kontrolü"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "Bu sahne için kullanılabilir bir yürütme yolu yok."
+        },
+        "scene_busy": {
+            "message": "Bu sahne zaten yürütülüyor."
+        },
+        "scene_failed": {
+            "message": "Sahne yürütme isteği reddedildi."
+        },
+        "scene_result_unknown": {
+            "message": "Sahne yürütme sonucu bilinmiyor. Otomatik olarak yeniden denenmeyecek."
         }
     }
 }

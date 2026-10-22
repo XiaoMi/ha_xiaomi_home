@@ -384,6 +384,9 @@ async def async_remove_entry(
     # Clean device list
     await miot_storage.remove_async(
         domain='miot_devices', name=f'{uid}_{cloud_server}', type_=dict)
+    # Clean manual scene metadata
+    await miot_storage.remove_async(
+        domain='miot_scenes', name=f'{uid}_{cloud_server}', type_=dict)
     # Clean user configuration
     await miot_storage.update_user_config_async(
         uid=uid, cloud_server=cloud_server, config=None)
@@ -412,6 +415,10 @@ async def async_remove_config_entry_device(
         _LOGGER.error(
             'remove device failed, invalid domain, %s, %s',
             device_entry.id, device_entry.identifiers)
+        return False
+
+    if identifiers[1] in miot_client.manual_scene_device_ids:
+        # This virtual device is managed by the manual scenes option.
         return False
 
     # Remove device

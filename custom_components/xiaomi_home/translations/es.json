@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "Importar la familia del dispositivo",
                     "area_name_rule": "Modo de sincronización del nombre de la habitación",
-                    "advanced_options": "Configuración avanzada"
+                    "advanced_options": "Configuración avanzada",
+                    "enable_manual_scenes": "Activar el control manual de escenas de Xiaomi Home"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "Actualizar reglas de conversión de entidad",
                     "update_lan_ctrl_config": "Actualizar configuración de control LAN",
                     "network_detect_config": "Configuración de Red Integrada",
-                    "cover_dead_zone_width": "Anchura del punto ciego de la cortina"
+                    "cover_dead_zone_width": "Anchura del punto ciego de la cortina",
+                    "enable_manual_scenes": "Activar el control manual de escenas de Xiaomi Home"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "Agregue la integración de nuevo, mensaje de error: {error}",
             "storage_error": "Error en el módulo de almacenamiento de integración. Intente de nuevo o agregue la integración de nuevo: {error}",
             "inconsistent_account": "La información de la cuenta no coincide. Inicie sesión con la cuenta correcta."
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "Control manual de escenas de Xiaomi Home"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "No hay una vía de ejecución disponible para esta escena."
+        },
+        "scene_busy": {
+            "message": "Esta escena ya se está ejecutando."
+        },
+        "scene_failed": {
+            "message": "Se rechazó la solicitud de ejecución de la escena."
+        },
+        "scene_result_unknown": {
+            "message": "Se desconoce el resultado de la ejecución de la escena. No se reintentará automáticamente."
         }
     }
 }

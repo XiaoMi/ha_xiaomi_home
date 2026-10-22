@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "导入设备的家庭",
                     "area_name_rule": "房间名同步模式",
-                    "advanced_options": "高级设置选项"
+                    "advanced_options": "高级设置选项",
+                    "enable_manual_scenes": "启用米家场景手动控制"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "更新实体转换规则",
                     "update_lan_ctrl_config": "更新局域网控制配置",
                     "network_detect_config": "集成网络配置",
-                    "cover_dead_zone_width": "窗帘盲区宽度"
+                    "cover_dead_zone_width": "窗帘盲区宽度",
+                    "enable_manual_scenes": "启用米家场景手动控制"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "请重新添加集成，错误信息：{error}",
             "storage_error": "集成存储模块异常。请重试或者重新添加集成：{error}",
             "inconsistent_account": "账号信息不一致。请使用正确的账号登录。"
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "米家场景手动控制"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "场景没有可用的执行通道。"
+        },
+        "scene_busy": {
+            "message": "此场景正在执行。"
+        },
+        "scene_failed": {
+            "message": "场景执行请求被拒绝。"
+        },
+        "scene_result_unknown": {
+            "message": "场景执行结果未知，不会自动重试。"
         }
     }
 }
