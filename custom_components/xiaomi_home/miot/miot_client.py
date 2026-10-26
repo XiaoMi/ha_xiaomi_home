@@ -993,7 +993,9 @@ class MIoTClient:
             mips.sub_event(did=did, handler=self.__on_event_msg)
 
     @final
-    def __update_device_msg_sub(self, did: str) -> None:
+    def __update_device_msg_sub(
+        self, did: str, gw_refresh: bool = False
+    ) -> None:
         if did not in self._device_list_cache:
             return
         from_old: Optional[str] = self._sub_source_list.get(did, None)
@@ -1018,8 +1020,12 @@ class MIoTClient:
             and self._device_list_cloud[did].get('online', False)
         ):
             from_new = 'cloud'
-        if (from_new == from_old) and (from_new=='cloud' or from_new=='lan'):
-            # No need to update
+        if from_new == from_old and (
+            not gw_refresh or from_new in ('cloud', 'lan')
+        ):
+            # No need to update. Only a gateway refresh subscribes again,
+            # because the gateway clears subscriptions on reconnect. Other
+            # callers must not, a resubscription can replay the last event.
             return
         # Unsub old
         if from_old:
@@ -1549,7 +1555,7 @@ class MIoTClient:
             info['group_id'] = group_id
             if (gw_state_old == gw_state_new) and (not gw_state_new):
                 continue
-            self.__update_device_msg_sub(did=did)
+            self.__update_device_msg_sub(did=did, gw_refresh=True)
             state_old: Optional[bool] = info.get('online', None)
             state_new: Optional[bool] = self.__check_device_state(
                 self._device_list_cloud.get(did, {}).get('online', None),
@@ -1573,7 +1579,7 @@ class MIoTClient:
             self._device_list_cache[did]['group_id'] = group_id
             _LOGGER.info(
                 'move device %s from %s to %s', did, group_id_old, group_id)
-            self.__update_device_msg_sub(did=did)
+            self.__update_device_msg_sub(did=did, gw_refresh=True)
             state_old: Optional[bool] = self._device_list_cache[did].get(
                 'online', None)
             state_new: Optional[bool] = self.__check_device_state(

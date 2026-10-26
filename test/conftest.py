@@ -39,6 +39,7 @@ def load_py_file():
     file_list = [
         'common.py',
         'const.py',
+        'miot_client.py',
         'miot_cloud.py',
         'miot_error.py',
         'miot_i18n.py',
