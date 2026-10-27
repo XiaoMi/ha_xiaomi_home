@@ -579,7 +579,8 @@ class _MipsClient(ABC):
         self.__mqtt_loop_handler()
 
     def __mqtt_write_handler(self) -> None:
-        self._internal_loop.remove_writer(self._mqtt_fd)
+        if self._mqtt_fd != -1:
+            self._internal_loop.remove_writer(self._mqtt_fd)
         self.__mqtt_loop_handler()
 
     def __mqtt_timer_handler(self) -> None:
@@ -603,13 +604,20 @@ class _MipsClient(ABC):
                 self._mqtt.loop_write()
             if self._mqtt:
                 self._mqtt.loop_misc()
-            if self._mqtt and self._mqtt.want_write():
+            if (
+                self._mqtt
+                and self._mqtt.want_write()
+                and self._mqtt_fd != -1
+            ):
                 self._internal_loop.add_writer(
                     self._mqtt_fd, self.__mqtt_write_handler)
         except Exception as err:  # pylint: disable=broad-exception-caught
-            # Catch all exception
+            # Catch all exception. Do not re-raise: this method runs as an
+            # asyncio callback, and an exception escaping here is reported as
+            # 'Exception in callback None()' without stopping the broken
+            # handler, so it repeats on every loop iteration. The reconnect
+            # logic in __mips_try_reconnect() is responsible for recovery.
             self.log_error(f'__mqtt_loop_handler, {err}')
-            raise err
 
     def __mips_loop_thread(self) -> None:
         self.log_info('mips_loop_thread start')
