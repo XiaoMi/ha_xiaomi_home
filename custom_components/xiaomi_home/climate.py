@@ -46,6 +46,7 @@ off Xiaomi or its affiliates' products.
 Climate entities for Xiaomi Home.
 """
 from __future__ import annotations
+from decimal import Decimal
 import logging
 from typing import Any, Optional
 
@@ -238,12 +239,25 @@ class FeatureFanMode(MIoTServiceEntity, ClimateEntity):
             if (prop.name == 'fan-level' and
                 (prop.service.name == 'fan-control' or
                  prop.service.name == 'thermostat')):
-                if not prop.value_list:
-                    _LOGGER.error('invalid fan-level value_list, %s',
+                if prop.value_list:
+                    self._fan_mode_map = prop.value_list.to_map()
+                    self._attr_fan_modes = prop.value_list.descriptions
+                elif (prop.value_range and prop.value_range.step > 0 and
+                      prop.value_range.max_ >= prop.value_range.min_):
+                    value_range = prop.value_range
+                    # Count decimal steps without truncating a float endpoint.
+                    count = int(
+                        (Decimal(str(value_range.max_)) -
+                         Decimal(str(value_range.min_))) /
+                        Decimal(str(value_range.step))) + 1
+                    values = [round(value_range.min_ + i * value_range.step,
+                                    prop.precision) for i in range(count)]
+                    self._fan_mode_map = {value: str(value) for value in values}
+                    self._attr_fan_modes = list(self._fan_mode_map.values())
+                else:
+                    _LOGGER.error('invalid fan-level specification, %s',
                                   self.entity_id)
                     continue
-                self._fan_mode_map = prop.value_list.to_map()
-                self._attr_fan_modes = prop.value_list.descriptions
                 self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
                 self._prop_fan_level = prop
             elif prop.name == 'on' and prop.service.name == 'fan-control':
