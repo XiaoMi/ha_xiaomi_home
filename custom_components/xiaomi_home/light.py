@@ -252,10 +252,21 @@ class Light(MIoTServiceEntity, LightEntity):
         """
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        if self._prop_on:
+        if self._prop_on and (
+            not self.is_on
+            or not any(
+                attr in kwargs
+                for attr in (
+                    ATTR_BRIGHTNESS,
+                    ATTR_COLOR_TEMP_KELVIN,
+                    ATTR_RGB_COLOR,
+                    ATTR_EFFECT,
+                )
+            )
+        ):
             value_on = True if self._prop_on.format_ == bool else 1
             await self.set_property_async(
-                prop=self._prop_on, value=value_on)
+                prop=self._prop_on, value=value_on, write_ha_state=False)
         # brightness
         if ATTR_BRIGHTNESS in kwargs:
             brightness = brightness_to_value(
