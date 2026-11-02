@@ -102,6 +102,8 @@ class MIoTClient:
     _device_list_gateway: dict[str, dict]
     # Device list scanned from LAN, {did: <info>}
     _device_list_lan: dict[str, dict]
+    # Devices newly discovered in the cloud, used by the change notification
+    _device_list_added: dict[str, dict]
     # Device list update timestamp
     _device_list_update_ts: int
 
@@ -168,6 +170,7 @@ class MIoTClient:
         self._device_list_cloud = {}
         self._device_list_gateway = {}
         self._device_list_lan = {}
+        self._device_list_added = {}
         self._device_list_update_ts = 0
         self._sub_source_list = {}
         self._sub_tree = MIoTMatcher()
@@ -1257,7 +1260,17 @@ class MIoTClient:
                     did, MIoTDeviceState.ONLINE if state_new
                     else MIoTDeviceState.OFFLINE, sub.handler_ctx)
         # New devices
-        self._device_list_cloud.update(cloud_list)
+        # Persist newly discovered devices into the device cache too.
+        # Previously only `_device_list_cloud` was updated, so a device
+        # added to the Mi Home app never reached `_device_list_cache`
+        # (which is what `device_list` and the storage use) and was
+        # silently dropped on every restart.
+        for did, info in cloud_list.items():
+            if filter_dids and did not in filter_dids:
+                continue
+            self._device_list_added[did] = info
+            self._device_list_cache[did] = info
+            self._device_list_cloud[did] = dict(info)
         # Update storage
         if not await self._storage.save_async(
             domain='miot_devices',
@@ -1668,9 +1681,10 @@ class MIoTClient:
 
         # New devices
         for did, info in {
-                **self._device_list_gateway, **self._device_list_cloud
+                **self._device_list_gateway, **self._device_list_added
         }.items():
-            if did in self._device_list_cache:
+            if did in self._device_list_cache \
+                    and did not in self._device_list_added:
                 continue
             count_add += 1
             message_add += (
@@ -1744,6 +1758,7 @@ class MIoTClient:
             _LOGGER.debug(
                 'show device list changed notify, add %s, del %s, offline %s',
                 count_add, count_del, count_offline)
+            self._device_list_added.clear()
         else:
             self._persistence_notify(
                 self.__gen_notify_key('dev_list_changed'), None, None)
