@@ -57,7 +57,7 @@ from urllib.parse import urlencode
 import aiohttp
 
 # pylint: disable=relative-beyond-top-level
-from .common import calc_group_id
+from .common import MIoTHttp, calc_group_id
 from .const import (
     UNSUPPORTED_MODELS,
     DEFAULT_OAUTH2_API_HOST,
@@ -253,6 +253,7 @@ class MIoTHttpClient:
 
     _get_prop_timer: Optional[asyncio.TimerHandle]
     _get_prop_list: dict[str, dict]
+    _spec_models: Optional[asyncio.Future]
 
     def __init__(
             self, cloud_server: str, client_id: str, access_token: str,
@@ -267,6 +268,7 @@ class MIoTHttpClient:
 
         self._get_prop_timer = None
         self._get_prop_list = {}
+        self._spec_models = None
 
         if (
             not isinstance(cloud_server, str)
@@ -558,6 +560,22 @@ class MIoTHttpClient:
     async def get_uid_async(self) -> str:
         return (await self.get_homeinfos_async()).get('uid', None)
 
+    async def __get_spec_models_async(self) -> dict[str, str]:
+        try:
+            res = await asyncio.wait_for(
+                MIoTHttp.get_json_async(
+                    url='https://miot-spec.org/miot-spec-v2/instances',
+                    params={'status': 'released'}),
+                timeout=MIHOME_HTTP_API_TIMEOUT)
+            return {
+                item['model']: item['type']
+                for item in sorted(
+                    (res or {}).get('instances', []),
+                    key=lambda item: item.get('version', 0))}
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('get spec instances failed, %s', err)
+            return {}
+
     async def __get_device_list_page_async(
         self, dids: list[str], start_did: Optional[str] = None
     ) -> dict[str, dict]:
@@ -583,6 +601,13 @@ class MIoTHttpClient:
             name = device.get('name', None)
             urn = device.get('spec_type', None)
             model = device.get('model', None)
+            if urn is None and model:
+                # Some third-party devices have no spec_type, resolve the urn
+                # from the released spec instances, fetched once per client.
+                if self._spec_models is None:
+                    self._spec_models = asyncio.ensure_future(
+                        self.__get_spec_models_async())
+                urn = (await self._spec_models).get(model, None)
             if did is None or name is None:
                 _LOGGER.info(
                     'invalid device, cloud, %s', device)

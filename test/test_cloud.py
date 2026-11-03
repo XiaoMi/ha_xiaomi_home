@@ -4,6 +4,7 @@ import asyncio
 import logging
 import time
 import webbrowser
+from typing import Optional
 import pytest
 
 # pylint: disable=import-outside-toplevel, unused-argument
@@ -585,3 +586,97 @@ async def test_miot_cloud_action_async(
     _LOGGER.info('test did, %s, action.4.1 -> %s', test_did, result)
 
     await miot_http.deinit_async()
+
+
+async def _get_devices_with_spec_catalog_async(
+    monkeypatch, devices: list[dict], catalog: Optional[dict]
+) -> tuple[dict, list[str]]:
+    from miot.common import MIoTHttp
+    from miot.miot_cloud import MIoTHttpClient
+
+    fetched: list[str] = []
+
+    async def mock_post_async(*args, **kwargs) -> dict:
+        return {'result': {'list': devices}}
+
+    async def mock_get_json_async(url: str, *args, **kwargs) -> dict:
+        fetched.append(url)
+        if catalog is None:
+            raise OSError('network error')
+        if 'block' in catalog:
+            await asyncio.sleep(1)
+            fetched.append(url)
+        return catalog
+
+    monkeypatch.setattr(
+        MIoTHttpClient, '_MIoTHttpClient__mihome_api_post_async',
+        mock_post_async)
+    monkeypatch.setattr(
+        MIoTHttp, 'get_json_async', mock_get_json_async)
+    client = MIoTHttpClient(
+        cloud_server='cn', client_id='1', access_token='token', uuid='uuid')
+    try:
+        result = await client.get_devices_with_dids_async(
+            dids=[d['did'] for d in devices])
+    finally:
+        await client.deinit_async()
+    return result, fetched
+
+
+_CATALOG = {'instances': [{
+    'model': 'huoman.feeder.pf20i', 'version': 2,
+    'type': 'urn:miot-spec-v2:device:pet-feeder:0000A06C:huoman-pf20i:2'}, {
+    'model': 'huoman.feeder.pf20i', 'version': 1,
+    'type': 'urn:miot-spec-v2:device:pet-feeder:0000A06C:huoman-pf20i:1'}, {
+    'model': 'huoman.feeder.basic',
+    'type': 'urn:miot-spec-v2:device:pet-feeder:0000A06C:huoman-basic:1'}]}
+
+
+@pytest.mark.github
+@pytest.mark.asyncio
+async def test_device_without_spec_type_uses_catalog_async(monkeypatch):
+    devices = [
+        {'did': '1', 'name': 'feeder', 'model': 'huoman.feeder.pf20i'},
+        {'did': '2', 'name': 'unknown'},
+        {'did': '3', 'name': 'feeder 2',
+         'model': 'huoman.feeder.pf20i'},
+        {'did': '4', 'name': 'uncatalogued', 'model': 'unknown.model'},
+        {'did': '5', 'name': 'basic feeder',
+         'model': 'huoman.feeder.basic'}]
+    result, fetched = await _get_devices_with_spec_catalog_async(
+        monkeypatch, devices, _CATALOG)
+    assert len(fetched) == 1
+    assert list(result) == ['1', '3', '5']
+    assert result['1']['urn'] == _CATALOG['instances'][0]['type']
+
+
+@pytest.mark.github
+@pytest.mark.asyncio
+async def test_device_with_spec_type_skips_catalog_async(monkeypatch):
+    devices = [{
+        'did': '1', 'name': 'plug', 'model': 'xiaomi.plug.v1',
+        'spec_type': 'urn:miot-spec-v2:device:outlet:0000A002:xiaomi-v1:1'}, {
+        'did': '2', 'name': 'invalid', 'model': ''}]
+    result, fetched = await _get_devices_with_spec_catalog_async(
+        monkeypatch, devices, _CATALOG)
+    assert not fetched
+    assert result['1']['urn'] == devices[0]['spec_type']
+
+
+@pytest.mark.github
+@pytest.mark.asyncio
+async def test_catalog_fetch_failure_skips_device_async(monkeypatch):
+    from miot import miot_cloud
+
+    devices = [
+        {'did': '1', 'name': 'feeder', 'model': 'huoman.feeder.pf20i'}]
+    result, fetched = await _get_devices_with_spec_catalog_async(
+        monkeypatch, devices, None)
+    assert len(fetched) == 1
+    assert not result
+
+    monkeypatch.setattr(miot_cloud, 'MIHOME_HTTP_API_TIMEOUT', 0.01)
+    result, fetched = await _get_devices_with_spec_catalog_async(
+        monkeypatch, devices, {'block': True})
+    assert len(fetched) == 1
+    assert not result
