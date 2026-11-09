@@ -80,10 +80,11 @@ async def async_setup_entry(
     # create select for light
     new_light_select_entities = []
     for miot_device in device_list:
-        # Add it to all devices with light entities, because some bathroom heaters and clothes drying racks also have lights.
+        # Include all devices with lights, such as bathroom heaters and
+        # clothes drying racks.
         # if "device:light" in miot_device.spec_instance.urn:
-        if miot_device.entity_list.get("light", []):
-            device_id = list(miot_device.device_info.get("identifiers"))[0][1]
+        if miot_device.entity_list.get('light', []):
+            device_id = list(miot_device.device_info.get('identifiers'))[0][1]
             new_light_select_entities.append(
                 LightCommandSendMode(hass=hass, device_id=device_id))
     if new_light_select_entities:
@@ -110,21 +111,21 @@ class Select(MIoTPropertyEntity, SelectEntity):
 
 
 class LightCommandSendMode(SelectEntity, RestoreEntity):
-    """To control whether to turn on the light, you need to send the light-on command first and
-    then send other color temperatures and brightness or send them all at the same time.
+    """Control whether to send the light-on command first and then send other
+    color temperatures and brightness or send them all at the same time.
     The default is to send one by one."""
 
     def __init__(self, hass: HomeAssistant, device_id: str):
         super().__init__()
         self.hass = hass
         self._device_id = device_id
-        self._attr_name = "Command Send Mode"
-        self.entity_id = f"select.light_{device_id}_command_send_mode"
+        self._attr_name = 'Command Send Mode'
+        self.entity_id = f'select.light_{device_id}_command_send_mode'
         self._attr_unique_id = self.entity_id
         self._attr_options = [
-            "Send One by One", "Send Turn On First", "Send Together"
+            'Send One by One', 'Send Turn On First', 'Send Together'
         ]
-        self._attr_device_info = {"identifiers": {(DOMAIN, device_id)}}
+        self._attr_device_info = {'identifiers': {(DOMAIN, device_id)}}
         self._attr_current_option = self._attr_options[0]
         self._attr_entity_category = EntityCategory.CONFIG
 

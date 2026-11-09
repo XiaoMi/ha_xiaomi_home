@@ -861,7 +861,7 @@ class MIoTLan:
     async def set_props_async(
         self,did: str,props_list: List[Dict[str, Any]],
         timeout_ms: int = 10000) -> dict:
-        # props_list = [{'did': did, 'siid': siid, 'piid': piid, 'value': value}......]
+        # props_list contains did, siid, piid and value for each property.
         self.__assert_service_ready()
         result_obj = await self.__call_api_async(
             did=did, msg={

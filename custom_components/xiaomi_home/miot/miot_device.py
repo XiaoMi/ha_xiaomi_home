@@ -1195,7 +1195,9 @@ class MIoTServiceEntity(Entity):
             } for set_property in set_properties_list])
         except MIoTClientError as e:
             raise RuntimeError(
-                f"{e}, {self.entity_id}, {self.name}, {'&'.join([set_property['prop'].name for set_property in set_properties_list])}") from e
+                f"{e}, {self.entity_id}, {self.name}, "
+                f"{'&'.join([set_property['prop'].name
+                            for set_property in set_properties_list])}") from e
         if update_value:
             for set_property in set_properties_list:
                 self._prop_value_map[

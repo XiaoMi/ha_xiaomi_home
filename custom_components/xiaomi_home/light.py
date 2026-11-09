@@ -107,7 +107,8 @@ class Light(MIoTServiceEntity, LightEntity):
     _mode_map: Optional[dict[Any, Any]]
 
     def __init__(
-        self, miot_device: MIoTDevice,  entity_data: MIoTEntityData,hass: HomeAssistant
+        self, miot_device: MIoTDevice, entity_data: MIoTEntityData,
+        hass: HomeAssistant
     ) -> None:
         """Initialize the Light."""
         super().__init__(miot_device=miot_device,  entity_data=entity_data)
@@ -256,18 +257,20 @@ class Light(MIoTServiceEntity, LightEntity):
         """
         # on
         # Dirty logic for lumi.gateway.mgl03 indicator light
-        # Determine whether the device sends the light-on properties in batches or one by one
-        # Search entityid through unique_id to avoid the user modifying entityid and causing command_send_mode to not match
+        # Send light-on properties in batches or one by one.
+        # Look up the entity ID by unique ID so renaming the entity still works.
         # 获取开灯模式
         if self._command_send_mode_entity_id is None:
             entity_registry = async_get_entity_registry(self.hass)
             device_id = list(
-                self.miot_device.device_info.get("identifiers"))[0][1]
-            self._command_send_mode_entity_id = entity_registry.async_get_entity_id(
-                "select", DOMAIN, f"select.light_{device_id}_command_send_mode")
+                self.miot_device.device_info.get('identifiers'))[0][1]
+            self._command_send_mode_entity_id = (
+                entity_registry.async_get_entity_id(
+                    'select', DOMAIN,
+                    f'select.light_{device_id}_command_send_mode'))
         if self._command_send_mode_entity_id is None:
             _LOGGER.error(
-                "light command_send_mode not found, %s",
+                'light command_send_mode not found, %s',
                 self.entity_id,
             )
             return
@@ -283,13 +286,13 @@ class Light(MIoTServiceEntity, LightEntity):
                 send_brightness_first = True
 
         # 开始发送开灯命令
-        if command_send_mode and command_send_mode.state == "Send Together":
+        if command_send_mode and command_send_mode.state == 'Send Together':
             set_properties_list: List[Dict[str, Any]] = []
             # mode
             if ATTR_EFFECT in kwargs:
                 set_properties_list.append({
-                    "prop":self._prop_mode,
-                    "value":self.get_map_key(
+                    'prop':self._prop_mode,
+                    'value':self.get_map_key(
                         map_=self._mode_map,value=kwargs[ATTR_EFFECT]),
                 })
             # brightness
@@ -297,14 +300,14 @@ class Light(MIoTServiceEntity, LightEntity):
                 brightness = brightness_to_value(
                     self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
                 set_properties_list.append({
-                    "prop": self._prop_brightness,
-                    "value": brightness
+                    'prop': self._prop_brightness,
+                    'value': brightness
                 })
             # color-temperature
             if ATTR_COLOR_TEMP_KELVIN in kwargs:
                 set_properties_list.append({
-                    "prop": self._prop_color_temp,
-                    "value": kwargs[ATTR_COLOR_TEMP_KELVIN],
+                    'prop': self._prop_color_temp,
+                    'value': kwargs[ATTR_COLOR_TEMP_KELVIN],
                 })
                 self._attr_color_mode = ColorMode.COLOR_TEMP
             # rgb color
@@ -314,8 +317,8 @@ class Light(MIoTServiceEntity, LightEntity):
                 b = kwargs[ATTR_RGB_COLOR][2]
                 rgb = (r << 16) | (g << 8) | b
                 set_properties_list.append({
-                    "prop": self._prop_color,
-                    "value": rgb
+                    'prop': self._prop_color,
+                    'value': rgb
                 })
                 self._attr_color_mode = ColorMode.RGB
             # brightness
@@ -323,33 +326,35 @@ class Light(MIoTServiceEntity, LightEntity):
                 brightness = brightness_to_value(
                     self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
                 set_properties_list.append({
-                    "prop": self._prop_brightness,
-                    "value": brightness
+                    'prop': self._prop_brightness,
+                    'value': brightness
                 })
 
             if self._prop_on:
                 value_on = True if self._prop_on.format_ == bool else 1
                 set_properties_list.append({
-                    "prop": self._prop_on,
-                    "value": value_on
+                    'prop': self._prop_on,
+                    'value': value_on
                 })
-            await self.set_properties_async(set_properties_list,write_ha_state=False)
+            await self.set_properties_async(
+                set_properties_list, write_ha_state=False)
             self.async_write_ha_state()
 
-        elif command_send_mode and command_send_mode.state == "Send Turn On First":
+        elif (command_send_mode
+              and command_send_mode.state == 'Send Turn On First'):
             set_properties_list: List[Dict[str, Any]] = []
             if self._prop_on:
                 value_on = True if self._prop_on.format_ == bool else 1
                 set_properties_list.append({
-                    "prop": self._prop_on,
-                    "value": value_on
+                    'prop': self._prop_on,
+                    'value': value_on
                 })
             # mode
             if ATTR_EFFECT in kwargs:
                 set_properties_list.append({
-                    "prop":
+                    'prop':
                         self._prop_mode,
-                    "value":
+                    'value':
                         self.get_map_key(
                             map_=self._mode_map,value=kwargs[ATTR_EFFECT]),
                 })
@@ -358,14 +363,14 @@ class Light(MIoTServiceEntity, LightEntity):
                 brightness = brightness_to_value(
                     self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
                 set_properties_list.append({
-                    "prop": self._prop_brightness,
-                    "value": brightness
+                    'prop': self._prop_brightness,
+                    'value': brightness
                 })
             # color-temperature
             if ATTR_COLOR_TEMP_KELVIN in kwargs:
                 set_properties_list.append({
-                    "prop": self._prop_color_temp,
-                    "value": kwargs[ATTR_COLOR_TEMP_KELVIN],
+                    'prop': self._prop_color_temp,
+                    'value': kwargs[ATTR_COLOR_TEMP_KELVIN],
                 })
                 self._attr_color_mode = ColorMode.COLOR_TEMP
             # rgb color
@@ -375,8 +380,8 @@ class Light(MIoTServiceEntity, LightEntity):
                 b = kwargs[ATTR_RGB_COLOR][2]
                 rgb = (r << 16) | (g << 8) | b
                 set_properties_list.append({
-                    "prop": self._prop_color,
-                    "value": rgb
+                    'prop': self._prop_color,
+                    'value': rgb
                 })
                 self._attr_color_mode = ColorMode.RGB
             # brightness
@@ -384,11 +389,12 @@ class Light(MIoTServiceEntity, LightEntity):
                 brightness = brightness_to_value(
                     self._brightness_scale,kwargs[ATTR_BRIGHTNESS])
                 set_properties_list.append({
-                    "prop": self._prop_brightness,
-                    "value": brightness
+                    'prop': self._prop_brightness,
+                    'value': brightness
                 })
 
-            await self.set_properties_async(set_properties_list,write_ha_state=False)
+            await self.set_properties_async(
+                set_properties_list, write_ha_state=False)
             self.async_write_ha_state()
 
         else:

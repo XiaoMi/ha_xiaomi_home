@@ -718,7 +718,19 @@ class MIoTClient:
     async def set_props_async(
         self, props_list: List[Dict[str, Any]],
     ) -> bool:
-        # props_list = [{'did': str, 'siid': int, 'piid': int, 'value': Any}......]
+        def result_codes(result: Any) -> list[int]:
+            """Handle errors and require a result for each property."""
+            invalid = MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value
+            if isinstance(result, dict):
+                code = result.get('code', invalid)
+                return [code if code not in (0, 1) else invalid]
+            if not isinstance(result, list) or len(result) != len(props_list):
+                return [invalid]
+            return [
+                item.get('code', invalid) if isinstance(item, dict) else invalid
+                for item in result]
+
+        # props_list contains did, siid, piid and value for each property.
         # 判断是不是只有一个did
         did_set = {prop["did"] for prop in props_list}
         if len(did_set) != 1:
@@ -733,7 +745,8 @@ class MIoTClient:
             device_gw = self._device_list_gateway.get(did, None)
             if (
                 device_gw and device_gw.get("online", False)
-                and device_gw.get("specv2_access", False) and "group_id" in device_gw
+                and device_gw.get("specv2_access", False)
+                and "group_id" in device_gw
             ):
                 mips = self._mips_local.get(device_gw["group_id"], None)
                 if mips is None:
@@ -743,29 +756,28 @@ class MIoTClient:
                 else:
                     result = await mips.set_props_async(
                         did=did,props_list=props_list)
-                    _LOGGER.debug("gateway set props, %s -> %s", props_list, result)
-                    rc = [(r or {}).get("code",
-                                   MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
-                          for r in result]
+                    _LOGGER.debug(
+                        "gateway set props, %s -> %s", props_list, result)
+                    rc = result_codes(result)
                     if all(t in [0, 1] for t in rc):
                         return True
                     else:
                         raise MIoTClientError(
-                            self.__get_exec_error_with_rc(rc=next(x for x in rc if x not in (0, 1))))
+                            self.__get_exec_error_with_rc(
+                                rc=next(x for x in rc if x not in (0, 1))))
             # Lan control
             device_lan = self._device_list_lan.get(did, None)
             if device_lan and device_lan.get("online", False):
                 result = await self._miot_lan.set_props_async(
                     did=did, props_list=props_list)
                 _LOGGER.debug("lan set props, %s -> %s", props_list, result)
-                rc = [(r or {}).get("code",
-                                MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
-                        for r in result]
+                rc = result_codes(result)
                 if all(t in [0, 1] for t in rc):
                     return True
                 else:
                     raise MIoTClientError(
-                        self.__get_exec_error_with_rc(rc=next(x for x in rc if x not in (0, 1))))
+                        self.__get_exec_error_with_rc(
+                            rc=next(x for x in rc if x not in (0, 1))))
         # Cloud control
         device_cloud = self._device_list_cloud.get(did, None)
         if device_cloud and device_cloud.get("online", False):
@@ -773,20 +785,18 @@ class MIoTClient:
             _LOGGER.debug(
                 "cloud set props, %s, result, %s",
                 props_list, result)
-            if result and len(result) == len(props_list):
-                rc = [(r or {}).get("code",
-                                MIoTErrorCode.CODE_MIPS_INVALID_RESULT.value)
-                        for r in result]
+            if result:
+                rc = result_codes(result)
                 if all(t in [0, 1] for t in rc):
                     return True
                 if any(t in [-704010000, -704042011] for t in rc):
                     # Device remove or offline
                     _LOGGER.error("device may be removed or offline, %s", did)
                     self._main_loop.create_task(
-                        await
                         self.__refresh_cloud_device_with_dids_async(dids=[did]))
                 raise MIoTClientError(
-                    self.__get_exec_error_with_rc(rc=next(x for x in rc if x not in (0, 1))))
+                    self.__get_exec_error_with_rc(
+                        rc=next(x for x in rc if x not in (0, 1))))
 
         # Show error message
         raise MIoTClientError(
