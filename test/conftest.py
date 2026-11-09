@@ -4,7 +4,7 @@ import logging
 import random
 import shutil
 import pytest
-from os import path, makedirs
+from os import path, makedirs, remove
 from uuid import uuid4
 
 TEST_ROOT_PATH: str = path.dirname(path.abspath(__file__))
@@ -57,6 +57,12 @@ def load_py_file():
                 file_name),
             path.join(TEST_FILES_PATH, file_name))
     _LOGGER.info('\nloaded test py files, %s', file_list)
+    # Copy manifest.json to test folder (parent of miot/)
+    shutil.copyfile(
+        path.join(
+            TEST_ROOT_PATH, '../custom_components/xiaomi_home/manifest.json'),
+        path.join(TEST_ROOT_PATH, 'manifest.json'))
+    _LOGGER.info('loaded manifest.json')
     # Copy spec files to test folder
     shutil.copytree(
         src=path.join(
@@ -88,6 +94,11 @@ def load_py_file():
     if path.exists(TEST_FILES_PATH):
         shutil.rmtree(TEST_FILES_PATH)
         print('\nremoved test files, ', TEST_FILES_PATH)
+
+    manifest_path = path.join(TEST_ROOT_PATH, 'manifest.json')
+    if path.exists(manifest_path):
+        remove(manifest_path)
+        print('removed test manifest.json, ', manifest_path)
 
     if path.exists(TEST_CACHE_PATH):
         shutil.rmtree(TEST_CACHE_PATH)

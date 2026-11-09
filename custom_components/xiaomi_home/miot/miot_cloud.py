@@ -61,6 +61,7 @@ from .common import calc_group_id
 from .const import (
     UNSUPPORTED_MODELS,
     DEFAULT_OAUTH2_API_HOST,
+    INTEGRATION_VERSION,
     MIHOME_HTTP_API_TIMEOUT,
     OAUTH2_AUTH_URL)
 from .miot_error import MIoTErrorCode, MIoTHttpError, MIoTOauthError
@@ -78,11 +79,13 @@ class MIoTOauthClient:
     _client_id: int
     _redirect_url: str
     _device_id: str
+    _user_agent: str
     _state: str
 
     def __init__(
             self, client_id: str, redirect_url: str, cloud_server: str,
-            uuid: str, loop: Optional[asyncio.AbstractEventLoop] = None
+            uuid: str, system_info: str = '',
+            loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
         if client_id is None or client_id.strip() == '':
@@ -101,6 +104,10 @@ class MIoTOauthClient:
         else:
             self._oauth_host = f'{cloud_server}.{DEFAULT_OAUTH2_API_HOST}'
         self._device_id = f'ha.{uuid}'
+        self._user_agent = (
+            f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+            f' {system_info}'
+            f' client/{self._device_id}')
         self._state = hashlib.sha1(
             f'd={self._device_id}'.encode('utf-8')).hexdigest()
         self._session = aiohttp.ClientSession(loop=self._main_loop)
@@ -161,7 +168,10 @@ class MIoTOauthClient:
         http_res = await self._session.get(
             url=f'https://{self._oauth_host}/app/v2/ha/oauth/get_token',
             params={'data': json.dumps(data)},
-            headers={'content-type': 'application/x-www-form-urlencoded'},
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': self._user_agent,
+            },
             timeout=MIHOME_HTTP_API_TIMEOUT
         )
         if http_res.status == 401:
@@ -239,12 +249,14 @@ class MIoTHttpClient:
     _base_url: str
     _client_id: str
     _access_token: str
+    _user_agent: str
 
     _get_prop_timer: Optional[asyncio.TimerHandle]
     _get_prop_list: dict[str, dict]
 
     def __init__(
             self, cloud_server: str, client_id: str, access_token: str,
+            uuid: str, system_info: str = '',
             loop: Optional[asyncio.AbstractEventLoop] = None
     ) -> None:
         self._main_loop = loop or asyncio.get_running_loop()
@@ -260,9 +272,14 @@ class MIoTHttpClient:
             not isinstance(cloud_server, str)
             or not isinstance(client_id, str)
             or not isinstance(access_token, str)
+            or not isinstance(uuid, str)
         ):
             raise MIoTHttpError('invalid params')
 
+        self._user_agent = (
+            f'ha_xiaomi_home/{INTEGRATION_VERSION}'
+            f' {system_info}'
+            f' client/ha.{uuid}')
         self.update_http_header(
             cloud_server=cloud_server, client_id=client_id,
             access_token=access_token)
@@ -303,6 +320,7 @@ class MIoTHttpClient:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer{self._access_token}',
             'X-Client-AppId': self._client_id,
+            'User-Agent': self._user_agent,
         }
 
     # pylint: disable=unused-private-member
@@ -367,7 +385,10 @@ class MIoTHttpClient:
             url='https://open.account.xiaomi.com/user/profile',
             params={
                 'clientId': self._client_id, 'token': self._access_token},
-            headers={'content-type': 'application/x-www-form-urlencoded'},
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': self._user_agent,
+            },
             timeout=MIHOME_HTTP_API_TIMEOUT
         )
 
@@ -755,7 +776,18 @@ class MIoTHttpClient:
         if not props_buffer:
             _LOGGER.error('get prop error, empty request list')
             return False
-        results = await self.get_props_async(props_buffer)
+        try:
+            results = await self.get_props_async(props_buffer)
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            # If the batch request fails (timeout, network error, etc.), the
+            # pending futures in self._get_prop_list would otherwise stay
+            # unresolved forever. Subsequent get_prop_async calls with the
+            # same key reuse the dead future via the cache lookup at the top
+            # of get_prop_async, so the integration would never recover until
+            # restart. Fall through with empty results so the loop below
+            # drains every requested key with set_result(None).
+            _LOGGER.error('get prop batch failed, %s', err)
+            results = []
 
         for result in results:
             if not all(

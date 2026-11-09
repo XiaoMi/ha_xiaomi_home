@@ -56,6 +56,8 @@ from homeassistant.components.humidifier import (HumidifierEntity,
                                                  HumidifierDeviceClass,
                                                  HumidifierEntityFeature,
                                                  HumidifierAction)
+from homeassistant.components.humidifier.const import (
+    MODE_NORMAL, MODE_ECO, MODE_BOOST, MODE_COMFORT, MODE_SLEEP, MODE_AUTO)
 
 from .miot.miot_spec import MIoTSpecProperty
 from .miot.miot_device import MIoTDevice, MIoTEntityData, MIoTServiceEntity
@@ -130,7 +132,24 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
                 if not prop.value_list:
                     _LOGGER.error('mode value_list is None, %s', self.entity_id)
                     continue
-                self._mode_map = prop.value_list.to_map()
+                self._mode_map = {}
+                for item in prop.value_list.items:
+                    if item.name in {'none', 'the_standard_model',
+                                     'constant_speed', '标准'}:
+                        self._mode_map[item.value] = MODE_NORMAL
+                    elif item.name in {'低湿'}:
+                        self._mode_map[item.value] = MODE_ECO
+                    elif item.name in {'strong', '高湿'}:
+                        self._mode_map[item.value] = MODE_BOOST
+                    elif item.name in {'skin'}:
+                        self._mode_map[item.value] = MODE_COMFORT
+                    elif item.name in {'sleep', 'sleep_mode', '睡眠'}:
+                        self._mode_map[item.value] = MODE_SLEEP
+                    elif item.name in {'constant_humidity',
+                                       'const_humidity', '自动'}:
+                        self._mode_map[item.value] = MODE_AUTO
+                    else:
+                        self._mode_map[item.value] = item.description
                 self._attr_available_modes = list(self._mode_map.values())
                 self._attr_supported_features |= HumidifierEntityFeature.MODES
                 self._prop_mode = prop
