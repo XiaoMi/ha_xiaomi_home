@@ -250,6 +250,18 @@ class Light(MIoTServiceEntity, LightEntity):
             map_=self._mode_map,
             key=self.get_prop_value(prop=self._prop_mode))
 
+    def _property_matches(
+        self, prop: Optional[MIoTSpecProperty], value: Any
+    ) -> bool:
+        """Compare a requested device value with the known light state."""
+        if prop is None or not prop.writable:
+            return False
+        current = self.get_prop_value(prop)
+        if current is None:
+            return False
+        value = prop.value_precision(prop.value_format(value))
+        return current == value
+
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the light on.
 
@@ -276,6 +288,34 @@ class Light(MIoTServiceEntity, LightEntity):
             return
         command_send_mode = self.hass.states.get(
             self._command_send_mode_entity_id)
+
+        # Omit unchanged properties here, before assembling any commands.
+        send_power_on = self._prop_on is not None and self.is_on is not True
+        if (ATTR_EFFECT in kwargs and self._property_matches(
+                self._prop_mode, self.get_map_key(
+                    map_=self._mode_map, value=kwargs[ATTR_EFFECT]))):
+            del kwargs[ATTR_EFFECT]
+        # Changing a device effect can also change its brightness or color.
+        changing_effect = ATTR_EFFECT in kwargs
+        if (not changing_effect and ATTR_BRIGHTNESS in kwargs
+                and self._property_matches(
+                    self._prop_brightness, brightness_to_value(
+                        self._brightness_scale, kwargs[ATTR_BRIGHTNESS]))):
+            del kwargs[ATTR_BRIGHTNESS]
+        if (not changing_effect and ATTR_COLOR_TEMP_KELVIN in kwargs
+                and self._attr_color_mode == ColorMode.COLOR_TEMP
+                and self._property_matches(
+                    self._prop_color_temp, kwargs[ATTR_COLOR_TEMP_KELVIN])):
+            del kwargs[ATTR_COLOR_TEMP_KELVIN]
+        if (not changing_effect and ATTR_RGB_COLOR in kwargs
+                and ATTR_COLOR_TEMP_KELVIN not in kwargs
+                and self._attr_color_mode == ColorMode.RGB):
+            r, g, b = kwargs[ATTR_RGB_COLOR]
+            if self._property_matches(
+                    self._prop_color, (r << 16) | (g << 8) | b):
+                del kwargs[ATTR_RGB_COLOR]
+        if not send_power_on and not kwargs:
+            return
 
         # 判断是先发送亮度还是先发送色温
         send_brightness_first = False
@@ -330,20 +370,21 @@ class Light(MIoTServiceEntity, LightEntity):
                     'value': brightness
                 })
 
-            if self._prop_on:
+            if send_power_on:
                 value_on = True if self._prop_on.format_ == bool else 1
                 set_properties_list.append({
                     'prop': self._prop_on,
                     'value': value_on
                 })
-            await self.set_properties_async(
-                set_properties_list, write_ha_state=False)
+            if set_properties_list:
+                await self.set_properties_async(
+                    set_properties_list, write_ha_state=False)
             self.async_write_ha_state()
 
         elif (command_send_mode
               and command_send_mode.state == 'Send Turn On First'):
             set_properties_list: List[Dict[str, Any]] = []
-            if self._prop_on:
+            if send_power_on:
                 value_on = True if self._prop_on.format_ == bool else 1
                 set_properties_list.append({
                     'prop': self._prop_on,
@@ -393,12 +434,13 @@ class Light(MIoTServiceEntity, LightEntity):
                     'value': brightness
                 })
 
-            await self.set_properties_async(
-                set_properties_list, write_ha_state=False)
+            if set_properties_list:
+                await self.set_properties_async(
+                    set_properties_list, write_ha_state=False)
             self.async_write_ha_state()
 
         else:
-            if self._prop_on:
+            if send_power_on:
                 value_on = True if self._prop_on.format_ == bool else 1
                 await self.set_property_async(
                     prop=self._prop_on, value=value_on)
@@ -437,7 +479,7 @@ class Light(MIoTServiceEntity, LightEntity):
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the light off."""
-        if not self._prop_on:
+        if not self._prop_on or self.is_on is False:
             return
         # Dirty logic for lumi.gateway.mgl03 indicator light
         value_on = False if self._prop_on.format_ == bool else 0
