@@ -99,6 +99,7 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
     _prop_humidity: Optional[MIoTSpecProperty]
 
     _mode_map: dict[Any, Any]
+    _target_values: Optional[list[int]]
 
     def __init__(self, miot_device: MIoTDevice,
                  entity_data: MIoTEntityData) -> None:
@@ -111,6 +112,7 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
         self._prop_target_humidity = None
         self._prop_humidity = None
         self._mode_map = None
+        self._target_values = None
 
         # properties
         for prop in entity_data.props:
@@ -119,14 +121,36 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
                 self._prop_on = prop
             # target-humidity
             elif prop.name == 'target-humidity':
-                if not prop.value_range:
+                if prop.value_range:
+                    self._attr_min_humidity = prop.value_range.min_
+                    self._attr_max_humidity = prop.value_range.max_
+                    self._prop_target_humidity = prop
+                elif prop.value_list and prop.value_list.items:
+                    # Some devices expose the target humidity as an
+                    # enumeration (e.g. 30/40/.../70 %) instead of a
+                    # continuous value range.
+                    values = sorted({
+                        int(item.value)
+                        for item in prop.value_list.items
+                        if isinstance(item.value, (int, float))
+                    })
+                    if not values:
+                        _LOGGER.error(
+                            'invalid target-humidity value_list format, %s',
+                            self.entity_id)
+                        continue
+                    self._target_values = values
+                    self._attr_min_humidity = values[0]
+                    self._attr_max_humidity = values[-1]
+                    self._prop_target_humidity = prop
+                    _LOGGER.debug(
+                        'target-humidity from value_list, %s, values=%s',
+                        self.entity_id, values)
+                else:
                     _LOGGER.error(
-                        'invalid target-humidity value_range format, %s',
+                        'invalid target-humidity value_range/list format, %s',
                         self.entity_id)
                     continue
-                self._attr_min_humidity = prop.value_range.min_
-                self._attr_max_humidity = prop.value_range.max_
-                self._prop_target_humidity = prop
             # mode
             elif prop.name == 'mode':
                 if not prop.value_list:
@@ -169,6 +193,9 @@ class Humidifier(MIoTServiceEntity, HumidifierEntity):
         """Set new target humidity."""
         if self._prop_target_humidity is None:
             return
+        if self._target_values:
+            # Snap to the closest value the device actually accepts.
+            humidity = min(self._target_values, key=lambda v: abs(v - humidity))
         await self.set_property_async(prop=self._prop_target_humidity,
                                       value=humidity)
 
