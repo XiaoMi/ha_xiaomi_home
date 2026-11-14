@@ -172,37 +172,45 @@ async def test_batch_values_use_spec_precision(make_light, value, expected):
 @pytest.mark.parametrize('mode', [
     'Send One by One', 'Send Turn On First', 'Send Together'])
 @pytest.mark.parametrize('color_mode', [ColorMode.COLOR_TEMP, ColorMode.RGB])
-async def test_matching_light_state_does_not_call_setters(
-        make_light, monkeypatch, mode, color_mode):
-    """Drop every unchanged command before calling either property setter."""
+async def test_matching_light_state_respects_sending_mode(
+        make_light, mode, color_mode):
+    """Only the properties selected by the sending mode are deduplicated."""
     light, transport, props, _ = make_light(mode, old_brightness=100)
     light.set_prop_value(props['on'], True)
     light.set_prop_value(props['color-temperature'], 4000)
     light.set_prop_value(props['color'], 0x0C2238)
     light.set_prop_value(props['mode'], 1)
     light._attr_color_mode = color_mode
-    single_setter = AsyncMock(wraps=light.set_property_async)
-    batch_setter = AsyncMock(wraps=light.set_properties_async)
-    monkeypatch.setattr(light, 'set_property_async', single_setter)
-    monkeypatch.setattr(light, 'set_properties_async', batch_setter)
     request = {'brightness': 100, 'effect': 'mode 1'}
     if color_mode == ColorMode.COLOR_TEMP:
         request['color_temp_kelvin'] = 4000
+        color_piid, color_value = 3, 4000
     else:
         request['rgb_color'] = (12, 34, 56)
+        color_piid, color_value = 4, 0x0C2238
 
     await light.async_turn_on(**request)
 
-    single_setter.assert_not_awaited()
-    batch_setter.assert_not_awaited()
-    transport.set_prop_async.assert_not_awaited()
-    transport.set_props_async.assert_not_awaited()
+    if mode == 'Send One by One':
+        transport.set_props_async.assert_not_awaited()
+        sent = [
+            call.kwargs for call in transport.set_prop_async.await_args_list]
+        expected = [(color_piid, color_value), (5, 1)]
+    else:
+        transport.set_prop_async.assert_not_awaited()
+        transport.set_props_async.assert_awaited_once()
+        sent = transport.set_props_async.await_args.args[0]
+        expected = [(5, 1), (2, 100), (color_piid, color_value)]
+        if mode == 'Send Together':
+            expected.append((1, True))
+    assert [(item['piid'], item['value']) for item in sent] == expected
 
 
 @pytest.mark.parametrize('mode', [
     'Send One by One', 'Send Turn On First', 'Send Together'])
-async def test_only_changed_temperature_is_sent(make_light, mode):
-    """An already-on light with matching brightness needs only new color."""
+async def test_new_temperature_preserves_other_required_commands(
+        make_light, mode):
+    """A new color does not suppress matching settings outside the policy."""
     light, transport, props, _ = make_light(mode, old_brightness=100)
     light.set_prop_value(props['on'], True)
     light.set_prop_value(props['color-temperature'], 4000)
@@ -212,13 +220,19 @@ async def test_only_changed_temperature_is_sent(make_light, mode):
     await light.async_turn_on(
         brightness=100, color_temp_kelvin=5000, effect='mode 1')
 
-    expected = [{'did': '123456', 'siid': 2, 'piid': 3, 'value': 5000}]
     if mode == 'Send One by One':
-        transport.set_prop_async.assert_awaited_once_with(**expected[0])
         transport.set_props_async.assert_not_awaited()
+        sent = [
+            call.kwargs for call in transport.set_prop_async.await_args_list]
+        expected = [(3, 5000), (5, 1)]
     else:
-        transport.set_props_async.assert_awaited_once_with(expected)
         transport.set_prop_async.assert_not_awaited()
+        transport.set_props_async.assert_awaited_once()
+        sent = transport.set_props_async.await_args.args[0]
+        expected = [(5, 1), (2, 100), (3, 5000)]
+        if mode == 'Send Together':
+            expected.append((1, True))
+    assert [(item['piid'], item['value']) for item in sent] == expected
 
 
 @pytest.mark.parametrize('mode', [
@@ -227,9 +241,9 @@ async def test_only_changed_temperature_is_sent(make_light, mode):
     (ColorMode.COLOR_TEMP, {'color_temp_kelvin': 4000}, 3, 4000),
     (ColorMode.RGB, {'rgb_color': (12, 34, 56)}, 4, 0x0C2238),
 ])
-async def test_new_effect_keeps_explicit_brightness_and_color(
+async def test_new_effect_does_not_change_mode_deduplication_policy(
         make_light, mode, color_mode, color_args, color_piid, value):
-    """A new scene can overwrite values that matched before the request."""
+    """Effect changes are sent while brightness follows the selected policy."""
     light, transport, props, _ = make_light(mode, old_brightness=100)
     light.set_prop_value(props['on'], True)
     light.set_prop_value(props['mode'], 1)
@@ -241,21 +255,24 @@ async def test_new_effect_keeps_explicit_brightness_and_color(
         brightness=100, effect='mode 2', **color_args)
 
     if mode == 'Send One by One':
+        transport.set_props_async.assert_not_awaited()
         sent = [
             call.kwargs for call in transport.set_prop_async.await_args_list]
-        expected_order = [2, color_piid, 5]
+        expected = [(color_piid, value), (5, 2)]
     else:
+        transport.set_prop_async.assert_not_awaited()
+        transport.set_props_async.assert_awaited_once()
         sent = transport.set_props_async.await_args.args[0]
-        expected_order = [5, 2, color_piid]
-    assert [item['piid'] for item in sent] == expected_order
-    assert {item['piid']: item['value'] for item in sent} == {
-        2: 100, color_piid: value, 5: 2}
+        expected = [(5, 2), (2, 100), (color_piid, value)]
+        if mode == 'Send Together':
+            expected.append((1, True))
+    assert [(item['piid'], item['value']) for item in sent] == expected
 
 
 @pytest.mark.parametrize('mode', [
     'Send One by One', 'Send Turn On First', 'Send Together'])
 async def test_brightness_dedup_uses_device_scale_and_step(make_light, mode):
-    """Different HA brightness values can map to the same device setting."""
+    """Only one-by-one mode skips equivalent normalized brightness values."""
     light, transport, props, _ = make_light(mode, old_brightness=7)
     light.set_prop_value(props['on'], True)
     props['brightness'].value_range = [1, 100, 3]
@@ -266,7 +283,14 @@ async def test_brightness_dedup_uses_device_scale_and_step(make_light, mode):
     await light.async_turn_on(brightness=17)
 
     transport.set_prop_async.assert_not_awaited()
-    transport.set_props_async.assert_not_awaited()
+    if mode == 'Send One by One':
+        transport.set_props_async.assert_not_awaited()
+    else:
+        expected = [{'did': '123456', 'siid': 2, 'piid': 2, 'value': 7}]
+        if mode == 'Send Together':
+            expected.append({
+                'did': '123456', 'siid': 2, 'piid': 1, 'value': True})
+        transport.set_props_async.assert_awaited_once_with(expected)
 
 
 @pytest.mark.parametrize('mode', [
@@ -297,7 +321,7 @@ async def test_unknown_light_state_still_sends_commands(make_light, mode):
 @pytest.mark.parametrize('brightness', [100, 240])
 async def test_remaining_commands_keep_original_order(
         make_light, mode, brightness):
-    """Removing power and effect does not reorder brightness/color changes."""
+    """Mode-specific power filtering preserves the remaining command order."""
     light, transport, props, _ = make_light(mode)
     light.set_prop_value(props['on'], True)
     light.set_prop_value(props['mode'], 1)
@@ -310,13 +334,17 @@ async def test_remaining_commands_keep_original_order(
     if mode == 'Send One by One':
         sent = [
             call.kwargs for call in transport.set_prop_async.await_args_list]
-        expected_order = [2, 3]
+        expected_order = [2, 3, 5]
     else:
         sent = transport.set_props_async.await_args.args[0]
-        expected_order = [2, 3] if brightness == 100 else [3, 2]
+        expected_order = [5, 2, 3] if brightness == 100 else [5, 3, 2]
+        if mode == 'Send Together':
+            expected_order.append(1)
     assert [item['piid'] for item in sent] == expected_order
-    assert {item['piid']: item['value'] for item in sent} == {
-        2: brightness, 3: 4500}
+    expected_values = {2: brightness, 3: 4500, 5: 1}
+    if mode == 'Send Together':
+        expected_values[1] = True
+    assert {item['piid']: item['value'] for item in sent} == expected_values
 
 
 @pytest.mark.parametrize('mode', [
@@ -343,6 +371,9 @@ async def test_matching_color_value_still_switches_color_mode(
         transport.set_prop_async.assert_awaited_once_with(**expected[0])
         transport.set_props_async.assert_not_awaited()
     else:
+        if mode == 'Send Together':
+            expected.append({
+                'did': '123456', 'siid': 2, 'piid': 1, 'value': True})
         transport.set_props_async.assert_awaited_once_with(expected)
         transport.set_prop_async.assert_not_awaited()
     assert light.color_mode == target
@@ -367,15 +398,17 @@ async def test_temperature_then_matching_rgb_preserves_final_mode(
             call.kwargs for call in transport.set_prop_async.await_args_list]
     else:
         sent = transport.set_props_async.await_args.args[0]
-    assert [(item['piid'], item['value']) for item in sent] == [
-        (3, 4500), (4, 0x0C2238)]
+    expected = [(3, 4500), (4, 0x0C2238)]
+    if mode == 'Send Together':
+        expected.append((1, True))
+    assert [(item['piid'], item['value']) for item in sent] == expected
     assert light.color_mode == ColorMode.RGB
 
 
 @pytest.mark.parametrize('mode', [
     'Send One by One', 'Send Turn On First', 'Send Together'])
-async def test_repeated_light_request_has_no_second_write(make_light, mode):
-    """The normalized values from a successful write suppress its repeat."""
+async def test_repeated_light_request_respects_sending_mode(make_light, mode):
+    """A second identical request only omits the selected properties."""
     light, transport, _, _ = make_light(mode)
     await light.async_turn_on(brightness=100, color_temp_kelvin=4000)
     transport.set_prop_async.reset_mock()
@@ -383,23 +416,161 @@ async def test_repeated_light_request_has_no_second_write(make_light, mode):
 
     await light.async_turn_on(brightness=100, color_temp_kelvin=4000)
 
-    transport.set_prop_async.assert_not_awaited()
-    transport.set_props_async.assert_not_awaited()
+    if mode == 'Send One by One':
+        transport.set_prop_async.assert_awaited_once_with(
+            did='123456', siid=2, piid=3, value=4000)
+        transport.set_props_async.assert_not_awaited()
+    else:
+        transport.set_prop_async.assert_not_awaited()
+        transport.set_props_async.assert_awaited_once()
+        sent = transport.set_props_async.await_args.args[0]
+        expected = [(2, 100), (3, 4000)]
+        if mode == 'Send Together':
+            expected.append((1, True))
+        assert [(item['piid'], item['value']) for item in sent] == expected
 
 
+@pytest.mark.parametrize('mode', [
+    'Send One by One', 'Send Turn On First', 'Send Together'])
 @pytest.mark.parametrize('current', [False, 0, None, True, 1])
-async def test_turn_off_skips_only_known_off_state(make_light, current):
-    """Skip known-off values, while unknown and on states still need off."""
-    light, transport, props, _ = make_light()
+async def test_turn_on_power_only_respects_sending_mode(make_light, mode, current):
+    """Together always sends on; other modes skip only a known-on state."""
+    light, transport, props, _ = make_light(mode)
+    light.set_prop_value(props['on'], current)
+
+    await light.async_turn_on()
+
+    if mode != 'Send Together' and current == 1:
+        transport.set_prop_async.assert_not_awaited()
+        transport.set_props_async.assert_not_awaited()
+    elif mode == 'Send One by One':
+        transport.set_prop_async.assert_awaited_once_with(
+            did='123456', siid=2, piid=1, value=True)
+        transport.set_props_async.assert_not_awaited()
+    else:
+        transport.set_prop_async.assert_not_awaited()
+        transport.set_props_async.assert_awaited_once_with([
+            {'did': '123456', 'siid': 2, 'piid': 1, 'value': True}])
+
+
+@pytest.mark.parametrize('mode', [
+    'Send One by One', 'Send Turn On First', 'Send Together'])
+@pytest.mark.parametrize('current', [False, 0, None, True, 1])
+async def test_turn_off_respects_sending_mode(make_light, mode, current):
+    """Together always sends off; other modes skip only a known-off state."""
+    light, transport, props, registry = make_light(mode)
     light.set_prop_value(props['on'], current)
 
     await light.async_turn_off()
 
-    if current is not None and current == 0:
+    registry.async_get_entity_id.assert_called_once_with(
+        'select', DOMAIN,
+        f'select.light_{light.miot_device.did_tag}_command_send_mode')
+    light.hass.states.get.assert_called_once_with('select.bedroom_command_mode')
+    if mode != 'Send Together' and current is not None and current == 0:
         transport.set_prop_async.assert_not_awaited()
     else:
         transport.set_prop_async.assert_awaited_once_with(
             did='123456', siid=2, piid=1, value=False)
+    transport.set_props_async.assert_not_awaited()
+
+
+@pytest.mark.parametrize('mode_state', [None, 'unknown', 'unavailable'])
+async def test_unavailable_mode_uses_one_by_one_policy(make_light, mode_state):
+    """A missing or unavailable select state keeps the sequential fallback."""
+    light, transport, props, _ = make_light(old_brightness=100)
+    light.set_prop_value(props['on'], True)
+    light.set_prop_value(props['color-temperature'], 4000)
+    light.hass.states.get.return_value = (
+        None if mode_state is None else State(
+            'select.bedroom_command_mode', mode_state))
+
+    await light.async_turn_on(brightness=100, color_temp_kelvin=4000)
+
+    transport.set_prop_async.assert_awaited_once_with(
+        did='123456', siid=2, piid=3, value=4000)
+    transport.set_props_async.assert_not_awaited()
+
+
+@pytest.mark.parametrize('current', [False, True, None])
+async def test_missing_mode_entity_does_not_block_turn_off(make_light, current):
+    """An unresolved select entity retains the existing off-state behavior."""
+    light, transport, props, registry = make_light()
+    registry.async_get_entity_id.return_value = None
+    light.set_prop_value(props['on'], current)
+
+    await light.async_turn_off()
+
+    if current is False:
+        transport.set_prop_async.assert_not_awaited()
+    else:
+        transport.set_prop_async.assert_awaited_once_with(
+            did='123456', siid=2, piid=1, value=False)
+    transport.set_props_async.assert_not_awaited()
+
+
+async def test_missing_mode_entity_preserves_turn_on_guard(make_light):
+    """An unresolved select entity still prevents a turn-on request."""
+    light, transport, _, registry = make_light()
+    registry.async_get_entity_id.return_value = None
+
+    await light.async_turn_on(brightness=100)
+
+    transport.set_prop_async.assert_not_awaited()
+    transport.set_props_async.assert_not_awaited()
+
+
+@pytest.mark.parametrize('mode', ['Send Turn On First', 'Send Together'])
+@pytest.mark.parametrize(('active', 'parameters', 'piid', 'value'), [
+    (ColorMode.RGB, {'color_temp_kelvin': 4000}, 3, 4000),
+    (ColorMode.COLOR_TEMP, {'rgb_color': (12, 34, 56)}, 4, 0x0C2238),
+])
+async def test_failed_color_batch_can_be_retried(
+        make_light, mode, active, parameters, piid, value):
+    """A failed mode switch must not suppress a retry of the same color."""
+    light, transport, props, _ = make_light(mode)
+    light.set_prop_value(props['on'], True)
+    light.set_prop_value(props['color-temperature'], 4000)
+    light.set_prop_value(props['color'], 0x0C2238)
+    light._attr_color_mode = active
+    transport.set_props_async.side_effect = [
+        MIoTClientError('simulated transport failure'), True]
+
+    with pytest.raises(RuntimeError, match='simulated transport failure'):
+        await light.async_turn_on(**parameters)
+    await light.async_turn_on(**parameters)
+
+    transport.set_prop_async.assert_not_awaited()
+    assert transport.set_props_async.await_count == 2
+    expected = [(piid, value)]
+    if mode == 'Send Together':
+        expected.append((1, True))
+    for call in transport.set_props_async.await_args_list:
+        assert [(item['piid'], item['value']) for item in call.args[0]] == expected
+
+
+async def test_changing_sending_mode_changes_deduplication(make_light):
+    """An entity uses the latest mode selection for each repeated request."""
+    light, transport, props, _ = make_light('Send Together', old_brightness=100)
+    light.set_prop_value(props['on'], True)
+
+    await light.async_turn_on(brightness=100)
+    transport.set_props_async.assert_awaited_once_with([
+        {'did': '123456', 'siid': 2, 'piid': 2, 'value': 100},
+        {'did': '123456', 'siid': 2, 'piid': 1, 'value': True}])
+    transport.set_props_async.reset_mock()
+
+    light.hass.states.get.return_value = State(
+        'select.bedroom_command_mode', 'Send Turn On First')
+    await light.async_turn_on(brightness=100)
+    transport.set_props_async.assert_awaited_once_with([
+        {'did': '123456', 'siid': 2, 'piid': 2, 'value': 100}])
+    transport.set_props_async.reset_mock()
+
+    light.hass.states.get.return_value = State(
+        'select.bedroom_command_mode', 'Send One by One')
+    await light.async_turn_on(brightness=100)
+    transport.set_prop_async.assert_not_awaited()
     transport.set_props_async.assert_not_awaited()
 
 

@@ -262,16 +262,9 @@ class Light(MIoTServiceEntity, LightEntity):
         value = prop.value_precision(prop.value_format(value))
         return current == value
 
-    async def async_turn_on(self, **kwargs) -> None:
-        """Turn the light on.
-
-        Shall set attributes in kwargs if applicable.
-        """
-        # on
-        # Dirty logic for lumi.gateway.mgl03 indicator light
-        # Send light-on properties in batches or one by one.
+    def _get_command_send_mode(self) -> Optional[str]:
+        """Resolve the sending mode for both power and property commands."""
         # Look up the entity ID by unique ID so renaming the entity still works.
-        # 获取开灯模式
         if self._command_send_mode_entity_id is None:
             entity_registry = async_get_entity_registry(self.hass)
             device_id = list(
@@ -285,35 +278,31 @@ class Light(MIoTServiceEntity, LightEntity):
                 'light command_send_mode not found, %s',
                 self.entity_id,
             )
-            return
+            return None
         command_send_mode = self.hass.states.get(
             self._command_send_mode_entity_id)
+        if command_send_mode and command_send_mode.state in (
+                'Send Together', 'Send Turn On First'):
+            return command_send_mode.state
+        return 'Send One by One'
 
-        # Omit unchanged properties here, before assembling any commands.
-        send_power_on = self._prop_on is not None and self.is_on is not True
-        if (ATTR_EFFECT in kwargs and self._property_matches(
-                self._prop_mode, self.get_map_key(
-                    map_=self._mode_map, value=kwargs[ATTR_EFFECT]))):
-            del kwargs[ATTR_EFFECT]
-        # Changing a device effect can also change its brightness or color.
-        changing_effect = ATTR_EFFECT in kwargs
-        if (not changing_effect and ATTR_BRIGHTNESS in kwargs
+    async def async_turn_on(self, **kwargs) -> None:
+        """Turn the light on and apply the selected deduplication policy."""
+        command_send_mode = self._get_command_send_mode()
+        if command_send_mode is None:
+            return
+
+        # Together always sends; the other modes deduplicate power only.
+        send_power_on = self._prop_on is not None and (
+            command_send_mode == 'Send Together' or self.is_on is not True)
+        # Only sequential sending also deduplicates normalized brightness.
+        # Colors and effects must still be sent, even when cached values match.
+        if (command_send_mode == 'Send One by One'
+                and ATTR_BRIGHTNESS in kwargs
                 and self._property_matches(
                     self._prop_brightness, brightness_to_value(
                         self._brightness_scale, kwargs[ATTR_BRIGHTNESS]))):
             del kwargs[ATTR_BRIGHTNESS]
-        if (not changing_effect and ATTR_COLOR_TEMP_KELVIN in kwargs
-                and self._attr_color_mode == ColorMode.COLOR_TEMP
-                and self._property_matches(
-                    self._prop_color_temp, kwargs[ATTR_COLOR_TEMP_KELVIN])):
-            del kwargs[ATTR_COLOR_TEMP_KELVIN]
-        if (not changing_effect and ATTR_RGB_COLOR in kwargs
-                and ATTR_COLOR_TEMP_KELVIN not in kwargs
-                and self._attr_color_mode == ColorMode.RGB):
-            r, g, b = kwargs[ATTR_RGB_COLOR]
-            if self._property_matches(
-                    self._prop_color, (r << 16) | (g << 8) | b):
-                del kwargs[ATTR_RGB_COLOR]
         if not send_power_on and not kwargs:
             return
 
@@ -326,7 +315,7 @@ class Light(MIoTServiceEntity, LightEntity):
                 send_brightness_first = True
 
         # 开始发送开灯命令
-        if command_send_mode and command_send_mode.state == 'Send Together':
+        if command_send_mode == 'Send Together':
             set_properties_list: List[Dict[str, Any]] = []
             # mode
             if ATTR_EFFECT in kwargs:
@@ -381,8 +370,7 @@ class Light(MIoTServiceEntity, LightEntity):
                     set_properties_list, write_ha_state=False)
             self.async_write_ha_state()
 
-        elif (command_send_mode
-              and command_send_mode.state == 'Send Turn On First'):
+        elif command_send_mode == 'Send Turn On First':
             set_properties_list: List[Dict[str, Any]] = []
             if send_power_on:
                 value_on = True if self._prop_on.format_ == bool else 1
@@ -479,7 +467,10 @@ class Light(MIoTServiceEntity, LightEntity):
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the light off."""
-        if not self._prop_on or self.is_on is False:
+        if not self._prop_on:
+            return
+        if (self._get_command_send_mode() != 'Send Together'
+                and self.is_on is False):
             return
         # Dirty logic for lumi.gateway.mgl03 indicator light
         value_on = False if self._prop_on.format_ == bool else 0
