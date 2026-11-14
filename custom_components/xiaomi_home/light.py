@@ -296,7 +296,9 @@ class Light(MIoTServiceEntity, LightEntity):
         send_power_on = self._prop_on is not None and (
             command_send_mode == 'Send Together' or self.is_on is not True)
         # Only sequential sending also deduplicates normalized brightness.
-        # Colors and effects must still be sent, even when cached values match.
+        # Always send colors and effects. Some lights change color temperature
+        # on power-on while the cache still holds the previous value, so equal
+        # cached color-temperature/RGB values cannot justify skipping a write.
         if (command_send_mode == 'Send One by One'
                 and ATTR_BRIGHTNESS in kwargs
                 and self._property_matches(
