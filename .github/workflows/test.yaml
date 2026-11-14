@@ -10,6 +10,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  check-light-commands:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Home Assistant test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Match the DNS dependency supported by this Home Assistant version.
+          pip install homeassistant==2025.5.3 pycares==4.8.0 pytest pytest-asyncio zeroconf paho-mqtt psutil python-slugify construct numpy
+
+      - name: Test light command modes and batch routing
+        run: |
+          pytest -v -m github ./test/test_light_commands.py
+
   check-rule-format:
     runs-on: ubuntu-latest
     steps:
