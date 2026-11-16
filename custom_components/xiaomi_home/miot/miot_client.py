@@ -1584,10 +1584,8 @@ class MIoTClient:
             # The connection to the central hub gateway is definitely broken.
             self.__show_central_state_changed_notify(False)
             return
-        generation = mips.connection_generation
         await self.__invalidate_scene_route_async(group_id)
         if (self._mips_local.get(group_id) is not mips
-                or mips.connection_generation != generation
                 or mips.mips_state != state):
             return
         if state:
