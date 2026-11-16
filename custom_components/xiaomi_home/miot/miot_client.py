@@ -46,6 +46,7 @@ off Xiaomi or its affiliates' products.
 MIoT client instance.
 """
 from copy import deepcopy
+from functools import partial
 from typing import Any, Callable, Optional, final
 import asyncio
 import hashlib
@@ -117,6 +118,7 @@ class MIoTManualScene:
 class _MIoTSceneRoute:
     """One connection's scene eligibility; None means not yet confirmed."""
     client: MipsLocalClient
+    generation: int
     scene_ids: Optional[frozenset[str]] = None
     refresh: asyncio.Event = dataclass_field(default_factory=asyncio.Event)
 
@@ -393,7 +395,8 @@ class MIoTClient:
                     mips.on_dev_list_changed = self.__on_gw_device_list_changed
                     mips.sub_mips_state(
                         key=info['group_id'],
-                        handler=self.__on_mips_local_state_changed)
+                        handler=partial(self.__on_mips_local_state_changed,
+                                        source=mips))
                     mips.connect()
             # Lan ctrl
             await self._miot_lan.vote_for_lan_ctrl_async(
@@ -697,6 +700,7 @@ class MIoTClient:
         route = self._scene_routes.get(group)
         if (client and client.mips_state and route
                 and route.client is client and route.scene_ids is not None
+                and route.generation == client.connection_generation
                 and scene.scene_id in route.scene_ids):
             return client
         return None
@@ -747,7 +751,8 @@ class MIoTClient:
                 ids = None
             if (self._scene_routes.get(group) is not route
                     or self._mips_local.get(group) is not route.client
-                    or not route.client.mips_state):
+                    or not route.client.mips_state
+                    or route.generation != route.client.connection_generation):
                 return
             route.scene_ids = (frozenset(ids) if ids is not None
                                and not route.refresh.is_set() else None)
@@ -793,7 +798,8 @@ class MIoTClient:
         client = self._mips_local.get(group)
         if client is None or not client.mips_state:
             return
-        route = _MIoTSceneRoute(client=client)
+        route = _MIoTSceneRoute(
+            client=client, generation=client.connection_generation)
         self._scene_routes[group] = route
         task = self._main_loop.create_task(
             self.__refresh_scene_route_async(group, route))
@@ -802,6 +808,9 @@ class MIoTClient:
         def done(completed: asyncio.Task) -> None:
             if self._scene_route_tasks.get(group) is completed:
                 self._scene_route_tasks.pop(group, None)
+                if (self._scene_routes.get(group) is route
+                        and client.connection_generation != route.generation):
+                    self.__request_scene_route_refresh(group)
 
         task.add_done_callback(done)
 
@@ -837,7 +846,9 @@ class MIoTClient:
                 if local:
                     # Once exec starts, MQTT may queue it even if disconnected.
                     result = await asyncio.wait_for(
-                        local.exec_action_group_list_async(scene.scene_id), 12)
+                        local.exec_action_group_list_async(
+                            scene.scene_id,
+                            expected_generation=route.generation), 12)
                     code = (result.get('code')
                             if isinstance(result, dict) else None)
                     if (not isinstance(code, int) or isinstance(code, bool)
@@ -1515,7 +1526,8 @@ class MIoTClient:
         mips.enable_logger(logger=_LOGGER)
         mips.on_dev_list_changed = self.__on_gw_device_list_changed
         mips.sub_mips_state(
-            key=group_id, handler=self.__on_mips_local_state_changed)
+            key=group_id, handler=partial(
+                self.__on_mips_local_state_changed, source=mips))
         mips.connect()
 
     @final
@@ -1558,17 +1570,26 @@ class MIoTClient:
 
     @final
     async def __on_mips_local_state_changed(
-        self, group_id: str, state: bool
+        self, group_id: str, state: bool,
+        source: Optional[MipsLocalClient] = None
     ) -> None:
         _LOGGER.info('local mips state changed, %s, %s', group_id, state)
         mips = self._mips_local.get(group_id, None)
+        if source is not None and (source is not mips
+                                   or source.mips_state != state):
+            return
         if not mips:
             _LOGGER.info(
                 'local mips state changed, mips not exist, %s', group_id)
             # The connection to the central hub gateway is definitely broken.
             self.__show_central_state_changed_notify(False)
             return
+        generation = mips.connection_generation
         await self.__invalidate_scene_route_async(group_id)
+        if (self._mips_local.get(group_id) is not mips
+                or mips.connection_generation != generation
+                or mips.mips_state != state):
+            return
         if state:
             # Connected
             self.__request_scene_route_refresh(group_id)

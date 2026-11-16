@@ -1189,6 +1189,11 @@ class MipsLocalClient(_MipsClient):
     def group_id(self) -> str:
         return self._group_id
 
+    @property
+    def connection_generation(self) -> int:
+        """Identify the current local RPC connection."""
+        return self._reply_generation
+
     def log_debug(self, msg, *args, **kwargs) -> None:
         if self._logger:
             self._logger.debug(f'{self._home_name}, '+msg, *args, **kwargs)
@@ -1460,12 +1465,13 @@ class MipsLocalClient(_MipsClient):
 
     @final
     async def exec_action_group_list_async(
-        self, ag_id: str, timeout_ms: int = 10000
+        self, ag_id: str, timeout_ms: int = 10000,
+        expected_generation: Optional[int] = None
     ) -> dict:
         result_obj = await self.__request_async(
             topic='proxy/execMijiaActionGroup',
             payload=json.dumps({'id': ag_id}),
-            timeout_ms=timeout_ms)
+            timeout_ms=timeout_ms, expected_generation=expected_generation)
         if (isinstance(result_obj, dict) and 'error' not in result_obj
                 and ('code' not in result_obj or (
                     isinstance(result_obj['code'], int)
@@ -1720,10 +1726,14 @@ class MipsLocalClient(_MipsClient):
 
     @final
     async def __request_async(
-        self, topic: str, payload: str, timeout_ms: int = 10000
+        self, topic: str, payload: str, timeout_ms: int = 10000,
+        expected_generation: Optional[int] = None
     ) -> dict:
         deadline = self.main_loop.time() + timeout_ms/1000
-        generation = self._reply_generation
+        generation = (self._reply_generation if expected_generation is None
+                      else expected_generation)
+        if generation != self._reply_generation:
+            return {'error': {'code': -10006}}
         if not self.mips_state:
             return {'error': {'code': -10006}}
         if not self._reply_ready.is_set():
