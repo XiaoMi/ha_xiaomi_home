@@ -1269,7 +1269,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         oauth_code: str = await self._cc_fut_oauth_code
         if not oauth_code:
             raise MIoTConfigError('oauth_code_error')
-        _LOGGER.debug('options flow __check_oauth_async, %s', oauth_code)
+        _LOGGER.debug('options flow received OAuth authorization code')
         # Get access_token and user_info from miot_oauth
         if not self._auth_info:
             auth_info: dict = {}
