@@ -355,6 +355,11 @@ async def async_unload_entry(
 ) -> bool:
     """Unload the entry."""
     entry_id = config_entry.entry_id
+    # Stop dynamic scene additions before the platform is destroyed.
+    cancel_scene_sync = hass.data[DOMAIN].get('scene_unload', {}).get(
+        entry_id)
+    if cancel_scene_sync:
+        await cancel_scene_sync()
     # Unload the platform
     unload_ok = await hass.config_entries.async_unload_platforms(
         config_entry, SUPPORTED_PLATFORMS)

@@ -85,6 +85,7 @@ async def async_setup_entry(
     entities: dict[str, ManualScene] = {}
     sync_task = None
     unloaded = False
+    unload_callbacks = hass.data[DOMAIN].setdefault('scene_unload', {})
 
     async def sync_scenes() -> None:
         scenes = client.manual_scenes
@@ -145,11 +146,14 @@ async def async_setup_entry(
         nonlocal unloaded
         unloaded = True
         client.unsub_manual_scene_state('platform')
+        if unload_callbacks.get(config_entry.entry_id) is cancel_sync:
+            unload_callbacks.pop(config_entry.entry_id)
         if sync_task:
             sync_task.cancel()
             await asyncio.gather(sync_task, return_exceptions=True)
 
     client.sub_manual_scene_state('platform', schedule_sync)
+    unload_callbacks[config_entry.entry_id] = cancel_sync
     config_entry.async_on_unload(cancel_sync)
     sync_task = hass.async_create_task(sync_scenes())
     sync_task.add_done_callback(sync_done)
