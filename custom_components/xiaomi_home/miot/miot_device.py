@@ -1621,3 +1621,6 @@ class MIoTActionEntity(Entity):
             return
         self._attr_available = state_new
         self.async_write_ha_state()
+
+
+
