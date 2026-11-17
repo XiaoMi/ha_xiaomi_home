@@ -46,6 +46,7 @@ off Xiaomi or its affiliates' products.
 MIoT device instance.
 """
 import asyncio
+import copy
 from abc import abstractmethod
 from typing import Any, Callable, Optional
 import logging
@@ -732,6 +733,11 @@ class MIoTDevice:
                 else:
                     action.platform = 'button'
                 self.append_action(action=action)
+                                # Pet feeder manual feed: also add a one-press button
+                if action.name == 'pet-food-out' and action.in_:
+                    feed_button = copy.copy(action)
+                    feed_button.platform = 'button'
+                    self.append_action(action=feed_button)
 
     def unit_convert(self, spec_unit: str) -> Optional[str]:
         """Convert MIoT unit to Home Assistant unit.
@@ -1615,3 +1621,6 @@ class MIoTActionEntity(Entity):
             return
         self._attr_available = state_new
         self.async_write_ha_state()
+
+
+
