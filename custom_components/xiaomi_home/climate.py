@@ -46,8 +46,13 @@ off Xiaomi or its affiliates' products.
 Climate entities for Xiaomi Home.
 """
 from __future__ import annotations
+import asyncio
 import logging
+import time
+from datetime import timedelta
 from typing import Any, Optional
+
+from homeassistant.helpers.event import async_track_time_interval
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -544,7 +549,62 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
         elif HVACMode.OFF not in self._attr_hvac_modes:
             self._attr_hvac_modes.append(HVACMode.OFF)
 
+        # Device quirk: lumi.airrtc.tcpecn01 (Aqara fresh-air thermostat).
+        # Its firmware pushes a spurious `on=False` notify while running and
+        # otherwise notifies rarely, so the notify-driven on cache is unreliable
+        # and hvac_mode would flap to OFF or show unknown. Property reads return
+        # the true state. For this model only, keep a sticky read-verified on
+        # flag and refresh on/mode/fan by polling every 10s (plus a throttled
+        # read on notify), so the state is correct without storming the cloud.
+        self._tcpecn01_quirk = (miot_device.model == 'lumi.airrtc.tcpecn01')
+        self._tcpecn01_on: Optional[bool] = None
+        self._tcpecn01_prev_on: Optional[bool] = None
+        self._tcpecn01_last_read = 0.0
+        self._tcpecn01_reading = False
+        self._tcpecn01_timer = None
+        self._tcpecn01_manual_fan_until = 0.0
+        if self._tcpecn01_quirk and self._prop_on:
+            self.sub_prop_changed(prop=self._prop_on,
+                                  handler=self.__tcpecn01_on_notify)
+            # get_property_async indexes _prop_value_map[prop] directly and
+            # raises KeyError when the key is absent. Pre-seed every prop so
+            # the verified reads (and the initial refresh) cannot crash.
+            for p in self.entity_data.props:
+                self._prop_value_map.setdefault(p, None)
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if self._tcpecn01_quirk and self.hass:
+            self._tcpecn01_timer = async_track_time_interval(
+                self.hass, self.__tcpecn01_poll, timedelta(seconds=10))
+            self.hass.async_create_task(self.__tcpecn01_refresh_on())
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._tcpecn01_timer:
+            self._tcpecn01_timer()
+            self._tcpecn01_timer = None
+        await super().async_will_remove_from_hass()
+
+    async def __tcpecn01_poll(self, now) -> None:
+        del now
+        await self.__tcpecn01_refresh_on()
+
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set the target hvac mode (with tcpecn01 verified-state update)."""
+        await self.__set_hvac_mode_base(hvac_mode)
+        if self._tcpecn01_quirk:
+            self._tcpecn01_on = (hvac_mode != HVACMode.OFF)
+            self.async_write_ha_state()
+            if self.hass:
+                self.hass.async_create_task(self.__tcpecn01_refresh_on())
+
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        """Set fan mode; record manual intent so the power-on default yields."""
+        await super().async_set_fan_mode(fan_mode)
+        if self._tcpecn01_quirk:
+            self._tcpecn01_manual_fan_until = time.monotonic() + 60.0
+
+    async def __set_hvac_mode_base(self, hvac_mode: HVACMode) -> None:
         """Set the target hvac mode."""
         # set the device off
         if hvac_mode == HVACMode.OFF:
@@ -570,7 +630,15 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
     @property
     def hvac_mode(self) -> Optional[HVACMode]:
         """The current hvac mode."""
-        if self.get_prop_value(prop=self._prop_on) is False:
+        if self._tcpecn01_quirk:
+            # Use the read-verified on flag; fall back to the cached value only
+            # before the first verified read lands.
+            prop_on = self._tcpecn01_on
+            if prop_on is None:
+                prop_on = self.get_prop_value(prop=self._prop_on)
+        else:
+            prop_on = self.get_prop_value(prop=self._prop_on)
+        if prop_on is False:
             return HVACMode.OFF
         return (self.get_map_value(map_=self._hvac_mode_map,
                                    key=self.get_prop_value(
@@ -647,6 +715,71 @@ class AirConditioner(FeatureOnOff, FeatureTargetTemperature,
 
         self._value_ac_state.update(v_ac_state)
         _LOGGER.debug('ac_state update, %s', self._value_ac_state)
+
+    def __tcpecn01_on_notify(self, prop: MIoTSpecProperty, value: Any) -> None:
+        """Throttled hint to re-read the true state (see quirk in __init__).
+
+        The notify value is ignored (spuriously False while running); it only
+        hints that a refresh may be due. Rate-limited to one read per 2s.
+        """
+        del prop, value
+        if not self.hass or self._tcpecn01_reading:
+            return
+        now = time.monotonic()
+        if now - self._tcpecn01_last_read < 2.0:
+            return
+        self._tcpecn01_last_read = now
+        self.hass.async_create_task(self.__tcpecn01_refresh_on())
+
+    async def __tcpecn01_refresh_on(self) -> None:
+        """Read the true on/mode/fan state and update the sticky on flag."""
+        if self._tcpecn01_reading or not self._prop_on:
+            return
+        self._tcpecn01_reading = True
+        self._tcpecn01_last_read = time.monotonic()
+        try:
+            # get_property_async returns the property value (or None on error).
+            val = await self.get_property_async(prop=self._prop_on)
+            prev_on = self._tcpecn01_prev_on
+            if val is not None:
+                self._tcpecn01_on = bool(val)
+                self._tcpecn01_prev_on = bool(val)
+            if self._prop_mode:
+                await self.get_property_async(prop=self._prop_mode)
+            if self._prop_fan_level:
+                await self.get_property_async(prop=self._prop_fan_level)
+            self.async_write_ha_state()
+            # On a real off->on transition, default the fan to Low (deferred,
+            # and only if the user has not manually picked a speed).
+            if (self._tcpecn01_quirk and prev_on is False
+                    and self._tcpecn01_on is True and self.hass):
+                self.hass.async_create_task(self.__tcpecn01_default_fan_low())
+        finally:
+            self._tcpecn01_reading = False
+
+    async def __tcpecn01_default_fan_low(self) -> None:
+        """Default fan to Low on power-on, never overriding a manual choice.
+
+        Wait out the device's ~8s post-power-on auto-adjust, then set Low only
+        if the fan is still Auto (the user has not picked a speed). Any manual
+        Low/Medium/High selection is left untouched.
+        """
+        if not self._prop_fan_level:
+            return
+        # Wait out the ~8s post-power-on auto-adjust AND the ~8s read-after-
+        # write lag, so a just-set manual speed is not misread as stale Auto.
+        await asyncio.sleep(15)
+        if time.monotonic() < self._tcpecn01_manual_fan_until:
+            return  # user manually set a speed (HA); respect it
+        cur = await self.get_property_async(prop=self._prop_fan_level)
+        auto = self.get_map_key(map_=self._fan_mode_map, value='Auto')
+        if cur is None or cur != auto:
+            return  # a non-Auto speed is already chosen; respect it
+        low = self.get_map_key(map_=self._fan_mode_map, value='Low')
+        if low is None:
+            low = 1
+        await self.set_property_async(prop=self._prop_fan_level, value=low)
+        await self.__tcpecn01_refresh_on()
 
 
 class PtcBathHeater(FeatureTargetTemperature, FeatureTemperature,
