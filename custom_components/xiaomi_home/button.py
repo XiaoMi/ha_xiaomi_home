@@ -85,4 +85,8 @@ class Button(MIoTActionEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
+        if self.spec.name == 'pet-food-out' and self.spec.in_:
+            # Pet feeder manual feed: dispense one portion
+            return await self.action_async(
+                in_list=[{'piid': self.spec.in_[0].iid, 'value': 1}])
         return await self.action_async()
