@@ -742,7 +742,10 @@ class MIoTClient:
             if self._network.network_status:
                 result = await self._http.get_prop_async(
                     did=did, siid=siid, piid=piid)
-                if result:
+                # Use `is not None`: a valid value of 0 / False / '' is falsy
+                # and must still be returned (e.g. fan-level 0 = Auto), not
+                # dropped through to the local fallback which yields None.
+                if result is not None:
                     return result
         except Exception as err:  # pylint: disable=broad-exception-caught
             # Catch all exceptions
