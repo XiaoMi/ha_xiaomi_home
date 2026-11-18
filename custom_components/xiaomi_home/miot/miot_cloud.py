@@ -71,6 +71,34 @@ _LOGGER = logging.getLogger(__name__)
 TOKEN_EXPIRES_TS_RATIO = 0.7
 
 
+async def _get_account_json(
+    session: aiohttp.ClientSession, url: str, params: dict, user_agent: str,
+    *, token_request: bool = False
+) -> dict:
+    """Read an account response without exposing credentials in its URL."""
+    try:
+        async with session.get(
+            url=url, params=params,
+            headers={'Content-Type': 'application/x-www-form-urlencoded',
+                     'User-Agent': user_agent},
+            timeout=MIHOME_HTTP_API_TIMEOUT
+        ) as response:
+            if response.status == 401 and token_request:
+                raise MIoTOauthError(
+                    'unauthorized(401)', MIoTErrorCode.CODE_OAUTH_UNAUTHORIZED)
+            if response.status != 200:
+                raise MIoTOauthError(
+                    f'invalid http status code, {response.status}')
+            result = json.loads(await response.text())
+    except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+        # HTTP errors can include the full request URL or response content.
+        raise MIoTOauthError(
+            f'account request failed ({type(err).__name__})') from None
+    if not isinstance(result, dict):
+        raise MIoTOauthError('invalid http response')
+    return result
+
+
 class MIoTOauthClient:
     """oauth agent url, default: product env."""
     _main_loop: asyncio.AbstractEventLoop
@@ -165,33 +193,19 @@ class MIoTOauthClient:
         return f'{OAUTH2_AUTH_URL}?{encoded_params}'
 
     async def __get_token_async(self, data) -> dict:
-        http_res = await self._session.get(
-            url=f'https://{self._oauth_host}/app/v2/ha/oauth/get_token',
-            params={'data': json.dumps(data)},
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': self._user_agent,
-            },
-            timeout=MIHOME_HTTP_API_TIMEOUT
-        )
-        if http_res.status == 401:
-            raise MIoTOauthError(
-                'unauthorized(401)', MIoTErrorCode.CODE_OAUTH_UNAUTHORIZED)
-        if http_res.status != 200:
-            raise MIoTOauthError(
-                f'invalid http status code, {http_res.status}')
-
-        res_str = await http_res.text()
-        res_obj = json.loads(res_str)
+        res_obj = await _get_account_json(
+            self._session,
+            f'https://{self._oauth_host}/app/v2/ha/oauth/get_token',
+            {'data': json.dumps(data)}, self._user_agent, token_request=True)
         if (
             not res_obj
             or res_obj.get('code', None) != 0
-            or 'result' not in res_obj
+            or not isinstance(res_obj.get('result'), dict)
             or not all(
                 key in res_obj['result']
                 for key in ['access_token', 'refresh_token', 'expires_in'])
         ):
-            raise MIoTOauthError(f'invalid http response, {res_str}')
+            raise MIoTOauthError('invalid http response')
 
         return {
             **res_obj['result'],
@@ -381,28 +395,15 @@ class MIoTHttpClient:
         return res_obj
 
     async def get_user_info_async(self) -> dict:
-        http_res = await self._session.get(
-            url='https://open.account.xiaomi.com/user/profile',
-            params={
-                'clientId': self._client_id, 'token': self._access_token},
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': self._user_agent,
-            },
-            timeout=MIHOME_HTTP_API_TIMEOUT
-        )
-
-        res_str = await http_res.text()
-        res_obj = json.loads(res_str)
-        if (
-            not res_obj
-            or res_obj.get('code', None) != 0
-            or 'data' not in res_obj
-            or 'miliaoNick' not in res_obj['data']
-        ):
-            raise MIoTOauthError(f'invalid http response, {http_res.text}')
-
-        return res_obj['data']
+        res_obj = await _get_account_json(
+            self._session, 'https://open.account.xiaomi.com/user/profile',
+            {'clientId': self._client_id, 'token': self._access_token},
+            self._user_agent)
+        profile = res_obj.get('data')
+        if (res_obj.get('code') != 0 or not isinstance(profile, dict)
+                or 'miliaoNick' not in profile):
+            raise MIoTOauthError('invalid http response')
+        return profile
 
     async def get_central_cert_async(self, csr: str) -> str:
         if not isinstance(csr, str):
