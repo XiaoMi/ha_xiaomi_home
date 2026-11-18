@@ -528,6 +528,10 @@ class MIoTClient:
         """Scenes loaded for this entry; names are not part of identity."""
         return dict(self._manual_scenes)
 
+    def get_manual_scene(self, key: str) -> Optional[MIoTManualScene]:
+        """Return the current immutable metadata for one scene."""
+        return self._manual_scenes.get(key)
+
     @staticmethod
     def __scene_id(value: Any) -> str:
         if type(value) not in (str, int) or not str(value).strip():

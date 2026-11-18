@@ -241,7 +241,7 @@ class ManualScene(Scene):
 
     @callback
     def _handle_scene_state(self) -> None:
-        scene = self._client.manual_scenes.get(self._scene_key)
+        scene = self._client.get_manual_scene(self._scene_key)
         if scene and scene.scene_name != self._attr_name:
             self._attr_name = scene.scene_name
             entity_registry.async_get(self.hass).async_update_entity(
