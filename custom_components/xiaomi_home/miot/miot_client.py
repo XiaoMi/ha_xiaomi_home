@@ -46,6 +46,7 @@ off Xiaomi or its affiliates' products.
 MIoT client instance.
 """
 from copy import deepcopy
+from itertools import islice
 from typing import Any, Callable, Optional, final
 import asyncio
 import json
@@ -1653,176 +1654,122 @@ class MIoTClient:
                         group_id=group_id))))
 
     @final
-    async def __refresh_props_from_cloud(self, patch_len: int = 150) -> bool:
-        if not self._network.network_status:
-            return False
+    def __complete_prop_refresh(
+        self, key: str, request: dict, result: dict
+    ) -> None:
+        if self._refresh_props_list.get(key) is request:
+            del self._refresh_props_list[key]
+            self._refresh_props_retry_count = 0
+            self.__on_prop_msg(params=result, ctx=None)
 
-        request_list = None
-        if len(self._refresh_props_list) < patch_len:
-            request_list = self._refresh_props_list
-            self._refresh_props_list = {}
-        else:
-            request_list = {}
-            for _ in range(patch_len):
-                key, value = self._refresh_props_list.popitem()
-                request_list[key] = value
+    @final
+    async def __refresh_props_from_cloud(self, batch: dict[str, dict]) -> None:
+        if not self._network.network_status:
+            return
         try:
             results = await self._http.get_props_async(
-                params=list(request_list.values()))
-            if not results:
-                raise MIoTClientError('get_props_async failed')
-            for result in results:
-                if (
-                    'did' not in result
-                    or 'siid' not in result
-                    or 'piid' not in result
-                    or 'value' not in result
-                ):
-                    continue
-                request_list.pop(
-                    f'{result["did"]}|{result["siid"]}|{result["piid"]}',
-                    None)
-                self.__on_prop_msg(params=result, ctx=None)
-            if request_list:
-                _LOGGER.info(
-                    'refresh props failed, cloud, %s',
-                    list(request_list.keys()))
-                request_list = None
-            return True
-        except Exception as err:  # pylint:disable=broad-exception-caught
-            _LOGGER.error(
-                'refresh props error, cloud, %s, %s',
-                err, traceback.format_exc())
-            # Add failed request back to the list
-            self._refresh_props_list.update(request_list)
-            return False
+                params=list(batch.values()))
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('refresh props error, cloud, %s', err)
+            return
+        if not isinstance(results, list):
+            return
+        for result in results:
+            if not isinstance(result, dict) or result.get('value') is None:
+                continue
+            code = result.get('code', 0)
+            if not isinstance(code, int) or isinstance(code, bool) or code != 0:
+                continue
+            key = (f'{result.get("did")}|{result.get("siid")}|'
+                   f'{result.get("piid")}')
+            request = batch.get(key)
+            if request and all(result.get(k) == v for k, v in request.items()):
+                del batch[key]
+                self.__complete_prop_refresh(key, request, result)
 
     @final
-    async def __refresh_props_from_gw(self) -> bool:
-        if not self._mips_local or not self._device_list_gateway:
-            return False
-        request_list = {}
-        succeed_once = False
-        for key in list(self._refresh_props_list.keys()):
-            did = key.split('|')[0]
-            if did in request_list:
-                # NOTICE: A device only requests once a cycle, continuous
-                # acquisition of properties can cause device exceptions.
+    async def __refresh_props_from_local(self, batch: dict[str, dict]) -> None:
+        if self._ctrl_mode != CtrlMode.AUTO:
+            batch.clear()
+            return
+        devices: set[str] = set()
+        requests = {}
+        reads = []
+        for key, request in list(batch.items()):
+            did = request['did']
+            if did in devices:
+                # At most one local read per device per cycle.
                 continue
-            params = self._refresh_props_list.pop(key)
-            device_gw = self._device_list_gateway.get(did, None)
-            if not device_gw:
-                # Device not exist
+            del batch[key]
+            if self._refresh_props_list.get(key) is not request:
                 continue
-            mips_gw = self._mips_local.get(device_gw['group_id'], None)
-            if not mips_gw:
-                _LOGGER.error('mips gateway not exist, %s', key)
+            if self._mips_local:
+                gateway = self._device_list_gateway.get(did, {})
+                client = self._mips_local.get(gateway.get('group_id'))
+            elif self._miot_lan.init_done and did in self._device_list_lan:
+                client = self._miot_lan
+            else:
                 continue
-            request_list[did] = {
-                **params,
-                'fut': mips_gw.get_prop_async(
-                    did=did, siid=params['siid'], piid=params['piid'],
-                    timeout_ms=6000)}
-        results = await asyncio.gather(
-            *[v['fut'] for v in request_list.values()])
-        for (did, param), result in zip(request_list.items(), results):
-            if result is None:
-                # Don't use "not result", it will be skipped when result
-                # is 0, false
+            if client is None:
                 continue
-            self.__on_prop_msg(
-                params={
-                    'did': did,
-                    'siid': param['siid'],
-                    'piid': param['piid'],
-                    'value': result},
-                ctx=None)
-            succeed_once = True
-        if succeed_once:
-            return True
-        _LOGGER.info(
-            'refresh props failed, gw, %s', list(request_list.keys()))
-        # Add failed request back to the list
-        self._refresh_props_list.update(request_list)
-        return False
+            devices.add(did)
+            requests[key] = request
+            reads.append(client.get_prop_async(**request, timeout_ms=6000))
+
+        results = await asyncio.gather(*reads, return_exceptions=True)
+        for (key, request), value in zip(requests.items(), results):
+            if isinstance(value, BaseException):
+                _LOGGER.debug('refresh prop failed, local, %s',
+                              type(value).__name__)
+            elif value is not None:
+                self.__complete_prop_refresh(
+                    key, request, {**request, 'value': value})
 
     @final
-    async def __refresh_props_from_lan(self) -> bool:
-        if not self._miot_lan.init_done or len(self._mips_local) > 0:
-            return False
-        request_list = {}
-        succeed_once = False
-        for key in list(self._refresh_props_list.keys()):
-            did = key.split('|')[0]
-            if did in request_list:
-                # NOTICE: A device only requests once a cycle, continuous
-                # acquisition of properties can cause device exceptions.
-                continue
-            params = self._refresh_props_list.pop(key)
-            if did not in self._device_list_lan:
-                continue
-            request_list[did] = {
-                **params,
-                'fut': self._miot_lan.get_prop_async(
-                    did=did, siid=params['siid'], piid=params['piid'],
-                    timeout_ms=6000)}
-        results = await asyncio.gather(
-            *[v['fut'] for v in request_list.values()])
-        for (did, param), result in zip(request_list.items(), results):
-            if result is None:
-                # Don't use "not result", it will be skipped when result
-                # is 0, false
-                continue
-            self.__on_prop_msg(
-                params={
-                    'did': did,
-                    'siid': param['siid'],
-                    'piid': param['piid'],
-                    'value': result},
-                ctx=None)
-            succeed_once = True
-        if succeed_once:
-            return True
-        _LOGGER.info(
-            'refresh props failed, lan, %s', list(request_list.keys()))
-        # Add failed request back to the list
-        self._refresh_props_list.update(request_list)
-        return False
-
-    @final
-    async def __refresh_props_handler(self) -> None:
+    async def __refresh_props_handler(
+        self, attempted: Optional[dict[str, dict]] = None,
+        local_pending: Optional[dict[str, dict]] = None
+    ) -> None:
         if not self._refresh_props_list:
             return
-        # Cloud, Central hub gateway, Lan control
-        if (
-            await self.__refresh_props_from_cloud()
-            or await self.__refresh_props_from_gw()
-            or await self.__refresh_props_from_lan()
-        ):
-            self._refresh_props_retry_count = 0
-            if self._refresh_props_list:
-                self._refresh_props_timer = self._main_loop.call_later(
-                    REFRESH_PROPS_DELAY, lambda: self._main_loop.create_task(
-                        self.__refresh_props_handler()))
-            else:
-                self._refresh_props_timer = None
+        timer = self._refresh_props_timer
+        if attempted is None:
+            attempted = {}
+        if local_pending is None:
+            local_pending = {}
+        # Query the cloud once per batch while earlier misses get local turns.
+        batch = dict(islice(
+            ((k, v) for k, v in self._refresh_props_list.items()
+             if attempted.get(k) is not v), 150))
+        if batch:
+            attempted.update(batch)
+            await self.__refresh_props_from_cloud(batch)
+            local_pending.update(batch)
+        if local_pending:
+            await self.__refresh_props_from_local(local_pending)
+        if self._refresh_props_timer is not timer:
+            return
+        if not self._refresh_props_list:
+            self._refresh_props_timer = None
             return
 
-        # Try three times, and if it fails three times, empty the list.
-        if self._refresh_props_retry_count >= 3:
-            self._refresh_props_list = {}
-            self._refresh_props_retry_count = 0
-            if self._refresh_props_timer:
-                self._refresh_props_timer.cancel()
+        delay = REFRESH_PROPS_DELAY
+        if not local_pending and all(
+            attempted.get(k) is v for k, v in self._refresh_props_list.items()
+        ):
+            # Charge a retry only after every pending property had its turn.
+            if self._refresh_props_retry_count >= 3:
+                self._refresh_props_list.clear()
                 self._refresh_props_timer = None
-            _LOGGER.info('refresh props failed, retry count exceed')
-            return
-        self._refresh_props_retry_count += 1
-        _LOGGER.info(
-            'refresh props failed, retry, %s', self._refresh_props_retry_count)
+                self._refresh_props_retry_count = 0
+                _LOGGER.info('refresh props failed, retry count exceed')
+                return
+            self._refresh_props_retry_count += 1
+            delay = REFRESH_PROPS_RETRY_DELAY
+            attempted = None
         self._refresh_props_timer = self._main_loop.call_later(
-            REFRESH_PROPS_RETRY_DELAY, lambda: self._main_loop.create_task(
-                self.__refresh_props_handler()))
+            delay, lambda: self._main_loop.create_task(
+                self.__refresh_props_handler(attempted, local_pending)))
 
     @final
     def __show_client_error_notify(
