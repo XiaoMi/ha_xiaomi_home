@@ -150,6 +150,8 @@ class MIoTClient:
     _device_list_cache: dict[str, dict]
     # Device list obtained from cloud, {did: <info>}
     _device_list_cloud: dict[str, dict]
+    # New devices found in the current run but not applied yet, {did: <info>}
+    _device_list_new: dict[str, dict]
     # Device list obtained from gateway, {did: <info>}
     _device_list_gateway: dict[str, dict]
     # Device list scanned from LAN, {did: <info>}
@@ -226,6 +228,7 @@ class MIoTClient:
 
         self._device_list_cache = {}
         self._device_list_cloud = {}
+        self._device_list_new = {}
         self._device_list_gateway = {}
         self._device_list_lan = {}
         self._device_list_update_ts = 0
@@ -1439,6 +1442,18 @@ class MIoTClient:
                     did, MIoTDeviceState.ONLINE if state_new
                     else MIoTDeviceState.OFFLINE, sub.handler_ctx)
         # New devices
+        # Devices left in cloud_list are absent from the cache, i.e. they
+        # were added to the account after the integration was set up. They
+        # must be added to the cache as well, otherwise they are never
+        # persisted: the cache is the only source of devices when the
+        # integration starts up, so the device list could never grow.
+        new_devices: dict[str, dict] = {
+            did: deepcopy(info) for did, info in cloud_list.items()
+            if did not in self._device_list_cache}
+        if new_devices:
+            _LOGGER.debug('new devices found, %s', list(new_devices))
+            self._device_list_cache.update(new_devices)
+            self._device_list_new.update(new_devices)
         self._device_list_cloud.update(cloud_list)
         # Update storage
         if not await self._storage.save_async(
@@ -1861,13 +1876,18 @@ class MIoTClient:
         message_offline: str = ''
         count_offline: int = 0
 
-        # New devices
+        # New devices: the ones already written into the cache in this run,
+        # plus the ones still missing from the cache (eg, gateway devices).
+        pending_devices: dict[str, dict] = {
+            **self._device_list_new,
+            **{
+                did: info for did, info in {
+                    **self._device_list_gateway,
+                    **self._device_list_cloud
+                }.items() if did not in self._device_list_cache}
+        }
         if 'add' in self._display_devs_notify:
-            for did, info in {
-                    **self._device_list_gateway, **self._device_list_cloud
-            }.items():
-                if did in self._device_list_cache:
-                    continue
+            for did, info in pending_devices.items():
                 count_add += 1
                 message_add += (
                     f'- {info.get("name", "unknown")} ({did}, '
@@ -1900,6 +1920,9 @@ class MIoTClient:
                 message_offline += (
                     f'- {info.get("name", "unknown")} ({did}, '
                     f'{info.get("room_name", "unknown")})\n')
+
+        # Pending new devices are reported once
+        self._device_list_new = {}
 
         message = ''
         if 'add' in self._display_devs_notify and count_add:
