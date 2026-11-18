@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "Familienimport für importierte Geräte",
                     "area_name_rule": "Raumnamensynchronisationsmodus",
-                    "advanced_options": "Erweiterte Einstellungen"
+                    "advanced_options": "Erweiterte Einstellungen",
+                    "enable_manual_scenes": "Manuelle Steuerung von Xiaomi Home-Szenen aktivieren"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "Entitätskonvertierungsregeln aktualisieren",
                     "update_lan_ctrl_config": "LAN-Steuerungskonfiguration aktualisieren",
                     "network_detect_config": "Integrierte Netzwerkkonfiguration",
-                    "cover_dead_zone_width": "Die Breite des toten Winkels des Vorhangs"
+                    "cover_dead_zone_width": "Die Breite des toten Winkels des Vorhangs",
+                    "enable_manual_scenes": "Manuelle Steuerung von Xiaomi Home-Szenen aktivieren"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "Fügen Sie die Integration erneut hinzu. Fehlermeldung: {error}",
             "storage_error": "Integrations-Speichermodulfehler. Bitte versuchen Sie es erneut oder fügen Sie die Integration erneut hinzu: {error}",
             "inconsistent_account": "Kontoinformationen sind inkonsistent. Bitte melden Sie sich mit den richtigen Kontoinformationen an."
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "Manuelle Steuerung von Xiaomi Home-Szenen"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "Für diese Szene ist kein Ausführungsweg verfügbar."
+        },
+        "scene_busy": {
+            "message": "Diese Szene wird bereits ausgeführt."
+        },
+        "scene_failed": {
+            "message": "Die Anfrage zur Szenenausführung wurde abgelehnt."
+        },
+        "scene_result_unknown": {
+            "message": "Das Ergebnis der Szenenausführung ist unbekannt. Es erfolgt kein automatischer erneuter Versuch."
         }
     }
 }

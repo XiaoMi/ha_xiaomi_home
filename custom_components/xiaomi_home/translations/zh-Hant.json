@@ -37,7 +37,8 @@
                 "data": {
                     "home_infos": "導入設備的家庭",
                     "area_name_rule": "房間名同步模式",
-                    "advanced_options": "高級設置選項"
+                    "advanced_options": "高級設置選項",
+                    "enable_manual_scenes": "啟用米家場景手動控制"
                 }
             },
             "advanced_options": {
@@ -125,7 +126,8 @@
                     "update_trans_rules": "更新實體轉換規則",
                     "update_lan_ctrl_config": "更新局域網控制配置",
                     "network_detect_config": "集成網絡配置",
-                    "cover_dead_zone_width": "窗簾盲區寬度"
+                    "cover_dead_zone_width": "窗簾盲區寬度",
+                    "enable_manual_scenes": "啟用米家場景手動控制"
                 }
             },
             "update_user_info": {
@@ -220,6 +222,25 @@
             "re_add": "請重新添加集成，錯誤信息：{error}",
             "storage_error": "集成存儲模塊異常。請重試或者重新添加集成：{error}",
             "inconsistent_account": "帳號信息不一致。請使用正確的帳號登錄。"
+        }
+    },
+    "device": {
+        "manual_scenes": {
+            "name": "米家場景手動控制"
+        }
+    },
+    "exceptions": {
+        "scene_unavailable": {
+            "message": "場景沒有可用的執行通道。"
+        },
+        "scene_busy": {
+            "message": "此場景正在執行。"
+        },
+        "scene_failed": {
+            "message": "場景執行請求被拒絕。"
+        },
+        "scene_result_unknown": {
+            "message": "場景執行結果未知，不會自動重試。"
         }
     }
 }
