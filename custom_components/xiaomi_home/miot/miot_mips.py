@@ -660,6 +660,12 @@ class _MipsClient(ABC):
         if not self._mqtt:
             _LOGGER.error('__on_connect, but mqtt is None')
             return
+        if rc != 0:
+            # Server unavailable (0x88) and server busy (0x89) use the
+            # existing retry warnings. Other refusals need their reason.
+            log = self.log_debug if rc in (0x88, 0x89) else self.log_error
+            log('mips connection refused, %s', rc)
+            return
         if not self._mqtt.is_connected():
             _LOGGER.error('__on_connect, but mqtt is disconnected')
             return
