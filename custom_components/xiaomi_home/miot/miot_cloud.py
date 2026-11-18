@@ -60,6 +60,7 @@ import aiohttp
 from .common import calc_group_id
 from .const import (
     UNSUPPORTED_MODELS,
+    SEPARATED_SHARED_GROUP_ID,
     DEFAULT_OAUTH2_API_HOST,
     INTEGRATION_VERSION,
     MIHOME_HTTP_API_TIMEOUT,
@@ -745,7 +746,7 @@ class MIoTHttpClient:
                 homes['separated_shared_list'].setdefault(owner_id,{
                     'home_name': owner['nickname'],
                     'uid': owner_id,
-                    'group_id': 'NotSupport',
+                    'group_id': SEPARATED_SHARED_GROUP_ID,
                     'room_info': {'shared_device': 'shared_device'}
                 })
                 devices.update({did: {
@@ -753,7 +754,7 @@ class MIoTHttpClient:
                     'home_name': owner['nickname'],
                     'room_id': 'shared_device',
                     'room_name': 'shared_device',
-                    'group_id': 'NotSupport'
+                    'group_id': SEPARATED_SHARED_GROUP_ID
                 }})
         dids = sorted(list(devices.keys()))
         results = await self.get_devices_with_dids_async(dids=dids)

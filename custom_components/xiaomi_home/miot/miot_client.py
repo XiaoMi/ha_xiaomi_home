@@ -67,7 +67,7 @@ from .common import (
 from .const import (
     DEFAULT_CTRL_MODE, DEFAULT_INTEGRATION_LANGUAGE, DEFAULT_NICK_NAME, DOMAIN,
     MIHOME_CERT_EXPIRE_MARGIN, NETWORK_REFRESH_INTERVAL,
-    OAUTH2_CLIENT_ID, SUPPORT_CENTRAL_GATEWAY_CTRL,
+    OAUTH2_CLIENT_ID, SEPARATED_SHARED_GROUP_ID, SUPPORT_CENTRAL_GATEWAY_CTRL,
     DEFAULT_COVER_DEAD_ZONE_WIDTH)
 from .miot_cloud import MIoTHttpClient, MIoTOauthClient
 from .miot_error import MIoTClientError, MIoTError, MIoTErrorCode
@@ -628,6 +628,8 @@ class MIoTClient:
         updated = {}
         owners = {}
         for home_id, home in self._entry_data['home_selected'].items():
+            if home.get('group_id') == SEPARATED_SHARED_GROUP_ID:
+                continue
             try:
                 home_id = self.__scene_id(home_id)
                 owner = self.__scene_id(home.get('uid'))

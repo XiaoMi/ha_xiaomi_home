@@ -114,6 +114,8 @@ CLOUD_SERVERS: dict = {
 }
 
 SUPPORT_CENTRAL_GATEWAY_CTRL: list = ['cn']
+# Device-only shares are grouped by their owner, without a home ID.
+SEPARATED_SHARED_GROUP_ID = 'NotSupport'
 
 DEFAULT_INTEGRATION_LANGUAGE: str = 'en'
 INTEGRATION_LANGUAGES = {

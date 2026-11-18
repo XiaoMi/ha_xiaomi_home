@@ -690,6 +690,7 @@ class XiaomiMihomeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not home_selected:
                 return await self.__show_homes_select_form(
                     'no_family_selected')
+            self._home_selected = {}
             for device_source in ['home_list','share_home_list',
                                   'separated_shared_list']:
                 if device_source not in self._cc_home_info['homes']:
