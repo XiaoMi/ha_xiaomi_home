@@ -611,19 +611,20 @@ class MIoTClient:
         """Refresh complete homes; retain metadata when a home fails."""
         if not self._manual_scenes_enabled:
             return
+        cache_name = f'{self._uid}_{self._cloud_server}'
         try:
             cached = await self._storage.load_async(
-                domain='miot_scenes', name=f'{self._uid}_{self._cloud_server}',
-                type_=dict)
+                domain='miot_scenes', name=cache_name, type_=dict)
         except (MIoTError, OSError, ValueError):
             _LOGGER.info('manual scene cache unavailable')
             cached = None
-        homes = (cached.get('homes', {}) if isinstance(cached, dict)
+        homes = (cached.get('homes') if isinstance(cached, dict)
                  and isinstance(cached.get('version'), int)
                  and not isinstance(cached['version'], bool)
-                 and cached['version'] == 1 else {})
+                 and cached['version'] == 1 else None)
         if not isinstance(homes, dict):
-            homes = {}
+            homes = None
+        incomplete = False
         saved = {}
         updated = {}
         owners = {}
@@ -657,8 +658,9 @@ class MIoTClient:
                 else:
                     try:
                         scenes = self.__parse_manual_scenes(
-                            home_id, owner, homes.get(home_id))
+                            home_id, owner, (homes or {}).get(home_id))
                     except MIoTClientError:
+                        incomplete = True
                         continue
             updated.update(scenes)
             owners[home_id] = owner
@@ -670,10 +672,17 @@ class MIoTClient:
         self._manual_scenes = updated
         self._scene_metadata_owners = owners
         self.__notify_manual_scene_state()
-        if cache_only:
+        if cache_only or saved == homes:
             return
+        if incomplete and homes is None:
+            # A missing file and a failed read both yield None. Only start a
+            # partial cache when it cannot replace another home's snapshot.
+            if not saved or await self._main_loop.run_in_executor(
+                    None, self._storage.file_exists, 'miot_scenes',
+                    f'{cache_name}.dict'):
+                return
         if not await self._storage.save_async(
-                domain='miot_scenes', name=f'{self._uid}_{self._cloud_server}',
+                domain='miot_scenes', name=cache_name,
                 data={'version': 1, 'homes': saved}):
             _LOGGER.error('manual scene cache save failed')
 
