@@ -82,6 +82,7 @@ _LOGGER = logging.getLogger(__name__)
 REFRESH_PROPS_DELAY = 0.2
 REFRESH_PROPS_RETRY_DELAY = 3
 REFRESH_CLOUD_DEVICES_DELAY = 6
+REFRESH_CLOUD_DEVICES_INTERVAL = 30
 REFRESH_CLOUD_DEVICES_RETRY_DELAY = 60
 REFRESH_GATEWAY_DEVICES_DELAY = 3
 
@@ -165,6 +166,8 @@ class MIoTClient:
     _refresh_token_timer: Optional[asyncio.TimerHandle]
     _refresh_cert_timer: Optional[asyncio.TimerHandle]
     _refresh_cloud_devices_timer: Optional[asyncio.TimerHandle]
+    _refresh_cloud_devices_running: bool
+    _refresh_cloud_devices_stopped: bool
     # Refresh prop
     _refresh_props_list: dict[str, dict]
     _refresh_props_timer: Optional[asyncio.TimerHandle]
@@ -237,6 +240,8 @@ class MIoTClient:
         self._refresh_token_timer = None
         self._refresh_cert_timer = None
         self._refresh_cloud_devices_timer = None
+        self._refresh_cloud_devices_running = False
+        self._refresh_cloud_devices_stopped = False
 
         # Refresh prop
         self._refresh_props_list = {}
@@ -378,6 +383,7 @@ class MIoTClient:
         _LOGGER.info('init_async, %s, %s', self._uid, self._cloud_server)
 
     async def deinit_async(self) -> None:
+        self._refresh_cloud_devices_stopped = True
         self._network.unsub_network_status(
             key=f'{self._uid}-{self._cloud_server}')
         # Cancel refresh props
@@ -1449,49 +1455,83 @@ class MIoTClient:
             _LOGGER.error('save device list to cache failed')
 
     @final
-    async def __refresh_cloud_devices_async(self) -> None:
-        _LOGGER.debug(
-            'refresh cloud devices, %s, %s', self._uid, self._cloud_server)
+    async def __refresh_cloud_devices_async(
+        self, reconcile_only: bool = False
+    ) -> None:
+        """Reconcile missed push notifications without polling entity values."""
         if self._refresh_cloud_devices_timer:
             self._refresh_cloud_devices_timer.cancel()
             self._refresh_cloud_devices_timer = None
+        if (
+            self._refresh_cloud_devices_stopped
+            or not self._network.network_status
+            or self._refresh_cloud_devices_running
+        ):
+            return
+        self._refresh_cloud_devices_running = True
+        delay = REFRESH_CLOUD_DEVICES_INTERVAL
         try:
-            result = await self._http.get_devices_async(
-                home_ids=list(self._entry_data.get('home_selected', {}).keys()))
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            _LOGGER.error('refresh cloud devices failed, %s', err)
-            self._refresh_cloud_devices_timer = self._main_loop.call_later(
-                REFRESH_CLOUD_DEVICES_RETRY_DELAY,
-                lambda: self._main_loop.create_task(
-                    self.__refresh_cloud_devices_async()))
-            return
-        if not result and 'devices' not in result:
-            self.__show_client_error_notify(
-                message=self._i18n.translate(
-                    'miot.client.device_cloud_error'),  # type: ignore
-                notify_key='device_cloud')
-            return
-        else:
+            if reconcile_only:
+                # One batched status read for tracked devices; do not enumerate
+                # every home/room or poll hundreds of entity properties.
+                devices = await self._http.get_devices_with_dids_async(
+                    dids=list(self._device_list_cache))
+                result = {'devices': devices}
+            else:
+                result = await self._http.get_devices_async(
+                    home_ids=list(
+                        self._entry_data.get('home_selected', {}).keys()))
+            # A response arriving after unload/network loss must not resurrect
+            # availability, touch subscriptions, or rearm the fallback timer.
+            if (
+                self._refresh_cloud_devices_stopped
+                or not self._network.network_status
+            ):
+                return
+            if (
+                not isinstance(result, dict)
+                or not isinstance(result.get('devices'), dict)
+            ):
+                self.__show_client_error_notify(
+                    message=self._i18n.translate(
+                        'miot.client.device_cloud_error'),
+                    notify_key='device_cloud')
+                delay = REFRESH_CLOUD_DEVICES_RETRY_DELAY
+                return
+            _LOGGER.getChild('availability_recovery').debug(
+                'Cloud availability reconciled: periodic=%s, devices=%s',
+                reconcile_only, len(result['devices']))
             self.__show_client_error_notify(
                 message=None, notify_key='device_cloud')
-        cloud_list: dict[str, dict] = result['devices']
-        await self.__update_devices_from_cloud_async(cloud_list=cloud_list)
-        # Update lan device
-        if (
-            self._ctrl_mode == CtrlMode.AUTO
-            and self._miot_lan.init_done
-        ):
-            self._miot_lan.update_devices(devices={
-                did: {
-                    'token': info['token'],
-                    'model': info['model'],
-                    'connect_type': info['connect_type']}
-                for did, info in self._device_list_cache.items()
-                if 'token' in info and 'connect_type' in info
-                and info['connect_type'] in [0, 8, 12, 23]
-            })
-
-        self.__request_show_devices_changed_notify()
+            await self.__update_devices_from_cloud_async(
+                cloud_list=result['devices'])
+            if self._refresh_cloud_devices_stopped:
+                return
+            if self._ctrl_mode == CtrlMode.AUTO and self._miot_lan.init_done:
+                self._miot_lan.update_devices(devices={
+                    did: {
+                        'token': info['token'],
+                        'model': info['model'],
+                        'connect_type': info['connect_type']}
+                    for did, info in self._device_list_cache.items()
+                    if 'token' in info and 'connect_type' in info
+                    and info['connect_type'] in [0, 8, 12, 23]
+                })
+            self.__request_show_devices_changed_notify()
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.error('refresh cloud devices failed, %s', err)
+            delay = REFRESH_CLOUD_DEVICES_RETRY_DELAY
+        finally:
+            self._refresh_cloud_devices_running = False
+            if (
+                not self._refresh_cloud_devices_stopped
+                and self._network.network_status
+                and self._refresh_cloud_devices_timer is None
+            ):
+                self._refresh_cloud_devices_timer = self._main_loop.call_later(
+                    delay, lambda: self._main_loop.create_task(
+                        self.__refresh_cloud_devices_async(
+                            reconcile_only=True)))
 
     @final
     async def __refresh_cloud_device_with_dids_async(
@@ -1507,6 +1547,9 @@ class MIoTClient:
         self.__request_show_devices_changed_notify()
 
     def __request_refresh_cloud_devices(self, immediately=False) -> None:
+        if (self._refresh_cloud_devices_stopped
+                or not self._network.network_status):
+            return
         _LOGGER.debug(
             'request refresh cloud devices, %s, %s',
             self._uid, self._cloud_server)
